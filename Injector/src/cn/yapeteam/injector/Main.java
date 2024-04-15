@@ -1,7 +1,6 @@
 package cn.yapeteam.injector;
 
-import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme;
 
 import javax.swing.*;
 import java.io.File;
@@ -13,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Utils.unzip(Main.class.getResourceAsStream("/injection.zip"), YolBi_Dir);
-        UIManager.setLookAndFeel(new FlatGitHubDarkIJTheme());
+        UIManager.setLookAndFeel(new FlatXcodeDarkIJTheme());
         new MainFrame().setVisible(true);
     }
 }

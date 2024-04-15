@@ -1,7 +1,7 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import org.objectweb.asm_9_2.Opcodes;
 
 import javax.swing.*;
@@ -36,7 +36,7 @@ public class Loader {
                         break;
                     }
                 }
-                UIManager.setLookAndFeel(new FlatDarkLaf());
+                UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } catch (UnsupportedLookAndFeelException e) {
                 Logger.exception(e);
             }

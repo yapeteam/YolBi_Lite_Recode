@@ -12,6 +12,7 @@ import cn.yapeteam.yolbi.server.HttpSeverV3;
 import cn.yapeteam.yolbi.shader.Shader;
 import lombok.Getter;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -53,6 +54,7 @@ public class YolBi {
         instance.eventManager.register(Shader.class);
         instance.moduleManager.load();
         instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
+        JOptionPane.showMessageDialog(null, "YolBi Lite " + version + " has been initialized.");
         try {
             YolBi.instance.getConfigManager().load();
             instance.httpSeverV3 = new HttpSeverV3(9090);
