@@ -4,13 +4,13 @@ Easier to compile
 
 # Development
 
-1.Open this project
+1. Open this project
 
-2.Init maven & download deps
+2. Init maven & download deps
 
-3.Run the ProjectRunConfiguration: "BUILD"
+3. Run the ProjectRunConfiguration: "BUILD"
 
-4.Your jar will appear in ./build
+4. Your jar will appear in ./build
 
 # Custom
 
