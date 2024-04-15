@@ -54,13 +54,13 @@ public class YolBi {
         instance.eventManager.register(Shader.class);
         instance.moduleManager.load();
         instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
-        JOptionPane.showMessageDialog(null, "YolBi Lite " + version + " has been initialized.");
         try {
             YolBi.instance.getConfigManager().load();
             instance.httpSeverV3 = new HttpSeverV3(9090);
         } catch (IOException e) {
             Logger.exception(e);
         }
+        JOptionPane.showMessageDialog(null, "YolBi Lite " + version + " has been initialized.");
     }
 
     public void shutdown() {
