@@ -170,7 +170,7 @@ public class Builder {
         }
     }
 
-    private static final String mingw_url = "https://github.com/brechtsanders/winlibs_mingw/releases/download/11.2.0-14.0.0-9.0.0-ucrt-r7/winlibs-i686-posix-dwarf-gcc-11.2.0-llvm-14.0.0-mingw-w64ucrt-9.0.0-r7.zip";
+    private static final String mingw_url = "https://github.com/brechtsanders/winlibs_mingw/releases/download/11.2.0-10.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64ucrt-10.0.0-r1.zip";
 
     private static void downloadFile(String file_url, File file) throws Exception {
         SSLUtils.ignoreSsl();
@@ -230,8 +230,20 @@ public class Builder {
         }
     }
 
+    private static void buildDLL() throws Exception {
+        File dir = new File("Loader/dll");
+        String gccPath = new File("mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+        Terminal terminal = new Terminal(dir, null);
+        terminal.execute(new String[]{gccPath, "-c", "main.c", "-o", "main.o"});
+        terminal.execute(new String[]{gccPath, "-c", "dllmain.c", "-o", "dllmain.o"});
+        terminal.execute(new String[]{gccPath, "-shared", "main.o", "dllmain.o", "-o", "injection.dll"});
+        terminal.execute(new String[]{"cmd", "/c", "del", "main.o"});
+        terminal.execute(new String[]{"cmd", "/c", "del", "dllmain.o"});
+    }
+
     public static void main(String[] args) throws Exception {
         checkMinGW();
+        buildDLL();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse("YBuild.xml");

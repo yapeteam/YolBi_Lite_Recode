@@ -36,3 +36,4 @@ bin/
 /Injector/target/
 /Loader/target/
 /mingw/
+/Loader/dll/injection.dll
