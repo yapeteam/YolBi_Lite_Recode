@@ -3,12 +3,12 @@ package cn.yapeteam.builder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+@SuppressWarnings("SameParameterValue")
 public class Builder {
     private static void copyStream(OutputStream os, InputStream is) throws IOException {
         int len;
@@ -63,14 +64,15 @@ public class Builder {
         Node attr = node.getAttributes().item(0);
         switch (node.getNodeName()) {
             case "dir": {
-                System.out.println("dir " + node.getTextContent());
                 if (attr == null) {
+                    System.out.println("dir " + node.getTextContent());
                     File dir = new File(node.getTextContent());
                     String parent = dir.getParent();
                     String root = parent != null ? parent : "/";
                     String finalRoot_dir = root_dir;
                     traverseFiles(dir, file -> {
                         String path = file.toString();
+                        System.out.println(path);
                         String entry_name = finalRoot_dir + path.substring(root.length()).replace("\\", "/").substring(1);
                         ZipEntry entry = new ZipEntry(entry_name);
                         try {
@@ -168,7 +170,68 @@ public class Builder {
         }
     }
 
-    public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
+    private static final String mingw_url = "https://github.com/brechtsanders/winlibs_mingw/releases/download/11.2.0-14.0.0-9.0.0-ucrt-r7/winlibs-i686-posix-dwarf-gcc-11.2.0-llvm-14.0.0-mingw-w64ucrt-9.0.0-r7.zip";
+
+    private static void downloadFile(String file_url, File file) throws Exception {
+        SSLUtils.ignoreSsl();
+        URL url = new URL(file_url);
+        URLConnection connection = url.openConnection();
+        int totalFileSize = connection.getContentLength();
+        FileOutputStream outputFile = new FileOutputStream(file);
+        int blockSize = 1024 * 1024;
+        byte[] buffer = new byte[blockSize];
+        int bytesRead;
+        int downloadedBytes = 0;
+        ProcessBar progressBar = new ProcessBar(100);
+        while (downloadedBytes < totalFileSize) {
+            int bytesToRead = Math.min(blockSize, totalFileSize - downloadedBytes);
+            InputStream inputStream = connection.getInputStream();
+            bytesRead = inputStream.read(buffer, 0, bytesToRead);
+            if (bytesRead == -1) break;
+            outputFile.write(buffer, 0, bytesRead);
+            downloadedBytes += bytesRead;
+            progressBar.update((int) (((float) downloadedBytes / totalFileSize) * 100));
+        }
+        outputFile.close();
+    }
+
+    private static final String MINGW_PATH = "mingw";
+
+    private static void checkMinGW() throws Exception {
+        String os_name = System.getProperty("os.name").toLowerCase();
+        if (os_name.contains("windows") && !os_name.contains("linux")) {
+            File mingw_dir = new File(MINGW_PATH);
+            if (mingw_dir.exists()) {
+                System.out.println("MinGW already exists");
+                return;
+            }
+            mingw_dir.mkdirs();
+            System.out.println("Downloading MinGW...");
+            downloadFile(mingw_url, new File(mingw_dir, "mingw.zip"));
+            System.out.println("Extracting MinGW...");
+            ZipInputStream input = new ZipInputStream(Files.newInputStream(Paths.get(mingw_dir.getAbsolutePath(), "mingw.zip")));
+            ZipEntry entry_in;
+            while ((entry_in = input.getNextEntry()) != null) {
+                if (entry_in.isDirectory()) continue;
+                String entry_name = entry_in.getName();
+                if (entry_name.startsWith("module-info.class")) continue;
+                if (entry_name.startsWith("META-INF/")) continue;
+                File entry_file = new File(mingw_dir, entry_name);
+                entry_file.getParentFile().mkdirs();
+                FileOutputStream output = new FileOutputStream(entry_file);
+                copyStream(output, input);
+                output.close();
+            }
+            input.close();
+            System.out.println("MinGW extracted");
+        } else {
+            System.out.println("Platform not supported");
+            throw new RuntimeException("Platform not supported");
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        checkMinGW();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse("YBuild.xml");

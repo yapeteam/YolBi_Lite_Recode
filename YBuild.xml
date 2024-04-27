@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
-    <rootdir>.</rootdir>
-    <output>./build</output>
+    <rootdir>./</rootdir>
+    <output>build</output>
     <artifacts>
         <artifact name="injector.jar">
-            <binary>./Injector/target/classes</binary>
+            <binary>Injector/target/classes</binary>
             <includes>
-                <dir>./Injector/META-INF</dir>
-                <extract>./deps/asm-all-9.2.jar</extract>
-                <extract>./deps/jna.jar</extract>
-                <extract>./deps/flatlaf.jar</extract>
-                <extract>./deps/flatlaf-intellij-themes.jar</extract>
-                <extract>./deps/tools.jar</extract>
+                <dir>Injector/META-INF</dir>
+                <extract>deps/asm-all-9.2.jar</extract>
+                <extract>deps/jna.jar</extract>
+                <extract>deps/flatlaf.jar</extract>
+                <extract>deps/flatlaf-intellij-themes.jar</extract>
+                <extract>deps/tools.jar</extract>
                 <archive name="injection.zip">
-                    <dir>./resources</dir>
+                    <dir>resources</dir>
                     <dir name="injection">
                         <archive name="injection.jar">
-                            <files>./Core/target/classes</files>
+                            <files>Core/target/classes</files>
                         </archive>
                     </dir>
-                    <files>./deps</files>
+                    <files>deps</files>
                     <archive name="loader.jar">
-                        <files>./Loader/target/classes</files>
+                        <files>Loader/target/classes</files>
                     </archive>
                     <archive name="agent.jar">
-                        <dir>./Agent/META-INF</dir>
-                        <files>./Agent/target/classes</files>
+                        <dir>Agent/META-INF</dir>
+                        <files>Agent/target/classes</files>
                     </archive>
-                    <file>./Loader/dll/injection.dll</file>
+                    <file>Loader/dll/injection.dll</file>
                 </archive>
             </includes>
         </artifact>
