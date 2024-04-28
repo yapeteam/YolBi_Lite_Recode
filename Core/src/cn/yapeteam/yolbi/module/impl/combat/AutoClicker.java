@@ -79,6 +79,6 @@ public class AutoClicker extends Module {
 
     @Override
     public String getSuffix() {
-        return cps.getValue() + ":" + delay;
+        return cps.getValue() + ":" + String.format("%.2f", delay);
     }
 }
