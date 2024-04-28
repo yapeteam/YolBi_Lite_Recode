@@ -13,6 +13,17 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Utils.unzip(Main.class.getResourceAsStream("/injection.zip"), YolBi_Dir);
         UIManager.setLookAndFeel(new FlatXcodeDarkIJTheme());
-        new MainFrame().setVisible(true);
+        MainFrame frame = new MainFrame();
+        new Thread(() -> frame.setVisible(true)).start();
+        if (args.length == 2) {
+            switch (args[0]) {
+                case "agent":
+                    frame.inject_agent(Integer.parseInt(args[1]));
+                    break;
+                case "dll":
+                    frame.inject_dll(Integer.parseInt(args[1]));
+            }
+            frame.inject_ui();
+        }
     }
 }

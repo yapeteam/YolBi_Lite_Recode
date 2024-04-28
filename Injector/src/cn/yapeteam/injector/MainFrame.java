@@ -22,14 +22,6 @@ public class MainFrame extends JFrame {
 
     private volatile float value1 = 0, value2 = 0;
 
-    public float getValue1() {
-        return value1;
-    }
-
-    public float getValue2() {
-        return value2;
-    }
-
     private ArrayList<Pair<String, Integer>> targets = new ArrayList<>();
 
     public MainFrame() {
@@ -55,25 +47,8 @@ public class MainFrame extends JFrame {
 
         getRootPane().setDefaultButton(inject);
         inject.addActionListener(e -> {
-            if (!targets.isEmpty() && process.getSelectedIndex() != -1) {
-                int pid = targets.get(process.getSelectedIndex()).b;
-                try {
-                    VirtualMachine virtualMachine = VirtualMachine.attach(String.valueOf(pid));
-                    new Thread(() -> {
-                        try {
-                            virtualMachine.loadAgent(new File(Main.YolBi_Dir, Main.agentName).getAbsolutePath());
-                        } catch (Throwable ignored) {
-                        }
-                    }).start();
-                } catch (AttachNotSupportedException ex) {
-                    WinNT.HANDLE hdl = Utils.kernel32.OpenProcess(0x1F1FFB, false, pid);
-                    Utils.loadLibrary(hdl, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath());
-                } catch (IOException ignored) {
-                    return;
-                }
-                process.setVisible(false);
-                inject.setVisible(false);
-            }
+            if (!targets.isEmpty() && process.getSelectedIndex() != -1)
+                inject(targets.get(process.getSelectedIndex()).b);
         });
         new Thread(() -> {
             float cache = 0;
@@ -153,5 +128,38 @@ public class MainFrame extends JFrame {
                 while (true) if (System.currentTimeMillis() - time >= 500) break;
             }
         }).start();
+    }
+
+    public void inject(int pid) {
+        System.out.println(pid);
+        if (!inject_agent(pid))
+            inject_dll(pid);
+        inject_ui();
+    }
+
+    public boolean inject_agent(int pid) {
+        try {
+            VirtualMachine virtualMachine = VirtualMachine.attach(String.valueOf(pid));
+            new Thread(() -> {
+                try {
+                    virtualMachine.loadAgent(new File(Main.YolBi_Dir, Main.agentName).getAbsolutePath());
+                } catch (Throwable ignored) {
+                }
+            }).start();
+        } catch (AttachNotSupportedException | IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public void inject_dll(int pid) {
+        WinNT.HANDLE hdl = Utils.kernel32.OpenProcess(0x1F1FFB, false, pid);
+        Utils.loadLibrary(hdl, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath());
+    }
+
+    public void inject_ui() {
+        process.setVisible(false);
+        inject.setVisible(false);
     }
 }
