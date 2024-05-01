@@ -1,6 +1,5 @@
 package cn.yapeteam.injector;
 
-import com.sun.jna.platform.win32.WinNT;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 
@@ -154,8 +153,9 @@ public class MainFrame extends JFrame {
     }
 
     public void inject_dll(int pid) {
-        WinNT.HANDLE hdl = Utils.kernel32.OpenProcess(0x1F1FFB, false, pid);
-        Utils.loadLibrary(hdl, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath());
+        new Thread(() -> Utils.injectDLL(pid, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath())).start();
+        /*WinNT.HANDLE hdl = Utils.kernel32.OpenProcess(0x1F1FFB, false, pid);
+        Utils.loadLibrary(hdl, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath());*/
     }
 
     public void inject_ui() {

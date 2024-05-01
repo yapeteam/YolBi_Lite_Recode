@@ -7,11 +7,12 @@ import java.io.File;
 
 public class Main {
     public static final File YolBi_Dir = new File(System.getProperty("user.home"), ".yolbi");
-    public static final String dllName = "injection.dll", agentName = "agent.jar";
+    public static final String dllName = "libinjection.dll", agentName = "agent.jar";
     public static final int port = 20181;
 
     public static void main(String[] args) throws Exception {
         Utils.unzip(Main.class.getResourceAsStream("/injection.zip"), YolBi_Dir);
+        System.load(new File(Main.YolBi_Dir, "libapi.dll").getAbsolutePath());
         UIManager.setLookAndFeel(new FlatXcodeDarkIJTheme());
         MainFrame frame = new MainFrame();
         new Thread(() -> frame.setVisible(true)).start();

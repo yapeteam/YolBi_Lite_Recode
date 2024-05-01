@@ -17,6 +17,11 @@ public class Utils {
     public static final Kernel32 kernel32 = Kernel32.INSTANCE;
     public static final User32 user32 = User32.INSTANCE;
 
+    /**
+     * Reflective DLL injection
+     */
+    public static native void injectDLL(int pid, String dllPath);
+
     public static String getWindowText(WinDef.HWND hWND) {
         char[] text = new char[1024];
         user32.GetWindowText(hWND, text, text.length);
