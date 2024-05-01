@@ -351,8 +351,8 @@ void Inject(JNIEnv *env, jvmtiEnv *jti, const char yolbi_dir[260]) {
     loadJar(injectionOutPath, clientThread);
 
     jclass Start = findThreadClass("cn/yapeteam/yolbi/Loader", clientThread);
-    jmethodID start = (*jniEnv)->GetStaticMethodID(jniEnv, Start, "start", "(Ljava/lang/String;)V");
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, Start, start, (*jniEnv)->NewStringUTF(jniEnv, injectionOutPath));
+    jmethodID start = (*jniEnv)->GetStaticMethodID(jniEnv, Start, "start", "()V");
+    (*jniEnv)->CallStaticVoidMethod(jniEnv, Start, start);
 
     (*jvm)->DetachCurrentThread(jvm);
 }
