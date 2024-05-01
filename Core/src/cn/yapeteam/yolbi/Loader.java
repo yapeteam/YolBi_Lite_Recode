@@ -7,7 +7,9 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 
+import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class Loader {
@@ -22,6 +24,14 @@ public class Loader {
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();
+            new Thread(() -> {
+                try {
+                    YolBi.instance.getHttpSeverV3().start();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+            JOptionPane.showMessageDialog(null, "YolBi Lite " + YolBi.version + " has been initialized.");
             YolBi.instance.getNotificationManager().post(
                     new Notification(
                             "Injected successfully",
@@ -30,7 +40,6 @@ public class Loader {
                             2000, NotificationType.INIT
                     )
             );
-            YolBi.instance.getHttpSeverV3().start();
         } catch (Throwable e) {
             Logger.exception(e);
             try {

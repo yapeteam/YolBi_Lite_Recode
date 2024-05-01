@@ -27,7 +27,8 @@
                         <dir>Agent/META-INF</dir>
                         <files>Agent/target/classes</files>
                     </archive>
-                    <file>Loader/dll/injection.dll</file>
+                    <file>Loader/dll/build/libinjection.dll</file>
+                    <file>Loader/dll/build/libapi.dll</file>
                 </archive>
             </includes>
         </artifact>

@@ -73,7 +73,7 @@ public class Builder {
                     traverseFiles(dir, file -> {
                         String path = file.toString();
                         System.out.println(path);
-                        String entry_name = finalRoot_dir + path.substring(root.length()).replace("\\", "/").substring(1);
+                        String entry_name = root.length() > 1 ? finalRoot_dir + path.substring(root.length()).replace("\\", "/").substring(1) : finalRoot_dir + path.replace("\\", "/");
                         ZipEntry entry = new ZipEntry(entry_name);
                         try {
                             output.putNextEntry(entry);
@@ -195,7 +195,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final String MINGW_PATH = "mingw";
+    private static final String MINGW_PATH = "Loader/dll/mingw";
 
     private static void checkMinGW() throws Exception {
         String os_name = System.getProperty("os.name").toLowerCase();
@@ -231,14 +231,19 @@ public class Builder {
     }
 
     private static void buildDLL() throws Exception {
-        File dir = new File("Loader/dll");
-        String gccPath = new File("mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+        File dir = new File("Loader/dll/build");
+        dir.mkdirs();
+        System.out.println("Building DLL...");
+        String gcc_path = new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
         Terminal terminal = new Terminal(dir, null);
-        terminal.execute(new String[]{gccPath, "-c", "main.c", "-o", "main.o"});
-        terminal.execute(new String[]{gccPath, "-c", "dllmain.c", "-o", "dllmain.o"});
-        terminal.execute(new String[]{gccPath, "-shared", "main.o", "dllmain.o", "-o", "injection.dll"});
-        terminal.execute(new String[]{"cmd", "/c", "del", "main.o"});
-        terminal.execute(new String[]{"cmd", "/c", "del", "dllmain.o"});
+        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/Main.c", "-o", "Main.o"});
+        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
+        terminal.execute(new String[]{gcc_path, "-shared", "Main.o", "ReflectiveLoader.o", "-o", "libinjection.dll"});
+
+        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
+        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
+        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
+        terminal.execute(new String[]{gcc_path, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
     }
 
     public static void main(String[] args) throws Exception {

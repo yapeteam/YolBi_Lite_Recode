@@ -12,7 +12,6 @@ import cn.yapeteam.yolbi.server.HttpSeverV3;
 import cn.yapeteam.yolbi.shader.Shader;
 import lombok.Getter;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -60,7 +59,6 @@ public class YolBi {
         } catch (IOException e) {
             Logger.exception(e);
         }
-        JOptionPane.showMessageDialog(null, "YolBi Lite " + version + " has been initialized.");
     }
 
     public void shutdown() {
