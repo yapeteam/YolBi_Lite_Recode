@@ -3,6 +3,12 @@
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$" dumb="true">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/build" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/cmake-build-debug" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/mingw" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/mingw/mingw64/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/dll/mingw/mingw64/x86_64-w64-mingw32/bin" />
     </content>
   </component>
 </module>
