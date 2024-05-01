@@ -1,5 +1,7 @@
 package cn.yapeteam.yolbi.event;
 
+import cn.yapeteam.loader.logger.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -55,13 +57,17 @@ public class EventManager {
     }
 
     public <E extends Event> E post(Event e) {
-        listeningMethods.forEach(m -> Arrays.stream(m.method.getParameters()).filter(p -> p.getType().equals(e.getClass())).forEach(p -> {
-            try {
-                m.method.invoke(m.instance, e);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new RuntimeException(ex);
-            }
-        }));
+        try {
+            listeningMethods.forEach(m -> Arrays.stream(m.method.getParameters()).filter(p -> p.getType().equals(e.getClass())).forEach(p -> {
+                try {
+                    m.method.invoke(m.instance, e);
+                } catch (IllegalAccessException | InvocationTargetException ex) {
+                    Logger.exception(ex);
+                }
+            }));
+        } catch (Throwable ex) {
+            Logger.exception(ex);
+        }
         return (E) e;
     }
 

@@ -20,12 +20,13 @@ public class Mixin {
         while (target == null && tries < 5) {
             try {
                 target = ASMUtils.node(provider.getClassBytes(targetClass));
-            } catch (IllegalArgumentException ignored) {
+            } catch (Throwable ignored) {
                 tries++;
                 Thread.sleep(500);
             }
         }
         if (target == null)
             Logger.error("Failed to load target class {} for mixin {}", targetClass.getName(), source.name);
+        else Logger.info("Loaded target class {} for mixin {}, tries: {}", targetClass.getName(), source.name, tries);
     }
 }
