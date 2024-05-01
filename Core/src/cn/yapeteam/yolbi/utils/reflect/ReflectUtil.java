@@ -2,9 +2,9 @@ package cn.yapeteam.yolbi.utils.reflect;
 
 import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ClassUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.util.ResourceLocation;
@@ -12,6 +12,7 @@ import net.minecraft.util.Timer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -111,7 +112,7 @@ public class ReflectUtil {
         }
     }
 
-    public static final boolean hasOptifine = ClassUtils.getClass("net.optifine.Log") != null;
+    public static final boolean hasOptifine = Arrays.stream(GameSettings.class.getFields()).anyMatch(f -> f.getName().equals("ofFastRender"));
 
     public static Field getField(Class<?> clz, String name) {
         try {
