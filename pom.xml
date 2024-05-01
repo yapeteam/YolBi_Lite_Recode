@@ -25,6 +25,7 @@
         <module>Core</module>
         <module>Builder</module>
         <module>Agent</module>
+        <module>Agent</module>
     </modules>
 
     <properties>
