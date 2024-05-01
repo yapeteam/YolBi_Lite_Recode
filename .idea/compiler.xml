@@ -15,8 +15,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Agent" target="1.8" />
-      <module name="Loader" target="1.5" />
       <module name="yolbi-lite" target="1.8" />
     </bytecodeTargetLevel>
   </component>
