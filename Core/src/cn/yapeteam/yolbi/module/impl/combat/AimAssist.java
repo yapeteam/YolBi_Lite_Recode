@@ -37,6 +37,7 @@ public class AimAssist extends Module {
 
     @Override
     public void onEnable() {
+        if (mc.thePlayer == null) return;
         rotations = new FixedRotations(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
     }
 

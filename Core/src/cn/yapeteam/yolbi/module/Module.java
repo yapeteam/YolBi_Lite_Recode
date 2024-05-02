@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi.module;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.values.Value;
 import cn.yapeteam.loader.api.module.values.impl.*;
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.config.Config;
 import com.google.gson.JsonElement;
@@ -105,7 +106,11 @@ public abstract class Module {
             @Override
             public void load(JsonObject content) {
                 JsonElement enabled = content.get("enabled");
-                setEnabled(enabled != null && enabled.getAsBoolean());
+                try {
+                    setEnabled(enabled != null && enabled.getAsBoolean());
+                } catch (Throwable e) {
+                    Logger.exception(e);
+                }
                 JsonElement key = content.get("key");
                 if (key != null) setKey(key.getAsInt());
                 for (Value<?> value : values) {
