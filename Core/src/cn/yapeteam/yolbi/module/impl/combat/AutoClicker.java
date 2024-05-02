@@ -5,9 +5,10 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.event.impl.game.EventLoop;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -60,18 +61,26 @@ public class AutoClicker extends Module {
         return noise;
     }
 
+    public void sendClick(final int button, final boolean state) {
+        final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
+        KeyBinding.setKeyBindState(keyBind, state);
+        if (state) KeyBinding.onTick(keyBind);
+    }
+
     @Listener
-    private void onUpdate(EventUpdate e) {
+    private void onLoop(EventLoop e) {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (Mouse.isButtonDown(0) && leftClick.getValue()) {
+            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) &&
+                    (mc.objectMouseOver == null || mc.objectMouseOver.entityHit != null || mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.MISS)
+            ) {
                 time = System.currentTimeMillis();
-                ReflectUtil.Minecraft$clickMouse(mc);
+                sendClick(0, true);
             }
-            if (Mouse.isButtonDown(1) && rightClick.getValue()) {
+            if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0)) {
                 time = System.currentTimeMillis();
-                ReflectUtil.Minecraft$rightClickMouse(mc);
+                sendClick(1, true);
             }
         }
     }

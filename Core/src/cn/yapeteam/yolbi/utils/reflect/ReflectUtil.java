@@ -18,7 +18,7 @@ import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public class ReflectUtil {
-    private static Field EntityRenderer$theShaderGroup, ShaderGroup$listShaders, Minecraft$timer;
+    private static Field EntityRenderer$theShaderGroup, ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter;
     private static Method EntityRenderer$loadShader, Minecraft$clickMouse, Minecraft$rightClickMouse;
 
     static {
@@ -39,6 +39,9 @@ public class ReflectUtil {
 
             Minecraft$timer = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "timer", null, Mapper.Type.Field));
             Minecraft$timer.setAccessible(true);
+
+            Minecraft$leftClickCounter = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "leftClickCounter", null, Mapper.Type.Field));
+            Minecraft$leftClickCounter.setAccessible(true);
         } catch (NoSuchFieldException | NoSuchMethodException e) {
             Logger.exception(e);
         }
@@ -107,6 +110,23 @@ public class ReflectUtil {
     public static void SetShaderGroup$listShaders(ShaderGroup shaderGroup, List<Shader> listShaders) {
         try {
             ShaderGroup$listShaders.set(shaderGroup, listShaders);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static int GetLeftClickCounter(Minecraft mc) {
+        try {
+            return Minecraft$leftClickCounter.getInt(mc);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static void SetLeftClickCounter(Minecraft mc, int value) {
+        try {
+            Minecraft$leftClickCounter.setInt(mc, value);
         } catch (Exception e) {
             Logger.exception(e);
         }
