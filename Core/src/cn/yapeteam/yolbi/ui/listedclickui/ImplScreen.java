@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.ui.listedclickui;
 
 import cn.yapeteam.loader.api.module.ModuleCategory;
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.mixin.annotations.Super;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.module.impl.visual.ClickUI;
@@ -143,6 +144,11 @@ public class ImplScreen extends GuiScreen {
                 theShaderGroup.deleteShaderGroup();
                 ReflectUtil.SetEntityRenderer$theShaderGroup(mc.entityRenderer, null);
             }
+        }
+        try {
+            YolBi.instance.getConfigManager().save();
+        } catch (IOException e) {
+            Logger.exception(e);
         }
     }
 
