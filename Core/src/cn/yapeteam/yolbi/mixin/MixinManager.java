@@ -47,12 +47,14 @@ public class MixinManager {
                 byte[] bytes = map.get(targetClass.getName());
                 Files.write(new File(dir, targetClass.getName()).toPath(), bytes);
                 int code = JVMTIWrapper.instance.redefineClass(targetClass, bytes);
-                SocketSender.send("P2" + " " + (float) mixins.size() / (i + 1) * 100f);
+                SocketSender.send("P2" + " " + (float) (i + 1) / mixins.size() * 100f);
                 if (code != 0)
                     failed.add(mixin.getSimpleName());
                 Logger.success("Redefined {}, Return Code {}.", targetClass, code);
+                Thread.sleep(200);
             }
         }
+        SocketSender.send("E2");
         if (!failed.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("Failed to transform").append(' ').append(failed.size() == 1 ? "class" : "classes").append(' ').append('\n');

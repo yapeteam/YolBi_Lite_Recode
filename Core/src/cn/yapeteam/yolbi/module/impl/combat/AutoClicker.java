@@ -67,7 +67,6 @@ public class AutoClicker extends Module {
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
             if (Mouse.isButtonDown(0) && leftClick.getValue()) {
                 time = System.currentTimeMillis();
-                mc.thePlayer.swingItem();
                 ReflectUtil.Minecraft$clickMouse(mc);
             }
             if (Mouse.isButtonDown(1) && rightClick.getValue()) {

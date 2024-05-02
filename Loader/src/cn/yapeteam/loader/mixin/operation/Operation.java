@@ -40,6 +40,6 @@ public interface Operation {
         desc = DescParser.mapDesc(desc);
         String finalName = name;
         String finalDesc = desc;
-        return list.stream().filter(m -> m.name.equals(finalName) && m.desc.equals(finalDesc)).findFirst().orElse(null);
+        return list.stream().filter(m -> m != null && m.name.equals(finalName) && m.desc.equals(finalDesc)).findFirst().orElse(null);
     }
 }
