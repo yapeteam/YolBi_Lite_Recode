@@ -7,7 +7,6 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
@@ -31,13 +30,12 @@ public class Loader {
                     throw new RuntimeException(e);
                 }
             }).start();
-            JOptionPane.showMessageDialog(null, "YolBi Lite " + YolBi.version + " has been initialized.");
             YolBi.instance.getNotificationManager().post(
                     new Notification(
                             "Injected successfully",
                             Easing.EASE_IN_OUT_QUAD,
                             Easing.EASE_IN_OUT_QUAD,
-                            2000, NotificationType.INIT
+                            2500, NotificationType.INIT
                     )
             );
         } catch (Throwable e) {
