@@ -12,7 +12,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class ModuleInfoHttpHandler implements HttpHandler {
-
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String Displayname = URLUtil.getValues(httpExchange)[0];
@@ -22,7 +21,7 @@ public class ModuleInfoHttpHandler implements HttpHandler {
         JsonObject jsonObject = new JsonObject();
         JsonObject result = new JsonObject();
 
-        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname) && module.getModuleInfo().allowDisable()).forEach(Module -> Module.setEnabled(Enabled));
+        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname)/* && module.getModuleInfo().allowDisable()*/).forEach(Module -> Module.setEnabled(Enabled));
 
         jsonObject.add("result", result);
         jsonObject.addProperty("success", true);
@@ -42,5 +41,4 @@ public class ModuleInfoHttpHandler implements HttpHandler {
         out.flush();
         out.close();
     }
-
 }

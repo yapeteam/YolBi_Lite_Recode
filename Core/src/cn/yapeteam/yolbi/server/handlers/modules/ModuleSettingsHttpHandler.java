@@ -33,6 +33,7 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
                 JsonArray moduleJsonArray = new JsonArray();
                 isFound = true;
                 for (final Value<?> setting : module.getValues()) {
+                    if (!setting.getVisibility().get()) continue;
                     JsonObject moduleSet = new JsonObject();
                     /*if (setting instanceof StringValue) {
                         moduleSet.addProperty("name", setting.getName());

@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', function () {
     categoryButtons.forEach(button => {
         button.addEventListener('click', function () {
             const category = this.textContent; // Assuming the category name is the same as expected by the API
-            if (category === 'Alt Manager') {
+            /*if (category === 'Alt Manager') {
                 const mainContentArea = document.querySelector('.module_container');
                 mainContentArea.innerHTML = ''; // Clear the main content area
 
@@ -1036,7 +1036,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 init(); // Call the initialization function to set everything up
 
-            } else {
+            } else*/
+            {
                 loadModules(category);
             }
         });

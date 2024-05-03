@@ -8,6 +8,7 @@ import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.module.impl.visual.HeadUpDisplay;
 import cn.yapeteam.yolbi.notification.NotificationManager;
+import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import lombok.Getter;
 
@@ -53,6 +54,7 @@ public class YolBi {
         instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
         try {
             YolBi.instance.getConfigManager().load();
+            WebServer.start();
         } catch (IOException e) {
             Logger.exception(e);
         }
@@ -61,6 +63,7 @@ public class YolBi {
     public void shutdown() {
         try {
             configManager.save();
+            WebServer.stop();
         } catch (IOException e) {
             Logger.exception(e);
         }
