@@ -63,7 +63,7 @@ public class MainFrame extends JFrame {
             while (true) {
                 long time = System.currentTimeMillis();
                 while (true) if (time + 10 <= System.currentTimeMillis()) break;
-                cache += (value2 - cache) / 100f;
+                cache += (value2 - cache) / 20f;
                 progressBar2.setValue((int) cache);
             }
         }).start();

@@ -33,7 +33,7 @@ public class MixinManager {
     }
 
     //for debug
-    private static final File dir = new File("generatedClasses");
+    private static final File dir = new File("generated");
 
     public static void transform() throws Throwable {
         boolean ignored = dir.mkdirs();
