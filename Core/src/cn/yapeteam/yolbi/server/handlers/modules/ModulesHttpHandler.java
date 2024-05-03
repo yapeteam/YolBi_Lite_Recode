@@ -26,9 +26,8 @@ public class ModulesHttpHandler implements HttpHandler {
                 JsonObject moduleJson = new JsonObject();
                 moduleJson.addProperty("name", module.getName());
                 /*moduleJson.addProperty("description", module.getModuleInfo().description());*/
-                moduleJson.addProperty("Enabled", module.isEnabled());
+                moduleJson.addProperty("enabled", module.isEnabled());
                 // Add more properties as needed
-
                 response.add(module.getName(), moduleJson);
             }
         }

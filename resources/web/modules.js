@@ -1091,13 +1091,12 @@ async function toggleModuleState(moduleName, isEnabled) {
 }
 
 function updateModuleUI(moduleElement, moduleName, isEnabled) {
-    const titleElement = document.querySelector('.module_content h2');
+    /*cconst titleElement = document.querySelector('.module_content h2');
 
-    console.log("aa")
+    onsole.log("aa")
     if (isEnabled) {
         titleElement.style.content += '(enabled)';
     } else {
         titleElement.style.color = 'White';
-    }
+    }*/
 }
-
