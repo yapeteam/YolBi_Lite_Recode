@@ -8,7 +8,6 @@ import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 
 import java.awt.*;
-import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class Loader {
@@ -23,13 +22,6 @@ public class Loader {
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();
-            new Thread(() -> {
-                try {
-                    YolBi.instance.getHttpSeverV3().start();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
             YolBi.instance.getNotificationManager().post(
                     new Notification(
                             "Injected successfully",
