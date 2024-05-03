@@ -1,8 +1,5 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-
-import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
@@ -15,7 +12,6 @@ public class ModulesHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-
         // Extract the category from the request URL
         String category = URLUtil.getValues(httpExchange)[0];
 
@@ -23,15 +19,15 @@ public class ModulesHttpHandler implements HttpHandler {
         JsonObject response = new JsonObject();
 
         // Iterate through modules and add relevant information to the response
-        for (Module module : YolBi.instance.getModuleManager().getModules()) {
-            if (module.getCategory().toString().toLowerCase().equals(category.toLowerCase())){
+        for (Module module : Hermes.moduleManager.getAll()) {
+            if (module.getModuleInfo().category().toString().toLowerCase().equals(category.toLowerCase()) && !module.getModuleInfo().hidden()) {
                 JsonObject moduleJson = new JsonObject();
-                moduleJson.addProperty("name", module.getName());
-                moduleJson.addProperty("description", module.getName());
-                moduleJson.addProperty("Enabled",module.isEnabled());
+                moduleJson.addProperty("name", module.getDisplayName());
+                moduleJson.addProperty("description", module.getModuleInfo().description());
+                moduleJson.addProperty("Enabled", module.isEnabled());
                 // Add more properties as needed
 
-                response.add(module.getName(), moduleJson);
+                response.add(module.getDisplayName(), moduleJson);
             }
         }
 

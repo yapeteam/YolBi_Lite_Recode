@@ -1,10 +1,13 @@
 package cn.yapeteam.yolbi.server.handlers.alts;
 
-
 import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import dev.hermes.Hermes;
+import dev.hermes.ui.alt.account.Account;
+import dev.hermes.ui.alt.account.MicrosoftLogin;
+import dev.hermes.utils.SkinUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Session;
 
@@ -34,20 +37,20 @@ public class HtmlAddAltHandler implements HttpHandler {
 
         final CountDownLatch latch = new CountDownLatch(1);
 
-        if(type.equals("microsoft")) {
+        if (type.equals("microsoft")) {
             System.out.println("Microsoft");
             MicrosoftLogin.getRefreshToken(refreshToken -> {
                 if (refreshToken != null) {
                     new Thread(() -> {
                         // logging in
                         MicrosoftLogin.LoginData loginData = loginWithRefreshToken(refreshToken);
-                        Account account = new Account(loginData.username, SkinUtil.uuidOf(loginData.username),loginData.newRefreshToken);
-                        if(!Hermes.accountManager.getAccounts().contains(account)){
+                        Account account = new Account(loginData.username, SkinUtil.uuidOf(loginData.username), loginData.newRefreshToken);
+                        if (!Hermes.accountManager.getAccounts().contains(account)) {
                             Hermes.accountManager.getAccounts().add(account);
                             // writes the file
                             Hermes.accountManager.get("alts").write();
                             jsonObject.addProperty("success", true);
-                        }else{
+                        } else {
                             jsonObject.addProperty("success", false);
                             jsonObject.addProperty("error", "Alt already exists");
                         }
@@ -55,13 +58,13 @@ public class HtmlAddAltHandler implements HttpHandler {
                     }).start();
                 }
             });
-        }else{
-            if(!Hermes.accountManager.getAccounts().contains(username)){
+        } else {
+            if (!Hermes.accountManager.getAccounts().contains(username)) {
                 Hermes.accountManager.getAccounts().add(new Account(username));
                 // writes the file
                 Hermes.accountManager.get("alts").write();
                 jsonObject.addProperty("success", true);
-            }else{
+            } else {
                 jsonObject.addProperty("success", false);
                 jsonObject.addProperty("error", "Alt already exists");
             }

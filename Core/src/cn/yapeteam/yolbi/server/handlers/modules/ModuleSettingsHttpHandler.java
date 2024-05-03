@@ -1,13 +1,5 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-
-import cn.yapeteam.loader.api.module.values.Value;
-import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
-import cn.yapeteam.loader.api.module.values.impl.ColorValue;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
-import cn.yapeteam.loader.api.module.values.impl.NumberValue;
-import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -27,11 +19,11 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
         JsonObject jsonObject = new JsonObject();
         boolean isFound = false;
 
-        for (Module module : YolBi.instance.getModuleManager().getModules()) {
-            if (module.getName().toLowerCase().equals(moduleName.toLowerCase())) {
+        for (Module module : Hermes.moduleManager.getAll()) {
+            if (module.getDisplayName().toLowerCase().equals(moduleName.toLowerCase())) {
                 JsonArray moduleJsonArray = new JsonArray();
                 isFound = true;
-                for (final Value<?> setting : module.getValues()) {
+                for (final Value<?> setting : module.getAllValues()) {
                     JsonObject moduleSet = new JsonObject();
                     if (setting instanceof StringValue) {
                         moduleSet.addProperty("name", setting.getName());
@@ -42,19 +34,20 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
                         moduleSet.addProperty("type", "slider");
                         moduleSet.addProperty("min", ((NumberValue) setting).getMin().doubleValue());
                         moduleSet.addProperty("max", ((NumberValue) setting).getMax().doubleValue());
-                        moduleSet.addProperty("step", ((NumberValue) setting).getInc());
+                        moduleSet.addProperty("step", ((NumberValue) setting).getDecimalPlaces());
                         moduleSet.addProperty("value", ((NumberValue) setting).getValue().doubleValue());
-                    }else if (setting instanceof ModeValue) {
+                        moduleSet.addProperty("suffix", ((NumberValue) setting).getSuffix());
+                    } else if (setting instanceof ModeValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "mode");
                         JsonArray values = new JsonArray();
-                        values.addAll(((ModeValue) setting).getModes().);
+                        values.addAll(((ModeValue) setting).getAllSubValuesAsJson());
                         moduleSet.add("values", values);
                         moduleSet.addProperty("value", URLUtil.encode(((ModeValue) setting).getValue().getName()));
                     } else if (setting instanceof ListValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "radio");
-                        moduleSet.addProperty("value",setting.getValue().toString());
+                        moduleSet.addProperty("value", setting.getValue().toString());
                         JsonArray values = new JsonArray();
                         values.addAll(((ListValue<?>) setting).getSubValuesAsJson());
                         moduleSet.add("values", values);
@@ -62,7 +55,7 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "checkbox");
                         moduleSet.addProperty("value", ((BooleanValue) setting).getValue());
-                    } else if (setting instanceof BoundsNumberValue){
+                    } else if (setting instanceof BoundsNumberValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "range_slider");
                         moduleSet.addProperty("min", ((BoundsNumberValue) setting).getMin().doubleValue());
@@ -71,7 +64,7 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
                         moduleSet.addProperty("minvalue", ((BoundsNumberValue) setting).getValue().doubleValue());
                         moduleSet.addProperty("maxvalue", ((BoundsNumberValue) setting).getSecondValue().doubleValue());
                         moduleSet.addProperty("suffix", ((BoundsNumberValue) setting).getSuffix());
-                    } else if (setting instanceof ColorValue){
+                    } else if (setting instanceof ColorValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "color");
                         JsonArray Color = new JsonArray();
