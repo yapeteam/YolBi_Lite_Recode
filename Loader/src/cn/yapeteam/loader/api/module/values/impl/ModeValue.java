@@ -2,6 +2,8 @@ package cn.yapeteam.loader.api.module.values.impl;
 
 import cn.yapeteam.loader.api.module.values.Value;
 import cn.yapeteam.loader.api.module.values.Visibility;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,4 +50,7 @@ public class ModeValue<T> extends Value<T> {
         int index = Arrays.asList(modes).indexOf(getValue());
         setValue(modes[index > 0 ? index - 1 : modes.length - 1]);
     }
+
+
+
 }

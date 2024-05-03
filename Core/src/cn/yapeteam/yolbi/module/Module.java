@@ -28,6 +28,8 @@ public abstract class Module {
 
     private boolean listening = false;
 
+    private String description = null;
+
     private final ArrayList<Value<?>> values = new ArrayList<>();
 
     protected void onEnable() {

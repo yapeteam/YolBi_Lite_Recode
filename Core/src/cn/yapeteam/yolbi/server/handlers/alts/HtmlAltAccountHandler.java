@@ -1,10 +1,9 @@
 package cn.yapeteam.yolbi.server.handlers.alts;
 
+
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import dev.hermes.Hermes;
-import dev.hermes.ui.alt.account.Account;
 
 import java.io.IOException;
 import java.io.OutputStream;
