@@ -1074,7 +1074,7 @@ async function updateModuleSettings(moduleName, settingName, settingValue, optio
 
 
 async function toggleModuleState(moduleName, isEnabled) {
-    const url = `http://localhost:${port}/api/updateModulesInfo?displayname=${encodeURIComponent(moduleName)}&enable=${!isEnabled}`;
+    const url = `http://localhost:${port}/api/updateModulesInfo?displayname=${encodeURIComponent(moduleName)}&enable=${isEnabled}`;
 
     try {
         const response = await fetch(url);
