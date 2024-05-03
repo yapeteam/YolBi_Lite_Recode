@@ -1,8 +1,17 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
+import cn.yapeteam.loader.api.module.values.Value;
+import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
+import cn.yapeteam.loader.api.module.values.impl.ColorValue;
+import cn.yapeteam.loader.api.module.values.impl.ModeValue;
+import cn.yapeteam.loader.api.module.values.impl.NumberValue;
+import cn.yapeteam.yolbi.YolBi;
+import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.server.utils.ValueUtil;
 import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -19,43 +28,44 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
         JsonObject jsonObject = new JsonObject();
         boolean isFound = false;
 
-        for (Module module : Hermes.moduleManager.getAll()) {
-            if (module.getDisplayName().toLowerCase().equals(moduleName.toLowerCase())) {
+        for (Module module : YolBi.instance.getModuleManager().getModules()) {
+            if (module.getName().equalsIgnoreCase(moduleName)) {
                 JsonArray moduleJsonArray = new JsonArray();
                 isFound = true;
-                for (final Value<?> setting : module.getAllValues()) {
+                for (final Value<?> setting : module.getValues()) {
                     JsonObject moduleSet = new JsonObject();
-                    if (setting instanceof StringValue) {
+                    /*if (setting instanceof StringValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "input");
                         moduleSet.addProperty("value", ((StringValue) setting).getValue());
-                    } else if (setting instanceof NumberValue) {
+                    } else*/
+                    if (setting instanceof NumberValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "slider");
-                        moduleSet.addProperty("min", ((NumberValue) setting).getMin().doubleValue());
-                        moduleSet.addProperty("max", ((NumberValue) setting).getMax().doubleValue());
-                        moduleSet.addProperty("step", ((NumberValue) setting).getDecimalPlaces());
-                        moduleSet.addProperty("value", ((NumberValue) setting).getValue().doubleValue());
-                        moduleSet.addProperty("suffix", ((NumberValue) setting).getSuffix());
+                        moduleSet.addProperty("min", ((NumberValue<?>) setting).getMin().doubleValue());
+                        moduleSet.addProperty("max", ((NumberValue<?>) setting).getMax().doubleValue());
+                        moduleSet.addProperty("step", ((NumberValue<?>) setting).getInc());
+                        moduleSet.addProperty("value", ((NumberValue<?>) setting).getValue().doubleValue());
+                        moduleSet.addProperty("suffix", /*((NumberValue<?>) setting).getSuffix()*/"");
                     } else if (setting instanceof ModeValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "mode");
                         JsonArray values = new JsonArray();
-                        values.addAll(((ModeValue) setting).getAllSubValuesAsJson());
+                        values.addAll(ValueUtil.getAllSubValuesAsJson((ModeValue<?>) setting));
                         moduleSet.add("values", values);
-                        moduleSet.addProperty("value", URLUtil.encode(((ModeValue) setting).getValue().getName()));
-                    } else if (setting instanceof ListValue) {
+                        moduleSet.addProperty("value", URLUtil.encode(((ModeValue<?>) setting).getValue().toString()));
+                    } /*else if (setting instanceof ListValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "radio");
                         moduleSet.addProperty("value", setting.getValue().toString());
                         JsonArray values = new JsonArray();
                         values.addAll(((ListValue<?>) setting).getSubValuesAsJson());
                         moduleSet.add("values", values);
-                    } else if (setting instanceof BooleanValue) {
+                    } */ else if (setting instanceof BooleanValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "checkbox");
                         moduleSet.addProperty("value", ((BooleanValue) setting).getValue());
-                    } else if (setting instanceof BoundsNumberValue) {
+                    } /*else if (setting instanceof BoundsNumberValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "range_slider");
                         moduleSet.addProperty("min", ((BoundsNumberValue) setting).getMin().doubleValue());
@@ -64,14 +74,14 @@ public class ModuleSettingsHttpHandler implements HttpHandler {
                         moduleSet.addProperty("minvalue", ((BoundsNumberValue) setting).getValue().doubleValue());
                         moduleSet.addProperty("maxvalue", ((BoundsNumberValue) setting).getSecondValue().doubleValue());
                         moduleSet.addProperty("suffix", ((BoundsNumberValue) setting).getSuffix());
-                    } else if (setting instanceof ColorValue) {
+                    }*/ else if (setting instanceof ColorValue) {
                         moduleSet.addProperty("name", setting.getName());
                         moduleSet.addProperty("type", "color");
                         JsonArray Color = new JsonArray();
-                        Color.add(((ColorValue) setting).getValue().getRed());
-                        Color.add(((ColorValue) setting).getValue().getGreen());
-                        Color.add(((ColorValue) setting).getValue().getBlue());
-                        Color.add(((ColorValue) setting).getValue().getAlpha());
+                        Color.add(new JsonPrimitive(((ColorValue) setting).getValue().getRed()));
+                        Color.add(new JsonPrimitive(((ColorValue) setting).getValue().getGreen()));
+                        Color.add(new JsonPrimitive(((ColorValue) setting).getValue().getBlue()));
+                        Color.add(new JsonPrimitive(((ColorValue) setting).getValue().getAlpha()));
                         moduleSet.add("value", Color);
                     }
                     moduleJsonArray.add(moduleSet);
