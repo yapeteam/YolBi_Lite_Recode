@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-import cn.yapeteam.yolbi.server.utils.FileUtils;
+
+import cn.yapeteam.yolbi.utils.file.FileUtils;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -15,7 +16,7 @@ public class HtmlHttpHandler implements HttpHandler {
         System.out.println("Requested Path: " + requestedPath); // Debugging log
 
         // Assuming "/assets/hermes/ui" is at the root of your classpath
-        String basePath = "web";
+        String basePath = "/assets/hermes/ui";
         String resourcePath = basePath + (requestedPath.equals("/") ? "/index.html" : requestedPath);
 
         // Determine content type based on the file extension

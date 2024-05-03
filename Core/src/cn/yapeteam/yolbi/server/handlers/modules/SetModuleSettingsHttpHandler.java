@@ -1,12 +1,18 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-import cn.yapeteam.yolbi.server.utils.URLUtil;
+
+import cn.yapeteam.loader.api.module.values.Value;
+import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
+import cn.yapeteam.loader.api.module.values.impl.ColorValue;
+import cn.yapeteam.loader.api.module.values.impl.ModeValue;
+import cn.yapeteam.loader.api.module.values.impl.NumberValue;
+import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -44,8 +50,8 @@ public class SetModuleSettingsHttpHandler implements HttpHandler {
                     JsonArray values = new JsonArray();
                     values.addAll(((ModeValue) setting).getAllSubValuesAsJson());
                     int currentIndex = ((ModeValue) setting).getModes().indexOf(setting.getValue());
-                    for (int i = 0; i < values.size(); i++) {
-                        if (values.get(i).getAsString().equals(URLUtil.decode(value))) {
+                    for(int i=0;i < values.size();i++){
+                        if(values.get(i).getAsString().equals(URLUtil.decode(value))){
                             currentIndex = i;
                         }
                     }
@@ -63,8 +69,8 @@ public class SetModuleSettingsHttpHandler implements HttpHandler {
                     JsonArray values = new JsonArray();
                     values.addAll(((ListValue) setting).getSubValuesAsJson());
                     int currentIndex = ((ListValue) setting).getModes().indexOf(setting.getValue());
-                    for (int i = 0; i < values.size(); i++) {
-                        if (values.get(i).getAsString().equals(URLUtil.decode(value))) {
+                    for(int i=0;i < values.size();i++){
+                        if(values.get(i).getAsString().equals(URLUtil.decode(value))){
                             currentIndex = i;
                         }
                     }
@@ -78,7 +84,7 @@ public class SetModuleSettingsHttpHandler implements HttpHandler {
                     int b = (int) Float.parseFloat(rgba[2]);
                     System.out.println(rgba[3]);
                     int a = (int) (Float.parseFloat(rgba[3]) * 255);
-                    Color color = new Color(r, g, b, a);
+                    Color color = new Color(r,g,b,a);
                     ((ColorValue) setting).setValue(color);
                     JsonObject.addProperty("result", value);
                 }
@@ -102,4 +108,5 @@ public class SetModuleSettingsHttpHandler implements HttpHandler {
         out.flush();
         out.close();
     }
+
 }

@@ -1,13 +1,10 @@
 package cn.yapeteam.yolbi.server.handlers.alts;
 
+
+import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import dev.hermes.Hermes;
-import dev.hermes.ui.alt.account.Account;
-import dev.hermes.ui.alt.account.MicrosoftLogin;
-import dev.hermes.ui.alt.impl.AuthThread;
-import dev.hermes.utils.url.URLUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Session;
 
@@ -34,14 +31,14 @@ public class HtmlAltLoginHandler implements HttpHandler {
         Hermes.accountManager.get("alts").read();
         JsonObject jsonObject = new JsonObject();
         boolean isFound = false;
-        for (Account alt : Hermes.accountManager.getAccounts()) {
-            if (alt.getUsername().equalsIgnoreCase(altname)) {
+        for(Account alt : Hermes.accountManager.getAccounts()){
+            if(alt.getUsername().equalsIgnoreCase(altname)){
                 AuthThread loginThread;
                 isFound = true;
-                if (alt.getAccountType().equalsIgnoreCase("microsoft")) {
+                if(alt.getAccountType().equalsIgnoreCase("microsoft")){
                     loginThread = new AuthThread(alt.getUsername(), "", alt.getRefreshToken(), "MICROSOFT");
                     loginThread.start();
-                } else {
+                }else{
                     loginThread = new AuthThread(alt.getUsername(), "", "", "CRACKED");
                     loginThread.start();
                 }

@@ -1,12 +1,10 @@
 package cn.yapeteam.yolbi.server.handlers.alts;
 
+
+import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import dev.hermes.Hermes;
-import dev.hermes.ui.alt.account.Account;
-import dev.hermes.ui.alt.impl.AuthThread;
-import dev.hermes.utils.url.URLUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,8 +18,8 @@ public class HtmlAltDeleteHandler implements HttpHandler {
 
         JsonObject jsonObject = new JsonObject();
         boolean isFound = false;
-        for (Account alt : Hermes.accountManager.getAccounts()) {
-            if (alt.getUsername().equalsIgnoreCase(altname)) {
+        for(Account alt : Hermes.accountManager.getAccounts()){
+            if(alt.getUsername().equalsIgnoreCase(altname)){
                 AuthThread loginThread;
                 isFound = true;
                 Hermes.accountManager.getAccounts().remove(alt);

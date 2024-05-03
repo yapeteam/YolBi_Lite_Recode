@@ -1,7 +1,8 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
+
 import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.server.utils.URLUtil;
+import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -17,10 +18,11 @@ public class ModuleInfoHttpHandler implements HttpHandler {
         String Displayname = URLUtil.getValues(httpExchange)[0];
         boolean Enabled = Boolean.parseBoolean(URLUtil.getValues(httpExchange)[1]);
 
+
         JsonObject jsonObject = new JsonObject();
         JsonObject result = new JsonObject();
 
-        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname) /*&& module.getModuleInfo().allowDisable()*/).forEach(Module -> Module.setEnabled(Enabled));
+        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname) && module.getModuleInfo().allowDisable()).forEach(Module -> Module.setEnabled(Enabled));
 
         jsonObject.add("result", result);
         jsonObject.addProperty("success", true);

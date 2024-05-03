@@ -14,11 +14,12 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 public class HermesServer {
+
     private static HttpServer server;
-    public static final int PORT = 1342;
 
     public static void start() throws IOException {
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+
+        server = HttpServer.create(new InetSocketAddress("localhost", 1342), 0);
         server.createContext("/", new HtmlHttpHandler());
         server.createContext("/api/modulesList", new ModulesHttpHandler());
 //        server.createContext("/api/setStatus", new StatusHttpHandler());
@@ -34,10 +35,13 @@ public class HermesServer {
         server.setExecutor(Executors.newFixedThreadPool(10));
 
         server.start();
-        Logger.info("Server started on port {}", PORT);
+        Logger.info("Server started on port 1342");
     }
 
     public static void stop() {
         server.stop(0);
     }
+
+
+
 }
