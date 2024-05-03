@@ -7,6 +7,8 @@ let altsData = {}; // Object to store fetched alts data for easy access
 let isHovered = false;
 let hoverTimeout;
 
+const port = 1342;
+
 async function createAlt(Username, Accounttype) {
     const altcontainer = document.querySelector('.alt-display');
 
@@ -48,7 +50,7 @@ async function createAlt(Username, Accounttype) {
         e.preventDefault();
         removeButton.textContent = 'Deleting...';
         try {
-            const response = await fetch(`http://localhost:1342/api/DeleteAlt?altname=${Username}`, {
+            const response = await fetch(`http://localhost:${port}/api/DeleteAlt?altname=${Username}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -90,7 +92,7 @@ async function createAlt(Username, Accounttype) {
 async function loginAlt(Username, buttonElement, altCardElement) {
     buttonElement.textContent = 'Logging in...';
     try {
-        const response = await fetch(`http://localhost:1342/api/AltLogin?altname=${Username}`, {
+        const response = await fetch(`http://localhost:${port}/api/AltLogin?altname=${Username}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -121,7 +123,7 @@ async function updateAlts() {
     try {
         const altcontainer = document.querySelector('.alt-display');
         altcontainer.innerHTML = ''; // Clear existing content
-        const response = await fetch(`http://localhost:1342/api/getAltAccounts`);
+        const response = await fetch(`http://localhost:${port}/api/getAltAccounts`);
         const altdata = await response.json();
         altsData = altdata; // Store fetched data
 
@@ -212,7 +214,7 @@ function bindAddAccountButton() {
                 e.preventDefault();
                 // Call the API with the additional parameters
                 try {
-                    const response = await fetch(`http://localhost:1342/api/AddAlt?type=microsoft&username=neil_huang007`, {
+                    const response = await fetch(`http://localhost:${port}/api/AddAlt?type=microsoft&username=neil_huang007`, {
                         method: 'GET',
                     });
                     const data = await response.json();
@@ -345,7 +347,7 @@ async function addModule(module) {
     });
 
     // Fetch module settings from the API
-    const response = await fetch(`http://localhost:1342/api/getModuleSetting?module=${module.name}`);
+    const response = await fetch(`http://localhost:${port}/api/getModuleSetting?module=${module.name}`);
     const settingsData = await response.json();
 
     if (settingsData.success) {
@@ -457,7 +459,7 @@ async function loadModules(category) {
         const moduleContainer = document.querySelector('.module_container');
         moduleContainer.innerHTML = '';
 
-        const response = await fetch(`http://localhost:1342/api/modulesList?category=${category}`);
+        const response = await fetch(`http://localhost:${port}/api/modulesList?category=${category}`);
         const modulesData = await response.json();
 
         // Assuming modulesData is an object with module names as keys
@@ -476,7 +478,7 @@ async function loadSettings(moduleName, page, settingsContainer) {
 
     settingsContainer.innerHTML = ''; // Clear existing content
 
-    const response = await fetch(`http://localhost:1342/api/getModuleSetting?module=${moduleName}`);
+    const response = await fetch(`http://localhost:${port}/api/getModuleSetting?module=${moduleName}`);
     const settingsData = await response.json();
 
     if (settingsData.success) {
@@ -1048,7 +1050,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function updateModuleSettings(moduleName, settingName, settingValue, options = "none") {
     // Construct the URL with query parameters
-    let url = `http://localhost:1342/api/setModuleSettingValue?module=${encodeURIComponent(moduleName)}&name=${encodeURIComponent(settingName)}&value=${encodeURIComponent(settingValue)}&options=${encodeURIComponent(options)}`;
+    let url = `http://localhost:${port}/api/setModuleSettingValue?module=${encodeURIComponent(moduleName)}&name=${encodeURIComponent(settingName)}&value=${encodeURIComponent(settingValue)}&options=${encodeURIComponent(options)}`;
 
     try {
         const response = await fetch(url);
@@ -1072,7 +1074,7 @@ async function updateModuleSettings(moduleName, settingName, settingValue, optio
 
 
 async function toggleModuleState(moduleName, isEnabled) {
-    const url = `http://localhost:1342/api/updateModulesInfo?displayname=${encodeURIComponent(moduleName)}&enable=${!isEnabled}`;
+    const url = `http://localhost:${port}/api/updateModulesInfo?displayname=${encodeURIComponent(moduleName)}&enable=${!isEnabled}`;
 
     try {
         const response = await fetch(url);
