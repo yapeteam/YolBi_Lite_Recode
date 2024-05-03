@@ -340,8 +340,8 @@ async function addModule(module) {
 
     ModuletoggleButton.addEventListener('click', function (event) {
         event.preventDefault();
-        toggleModuleState(module.name, !module.enabled);
         module.enabled = !module.enabled; // Update module.enabled property
+        toggleModuleState(module.name, module.enabled);
         ModuletoggleButton.textContent = module.enabled ? 'UnToggled' : 'Toggled';
         updateModuleUI(moduleElement, module.name, module.enabled); // Optional: Refresh module UI
     });
