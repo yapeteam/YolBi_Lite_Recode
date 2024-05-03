@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Builder/Builder.iml" filepath="$PROJECT_DIR$/Builder/Builder.iml" />
-      <module fileurl="file://$PROJECT_DIR$/YolBi_Lite_Recode.iml" filepath="$PROJECT_DIR$/YolBi_Lite_Recode.iml" />
       <module fileurl="file://$PROJECT_DIR$/Agent/agent.iml" filepath="$PROJECT_DIR$/Agent/agent.iml" />
       <module fileurl="file://$PROJECT_DIR$/Core/core.iml" filepath="$PROJECT_DIR$/Core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/injector.iml" filepath="$PROJECT_DIR$/Injector/injector.iml" />
