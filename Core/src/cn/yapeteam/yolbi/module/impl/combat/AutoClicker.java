@@ -5,8 +5,9 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventLoop;
+import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
@@ -68,19 +69,23 @@ public class AutoClicker extends Module {
     }
 
     @Listener
-    private void onLoop(EventLoop e) {
+    private void onTick(EventTick e) {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) &&
-                    (mc.objectMouseOver == null || mc.objectMouseOver.entityHit != null || mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.MISS)
-            ) {
+            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
-                sendClick(0, true);
+                if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY)
+                    sendClick(0, true);
+                else if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.MISS) {
+                    mc.thePlayer.swingItem();
+                    ReflectUtil.Minecraft$clickMouse(mc);
+                }
             }
-            if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0)) {
+            if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
-                sendClick(1, true);
+                if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
+                    sendClick(1, true);
             }
         }
     }
