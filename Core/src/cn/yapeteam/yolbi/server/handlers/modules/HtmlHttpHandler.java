@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-import cn.yapeteam.yolbi.server.utils.FileUtils;
+import cn.yapeteam.yolbi.utils.file.FileUtils;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
