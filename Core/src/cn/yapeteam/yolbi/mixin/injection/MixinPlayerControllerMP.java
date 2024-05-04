@@ -46,5 +46,4 @@ public class MixinPlayerControllerMP {
 
         return this.currentGameType.isCreative() ? 5.0F : 4.0F;
     }
-
 }

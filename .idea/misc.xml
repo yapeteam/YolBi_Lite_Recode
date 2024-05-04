@@ -7,6 +7,9 @@
       <item index="2" class="java.lang.String" itemvalue="cn.yapeteam.loader.mixin.annotations.Overwrite" />
       <item index="3" class="java.lang.String" itemvalue="cn.yapeteam.yolbi.event.Listener" />
     </list>
+    <writeAnnotations>
+      <writeAnnotation name="cn.yapeteam.loader.mixin.annotations.Shadow" />
+    </writeAnnotations>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="MavenProjectsManager">
@@ -17,7 +20,6 @@
         <option value="$PROJECT_DIR$/Agent/pom.xml" />
       </list>
     </option>
-    <option name="workspaceImportForciblyTurnedOn" value="true" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
