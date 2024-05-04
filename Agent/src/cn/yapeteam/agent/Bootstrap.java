@@ -8,7 +8,7 @@ import java.net.URLClassLoader;
 import java.util.Objects;
 
 public class Bootstrap {
-    public static void agentmain(String args, Instrumentation instrumentation) throws Throwable {
+    private static void inject(Instrumentation instrumentation) throws Throwable {
         URLClassLoader loader = null;
         for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
             Thread thread = (Thread) o;
@@ -29,6 +29,14 @@ public class Bootstrap {
         Class.forName("cn.yapeteam.loader.Loader", true, loader).getMethod("preload", String.class).invoke(null, yolbi_dir);
         loadJar(loader, new File(yolbi_dir, "injection.jar"));
         Class.forName("cn.yapeteam.yolbi.Loader", true, loader).getMethod("start").invoke(null);
+    }
+
+    public static void agentmain(String args, Instrumentation instrumentation) throws Throwable {
+        inject(instrumentation);
+    }
+
+    public static void premain(String args, Instrumentation instrumentation) throws Throwable {
+        inject(instrumentation);
     }
 
     private static void loadJar(URLClassLoader urlClassLoader, File jar) throws Throwable {
