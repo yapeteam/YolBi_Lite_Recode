@@ -24,7 +24,7 @@ public abstract class Module {
     private ModuleCategory category = null;
     private int key = 0;
 
-    private boolean enabled = false;
+    protected boolean enabled = false;
 
     private boolean listening = false;
 
@@ -45,11 +45,11 @@ public abstract class Module {
             this.enabled = enabled;
 
             if (enabled) {
-                onEnable();
                 startListening();
+                onEnable();
             } else {
-                onDisable();
                 stopListening();
+                onDisable();
             }
         }
     }
