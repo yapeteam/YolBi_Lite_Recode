@@ -37,7 +37,7 @@ public class MixinPlayerControllerMP {
             desc = "()F"
     )
     public float getBlockReachDistance() {
-        if (YolBi.instance != null) {
+        if (YolBi.instance != null && YolBi.instance.getModuleManager() != null) {
             Reach reach = YolBi.instance.getModuleManager().getModule(Reach.class);
             if (reach != null && reach.isEnabled() && !reach.getValues().isEmpty())
                 return ((Number) reach.getValues().get(0).getValue()).floatValue();
