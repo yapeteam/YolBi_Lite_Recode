@@ -50,8 +50,10 @@ public class Mapper {
     public static Mode mode = null;
 
     public static void readMapping(String content, ArrayList<Map> dest) {
+        content = content.replace("\r", "\n");
         dest.clear();
         for (String line : content.split("\n")) {
+            line = line.replace("\n", "");
             String[] values = line.substring(4).split(" ");
             String[] obf, friendly;
             switch (line.substring(0, 2)) {
