@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ModuleInfoHttpHandler implements HttpHandler {
     @Override
@@ -21,10 +22,21 @@ public class ModuleInfoHttpHandler implements HttpHandler {
         JsonObject jsonObject = new JsonObject();
         JsonObject result = new JsonObject();
 
-        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname)/* && module.getModuleInfo().allowDisable()*/).forEach(Module -> Module.setEnabled(Enabled));
+        AtomicBoolean moduleFound = new AtomicBoolean(false);
 
-        jsonObject.add("result", result);
-        jsonObject.addProperty("success", true);
+        YolBi.instance.getModuleManager().getModules().stream().filter(module -> module.getName().equalsIgnoreCase(Displayname)).forEach(Module -> {
+            Module.setEnabled(Enabled);
+            moduleFound.set(true);
+        });
+
+        if (!moduleFound.get()) {
+            result.addProperty("message", "No module found");
+            jsonObject.add("result", result);
+            jsonObject.addProperty("success", false);
+        } else {
+            jsonObject.add("result", result);
+            jsonObject.addProperty("success", true);
+        }
 
         byte[] response = jsonObject.toString().getBytes(StandardCharsets.UTF_8);
 

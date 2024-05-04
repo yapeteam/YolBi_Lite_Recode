@@ -1,4 +1,5 @@
 console.log('modules.js loaded');
+loadModules('Combat')
 
 // func for altmanager
 
@@ -318,9 +319,10 @@ async function addModule(module) {
     moduleContent.appendChild(settingsContainer);
 
     // Check if the module is enabled and update UI
-    if (module.enabled) {
-        updateModuleUI(moduleElement, module.name, true);
-    }
+    // if (module.enabled) {
+    //     console.log('Module is enabled:', module.name);
+    //     updateModuleUI(moduleElement, module.name, true);
+    // }
 
     let page = 1
 
@@ -335,14 +337,15 @@ async function addModule(module) {
 
     const ModuletoggleButton = document.createElement('a');
     ModuletoggleButton.setAttribute('href', '#');
-    ModuletoggleButton.textContent = module.enabled ? 'UnToggled' : 'Toggled';
+    console.log(`module name: ${module.name} module enabled: ${module.enabled}`)
+    ModuletoggleButton.textContent = module.enabled ? 'Toggled' : 'UnToggled';
     ModuletoggleButton.style.marginLeft = '10px';
 
     ModuletoggleButton.addEventListener('click', function (event) {
         event.preventDefault();
         module.enabled = !module.enabled; // Update module.enabled property
         toggleModuleState(module.name, module.enabled);
-        ModuletoggleButton.textContent = module.enabled ? 'UnToggled' : 'Toggled';
+        ModuletoggleButton.textContent = module.enabled ? 'Toggled' : 'UnToggled';
         updateModuleUI(moduleElement, module.name, module.enabled); // Optional: Refresh module UI
     });
 
