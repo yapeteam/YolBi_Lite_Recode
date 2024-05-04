@@ -17,7 +17,7 @@ public class SocketSender {
             OutputStream stream = socket.getOutputStream();
             writer = new PrintWriter(stream);
         } catch (Throwable e) {
-            Logger.exception(e);
+            Logger.warn("Failed to connect with injector");
         }
     }
 
