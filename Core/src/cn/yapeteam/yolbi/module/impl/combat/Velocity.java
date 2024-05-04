@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
@@ -12,6 +13,8 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import org.lwjgl.input.Keyboard;
 
@@ -26,7 +29,7 @@ public class Velocity extends Module {
     }
 
     @Listener
-    public void onPacket(EventPacket event) {
+    public void onPacket(EventPacket event) throws IllegalAccessException {
         if (event.getPacket()  instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity) event.getPacket()).getEntityID() == mc.thePlayer.getEntityId()) {
             YolBi.instance.getNotificationManager().post(
                     new Notification(
@@ -36,9 +39,9 @@ public class Velocity extends Module {
                             2500, NotificationType.WARNING
                     )
             );
-            mc.thePlayer.motionX *= horizontal.getValue()/100;
-            mc.thePlayer.motionZ = horizontal.getValue()/100;
-            mc.thePlayer.motionY *= vertical.getValue()/100;
+            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionX", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionX() * horizontal.getValue()/100);
+            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionZ", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionZ() * horizontal.getValue()/100);
+            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionY", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionY() * vertical.getValue()/100);
         }
     }
 
