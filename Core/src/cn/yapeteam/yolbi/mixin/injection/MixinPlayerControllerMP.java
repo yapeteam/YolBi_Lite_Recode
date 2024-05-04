@@ -1,14 +1,14 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.Inject;
-import cn.yapeteam.loader.mixin.annotations.Local;
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Target;
+import cn.yapeteam.loader.logger.Logger;
+import cn.yapeteam.loader.mixin.annotations.*;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.event.type.CancellableEvent;
+import cn.yapeteam.yolbi.module.impl.combat.Reach;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.Entity;
+import net.minecraft.world.WorldSettings;
 
 /**
  * @author yuxiangll
@@ -17,6 +17,10 @@ import net.minecraft.entity.Entity;
  */
 @Mixin(PlayerControllerMP.class)
 public class MixinPlayerControllerMP {
+
+    @Shadow
+    private WorldSettings.GameType currentGameType = WorldSettings.GameType.SURVIVAL;
+
     @Inject(
             method = "attackEntity",
             desc = "(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;)V",
@@ -28,4 +32,19 @@ public class MixinPlayerControllerMP {
             return;
         }
     }
+
+    @Overwrite(
+            method = "getBlockReachDistance",
+            desc = "()F"
+    )
+    public float getBlockReachDistance() {
+        if(YolBi.instance.getModuleManager().getModule(Reach.class).isEnabled()){
+            Number value = (Number) YolBi.instance.getModuleManager().getModule(Reach.class).getValues().get(0).getValue();
+            Logger.info("Reach value: " + value);
+            return value.floatValue();
+        }
+
+        return this.currentGameType.isCreative() ? 5.0F : 4.0F;
+    }
+
 }
