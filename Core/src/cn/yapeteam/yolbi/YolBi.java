@@ -66,7 +66,7 @@ public class YolBi {
         try {
             configManager.save();
             WebServer.stop();
-            YolBi.instance = null;
+            YolBi.instance = new YolBi();
             System.gc();
         } catch (IOException e) {
             Logger.exception(e);

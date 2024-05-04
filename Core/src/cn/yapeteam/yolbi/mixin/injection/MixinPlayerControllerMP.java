@@ -37,9 +37,12 @@ public class MixinPlayerControllerMP {
             desc = "()F"
     )
     public float getBlockReachDistance() {
-        if(YolBi.instance.getModuleManager().getModule(Reach.class).isEnabled()){
-            Number value = (Number) YolBi.instance.getModuleManager().getModule(Reach.class).getValues().get(0).getValue();
-            return value.floatValue();
+        if (YolBi.instance != null) {
+            Reach reach = YolBi.instance.getModuleManager().getModule(Reach.class);
+            if (reach != null && reach.isEnabled()) {
+                Number value = (Number) YolBi.instance.getModuleManager().getModule(Reach.class).getValues().get(0).getValue();
+                return value.floatValue();
+            }
         }
 
         return this.currentGameType.isCreative() ? 5.0F : 4.0F;
