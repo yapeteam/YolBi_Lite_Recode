@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Getter
 public class YolBi {
-    public static final YolBi instance = new YolBi();
+    public static YolBi instance = new YolBi();
     public static final String name = "YolBi Lite";
     public static final String version = "0.3.0";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
@@ -64,6 +64,8 @@ public class YolBi {
         try {
             configManager.save();
             WebServer.stop();
+            YolBi.instance = null;
+            System.gc();
         } catch (IOException e) {
             Logger.exception(e);
         }
