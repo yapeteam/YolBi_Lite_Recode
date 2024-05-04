@@ -54,6 +54,7 @@ public class Mapper {
         dest.clear();
         for (String line : content.split("\n")) {
             line = line.replace("\n", "");
+            if (line.length() <= 4) continue;
             String[] values = line.substring(4).split(" ");
             String[] obf, friendly;
             switch (line.substring(0, 2)) {
