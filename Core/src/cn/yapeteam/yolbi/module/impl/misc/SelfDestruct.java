@@ -13,11 +13,8 @@ import java.io.IOException;
 
 @ModuleInfo(name = "SelfDestruct", category = ModuleCategory.MISC)
 public class SelfDestruct extends Module {
-    public SelfDestruct() {
-    }
     public void onEnable() {
-        try{
-
+        try {
             MixinManager.destroyClient();
         } catch (IOException e) {
             YolBi.instance.getNotificationManager().post(
@@ -29,7 +26,6 @@ public class SelfDestruct extends Module {
                     )
             );
         }
-
         this.setEnabled(false);
     }
 }
