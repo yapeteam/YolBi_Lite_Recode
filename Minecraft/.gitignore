@@ -6,3 +6,4 @@
 /run/servers.dat
 /run/usercache.json
 /run/usernamecache.json
+*.log
