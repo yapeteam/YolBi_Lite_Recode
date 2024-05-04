@@ -16,6 +16,7 @@ public class SelfDestruct extends Module {
     public void onEnable() {
         try {
             MixinManager.destroyClient();
+            YolBi.instance.shutdown();
         } catch (IOException e) {
             YolBi.instance.getNotificationManager().post(
                     new Notification(
