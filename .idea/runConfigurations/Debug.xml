@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="Start" />
+    <module name="Minecraft" />
+    <option name="VM_PARAMETERS" value="-Djava.library.path=natives -javaagent:agent.jar=debug" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Minecraft/run" />
+    <method v="2">
+      <option name="MakeProject" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="BUILD" run_configuration_type="Application" />
+    </method>
+  </configuration>
+</component>
