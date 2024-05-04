@@ -8,7 +8,6 @@ import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 
 import java.awt.*;
-import java.lang.instrument.UnmodifiableClassException;
 
 @SuppressWarnings("unused")
 public class Loader {
