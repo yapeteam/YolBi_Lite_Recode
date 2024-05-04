@@ -2,8 +2,10 @@
 /run/logs/
 /run/saves/
 /run/resourcepacks/
+/run/screenshots/
+/run/crash-reports/
+/run/generated/
 /run/options.txt
 /run/servers.dat
 /run/usercache.json
-/run/usernamecache.json
 *.log
