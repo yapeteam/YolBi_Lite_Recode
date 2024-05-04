@@ -1,6 +1,5 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.mixin.annotations.*;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventAttack;
@@ -40,7 +39,6 @@ public class MixinPlayerControllerMP {
     public float getBlockReachDistance() {
         if(YolBi.instance.getModuleManager().getModule(Reach.class).isEnabled()){
             Number value = (Number) YolBi.instance.getModuleManager().getModule(Reach.class).getValues().get(0).getValue();
-            Logger.info("Reach value: " + value);
             return value.floatValue();
         }
 
