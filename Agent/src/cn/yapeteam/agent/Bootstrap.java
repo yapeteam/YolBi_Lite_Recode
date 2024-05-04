@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@SuppressWarnings("unused")
 public class Bootstrap {
     private static void inject(Instrumentation instrumentation) throws Throwable {
         URLClassLoader loader = null;
@@ -113,6 +114,7 @@ public class Bootstrap {
                         }
                     }
                 }
+                Thread.sleep(5000);
                 inject(instrumentation);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
