@@ -9,8 +9,6 @@ import cn.yapeteam.yolbi.mixin.injection.*;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
-import java.lang.instrument.UnmodifiableClassException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
@@ -32,21 +30,6 @@ public class MixinManager {
         add(MixinEntityPlayer.class);
         add(MixinBlockNote.class);
         add(MixinBlock.class);
-    }
-
-    public static void destroyClient() throws IOException {
-        Map<String, byte[]> map = transformer.transformoldbytes();
-        for (int i = 0; i < mixins.size(); i++) {
-            Class<?> mixin = mixins.get(i);
-            Class<?> targetClass = mixin.getAnnotation(Mixin.class).value();
-            if (targetClass != null) {
-                byte[] bytes = map.get(targetClass.getName());
-                Files.write(new File(dir, targetClass.getName()).toPath(), bytes);
-                int code = JVMTIWrapper.instance.redefineClass(targetClass, bytes);
-                SocketSender.send("P2" + " " + (float) (i + 1) / mixins.size() * 100f);
-                Logger.success("Redefined {}, Return Code {}.", targetClass, code);
-            }
-        }
     }
 
     //for debug
