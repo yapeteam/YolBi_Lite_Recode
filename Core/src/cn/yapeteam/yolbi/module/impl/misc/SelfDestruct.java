@@ -15,6 +15,7 @@ import java.io.IOException;
 public class SelfDestruct extends Module {
     public void onEnable() {
         try {
+            if (mc.currentScreen != null) mc.displayGuiScreen(null);
             MixinManager.destroyClient();
             YolBi.instance.shutdown();
         } catch (IOException e) {
