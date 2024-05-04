@@ -45,11 +45,11 @@ public abstract class Module {
             this.enabled = enabled;
 
             if (enabled) {
-                onEnable();
                 startListening();
+                onEnable();
             } else {
-                onDisable();
                 stopListening();
+                onDisable();
             }
         }
     }
