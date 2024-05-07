@@ -21,7 +21,6 @@ public class NumberValue<T extends Number> extends Value<T> {
         this.max = max;
         this.inc = inc;
         type = value.getClass();
-
     }
 
     public NumberValue(String name, Visibility visibility, T value, T min, T max, T inc) {
