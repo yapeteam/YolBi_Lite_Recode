@@ -2,6 +2,7 @@ package cn.yapeteam.loader.mixin;
 
 import cn.yapeteam.loader.mixin.operation.Operation;
 import cn.yapeteam.loader.mixin.operation.impl.InjectOperation;
+import cn.yapeteam.loader.mixin.operation.impl.ModifyOperation;
 import cn.yapeteam.loader.mixin.operation.impl.OverwriteOperation;
 import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.loader.utils.ClassUtils;
@@ -25,6 +26,7 @@ public class Transformer {
         this.operations = new ArrayList<>();
         operations.add(new InjectOperation());
         operations.add(new OverwriteOperation());
+        operations.add(new ModifyOperation());
     }
 
     public void addMixin(Class<?> theClass) throws Throwable {
