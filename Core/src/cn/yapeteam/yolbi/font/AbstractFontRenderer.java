@@ -26,4 +26,6 @@ public interface AbstractFontRenderer {
     double drawString(String text, double x, double y, int color);
 
     double getHeight();
+
+    Font getFont();
 }

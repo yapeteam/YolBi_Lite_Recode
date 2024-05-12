@@ -40,28 +40,43 @@ public class JFrameRenderer extends JFrame {
         User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, newExtendedStyle);
     }
 
+    public void setTransparent(boolean transparent, String windowTitle) {
+        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, windowTitle);
+        int wl = User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE);
+        if (transparent) {
+            // 设置窗口为透明
+            wl |= WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
+        } else {
+            // 清除透明样式，允许窗口接收绘制消息
+            wl &= ~(WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT);
+        }
+        User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, wl);
+    }
+
     public void display() {
         setVisible(true);
-        setTransparent(getTitle());
+        setTransparent(true, getTitle());
     }
 
     public void close() {
         setVisible(false);
     }
 
-    private static class TransparentPanel extends JPanel {
+    static class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
         }
 
+
         @Override
         protected void paintComponent(Graphics g) {
+            ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             YolBi.instance.getEventManager().post(new EventExternalRender(g));
         }
     }
 
     @Listener
     private void onUpdate(EventLoop e) {
-        transparentPanel.repaint();
+        SwingUtilities.invokeLater(transparentPanel::repaint);
     }
 }

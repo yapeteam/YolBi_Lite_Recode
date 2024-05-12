@@ -54,7 +54,7 @@ public class YolBi {
         instance.jFrameRenderer = new JFrameRenderer();
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
-        YolBi.instance.getEventManager().register(instance.jFrameRenderer);
+        instance.eventManager.register(instance.jFrameRenderer);
         instance.eventManager.register(Shader.class);
         instance.moduleManager.load();
         instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
