@@ -70,6 +70,7 @@ public class YolBi {
 
     public void shutdown() {
         try {
+            instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
             YolBi.instance = new YolBi();

@@ -29,36 +29,24 @@ public class JFrameRenderer extends JFrame {
         AWTUtilities.setWindowShape(this, null);
     }
 
-    private static void setTransparent(String windowTitle) {
-        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, windowTitle);
-        int extendedStyle = User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE);
-        int newExtendedStyle = extendedStyle | WinUser.WS_EX_LAYERED;
-        User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, newExtendedStyle);
-        User32.INSTANCE.SetLayeredWindowAttributes(hwnd, 0x00000000, (byte) 0, WinUser.LWA_COLORKEY);
-        newExtendedStyle = User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE);
-        newExtendedStyle |= WinUser.WS_EX_TRANSPARENT;
-        User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, newExtendedStyle);
-    }
-
     public void setTransparent(boolean transparent, String windowTitle) {
         WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, windowTitle);
         int wl = User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE);
-        if (transparent) {
-            // 设置窗口为透明
+        if (transparent)
             wl |= WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
-        } else {
-            // 清除透明样式，允许窗口接收绘制消息
+        else
             wl &= ~(WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT);
-        }
         User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, wl);
     }
 
     public void display() {
+        YolBi.instance.getEventManager().register(this);
         setVisible(true);
         setTransparent(true, getTitle());
     }
 
     public void close() {
+        YolBi.instance.getEventManager().unregister(this);
         setVisible(false);
     }
 
@@ -75,8 +63,12 @@ public class JFrameRenderer extends JFrame {
         }
     }
 
+    private long count = 0;
+
     @Listener
     private void onUpdate(EventLoop e) {
-        SwingUtilities.invokeLater(transparentPanel::repaint);
+        if (count % 7 == 0)
+            SwingUtilities.invokeLater(transparentPanel::repaint);
+        count++;
     }
 }
