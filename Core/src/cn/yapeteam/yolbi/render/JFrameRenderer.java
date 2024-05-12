@@ -22,12 +22,11 @@ public class JFrameRenderer extends JFrame {
         setResizable(false);
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        transparentPanel.setPreferredSize(new Dimension(300, 300));
+        transparentPanel.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
         add(transparentPanel);
         setAlwaysOnTop(true);
         AWTUtilities.setWindowOpaque(this, false);
         AWTUtilities.setWindowShape(this, null);
-        YolBi.instance.getEventManager().register(this);
     }
 
     private static void setTransparent(String windowTitle) {
@@ -53,7 +52,6 @@ public class JFrameRenderer extends JFrame {
     private static class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
-            setSize(300, 300);
         }
 
         @Override
