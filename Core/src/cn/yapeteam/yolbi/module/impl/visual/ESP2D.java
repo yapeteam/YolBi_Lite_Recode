@@ -27,7 +27,7 @@ public class ESP2D extends Module {
         entityPosition.clear();
         for (Entity entity : mc.theWorld.loadedEntityList)
             if (ESPUtil.isInView(entity) && !(entity == mc.thePlayer && mc.gameSettings.thirdPersonView == 0))
-                entityPosition.put(entity, ESPUtil.getEntityPositionsOn2D(entity, e.getPartialTicks()));
+                entityPosition.put(entity, ESPUtil.getEntityPositionsOn2D(entity, 1));
     }
 
     private final Color firstColor = Color.RED, secondColor = Color.BLUE, thirdColor = Color.BLACK, fourthColor = Color.WHITE;
