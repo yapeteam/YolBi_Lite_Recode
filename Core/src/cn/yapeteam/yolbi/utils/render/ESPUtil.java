@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.utils.render;
 
 import cn.yapeteam.yolbi.utils.IMinecraft;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -16,7 +15,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -46,28 +44,26 @@ public class ESPUtil implements IMinecraft {
         return old + (current - old) * scale;
     }
 
-    public static double[] getInterpolatedPos(Entity entity) {
-        float ticks = Objects.requireNonNull(ReflectUtil.Minecraft$getTimer(mc)).renderPartialTicks;
+    public static double[] getInterpolatedPos(Entity entity, float partialTicks) {
         return new double[]{
-                interpolate(entity.lastTickPosX, entity.posX, ticks) - mc.getRenderManager().viewerPosX,
-                interpolate(entity.lastTickPosY, entity.posY, ticks) - mc.getRenderManager().viewerPosY,
-                interpolate(entity.lastTickPosZ, entity.posZ, ticks) - mc.getRenderManager().viewerPosZ
+                interpolate(entity.lastTickPosX, entity.posX, partialTicks) - mc.getRenderManager().viewerPosX,
+                interpolate(entity.lastTickPosY, entity.posY, partialTicks) - mc.getRenderManager().viewerPosY,
+                interpolate(entity.lastTickPosZ, entity.posZ, partialTicks) - mc.getRenderManager().viewerPosZ
         };
     }
 
-    public static AxisAlignedBB getInterpolatedBoundingBox(Entity entity) {
-        final double[] renderingEntityPos = getInterpolatedPos(entity);
+    public static AxisAlignedBB getInterpolatedBoundingBox(Entity entity, float partialTicks) {
+        final double[] renderingEntityPos = getInterpolatedPos(entity, partialTicks);
         final double entityRenderWidth = entity.width / 1.5;
         return new AxisAlignedBB(renderingEntityPos[0] - entityRenderWidth,
                 renderingEntityPos[1], renderingEntityPos[2] - entityRenderWidth, renderingEntityPos[0] + entityRenderWidth,
                 renderingEntityPos[1] + entity.height + (entity.isSneaking() ? -0.3 : 0.18), renderingEntityPos[2] + entityRenderWidth).expand(0.15, 0.15, 0.15);
     }
 
-    public static Vector4f getEntityPositionsOn2D(Entity entity) {
-        final AxisAlignedBB bb = getInterpolatedBoundingBox(entity);
+    public static Vector4f getEntityPositionsOn2D(Entity entity, float partialTicks) {
+        final AxisAlignedBB bb = getInterpolatedBoundingBox(entity, partialTicks);
 
         float yOffset = 0;
-
 
         final List<Vector3f> vectors = Arrays.asList(
                 new Vector3f((float) bb.minX, (float) bb.minY, (float) bb.minZ),

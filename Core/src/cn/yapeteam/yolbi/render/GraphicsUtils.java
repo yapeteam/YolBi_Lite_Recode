@@ -25,7 +25,7 @@ public class GraphicsUtils {
     public static void horizontalGradientRect(int x, int y, int width, int height, Color startColor, Color endColor) {
         float[] fractions = {0.0f, 1.0f};
         Color[] colors = {startColor, endColor};
-        currentContext.setPaint(new LinearGradientPaint(x, y, x + width, y, fractions, colors));
+        currentContext.setPaint(new LinearGradientPaint(x, y, x + width, y + .01f, fractions, colors));
         currentContext.fillRect(x, y, width, height);
     }
 
@@ -36,7 +36,7 @@ public class GraphicsUtils {
     public static void verticalGradientRect(int x, int y, int width, int height, Color startColor, Color endColor) {
         float[] fractions = {0.0f, 1.0f};
         Color[] colors = {startColor, endColor};
-        currentContext.setPaint(new LinearGradientPaint(x, y, x, y + height, fractions, colors));
+        currentContext.setPaint(new LinearGradientPaint(x, y, x + .01f, y + height, fractions, colors));
         currentContext.fillRect(x, y, width, height);
     }
 

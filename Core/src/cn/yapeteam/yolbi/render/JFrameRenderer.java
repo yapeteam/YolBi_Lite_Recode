@@ -76,30 +76,28 @@ public class JFrameRenderer extends JFrame {
     class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
+            new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
+            new Timer(1000 / 10, e -> {
+                int titleBarHeight = 30;
+                ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+                int scaleFactor = scaledResolution.getScaleFactor();
+                setPosition(Display.getX() + 6, Display.getY() + titleBarHeight);
+                setFrameSize(scaledResolution.getScaledWidth() * scaleFactor, scaledResolution.getScaledHeight() * scaleFactor);
+            }).start();
         }
 
 
         @Override
         protected void paintComponent(Graphics g) {
+            if (Minecraft.getMinecraft().currentScreen != null) return;
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             YolBi.instance.getEventManager().post(new EventExternalRender(g));
             drawables.forEach(drawable -> drawable.draw(g));
-            drawables.clear();
         }
     }
 
-    private long count = 0;
-
     @Listener
-    private void onUpdate(EventLoop e) {
-        if (count % 5 == 0) SwingUtilities.invokeLater(transparentPanel::repaint);
-        if (count % 20 == 0) {
-            int titleBarHeight = 30;
-            ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
-            int scaleFactor = scaledResolution.getScaleFactor();
-            setPosition(Display.getX(), Display.getY() + titleBarHeight);
-            setFrameSize(scaledResolution.getScaledWidth() * scaleFactor, scaledResolution.getScaledHeight() * scaleFactor - titleBarHeight);
-        }
-        count++;
+    private void onLoop(EventLoop event) {
+        drawables.clear();
     }
 }
