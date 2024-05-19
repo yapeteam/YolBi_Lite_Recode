@@ -51,7 +51,7 @@ public class YolBi {
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
         instance.notificationManager = new NotificationManager();
-        instance.jFrameRenderer = new JFrameRenderer();
+        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
         instance.eventManager.register(instance.jFrameRenderer);

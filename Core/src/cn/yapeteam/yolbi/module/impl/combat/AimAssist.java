@@ -5,7 +5,7 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
+import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
 import cn.yapeteam.yolbi.utils.player.FixedRotations;
@@ -35,14 +35,9 @@ public class AimAssist extends Module {
         this.addValues(filter, range, speed);
     }
 
-    @Override
-    public void onEnable() {
-        if (mc.thePlayer == null) return;
-        rotations = new FixedRotations(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-    }
-
     @Listener
-    public void onRender(EventRender2D event) {
+    public void onUpdate(EventUpdate event) {
+        if (rotations == null) rotations = new FixedRotations(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         EntityPlayer target = findTarget();
 
         if (target != null && Mouse.isButtonDown(0) && mc.currentScreen == null) {

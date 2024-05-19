@@ -8,25 +8,41 @@ import com.sun.awt.AWTUtilities;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
+import lombok.Getter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
+import org.lwjgl.opengl.Display;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class JFrameRenderer extends JFrame {
     private final TransparentPanel transparentPanel = new TransparentPanel();
 
-    public JFrameRenderer() {
+    public JFrameRenderer(int x, int y, int width, int height) {
         super("External Window");
         setUndecorated(true);
-        setLocation(0, 0);
+        setPosition(x, y);
+        setFrameSize(width, height);
         setResizable(false);
-        setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         transparentPanel.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
         add(transparentPanel);
         setAlwaysOnTop(true);
         AWTUtilities.setWindowOpaque(this, false);
         AWTUtilities.setWindowShape(this, null);
+
+    }
+
+    public void setPosition(int x, int y) {
+        setLocation(x, y);
+    }
+
+    public void setFrameSize(int width, int height) {
+        Dimension size = new Dimension(width, height);
+        setSize(size);
+        transparentPanel.setPreferredSize(size);
     }
 
     public void setTransparent(boolean transparent, String windowTitle) {
@@ -50,7 +66,14 @@ public class JFrameRenderer extends JFrame {
         setVisible(false);
     }
 
-    static class TransparentPanel extends JPanel {
+    @Getter
+    private final CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
+
+    public interface Drawable {
+        void draw(Graphics g);
+    }
+
+    class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
         }
@@ -60,6 +83,8 @@ public class JFrameRenderer extends JFrame {
         protected void paintComponent(Graphics g) {
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             YolBi.instance.getEventManager().post(new EventExternalRender(g));
+            drawables.forEach(drawable -> drawable.draw(g));
+            drawables.clear();
         }
     }
 
@@ -67,8 +92,14 @@ public class JFrameRenderer extends JFrame {
 
     @Listener
     private void onUpdate(EventLoop e) {
-        if (count % 7 == 0)
-            SwingUtilities.invokeLater(transparentPanel::repaint);
+        if (count % 5 == 0) SwingUtilities.invokeLater(transparentPanel::repaint);
+        if (count % 20 == 0) {
+            int titleBarHeight = 30;
+            ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
+            int scaleFactor = scaledResolution.getScaleFactor();
+            setPosition(Display.getX(), Display.getY() + titleBarHeight);
+            setFrameSize(scaledResolution.getScaledWidth() * scaleFactor, scaledResolution.getScaledHeight() * scaleFactor - titleBarHeight);
+        }
         count++;
     }
 }

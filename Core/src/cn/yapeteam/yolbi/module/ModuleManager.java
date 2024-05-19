@@ -35,10 +35,11 @@ public class ModuleManager {
                     name = name.substring(0, name.length() - 6);
                     if (name.startsWith("cn.yapeteam.yolbi.module.impl."))
                         try {
-                            Class<?> aClass = Class.forName(name);
+                            Class<?> aClass = Class.forName(name, true, ModuleManager.class.getClassLoader());
                             if (aClass.getSuperclass() == Module.class && aClass.getAnnotation(ModuleInfo.class) != null && aClass.getAnnotation(Deprecated.class) == null)
                                 registerModule(aClass);
                         } catch (Throwable e) {
+                            Logger.error("Failed to load Module: {}", name);
                             Logger.exception(e);
                         }
                 }

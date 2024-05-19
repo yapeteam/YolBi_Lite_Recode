@@ -62,10 +62,12 @@ public class EventManager {
                 try {
                     m.method.invoke(m.instance, e);
                 } catch (IllegalAccessException | InvocationTargetException ex) {
+                    Logger.error("Error while posting event: {}", e.getClass().getName());
                     Logger.exception(ex);
                 }
             }));
         } catch (Throwable ex) {
+            Logger.error("Error while posting event: {}", e.getClass().getName());
             Logger.exception(ex);
         }
         return (E) e;
