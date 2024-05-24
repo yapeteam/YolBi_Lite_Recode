@@ -15,7 +15,7 @@ public class GraphicsUtils {
 
     public static void rect(int x, int y, int width, int height, Color color) {
         currentContext.setColor(color);
-        currentContext.drawRect(x, y, width, height);
+        currentContext.fillRect(x, y, width, height);
     }
 
     public static void rect2(int left, int top, int right, int bottom, Color color) {

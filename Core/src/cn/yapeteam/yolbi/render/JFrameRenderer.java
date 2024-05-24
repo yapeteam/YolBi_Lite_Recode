@@ -2,13 +2,14 @@ package cn.yapeteam.yolbi.render;
 
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventLoop;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
+import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.opengl.Display;
 
@@ -24,12 +25,12 @@ public class JFrameRenderer extends JFrame {
         setUndecorated(true);
         setPosition(x, y);
         setFrameSize(width, height);
-        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         transparentPanel.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+        setBackground(new Color(0, 0, 0, 0));
         add(transparentPanel);
         setAlwaysOnTop(true);
-        setBackground(new Color(0, 0, 0, 0));
     }
 
     public void setPosition(int x, int y) {
@@ -66,14 +67,10 @@ public class JFrameRenderer extends JFrame {
     @Getter
     private final CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
 
-    public interface Drawable {
-        void draw(Graphics g);
-    }
-
     class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
-            new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
+            //new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
             new Timer(1000 / 10, e -> {
                 int titleBarHeight = 30;
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
@@ -86,15 +83,15 @@ public class JFrameRenderer extends JFrame {
 
         @Override
         protected void paintComponent(Graphics g) {
-            if (Minecraft.getMinecraft().currentScreen != null) return;
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             YolBi.instance.getEventManager().post(new EventExternalRender(g));
-            drawables.forEach(drawable -> drawable.draw(g));
+            if (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiChat)
+                drawables.forEach(drawable -> drawable.getDrawableListeners().forEach(action -> action.onDrawableUpdate(g)));
         }
     }
 
     @Listener
-    private void onLoop(EventLoop event) {
-        drawables.clear();
+    private void onLoop(EventRender2D event) {
+        transparentPanel.repaint();
     }
 }

@@ -25,24 +25,39 @@ public class ReflectUtil {
         try {
             Minecraft$clickMouse = Minecraft.class.getDeclaredMethod(Mapper.map("net/minecraft/client/Minecraft", "clickMouse", "()V", Mapper.Type.Method));
             Minecraft$clickMouse.setAccessible(true);
-
+        } catch (NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
             Minecraft$rightClickMouse = Minecraft.class.getDeclaredMethod(Mapper.map("net/minecraft/client/Minecraft", "rightClickMouse", "()V", Mapper.Type.Method));
             Minecraft$rightClickMouse.setAccessible(true);
-
+        } catch (NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
             EntityRenderer$theShaderGroup = EntityRenderer.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "theShaderGroup", null, Mapper.Type.Field));
             EntityRenderer$loadShader = EntityRenderer.class.getDeclaredMethod(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "loadShader", null, Mapper.Type.Method), ResourceLocation.class);
             EntityRenderer$theShaderGroup.setAccessible(true);
             EntityRenderer$loadShader.setAccessible(true);
-
+        } catch (NoSuchFieldException | NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
             ShaderGroup$listShaders = ShaderGroup.class.getDeclaredField(Mapper.map("net/minecraft/client/shader/ShaderGroup", "listShaders", null, Mapper.Type.Field));
             ShaderGroup$listShaders.setAccessible(true);
-
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
             Minecraft$timer = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "timer", null, Mapper.Type.Field));
             Minecraft$timer.setAccessible(true);
-
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
             Minecraft$leftClickCounter = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "leftClickCounter", null, Mapper.Type.Field));
             Minecraft$leftClickCounter.setAccessible(true);
-        } catch (NoSuchFieldException | NoSuchMethodException e) {
+        } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
     }
