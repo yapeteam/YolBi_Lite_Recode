@@ -4,7 +4,6 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventLoop;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
-import com.sun.awt.AWTUtilities;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
@@ -30,9 +29,7 @@ public class JFrameRenderer extends JFrame {
         transparentPanel.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
         add(transparentPanel);
         setAlwaysOnTop(true);
-        AWTUtilities.setWindowOpaque(this, false);
-        AWTUtilities.setWindowShape(this, null);
-
+        setBackground(new Color(0, 0, 0, 0));
     }
 
     public void setPosition(int x, int y) {
