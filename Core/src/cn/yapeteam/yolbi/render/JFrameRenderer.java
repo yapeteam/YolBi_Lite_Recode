@@ -25,7 +25,6 @@ public class JFrameRenderer extends JFrame {
         setUndecorated(true);
         setPosition(x, y);
         setFrameSize(width, height);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         transparentPanel.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
         setBackground(new Color(0, 0, 0, 0));
