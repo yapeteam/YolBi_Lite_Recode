@@ -3,7 +3,9 @@ package cn.yapeteam.yolbi.utils.reflect;
 import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.loader.logger.Logger;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
@@ -12,14 +14,19 @@ import net.minecraft.util.Timer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public class ReflectUtil {
-    private static Field EntityRenderer$theShaderGroup, ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter;
-    private static Method EntityRenderer$loadShader, Minecraft$clickMouse, Minecraft$rightClickMouse;
+    private static Field
+            EntityRenderer$theShaderGroup,
+            ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter,
+            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ;
+    private static Method EntityRenderer$loadShader, EntityRenderer$setupCameraTransform, EntityRenderer$setupOverlayRendering, Minecraft$clickMouse, Minecraft$rightClickMouse;
 
     static {
         try {
@@ -60,6 +67,40 @@ public class ReflectUtil {
         } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
+        try {
+            EntityRenderer$setupCameraTransform = EntityRenderer.class.getDeclaredMethod(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "setupCameraTransform", "(FI)V", Mapper.Type.Method), float.class, int.class);
+            EntityRenderer$setupCameraTransform.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
+            EntityRenderer$setupOverlayRendering = EntityRenderer.class.getDeclaredMethod(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "setupOverlayRendering", "()V", Mapper.Type.Method));
+            EntityRenderer$setupOverlayRendering.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
+            ActiveRenderInfo$MODELVIEW = ActiveRenderInfo.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/ActiveRenderInfo", "MODELVIEW", null, Mapper.Type.Field));
+            ActiveRenderInfo$PROJECTION = ActiveRenderInfo.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/ActiveRenderInfo", "PROJECTION", null, Mapper.Type.Field));
+            ActiveRenderInfo$VIEWPORT = ActiveRenderInfo.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/ActiveRenderInfo", "VIEWPORT", null, Mapper.Type.Field));
+            ActiveRenderInfo$OBJECTCOORDS = ActiveRenderInfo.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/ActiveRenderInfo", "OBJECTCOORDS", null, Mapper.Type.Field));
+            ActiveRenderInfo$MODELVIEW.setAccessible(true);
+            ActiveRenderInfo$PROJECTION.setAccessible(true);
+            ActiveRenderInfo$VIEWPORT.setAccessible(true);
+            ActiveRenderInfo$OBJECTCOORDS.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
+            RenderManager$renderPosX = RenderManager.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/entity/RenderManager", "renderPosX", null, Mapper.Type.Field));
+            RenderManager$renderPosY = RenderManager.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/entity/RenderManager", "renderPosY", null, Mapper.Type.Field));
+            RenderManager$renderPosZ = RenderManager.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/entity/RenderManager", "renderPosZ", null, Mapper.Type.Field));
+            RenderManager$renderPosX.setAccessible(true);
+            RenderManager$renderPosY.setAccessible(true);
+            RenderManager$renderPosZ.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
     }
 
     public static void Minecraft$clickMouse(Minecraft minecraft) {
@@ -96,6 +137,69 @@ public class ReflectUtil {
         return null;
     }
 
+    public static FloatBuffer GetActiveRenderInfo$MODELVIEW() {
+        try {
+            return (FloatBuffer) ActiveRenderInfo$MODELVIEW.get(null);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return null;
+    }
+
+    public static FloatBuffer GetActiveRenderInfo$PROJECTION() {
+        try {
+            return (FloatBuffer) ActiveRenderInfo$PROJECTION.get(null);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return null;
+    }
+
+    public static IntBuffer GetActiveRenderInfo$VIEWPORT() {
+        try {
+            return (IntBuffer) ActiveRenderInfo$VIEWPORT.get(null);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return null;
+    }
+
+    public static FloatBuffer GetActiveRenderInfo$OBJECTCOORDS() {
+        try {
+            return (FloatBuffer) ActiveRenderInfo$OBJECTCOORDS.get(null);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return null;
+    }
+
+    public static double GetRenderManager$renderPosX(RenderManager renderManager) {
+        try {
+            return RenderManager$renderPosX.getDouble(renderManager);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double GetRenderManager$renderPosY(RenderManager renderManager) {
+        try {
+            return RenderManager$renderPosY.getDouble(renderManager);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double GetRenderManager$renderPosZ(RenderManager renderManager) {
+        try {
+            return RenderManager$renderPosZ.getDouble(renderManager);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
     public static void SetEntityRenderer$theShaderGroup(EntityRenderer entityRenderer, ShaderGroup theShaderGroup) {
         try {
             EntityRenderer$theShaderGroup.set(entityRenderer, theShaderGroup);
@@ -108,6 +212,23 @@ public class ReflectUtil {
     public static void EntityRenderer$loadShader(EntityRenderer entityRenderer, ResourceLocation resourceLocationIn) {
         try {
             EntityRenderer$loadShader.invoke(entityRenderer, resourceLocationIn);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void EntityRenderer$setupCameraTransform(EntityRenderer entityRenderer, float partialTicks,
+                                                           int pass) {
+        try {
+            EntityRenderer$setupCameraTransform.invoke(entityRenderer, partialTicks, pass);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void EntityRenderer$setupOverlayRendering(EntityRenderer entityRenderer) {
+        try {
+            EntityRenderer$setupOverlayRendering.invoke(entityRenderer);
         } catch (Exception e) {
             Logger.exception(e);
         }

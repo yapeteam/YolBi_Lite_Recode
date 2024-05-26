@@ -16,7 +16,7 @@ public class MixinGuiIngame {
             desc = "(Lnet/minecraft/client/gui/ScaledResolution;F)V",
             target = @Target(
                     value = "INVOKESTATIC",
-                    target = "net/minecraft/client/renderer/GlStateManager.color(FFFF)V",
+                    target = "net/minecraft/client/renderer/GlStateManager.disableRescaleNormal()V",
                     shift = Target.Shift.AFTER
             )
     )

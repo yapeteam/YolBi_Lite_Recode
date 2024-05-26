@@ -53,11 +53,17 @@ public class ESPUtil implements IMinecraft {
     }
 
     public static AxisAlignedBB getInterpolatedBoundingBox(Entity entity, float partialTicks) {
-        final double[] renderingEntityPos = getInterpolatedPos(entity, partialTicks);
-        final double entityRenderWidth = entity.width / 1.5;
-        return new AxisAlignedBB(renderingEntityPos[0] - entityRenderWidth,
-                renderingEntityPos[1], renderingEntityPos[2] - entityRenderWidth, renderingEntityPos[0] + entityRenderWidth,
-                renderingEntityPos[1] + entity.height + (entity.isSneaking() ? -0.3 : 0.18), renderingEntityPos[2] + entityRenderWidth).expand(0.15, 0.15, 0.15);
+        double[] interpolatedPos = getInterpolatedPos(entity, partialTicks);
+        double width = (double) entity.width / 1.5;
+        double height = (double) entity.height + (entity.isSneaking() ? -0.3 : 0.2);
+        return new AxisAlignedBB(
+                interpolatedPos[0] - width,
+                interpolatedPos[1],
+                interpolatedPos[2] - width,
+                interpolatedPos[0] + width,
+                interpolatedPos[1] + height,
+                interpolatedPos[2] + width
+        );
     }
 
     public static Vector4f getEntityPositionsOn2D(Entity entity, float partialTicks) {
