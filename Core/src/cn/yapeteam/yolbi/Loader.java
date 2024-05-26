@@ -6,6 +6,7 @@ import cn.yapeteam.yolbi.mixin.MixinManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
+import net.minecraft.client.Minecraft;
 
 import java.awt.*;
 
@@ -21,15 +22,17 @@ public class Loader {
             Logger.success("Welcome {} ver {}", YolBi.name, YolBi.version);
             SocketSender.send("CLOSE");
             SocketSender.close();
-            YolBi.initialize();
-            YolBi.instance.getNotificationManager().post(
-                    new Notification(
-                            "Injected successfully",
-                            Easing.EASE_IN_OUT_QUAD,
-                            Easing.EASE_IN_OUT_QUAD,
-                            2500, NotificationType.INIT
-                    )
-            );
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                YolBi.initialize();
+                YolBi.instance.getNotificationManager().post(
+                        new Notification(
+                                "Injected successfully",
+                                Easing.EASE_IN_OUT_QUAD,
+                                Easing.EASE_IN_OUT_QUAD,
+                                2500, NotificationType.INIT
+                        )
+                );
+            });
         } catch (Throwable e) {
             Logger.exception(e);
             try {
