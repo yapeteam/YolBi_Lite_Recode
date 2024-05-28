@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="JavaDllPacker">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/JavaDllPacker.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,5 +1,6 @@
 package cn.yapeteam.loader;
 
+import cn.yapeteam.loader.mixin.annotations.DontMap;
 import cn.yapeteam.loader.mixin.annotations.Mixin;
 import cn.yapeteam.loader.utils.ASMUtils;
 import lombok.val;
@@ -57,6 +58,14 @@ public class JarMapper {
                     if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
                         System.out.println(se.getName());
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
+                    }
+                    if (DontMap.Helper.hasAnnotation(node)) {
+                        val de = new ZipEntry(se);
+                        de.setCompressedSize(-1);
+                        zos.putNextEntry(de);
+                        copyStream(zos, zis);
+                        zos.closeEntry();
+                        continue;
                     }
                     val de = newEntry(se, bytes);
                     zos.putNextEntry(de);

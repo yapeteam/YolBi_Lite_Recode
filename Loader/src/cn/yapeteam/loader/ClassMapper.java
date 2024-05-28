@@ -1,5 +1,6 @@
 package cn.yapeteam.loader;
 
+import cn.yapeteam.loader.mixin.annotations.DontMap;
 import cn.yapeteam.loader.mixin.annotations.Mixin;
 import cn.yapeteam.loader.mixin.annotations.Shadow;
 import cn.yapeteam.loader.mixin.annotations.Super;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 public class ClassMapper {
     public static byte[] map(byte[] bytes) throws Throwable {
         ClassNode node = ASMUtils.node(bytes);
+        if (DontMap.Helper.hasAnnotation(node)) return bytes;
         System.out.println(node.name);
         node.superName = Mapper.getObfClass(node.superName);
         List<String> interfaces = new ArrayList<>();
@@ -161,6 +163,7 @@ public class ClassMapper {
                     source.name = Mapper.mapWithSuper(parent.superName, source.name, null, Mapper.Type.Method);
                     break;
                 }
+                if (DontMap.Helper.isAnnotation(visibleAnnotation)) return;
             }
         }
         for (String name : parseDesc(source.desc).split(";"))
