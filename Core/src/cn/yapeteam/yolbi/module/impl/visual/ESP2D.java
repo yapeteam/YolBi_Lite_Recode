@@ -3,7 +3,7 @@ package cn.yapeteam.yolbi.module.impl.visual;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.vec.Vector4d;
+import cn.yapeteam.loader.utils.vector.Vector4d;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;

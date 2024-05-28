@@ -3,14 +3,18 @@ package cn.yapeteam.yolbi.utils.reflect;
 import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.loader.logger.Logger;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.Vec3;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -23,10 +27,14 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class ReflectUtil {
     private static Field
-            EntityRenderer$theShaderGroup,
-            ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter,
+            EntityRenderer$theShaderGroup, KeyBinding$pressed,
+            ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
+            EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch,
             ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ;
-    private static Method EntityRenderer$loadShader, EntityRenderer$setupCameraTransform, EntityRenderer$setupOverlayRendering, Minecraft$clickMouse, Minecraft$rightClickMouse;
+    private static Method
+            EntityRenderer$loadShader, EntityRenderer$setupCameraTransform, EntityRenderer$setupOverlayRendering,
+            Minecraft$clickMouse, Minecraft$rightClickMouse,
+            Entity$getVectorForRotation;
 
     static {
         try {
@@ -42,11 +50,23 @@ public class ReflectUtil {
             Logger.exception(e);
         }
         try {
+            Entity$getVectorForRotation = Entity.class.getDeclaredMethod(Mapper.map("net/minecraft/entity/Entity", "getVectorForRotation", "(FF)Lnet/minecraft/util/Vec3;", Mapper.Type.Method), float.class, float.class);
+            Entity$getVectorForRotation.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
             EntityRenderer$theShaderGroup = EntityRenderer.class.getDeclaredField(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "theShaderGroup", null, Mapper.Type.Field));
             EntityRenderer$loadShader = EntityRenderer.class.getDeclaredMethod(Mapper.map("net/minecraft/client/renderer/EntityRenderer", "loadShader", null, Mapper.Type.Method), ResourceLocation.class);
             EntityRenderer$theShaderGroup.setAccessible(true);
             EntityRenderer$loadShader.setAccessible(true);
         } catch (NoSuchFieldException | NoSuchMethodException e) {
+            Logger.exception(e);
+        }
+        try {
+            KeyBinding$pressed = KeyBinding.class.getDeclaredField(Mapper.map("net/minecraft/client/settings/KeyBinding", "pressed", null, Mapper.Type.Field));
+            KeyBinding$pressed.setAccessible(true);
+        } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
         try {
@@ -64,6 +84,24 @@ public class ReflectUtil {
         try {
             Minecraft$leftClickCounter = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "leftClickCounter", null, Mapper.Type.Field));
             Minecraft$leftClickCounter.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
+            Minecraft$rightClickDelayTimer = Minecraft.class.getDeclaredField(Mapper.map("net/minecraft/client/Minecraft", "rightClickDelayTimer", null, Mapper.Type.Field));
+            Minecraft$rightClickDelayTimer.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
+            EntityPlayerSP$lastReportedYaw = EntityPlayerSP.class.getDeclaredField(Mapper.map("net/minecraft/client/entity/EntityPlayerSP", "lastReportedYaw", null, Mapper.Type.Field));
+            EntityPlayerSP$lastReportedYaw.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
+            EntityPlayerSP$lastReportedPitch = EntityPlayerSP.class.getDeclaredField(Mapper.map("net/minecraft/client/entity/EntityPlayerSP", "lastReportedPitch", null, Mapper.Type.Field));
+            EntityPlayerSP$lastReportedPitch.setAccessible(true);
         } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
@@ -234,6 +272,15 @@ public class ReflectUtil {
         }
     }
 
+    public static Vec3 Entity$getVectorForRotation(Entity entity, float yaw, float pitch) {
+        try {
+            return (Vec3) Entity$getVectorForRotation.invoke(entity, yaw, pitch);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return null;
+    }
+
     public static List<Shader> GetShaderGroup$listShaders(ShaderGroup shaderGroup) {
         try {
             return (List<Shader>) ShaderGroup$listShaders.get(shaderGroup);
@@ -263,6 +310,75 @@ public class ReflectUtil {
     public static void SetLeftClickCounter(Minecraft mc, int value) {
         try {
             Minecraft$leftClickCounter.setInt(mc, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static int GetRightClickDelayTimer(Minecraft mc) {
+        try {
+            return Minecraft$rightClickDelayTimer.getInt(mc);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static void SetRightClickDelayTimer(Minecraft mc, int value) {
+        try {
+            Minecraft$rightClickDelayTimer.setInt(mc, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static boolean IsPressed(KeyBinding keyBinding) {
+        try {
+            return KeyBinding$pressed.getBoolean(keyBinding);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return false;
+    }
+
+
+    public static void SetPressed(KeyBinding keyBinding, boolean value) {
+        try {
+            KeyBinding$pressed.setBoolean(keyBinding, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static float GetLastReportedYaw(EntityPlayerSP player) {
+        try {
+            return EntityPlayerSP$lastReportedYaw.getFloat(player);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static void setLastReportedYaw(EntityPlayerSP player, float value) {
+        try {
+            EntityPlayerSP$lastReportedYaw.setFloat(player, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static float GetLastReportedPitch(EntityPlayerSP player) {
+        try {
+            return EntityPlayerSP$lastReportedPitch.getFloat(player);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static void setLastReportedPitch(EntityPlayerSP player, float value) {
+        try {
+            EntityPlayerSP$lastReportedPitch.setFloat(player, value);
         } catch (Exception e) {
             Logger.exception(e);
         }

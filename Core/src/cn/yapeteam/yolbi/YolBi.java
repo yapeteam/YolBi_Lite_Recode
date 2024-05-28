@@ -11,6 +11,7 @@ import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
+import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.render.ProjectionUtil;
 import lombok.Getter;
 
@@ -60,6 +61,7 @@ public class YolBi {
         instance.moduleManager.load();
         instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
         YolBi.instance.getEventManager().register(ProjectionUtil.class);
+        YolBi.instance.getEventManager().register(RotationManager.class);
 
         instance.jFrameRenderer.display();
         try {

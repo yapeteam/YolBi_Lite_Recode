@@ -1,4 +1,4 @@
-package cn.yapeteam.loader.utils.vec;
+package cn.yapeteam.loader.utils.vector;
 
 import cn.yapeteam.loader.mixin.annotations.DontMap;
 import lombok.AllArgsConstructor;
@@ -9,8 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Vector3d {
+public class Vector4d {
     public double x;
     public double y;
     public double z;
+    public double w;
 }

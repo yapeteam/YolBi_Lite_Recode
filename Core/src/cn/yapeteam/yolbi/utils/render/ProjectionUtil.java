@@ -1,7 +1,7 @@
 package cn.yapeteam.yolbi.utils.render;
 
-import cn.yapeteam.loader.utils.vec.Vector3d;
-import cn.yapeteam.loader.utils.vec.Vector4d;
+import cn.yapeteam.loader.utils.vector.Vector3d;
+import cn.yapeteam.loader.utils.vector.Vector4d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;

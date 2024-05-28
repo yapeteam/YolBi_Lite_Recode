@@ -31,6 +31,7 @@ public class MixinManager {
         add(MixinEntityPlayer.class);
         add(MixinBlockNote.class);
         add(MixinBlock.class);
+        add(MixinEntity.class);
     }
 
     public static void destroyClient() throws IOException {
