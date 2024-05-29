@@ -18,6 +18,13 @@ public @interface Modify {
 
     String desc();
 
+    String replacepath();
+
+    String replacementfunc();
+
+    String funcdesc();
+
+
 
     class Helper {
         public static Modify fromNode(AnnotationNode annotation) {
@@ -35,6 +42,21 @@ public @interface Modify {
                 @Override
                 public String desc() {
                     return ASMUtils.getAnnotationValue(annotation, "desc");
+                }
+
+                @Override
+                public String replacepath() {
+                    return ASMUtils.getAnnotationValue(annotation, "replacepath");
+                }
+
+                @Override
+                public String replacementfunc() {
+                    return ASMUtils.getAnnotationValue(annotation, "replacementfunc");
+                }
+
+                @Override
+                public String funcdesc() {
+                    return ASMUtils.getAnnotationValue(annotation, "funcdesc");
                 }
             };
         }
