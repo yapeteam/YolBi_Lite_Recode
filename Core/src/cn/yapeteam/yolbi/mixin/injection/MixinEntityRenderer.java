@@ -33,7 +33,8 @@ public class MixinEntityRenderer {
              target = @Target(value = "ISTORE",
                      shift = Target.Shift.AFTER))
      private void getMouseOver(@Local(source = "partialTicks", index = 1) float partialTicks) {
-         YolBi.instance.getEventManager().post(new EventMouseOver(3.0f));
+        EventMouseOver event = new EventMouseOver(3.0f);
+        YolBi.instance.getEventManager().post(event);
      }
 
      @Modify(method = "getMouseOver", desc = "(F)V", replacepath = "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", replacementfunc = "getReach", funcdesc = "()F")

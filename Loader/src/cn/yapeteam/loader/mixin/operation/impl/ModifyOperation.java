@@ -11,7 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.objectweb.asm_9_2.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm_9_2.Opcodes.*;
+import static org.objectweb.asm_9_2.TypeReference.NEW;
 
 
 public class ModifyOperation implements Operation {
@@ -54,10 +55,19 @@ public class ModifyOperation implements Operation {
                 // Check if the method exists
                 if (Arrays.stream(clazz.getMethods()).anyMatch(method -> method.getName().equals(info.replacementfunc()))) {
                     // Replace the LdcInsnNode with a new LdcInsnNode that loads the constant 6.0D onto the operand stack
+                    // Replace the LdcInsnNode with a new LdcInsnNode that loads the constant 6.0D onto the operand stack
                     if (ldc != null) {
-                        LdcInsnNode newLdc = new LdcInsnNode(6.0);
-                        MethodInsnNode newInsn = new MethodInsnNode(INVOKEVIRTUAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getReach", "()F", false);
-                        targetMethod.instructions.insert(ldc, newInsn);
+                        // Create new instance and call getReach
+                        TypeInsnNode newTypeInsn = new TypeInsnNode(NEW, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver");
+                        InsnNode dupInsn = new InsnNode(DUP);
+                        MethodInsnNode getReachInsn = new MethodInsnNode(INVOKESTATIC, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getReach", "()F", false);
+                        MethodInsnNode constructorInsn = new MethodInsnNode(INVOKESPECIAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "<init>", "(F)V", false);
+
+                        // Replace the ldc instruction
+                        targetMethod.instructions.insertBefore(ldc, newTypeInsn);
+                        targetMethod.instructions.insert(newTypeInsn, dupInsn);
+                        targetMethod.instructions.insert(dupInsn, getReachInsn);
+                        targetMethod.instructions.insert(getReachInsn, constructorInsn);
                         targetMethod.instructions.remove(ldc);
                     }
                 } else {
