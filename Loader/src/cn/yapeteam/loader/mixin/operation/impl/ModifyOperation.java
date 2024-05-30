@@ -44,24 +44,21 @@ public class ModifyOperation implements Operation {
                     }
                 }
             }
+            if (ldc == null) {
+                Logger.error("LdcInsnNode not found in method " + info.method());
+                return;
+            }
 
             try {
                 Class<?> clazz = Class.forName(info.replacepath().replace("/", "."));
                 // Check if the method exists
                 if (Arrays.stream(clazz.getMethods()).anyMatch(method -> method.getName().equals(info.replacementfunc()))) {
-                    // Replace the LdcInsnNode with a new MethodInsnNode that calls event.getReach()
-//                    if (ldc != null) {
-//                        MethodInsnNode newInsn = new MethodInsnNode(INVOKEVIRTUAL, info.replacepath(), info.replacementfunc(), info.funcdesc(), false);
-//                        targetMethod.instructions.insert(ldc, newInsn);
-//                        targetMethod.instructions.remove(ldc);
-//                        Logger.info("Successfully modified method " + info.method());
-//                    }
                     // Replace the LdcInsnNode with a new LdcInsnNode that loads the constant 6.0D onto the operand stack
                     if (ldc != null) {
-//                        LdcInsnNode newLdc = new LdcInsnNode(6.0);
+                        LdcInsnNode newLdc = new LdcInsnNode(6.0);
                         MethodInsnNode newInsn = new MethodInsnNode(INVOKEVIRTUAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getReach", "()F", false);
                         targetMethod.instructions.insert(ldc, newInsn);
-//                        targetMethod.instructions.remove(ldc);
+                        targetMethod.instructions.remove(ldc);
                     }
                 } else {
                     Logger.info("Method " + info.replacementfunc() + " does not exist in class " + info.replacepath());
