@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include"../jvm/jni.h"
-#include"../jvm/jvmti.h"
+#include"../jvm/8u60/jni.h"
+#include"../jvm/8u60/jvmti.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"

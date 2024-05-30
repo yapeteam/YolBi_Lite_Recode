@@ -76,7 +76,8 @@ public class RotationManager implements IMinecraft {
 
             mc.thePlayer.renderYawOffset = yaw;
             mc.thePlayer.rotationYawHead = yaw;
-            mc.thePlayer.rotationPitch = pitch;
+            //todo: fix this
+            //mc.thePlayer.renderPitchHead = pitch;
 
             lastServerRotations = new Vector2f(yaw, pitch);
 

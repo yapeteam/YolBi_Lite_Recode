@@ -12,7 +12,6 @@ import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.render.Drawable;
 import cn.yapeteam.yolbi.render.GraphicsUtils;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
-import cn.yapeteam.yolbi.utils.render.ProjectionUtil;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -56,7 +55,7 @@ public class ESP2D extends Module implements Drawable {
             for (Entity entity : mc.theWorld.loadedEntityList)
                 if (entity instanceof EntityLivingBase && ESPUtil.isInView(entity) && !(entity == mc.thePlayer && mc.gameSettings.thirdPersonView == 0)) {
                     //Vector4f pos = ESPUtil.getEntityPositionsOn2D(entity, e.getPartialTicks());
-                    Vector4d pos = ProjectionUtil.get(entity);
+                    Vector4d pos = ESPUtil.get(entity);
                     if (pos == null) continue;
                     double left = pos.getX(),
                             top = pos.getY(),
