@@ -13,6 +13,7 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
@@ -26,6 +27,18 @@ public class Velocity extends Module {
 
     public Velocity() {
         addValues(horizontal, vertical);
+    }
+
+    @Listener
+    public void onUpdate(EventUpdate event) {
+        if (mc.thePlayer.hurtTime >= 8) {
+            mc.gameSettings.keyBindJump.pressed = true;
+        }
+        if (mc.thePlayer.hurtTime >= 4) {
+            mc.gameSettings.keyBindJump.pressed = false;
+        } else if (mc.thePlayer.hurtTime > 1){
+            mc.gameSettings.keyBindJump.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindJump);
+        }
     }
 
     @Listener
