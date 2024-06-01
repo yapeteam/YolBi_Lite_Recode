@@ -135,10 +135,14 @@ public class InjectOperation implements Operation {
 
     private static void insert(MethodNode source, MethodNode target, Inject info) {
         AbstractInsnNode targetNode = findTargetInsnNode(target, info);
+        if (targetNode == null) {
+            Logger.error("No target found: {} in {}", info.target().value() + " " + info.target().target(), target.name);
+            return;
+        }
         AbstractInsnNode[] block = getBlock(targetNode, target.instructions);
         Target.Shift shift = info.target().shift();
         InsnList list = new InsnList();
-        if (info.target().value().equals("HEAD") || targetNode == null) {
+        if (info.target().value().equals("HEAD")) {
             boolean added = false;
             for (int i = 0; i < target.instructions.size(); i++) {
                 AbstractInsnNode instruction = target.instructions.get(i);
@@ -249,15 +253,18 @@ public class InjectOperation implements Operation {
         Target targetInfo = info.target();
         String targetOpe = targetInfo.target().isEmpty() ? "" : mapOperation(targetInfo.target());
         int opcode = getOperationCode(targetInfo.value());
+        int index = 0;
         for (AbstractInsnNode instruction : target.instructions) {
             if (
                     instruction.getOpcode() == opcode &&
-                    (
-                            targetOpe.isEmpty() ||
-                            (targetOpe.contains(" ") ? getFieldInsnNodeOperation(instruction) : getMethodInsnNodeOperation(instruction)).equals(targetOpe)
-                    )
+                            (
+                                    targetOpe.isEmpty() ||
+                                            (targetOpe.contains(" ") ? getFieldInsnNodeOperation(instruction) : getMethodInsnNodeOperation(instruction)).equals(targetOpe)
+                            )
             ) {
-                return instruction;
+                if (index == targetInfo.ordinal())
+                    return instruction;
+                else index++;
             }
         }
         return null;

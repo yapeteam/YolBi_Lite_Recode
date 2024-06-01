@@ -6,5 +6,7 @@ public class target {
         float yy2 = 11;
         float yy3 = yy2 - yy;
         System.out.println(yy3);
+        System.out.println(yy);
+        System.out.println(yy2);
     }
 }

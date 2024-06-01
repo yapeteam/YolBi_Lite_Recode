@@ -22,6 +22,8 @@ public @interface Target {
 
     Shift shift() default Shift.BEFORE;
 
+    int ordinal() default 0;
+
     class Helper {
         public static Target fromNode(AnnotationNode annotation) {
             return new Target() {
@@ -47,6 +49,13 @@ public @interface Target {
                     Object value = ASMUtils.getAnnotationValue(annotation, "shift");
                     if (value == null) return Shift.BEFORE;
                     return Shift.valueOf(((String[]) value)[1]);
+                }
+
+                @Override
+                public int ordinal() {
+                    Object value = ASMUtils.getAnnotationValue(annotation, "ordinal");
+                    if (value == null) return 0;
+                    return (int) value;
                 }
             };
         }
