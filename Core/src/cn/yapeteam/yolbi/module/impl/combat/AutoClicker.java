@@ -64,8 +64,23 @@ public class AutoClicker extends Module {
 
     public void sendClick(final int button, final boolean state) {
         final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
-        KeyBinding.setKeyBindState(keyBind, state);
-        if (state) KeyBinding.onTick(keyBind);
+
+        if (state) {
+            KeyBinding.onTick(keyBind);
+            //thread to release button
+            new Thread(() -> {
+                try {
+                    // Calculate delay according to the CPS
+                    long delay = (long) (1000 / generate(cps.getValue(), range.getValue()));
+                    // wait for the delay
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // Release the mouse button
+                KeyBinding.setKeyBindState(keyBind, false);
+            }).start();
+        }
     }
 
     @Listener
@@ -89,6 +104,8 @@ public class AutoClicker extends Module {
             }
         }
     }
+
+
 
     @Override
     public String getSuffix() {
