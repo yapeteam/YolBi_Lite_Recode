@@ -193,25 +193,25 @@ public class ReflectUtil {
     }
 
 
-    public static void setMotionX(Minecraft mc, double value) {
+    public static void setMotionX(Entity entity, double value) {
         try {
-            Entity$motionX.setDouble(mc, value);
+            Entity$motionX.setDouble(entity, value);
         } catch (Exception e) {
             Logger.exception(e);
         }
     }
 
-    public static void setMotionY(Minecraft mc, double value) {
+    public static void setMotionY(Entity entity, double value) {
         try {
-            Entity$motionY.setDouble(mc, value);
+            Entity$motionY.setDouble(entity, value);
         } catch (Exception e) {
             Logger.exception(e);
         }
     }
 
-    public static void setMotionZ(Minecraft mc, double value) {
+    public static void setMotionZ(Entity entity, double value) {
         try {
-            Entity$motionZ.setDouble(mc, value);
+            Entity$motionZ.setDouble(entity, value);
         } catch (Exception e) {
             Logger.exception(e);
         }

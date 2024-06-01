@@ -1,6 +1,5 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
-import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
@@ -14,10 +13,7 @@ import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
-import org.lwjgl.input.Keyboard;
 
 @ModuleInfo(name = "Velocity", category = ModuleCategory.COMBAT)
 public class Velocity extends Module {
@@ -32,18 +28,18 @@ public class Velocity extends Module {
     @Listener
     public void onUpdate(EventUpdate event) {
         if (mc.thePlayer.hurtTime >= 8) {
-            mc.gameSettings.keyBindJump.pressed = true;
+            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, true);
         }
         if (mc.thePlayer.hurtTime >= 4) {
-            mc.gameSettings.keyBindJump.pressed = false;
-        } else if (mc.thePlayer.hurtTime > 1){
-            mc.gameSettings.keyBindJump.pressed = GameSettings.isKeyDown(mc.gameSettings.keyBindJump);
+            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, false);
+        } else if (mc.thePlayer.hurtTime > 1) {
+            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, GameSettings.isKeyDown(mc.gameSettings.keyBindJump));
         }
     }
 
     @Listener
-    public void onPacket(EventPacket event) throws IllegalAccessException {
-        if (event.getPacket()  instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity) event.getPacket()).getEntityID() == mc.thePlayer.getEntityId()) {
+    public void onPacket(EventPacket event) {
+        if (event.getPacket() instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity) event.getPacket()).getEntityID() == mc.thePlayer.getEntityId()) {
             YolBi.instance.getNotificationManager().post(
                     new Notification(
                             "Velocity",
@@ -64,9 +60,9 @@ public class Velocity extends Module {
             double newZ = z / 8000.0D * horizontal.getValue();
 
             // Set the new velocities
-            ReflectUtil.setMotionX(mc, newX);
-            ReflectUtil.setMotionY(mc, newY);
-            ReflectUtil.setMotionZ(mc, newZ);
+            ReflectUtil.setMotionX(mc.thePlayer, newX);
+            ReflectUtil.setMotionY(mc.thePlayer, newY);
+            ReflectUtil.setMotionZ(mc.thePlayer, newZ);
         }
     }
 }
