@@ -60,6 +60,10 @@ public class MixinManager {
             Class<?> targetClass = mixin.getAnnotation(Mixin.class).value();
             if (targetClass != null) {
                 byte[] bytes = map.get(targetClass.getName());
+                if (bytes == null) {
+                    failed.add(mixin.getSimpleName());
+                    continue;
+                }
                 Files.write(new File(dir, targetClass.getName()).toPath(), bytes);
                 int code = JVMTIWrapper.instance.redefineClass(targetClass, bytes);
                 SocketSender.send("P2" + " " + (float) (i + 1) / mixins.size() * 100f);

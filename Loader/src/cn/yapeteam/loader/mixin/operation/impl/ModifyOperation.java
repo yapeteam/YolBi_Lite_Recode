@@ -58,16 +58,32 @@ public class ModifyOperation implements Operation {
                     // Replace the LdcInsnNode with a new LdcInsnNode that loads the constant 6.0D onto the operand stack
                     if (ldc != null) {
                         // Create new instance and call getReach
+                        // NEW dev/hermes/event/events/impl/Combat/EventMouseOver
+                        // DUP
+                        // LDC 3.0D
+                        // INVOKESPECIAL dev/hermes/event/events/impl/Combat/EventMouseOver.<init>(D)V
+                        // ASTORE event
                         TypeInsnNode newTypeInsn = new TypeInsnNode(NEW, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver");
                         InsnNode dupInsn = new InsnNode(DUP);
-                        MethodInsnNode getReachInsn = new MethodInsnNode(INVOKESTATIC, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getReach", "()F", false);
-                        MethodInsnNode constructorInsn = new MethodInsnNode(INVOKESPECIAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "<init>", "(F)V", false);
-
+                        LdcInsnNode reachLdc = new LdcInsnNode(3.0);
+                        MethodInsnNode getReachInsn =
+                                new MethodInsnNode(INVOKEVIRTUAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getReach", "()F", false);
+                        MethodInsnNode constructorInsn =
+                                new MethodInsnNode(INVOKESPECIAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "<init>", "(F)V", false);
+                        VarInsnNode storeInsn = new VarInsnNode(ASTORE, 999);
+                        // ALOAD event
+                        // INVOKEVIRTUAL dev/hermes/event/events/impl/Combat/EventMouseOver.getRange()D
+                        VarInsnNode loadInsn = new VarInsnNode(ALOAD, 999);
+                        MethodInsnNode getRangeInsn =
+                                new MethodInsnNode(INVOKEVIRTUAL, "cn/yapeteam/yolbi/event/impl/player/EventMouseOver", "getRange", "()D", false);
                         // Replace the ldc instruction
                         targetMethod.instructions.insertBefore(ldc, newTypeInsn);
                         targetMethod.instructions.insert(newTypeInsn, dupInsn);
-                        targetMethod.instructions.insert(dupInsn, getReachInsn);
-                        targetMethod.instructions.insert(getReachInsn, constructorInsn);
+                        targetMethod.instructions.insert(dupInsn, reachLdc);
+                        targetMethod.instructions.insert(reachLdc, constructorInsn);
+                        targetMethod.instructions.insert(constructorInsn, storeInsn);
+                        targetMethod.instructions.insert(storeInsn, loadInsn);
+                        targetMethod.instructions.insert(loadInsn, getRangeInsn);
                         targetMethod.instructions.remove(ldc);
                     }
                 } else {

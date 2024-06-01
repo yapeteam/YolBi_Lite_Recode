@@ -1,5 +1,6 @@
 package cn.yapeteam.loader.mixin;
 
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.mixin.operation.Operation;
 import cn.yapeteam.loader.mixin.operation.impl.InjectOperation;
 import cn.yapeteam.loader.mixin.operation.impl.ModifyOperation;
@@ -43,8 +44,13 @@ public class Transformer {
             oldBytes.put(name, mixin.getTargetOldBytes());
             for (Operation operation : operations)
                 operation.dispose(mixin);
-            byte[] class_bytes = ASMUtils.rewriteClass(mixin.getTarget());
-            classMap.put(name, class_bytes);
+            try {
+                byte[] class_bytes = ASMUtils.rewriteClass(mixin.getTarget());
+                classMap.put(name, class_bytes);
+            } catch (Throwable e) {
+                Logger.error("Failed to transform class " + name, e);
+                Logger.exception(e);
+            }
         }
         return classMap;
     }
