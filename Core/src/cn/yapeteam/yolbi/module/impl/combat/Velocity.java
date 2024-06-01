@@ -39,11 +39,22 @@ public class Velocity extends Module {
                             2500, NotificationType.WARNING
                     )
             );
-            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionX", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionX() * horizontal.getValue()/100);
-            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionZ", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionZ() * horizontal.getValue()/100);
-            ReflectUtil.getField(Entity.class, Mapper.map("net/minecraft/entity/Entity", "motionY", null, Mapper.Type.Field)).set(mc.thePlayer, ((S12PacketEntityVelocity) event.getPacket()).getMotionY() * vertical.getValue()/100);
+
+            S12PacketEntityVelocity packet = (S12PacketEntityVelocity) event.getPacket();
+            int x = packet.getMotionX();
+            int y = packet.getMotionY();
+            int z = packet.getMotionZ();
+
+            // Calculate the new velocities based on the current velocities and the horizontal and vertical values
+            double newX = x / 8000.0D * horizontal.getValue();
+            double newY = y / 8000.0D * vertical.getValue();
+            double newZ = z / 8000.0D * horizontal.getValue();
+
+            // Set the new velocities
+            ReflectUtil.setMotionX(mc, newX);
+            ReflectUtil.setMotionY(mc, newY);
+            ReflectUtil.setMotionZ(mc, newZ);
         }
     }
-
 }
 

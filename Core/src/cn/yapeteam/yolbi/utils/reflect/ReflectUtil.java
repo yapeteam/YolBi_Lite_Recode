@@ -29,8 +29,11 @@ public class ReflectUtil {
     private static Field
             EntityRenderer$theShaderGroup, KeyBinding$pressed,
             ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
-            EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch,
+            EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
             ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ;
+
+
+
     private static Method
             EntityRenderer$loadShader, EntityRenderer$setupCameraTransform, EntityRenderer$setupOverlayRendering,
             Minecraft$clickMouse, Minecraft$rightClickMouse,
@@ -139,7 +142,81 @@ public class ReflectUtil {
         } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
+
+        try {
+            Entity$motionX = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "motionX", null, Mapper.Type.Field));
+            Entity$motionX.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            Entity$motionY = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "motionY", null, Mapper.Type.Field));
+            Entity$motionY.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            Entity$motionZ = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "motionZ", null, Mapper.Type.Field));
+            Entity$motionZ.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
     }
+
+    public static double Entity$MotionX(Entity entity) {
+        try {
+            return Entity$motionX.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double Entity$MotionY(Entity entity) {
+        try {
+            return Entity$motionY.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double Entity$MotionZ(Entity entity) {
+        try {
+            return Entity$motionZ.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+
+    public static void setMotionX(Minecraft mc, double value) {
+        try {
+            Entity$motionX.setDouble(mc, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void setMotionY(Minecraft mc, double value) {
+        try {
+            Entity$motionY.setDouble(mc, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void setMotionZ(Minecraft mc, double value) {
+        try {
+            Entity$motionZ.setDouble(mc, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
 
     public static void Minecraft$clickMouse(Minecraft minecraft) {
         try {
