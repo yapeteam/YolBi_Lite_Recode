@@ -8,10 +8,5 @@ include_directories(.)
 add_library(
         injection
         SHARED
-        dllmain.c
-        jni.h
-        jni_md.h
-        jvmti.h
-        main.c
-        obfuscate.h
+        src/dll/Native.c
 )

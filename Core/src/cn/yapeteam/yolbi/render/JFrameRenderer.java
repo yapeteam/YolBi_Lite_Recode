@@ -1,10 +1,8 @@
 package cn.yapeteam.yolbi.render;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinUser;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
@@ -40,20 +38,10 @@ public class JFrameRenderer extends JFrame {
         transparentPanel.setPreferredSize(size);
     }
 
-    public void setTransparent(boolean transparent, String windowTitle) {
-        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, windowTitle);
-        int wl = User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE);
-        if (transparent)
-            wl |= WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
-        else
-            wl &= ~(WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT);
-        User32.INSTANCE.SetWindowLong(hwnd, WinUser.GWL_EXSTYLE, wl);
-    }
-
     public void display() {
         YolBi.instance.getEventManager().register(this);
         setVisible(true);
-        setTransparent(true, getTitle());
+        Natives.SetWindowsTransparent(true, getTitle());
     }
 
     public void close() {

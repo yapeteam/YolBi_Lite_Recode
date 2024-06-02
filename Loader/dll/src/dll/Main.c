@@ -6,8 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include"../jvm/8u60/jni.h"
-#include"../jvm/8u60/jvmti.h"
+#include "Native.c"
+#include "../jvm/jni.h"
+#include "../jvm/jvmti.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"
@@ -15,13 +16,15 @@ JavaVM *jvm;
 JNIEnv *jniEnv;
 jvmtiEnv *jvmti;
 
-struct Callback {
+struct Callback
+{
     const unsigned char *array;
     jint length;
     int success;
 };
 
-struct TransformCallback {
+struct TransformCallback
+{
     jclass clazz;
     struct Callback *callback;
     struct TransformCallback *next;
@@ -29,26 +32,30 @@ struct TransformCallback {
 
 static struct TransformCallback *callback_list = NULL;
 
-jclass findThreadClass(const char *name, jobject classLoader) {
+jclass findThreadClass(const char *name, jobject classLoader)
+{
     jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
     jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName",
                                                      "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
     jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
-    jclass result = (jclass) (*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
-                                                                                               className,
-                                                                                               JNI_TRUE, classLoader));
+    jclass result = (jclass)(*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
+                                                                                              className,
+                                                                                              JNI_TRUE, classLoader));
     (*jniEnv)->DeleteLocalRef(jniEnv, className);
     return result;
 }
 
-unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray) {
+unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray)
+{
     jsize length = (*env)->GetArrayLength(env, byteArray);
     jbyte *elements = (*env)->GetByteArrayElements(env, byteArray, NULL);
 
-    unsigned char *unsignedCharArray = (unsigned char *) malloc(length * sizeof(unsigned char));
-    if (unsignedCharArray != NULL) {
-        for (int i = 0; i < length; i++) {
-            unsignedCharArray[i] = (unsigned char) elements[i];
+    unsigned char *unsignedCharArray = (unsigned char *)malloc(length * sizeof(unsigned char));
+    if (unsignedCharArray != NULL)
+    {
+        for (int i = 0; i < length; i++)
+        {
+            unsignedCharArray[i] = (unsigned char)elements[i];
         }
     }
 
@@ -57,14 +64,17 @@ unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray) 
     return unsignedCharArray;
 }
 
-jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsignedCharArray, jsize length) {
+jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsignedCharArray, jsize length)
+{
     jbyteArray byteArray = (*env)->NewByteArray(env, length);
 
-    if (byteArray != NULL) {
+    if (byteArray != NULL)
+    {
         jbyte *elements = (*env)->GetByteArrayElements(env, byteArray, NULL);
 
-        for (int i = 0; i < length; i++) {
-            elements[i] = (jbyte) unsignedCharArray[i];
+        for (int i = 0; i < length; i++)
+        {
+            elements[i] = (jbyte)unsignedCharArray[i];
         }
 
         (*env)->ReleaseByteArrayElements(env, byteArray, elements, 0);
@@ -78,48 +88,46 @@ jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsig
 
 void JNICALL
 classFileLoadHook(jvmtiEnv
-                  *jvmti_env,
+                      *jvmti_env,
                   JNIEnv *env,
                   jclass
-                  class_being_redefined,
+                      class_being_redefined,
                   jobject loader,
-                  const char *name, jobject
-                  protection_domain,
+                  const char *name, jobject protection_domain,
                   jint class_data_len,
                   const unsigned char *class_data,
                   jint
-                  *new_class_data_len,
-                  unsigned char **new_class_data
-) {
-    *
-            new_class_data = NULL;
+                      *new_class_data_len,
+                  unsigned char **new_class_data)
+{
+    *new_class_data = NULL;
 
-    if (class_being_redefined) {
+    if (class_being_redefined)
+    {
         struct TransformCallback *current = callback_list;
         struct TransformCallback *previous = NULL;
 
-        while (current != NULL) {
-            if (!(*env)->
-                    IsSameObject(env, current
-                    ->clazz, class_being_redefined)) {
+        while (current != NULL)
+        {
+            if (!(*env)->IsSameObject(env, current->clazz, class_being_redefined))
+            {
                 previous = current;
                 current = current->next;
                 continue;
             }
 
-            if (previous == NULL) {
+            if (previous == NULL)
+            {
                 callback_list = current->next;
-            } else {
-                previous->
-                        next = current->next;
+            }
+            else
+            {
+                previous->next = current->next;
             }
 
-            current->callback->
-                    array = class_data;
-            current->callback->
-                    length = class_data_len;
-            current->callback->
-                    success = 1;
+            current->callback->array = class_data;
+            current->callback->length = class_data_len;
+            current->callback->success = 1;
 
             free(current);
             break;
@@ -129,18 +137,22 @@ classFileLoadHook(jvmtiEnv
 
 #pragma clang diagnostic pop
 
-void *allocate(jlong size) {
+void *allocate(jlong size)
+{
     void *resultBuffer = malloc(size);
     return resultBuffer;
 }
 
 JNIEXPORT jobject
 
-JNICALL GetLoadedClasses(JNIEnv *env, jclass _) {
+    JNICALL
+    GetLoadedClasses(JNIEnv *env, jclass _)
+{
     jint classcount = 0;
     jclass *classes = NULL;
     (*jvmti)->GetLoadedClasses((jvmtiEnv *)
-                                       jvmti, &classcount, &classes);
+                                   jvmti,
+                               &classcount, &classes);
     jclass ArrayList = (*env)->FindClass(env, "java/util/ArrayList");
     jmethodID add = (*env)->GetMethodID(env, ArrayList, "add", "(Ljava/lang/Object;)Z");
     jobject list = (*env)->NewObject(env, ArrayList, (*env)->GetMethodID(env, ArrayList, "<init>", "()V"));
@@ -152,29 +164,32 @@ JNICALL GetLoadedClasses(JNIEnv *env, jclass _) {
 
 JNIEXPORT jbyteArray
 
-JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz) {
-    struct Callback *retransform_callback = (struct Callback *) allocate(sizeof(struct Callback));
+    JNICALL
+    GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
+{
+    struct Callback *retransform_callback = (struct Callback *)allocate(sizeof(struct Callback));
     retransform_callback->success = 0;
 
-    struct TransformCallback *new_node = (struct TransformCallback *) allocate(sizeof(struct TransformCallback));
+    struct TransformCallback *new_node = (struct TransformCallback *)allocate(sizeof(struct TransformCallback));
     new_node->clazz = clazz;
     new_node->callback = retransform_callback;
     new_node->next = callback_list;
     callback_list = new_node;
 
     jclass *classes = (jclass *)
-            allocate(sizeof(jclass));
+        allocate(sizeof(jclass));
     classes[0] = clazz;
 
-    jint err = (*jvmti)->RetransformClasses((jvmtiEnv *) jvmti, 1, classes);
+    jint err = (*jvmti)->RetransformClasses((jvmtiEnv *)jvmti, 1, classes);
 
-    if (err > 0) {
+    if (err > 0)
+    {
         printf("jvmti error while getting class bytes: %ld\n", err);
         return NULL;
     }
 
     jbyteArray output = (*env)->NewByteArray(env, retransform_callback->length);
-    (*env)->SetByteArrayRegion(env, output, 0, retransform_callback->length, (jbyte *) retransform_callback->array);
+    (*env)->SetByteArrayRegion(env, output, 0, retransform_callback->length, (jbyte *)retransform_callback->array);
 
     free(classes);
     return output;
@@ -182,35 +197,39 @@ JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz) {
 
 JNIEXPORT jint
 
-JNICALL RedefineClass(JNIEnv *env, jclass _, jclass clazz, jbyteArray classBytes) {
+    JNICALL
+    RedefineClass(JNIEnv *env, jclass _, jclass clazz, jbyteArray classBytes)
+{
     jbyte *classByteArray = (*env)->GetByteArrayElements(env, classBytes, NULL);
-    struct Callback *retransform_callback = (struct Callback *) allocate(sizeof(struct Callback));
+    struct Callback *retransform_callback = (struct Callback *)allocate(sizeof(struct Callback));
     retransform_callback->success = 0;
-    struct TransformCallback *new_node = (struct TransformCallback *) allocate(sizeof(struct TransformCallback));
+    struct TransformCallback *new_node = (struct TransformCallback *)allocate(sizeof(struct TransformCallback));
     new_node->clazz = clazz;
     new_node->callback = retransform_callback;
     new_node->next = callback_list;
     callback_list = new_node;
-    jvmtiClassDefinition *definitions = (jvmtiClassDefinition *) allocate(sizeof(jvmtiClassDefinition));
+    jvmtiClassDefinition *definitions = (jvmtiClassDefinition *)allocate(sizeof(jvmtiClassDefinition));
     definitions->klass = clazz;
     definitions->class_byte_count = (*env)->GetArrayLength(env, classBytes);
-    definitions->class_bytes = (unsigned char *) classByteArray;
-    jint error = (jint) (*jvmti)->RedefineClasses((jvmtiEnv *) jvmti, 1, definitions);
+    definitions->class_bytes = (unsigned char *)classByteArray;
+    jint error = (jint)(*jvmti)->RedefineClasses((jvmtiEnv *)jvmti, 1, definitions);
     (*env)->ReleaseByteArrayElements(env, classBytes, classByteArray, 0);
     free(definitions);
     return error;
 }
 
-jclass DefineClass(JNIEnv *env, jobject obj, jobject classLoader, jbyteArray bytes) {
+jclass DefineClass(JNIEnv *env, jobject obj, jobject classLoader, jbyteArray bytes)
+{
     jclass clClass = (*env)->FindClass(env, "java/lang/ClassLoader");
     jmethodID defineClass = (*env)->GetMethodID(env, clClass, "defineClass", "([BII)Ljava/lang/Class;");
     jobject classDefined = (*env)->CallObjectMethod(env, classLoader, defineClass, bytes, 0,
                                                     (*env)->GetArrayLength(env, bytes));
     return (jclass)
-            classDefined;
+        classDefined;
 }
 
-void loadJar(const char *path, jobject thread) {
+void loadJar(const char *path, jobject thread)
+{
     jclass urlClassLoader = (*jniEnv)->FindClass(jniEnv, "java/net/URLClassLoader");
     jclass fileClass = (*jniEnv)->FindClass(jniEnv, "java/io/File");
     jmethodID init = (*jniEnv)->GetMethodID(jniEnv, fileClass, "<init>", "(Ljava/lang/String;)V");
@@ -222,21 +241,18 @@ void loadJar(const char *path, jobject thread) {
     jclass URIClass = (*jniEnv)->FindClass(jniEnv, "java/net/URI");
     jmethodID toURL = (*jniEnv)->GetMethodID(jniEnv, URIClass, "toURL", "()Ljava/net/URL;");
     jobject url = (*jniEnv)->CallObjectMethod(jniEnv, uri, toURL);
-    (*jniEnv)->CallVoidMethod(jniEnv, (*jniEnv)->CallObjectMethod(jniEnv, thread, (*jniEnv)->GetMethodID(jniEnv,
-                                                                                                         (*jniEnv)->GetObjectClass(
-                                                                                                                 jniEnv,
-                                                                                                                 thread),
-                                                                                                         "getContextClassLoader",
-                                                                                                         "()Ljava/lang/ClassLoader;")),
+    (*jniEnv)->CallVoidMethod(jniEnv, (*jniEnv)->CallObjectMethod(jniEnv, thread, (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, thread), "getContextClassLoader", "()Ljava/lang/ClassLoader;")),
                               addURL, url);
 }
 
-int str_endwith(const char *str, const char *reg) {
+int str_endwith(const char *str, const char *reg)
+{
     int l1 = strlen(str), l2 = strlen(reg);
     if (l1 < l2)
         return 0;
     str += l1 - l2;
-    while (*str && *reg && *str == *reg) {
+    while (*str && *reg && *str == *reg)
+    {
         str++;
         reg++;
     }
@@ -245,35 +261,26 @@ int str_endwith(const char *str, const char *reg) {
     return 0;
 }
 
-void Inject(const char yolbi_dir[260]) {
+void Inject(const char yolbi_dir[260])
+{
     jclass threadClass = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
     jmethodID getAllStackTraces = (*jniEnv)->GetStaticMethodID(jniEnv, threadClass, "getAllStackTraces",
                                                                "()Ljava/util/Map;");
     if (!getAllStackTraces)
         return;
-    jobjectArray threads = (jobjectArray) (*jniEnv)->CallObjectMethod(jniEnv, (*jniEnv)->CallObjectMethod(jniEnv,
-                                                                                                          (*jniEnv)->CallStaticObjectMethod(
-                                                                                                                  jniEnv,
-                                                                                                                  threadClass,
-                                                                                                                  getAllStackTraces),
-                                                                                                          (*jniEnv)->GetMethodID(
-                                                                                                                  jniEnv,
-                                                                                                                  (*jniEnv)->FindClass(
-                                                                                                                          jniEnv,
-                                                                                                                          "java/util/Map"),
-                                                                                                                  "keySet",
-                                                                                                                  "()Ljava/util/Set;")),
-                                                                      (*jniEnv)->GetMethodID(jniEnv,
-                                                                                             (*jniEnv)->FindClass(
-                                                                                                     jniEnv,
-                                                                                                     "java/util/Set"),
-                                                                                             "toArray",
-                                                                                             "()[Ljava/lang/Object;"));
+    jobjectArray threads = (jobjectArray)(*jniEnv)->CallObjectMethod(jniEnv, (*jniEnv)->CallObjectMethod(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, threadClass, getAllStackTraces), (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->FindClass(jniEnv, "java/util/Map"), "keySet", "()Ljava/util/Set;")),
+                                                                     (*jniEnv)->GetMethodID(jniEnv,
+                                                                                            (*jniEnv)->FindClass(
+                                                                                                jniEnv,
+                                                                                                "java/util/Set"),
+                                                                                            "toArray",
+                                                                                            "()[Ljava/lang/Object;"));
     if (!threads)
         return;
     jsize arrlength = (*jniEnv)->GetArrayLength(jniEnv, threads);
     jobject clientThread = NULL;
-    for (int i = 0; i < arrlength; i++) {
+    for (int i = 0; i < arrlength; i++)
+    {
         jobject thread = (*jniEnv)->GetObjectArrayElement(jniEnv, threads, i);
         if (thread == NULL)
             continue;
@@ -282,7 +289,8 @@ void Inject(const char yolbi_dir[260]) {
                                                    (*jniEnv)->GetMethodID(jniEnv, threadClass, "getName",
                                                                           "()Ljava/lang/String;"));
         const char *str = (*jniEnv)->GetStringUTFChars(jniEnv, name, 0);
-        if (!strcmp(str, "Client thread")) {
+        if (!strcmp(str, "Client thread"))
+        {
             clientThread = thread;
             (*jniEnv)->ReleaseStringUTFChars(jniEnv, name, str);
             break;
@@ -292,29 +300,24 @@ void Inject(const char yolbi_dir[260]) {
     if (!clientThread)
         return;
 
-    jobject classLoader = (*jniEnv)->CallObjectMethod(jniEnv, clientThread, (*jniEnv)->GetMethodID(jniEnv,
-                                                                                                   (*jniEnv)->GetObjectClass(
-                                                                                                           jniEnv,
-                                                                                                           clientThread),
-                                                                                                   "getContextClassLoader",
-                                                                                                   "()Ljava/lang/ClassLoader;"));
+    jobject classLoader = (*jniEnv)->CallObjectMethod(jniEnv, clientThread, (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, clientThread), "getContextClassLoader", "()Ljava/lang/ClassLoader;"));
     if (!classLoader)
         return;
-    else printf("classLoader found\n");
+    else
+        printf("classLoader found\n");
 
     jclass Thread = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
     jmethodID setContextClassLoader = (*jniEnv)->GetMethodID(jniEnv, Thread, "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
-    jobject currentThread = (*jniEnv)->CallStaticObjectMethod(jniEnv, Thread, (*jniEnv)->GetStaticMethodID(jniEnv,
-                                                                                                               Thread,
-                                                                                                               "currentThread",
-                                                                                                               "()Ljava/lang/Thread;"));
+    jobject currentThread = (*jniEnv)->CallStaticObjectMethod(jniEnv, Thread, (*jniEnv)->GetStaticMethodID(jniEnv, Thread, "currentThread", "()Ljava/lang/Thread;"));
     (*jniEnv)->CallVoidMethod(jniEnv, currentThread, setContextClassLoader, classLoader);
     printf("currentThread contextClassLoader set\n");
 
     DIR *dir = opendir(yolbi_dir);
     struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (str_endwith(entry->d_name, ".jar") && strcmp(entry->d_name, "injection.jar") != 0) {
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (str_endwith(entry->d_name, ".jar") && strcmp(entry->d_name, "injection.jar") != 0)
+        {
             char jarPath[260];
             sprintf_s(jarPath, 260, "%s\\%s", yolbi_dir, entry->d_name);
             loadJar(jarPath, clientThread);
@@ -336,33 +339,37 @@ void Inject(const char yolbi_dir[260]) {
     capabilities.can_retransform_classes = 1;
     capabilities.can_retransform_any_class = 1;
 
-    (*jvmti)->AddCapabilities((jvmtiEnv *) jvmti, &capabilities);
+    (*jvmti)->AddCapabilities((jvmtiEnv *)jvmti, &capabilities);
 
     jvmtiEventCallbacks callbacks = {0};
     memset(&callbacks, 0, sizeof(jvmtiEventCallbacks));
 
     callbacks.ClassFileLoadHook = &classFileLoadHook;
 
-    (*jvmti)->SetEventCallbacks((jvmtiEnv *) jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
-    (*jvmti)->SetEventNotificationMode((jvmtiEnv *) jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
+    (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
+    (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
     jclass wrapperClass = findThreadClass("cn.yapeteam.loader.NativeWrapper", classLoader);
-    if (!wrapperClass) {
+    if (!wrapperClass)
+    {
         printf("Failed to find NativeWrapper class\n");
         return;
     }
     printf("NativeWrapper class found\n");
     JNINativeMethod methods[] = {
-            {"getClassBytes",    "(Ljava/lang/Class;)[B",                        (void *) &GetClassBytes},
-            {"redefineClass",    "(Ljava/lang/Class;[B)I",                       (void *) &RedefineClass},
-            {"defineClass",      "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *) &DefineClass},
-            {"getLoadedClasses", "()Ljava/util/ArrayList;",                      (void *) &GetLoadedClasses},
+        {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
+        {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
+        {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
+        {"getLoadedClasses", "()Ljava/util/ArrayList;", (void *)&GetLoadedClasses},
     };
+    jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
+    register_native_methods(jniEnv, natvieClass);
     printf("Native methods registered\n");
 
     jclass PreLoad = findThreadClass("cn.yapeteam.loader.Loader", classLoader);
-    if (!PreLoad) {
+    if (!PreLoad)
+    {
         printf("Failed to find Loader class\n");
         return;
     }
@@ -374,7 +381,8 @@ void Inject(const char yolbi_dir[260]) {
     printf("Injection jar loaded\n");
 
     jclass Start = findThreadClass("cn.yapeteam.yolbi.Loader", classLoader);
-    if (!Start) {
+    if (!Start)
+    {
         printf("Failed to find Loader class\n");
         return;
     }
@@ -385,19 +393,20 @@ void Inject(const char yolbi_dir[260]) {
 
 #include <windows.h>
 
-void entry() {
+void entry()
+{
     HMODULE jvmHandle = GetModuleHandle("jvm.dll");
     if (!jvmHandle)
         return;
-    typedef jint(JNICALL *fnJNI_GetCreatedJavaVMs)(JavaVM **, jsize, jsize *);
-    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs) GetProcAddress(jvmHandle,
-                                                                                             "JNI_GetCreatedJavaVMs");
+    typedef jint(JNICALL * fnJNI_GetCreatedJavaVMs)(JavaVM **, jsize, jsize *);
+    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs)GetProcAddress(jvmHandle,
+                                                                                            "JNI_GetCreatedJavaVMs");
     if (!JNI_GetCreatedJavaVMs)
         return;
     if (JNI_GetCreatedJavaVMs(&jvm, 1, NULL) != JNI_OK ||
-        (*jvm)->AttachCurrentThread(jvm, (void **) &jniEnv, NULL) != JNI_OK)
+        (*jvm)->AttachCurrentThread(jvm, (void **)&jniEnv, NULL) != JNI_OK)
         return;
-    (*jvm)->GetEnv(jvm, (void **) &jvmti, JVMTI_VERSION);
+    (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION);
     if (!jvmti)
         return;
     char userProfile[MAX_PATH];
