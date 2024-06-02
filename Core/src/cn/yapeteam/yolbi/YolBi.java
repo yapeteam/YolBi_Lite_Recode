@@ -64,9 +64,9 @@ public class YolBi {
         YolBi.instance.getEventManager().register(RotationManager.class);
 
         try {
-            instance.jFrameRenderer.display();
             YolBi.instance.getConfigManager().load();
             WebServer.start();
+            instance.jFrameRenderer.display();
         } catch (Throwable e) {
             Logger.exception(e);
         }
