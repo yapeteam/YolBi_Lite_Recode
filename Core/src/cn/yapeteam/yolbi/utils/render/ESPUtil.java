@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.glu.GLU;
@@ -38,16 +39,16 @@ public class ESPUtil {
 
         List<Entity> Entitylist = new ArrayList<>(mc.theWorld.loadedEntityList);
 
-        for (Entity entity : Entitylist) {
-            try {
-                final Vector4d position = projectEntity(entity, renderX, renderY, renderZ, partialTicks, factor);
-                if (position != null) {
-                    concurrentProjections.put(entity, position);
+        for (Entity entity : Entitylist)
+            if (entity instanceof EntityLivingBase && ESPUtil.isInView(entity) && !(entity == mc.thePlayer && mc.gameSettings.thirdPersonView == 0))
+                try {
+                    final Vector4d position = projectEntity(entity, renderX, renderY, renderZ, partialTicks, factor);
+                    if (position != null) {
+                        concurrentProjections.put(entity, position);
+                    }
+                } catch (Exception ignored) {
+                    concurrentProjections.remove(entity);
                 }
-            } catch (Exception ignored) {
-                concurrentProjections.remove(entity);
-            }
-        }
 
         finalisedProjections = new ConcurrentHashMap<>(concurrentProjections);
     }
@@ -62,9 +63,10 @@ public class ESPUtil {
         return projectAABB(aabb, factor);
     }
 
-    private static final Frustum frustum = new Frustum();
+    private static Frustum frustum;
 
     public static boolean isInView(Entity ent) {
+        if (frustum == null) frustum = new Frustum();
         frustum.setPosition(mc.getRenderViewEntity().posX, mc.getRenderViewEntity().posY, mc.getRenderViewEntity().posZ);
         return frustum.isBoundingBoxInFrustum(ent.getEntityBoundingBox()) || ent.ignoreFrustumCheck;
     }

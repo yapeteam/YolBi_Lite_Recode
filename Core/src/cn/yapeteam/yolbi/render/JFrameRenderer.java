@@ -1,9 +1,7 @@
 package cn.yapeteam.yolbi.render;
 
 import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
-import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
@@ -69,7 +67,7 @@ public class JFrameRenderer extends JFrame {
     class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
-            //new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
+            new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
             new Timer(1000 / 10, e -> {
                 int titleBarHeight = 30;
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
@@ -87,10 +85,5 @@ public class JFrameRenderer extends JFrame {
             if (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiChat)
                 drawables.forEach(drawable -> drawable.getDrawableListeners().forEach(action -> action.onDrawableUpdate(g)));
         }
-    }
-
-    @Listener
-    private void onLoop(EventRender2D event) {
-        transparentPanel.repaint();
     }
 }

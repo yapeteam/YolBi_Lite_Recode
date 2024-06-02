@@ -7,7 +7,6 @@ import cn.yapeteam.loader.utils.vector.Vector4d;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
-import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.render.Drawable;
 import cn.yapeteam.yolbi.render.GraphicsUtils;
@@ -35,33 +34,20 @@ public class ESP2D extends Module implements Drawable {
         YolBi.instance.getJFrameRenderer().getDrawables().remove(this);
     }
 
-    private List<DrawableListener> listeners;
     private final List<DrawableListener> cache = new CopyOnWriteArrayList<>();
 
     @Listener
     private void onExternal(EventExternalRender e) {
-        listeners = new CopyOnWriteArrayList<>(cache);
         cache.clear();
-    }
-
-    @Override
-    public List<DrawableListener> getDrawableListeners() {
-        return listeners;
-    }
-
-    @Listener
-    private void onRender2D(EventRender2D e) {
         try {
-            for (Entity entity : mc.theWorld.loadedEntityList)
-                if (entity instanceof EntityLivingBase && ESPUtil.isInView(entity) && !(entity == mc.thePlayer && mc.gameSettings.thirdPersonView == 0)) {
-                    //Vector4f pos = ESPUtil.getEntityPositionsOn2D(entity, e.getPartialTicks());
+            if (mc.theWorld != null)
+                for (Entity entity : mc.theWorld.loadedEntityList) {
                     Vector4d pos = ESPUtil.get(entity);
                     if (pos == null) continue;
                     double left = pos.getX(),
                             top = pos.getY(),
                             right = pos.getZ(),
                             bottom = pos.getW();
-
 
                     float outlineThickness = .5f;
 
@@ -111,6 +97,11 @@ public class ESP2D extends Module implements Drawable {
         } catch (Throwable ex) {
             Logger.exception(ex);
         }
+    }
+
+    @Override
+    public List<DrawableListener> getDrawableListeners() {
+        return cache;
     }
 
     private int process(double num) {
