@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
@@ -62,25 +63,22 @@ public class AutoClicker extends Module {
         return noise;
     }
 
-    public void sendClick(final int button, final boolean state) {
-        final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
+    public void sendClick(final int button) {
 
-        if (state) {
-            KeyBinding.onTick(keyBind);
+        Natives.SetKey(button, true);
             //thread to release button
-            new Thread(() -> {
-                try {
-                    // Calculate delay according to the CPS
-                    long delay = (long) (1000 / generate(cps.getValue(), range.getValue()));
-                    // wait for the delay
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                // Calculate delay according to the CPS
+                long delay = (long) (1000 / generate(cps.getValue(), range.getValue()));
+                // wait for the delay
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
                 // Release the mouse button
-                KeyBinding.setKeyBindState(keyBind, false);
-            }).start();
-        }
+            Natives.SetKey(button, false);
+        }).start();
     }
 
     @Listener
@@ -91,7 +89,7 @@ public class AutoClicker extends Module {
             if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
                 if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY)
-                    sendClick(0, true);
+                    sendClick(0);
                 else if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.MISS) {
                     mc.thePlayer.swingItem();
                     ReflectUtil.Minecraft$clickMouse(mc);
@@ -100,7 +98,7 @@ public class AutoClicker extends Module {
             if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
                 if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
-                    sendClick(1, true);
+                    sendClick(1);
             }
         }
     }
