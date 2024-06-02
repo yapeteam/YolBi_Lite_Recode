@@ -52,14 +52,7 @@ public class Velocity extends Module {
 
     @Listener
     public void onUpdate(EventUpdate event) {
-        if (mc.thePlayer.hurtTime >= 8) {
-            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, true);
-        }
-        if (mc.thePlayer.hurtTime >= 4) {
-            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, false);
-        } else if (mc.thePlayer.hurtTime > 1) {
-            ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, GameSettings.isKeyDown(mc.gameSettings.keyBindJump));
-        }
+        System.out.println(ReflectUtil.Entity$MotionX(mc.thePlayer));
     }
 
     public void jumpreset(){
@@ -96,14 +89,16 @@ public class Velocity extends Module {
             int z = packet.getMotionZ();
 
             // Calculate the new velocities based on the current velocities and the horizontal and vertical values
-            double newX = x / 8000.0D * horizontal.getValue();
-            double newY = y / 8000.0D * vertical.getValue();
-            double newZ = z / 8000.0D * horizontal.getValue();
+            double newX = x / 8000.0D * horizontal.getValue() / 100;
+            double newY = y / 8000.0D * vertical.getValue() / 100;
+            double newZ = z / 8000.0D * horizontal.getValue() / 100;
+
+
 
             // Set the new velocities
-            ReflectUtil.setMotionX(mc.thePlayer, 0);
-            ReflectUtil.setMotionY(mc.thePlayer, 0);
-            ReflectUtil.setMotionZ(mc.thePlayer, 0);
+            ReflectUtil.setMotionX(mc.thePlayer, newX);
+            ReflectUtil.setMotionY(mc.thePlayer, newY);
+            ReflectUtil.setMotionZ(mc.thePlayer, newZ);
 
             if(jump.getValue()){
                 if(Math.random() * 100 < probability.getValue()){
