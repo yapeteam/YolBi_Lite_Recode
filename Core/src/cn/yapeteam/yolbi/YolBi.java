@@ -64,6 +64,7 @@ public class YolBi {
         try {
             YolBi.instance.getConfigManager().load();
             WebServer.start();
+            instance.jFrameRenderer.display();
         } catch (Throwable e) {
             Logger.exception(e);
         }
