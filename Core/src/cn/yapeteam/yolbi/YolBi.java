@@ -74,9 +74,9 @@ public class YolBi {
 
     public void shutdown() {
         try {
-            instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
+            instance.jFrameRenderer.close();
             YolBi.instance = new YolBi();
             System.gc();
         } catch (IOException e) {
