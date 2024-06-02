@@ -165,7 +165,7 @@ public class ReflectUtil {
         }
     }
 
-    public static double Entity$MotionX(Entity entity) {
+    public static double Entity$getMotionX(Entity entity) {
         try {
             return Entity$motionX.getDouble(entity);
         } catch (Exception e) {
@@ -174,7 +174,7 @@ public class ReflectUtil {
         return 0;
     }
 
-    public static double Entity$MotionY(Entity entity) {
+    public static double Entity$getMotionY(Entity entity) {
         try {
             return Entity$motionY.getDouble(entity);
         } catch (Exception e) {
@@ -183,7 +183,7 @@ public class ReflectUtil {
         return 0;
     }
 
-    public static double Entity$MotionZ(Entity entity) {
+    public static double Entity$getMotionZ(Entity entity) {
         try {
             return Entity$motionZ.getDouble(entity);
         } catch (Exception e) {
@@ -193,7 +193,7 @@ public class ReflectUtil {
     }
 
 
-    public static void setMotionX(Entity entity, double value) {
+    public static void Entity$setMotionX(Entity entity, double value) {
         try {
             Entity$motionX.setDouble(entity, value);
         } catch (Exception e) {
@@ -201,7 +201,7 @@ public class ReflectUtil {
         }
     }
 
-    public static void setMotionY(Entity entity, double value) {
+    public static void Entity$setMotionY(Entity entity, double value) {
         try {
             Entity$motionY.setDouble(entity, value);
         } catch (Exception e) {
@@ -209,7 +209,7 @@ public class ReflectUtil {
         }
     }
 
-    public static void setMotionZ(Entity entity, double value) {
+    public static void Entity$setMotionZ(Entity entity, double value) {
         try {
             Entity$motionZ.setDouble(entity, value);
         } catch (Exception e) {

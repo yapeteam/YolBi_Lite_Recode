@@ -6,7 +6,6 @@ import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.network.EventPacket;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
@@ -15,10 +14,8 @@ import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +49,7 @@ public class Velocity extends Module {
 
     @Listener
     public void onUpdate(EventUpdate event) {
-        System.out.println(ReflectUtil.Entity$MotionX(mc.thePlayer));
+        System.out.println(ReflectUtil.Entity$getMotionX(mc.thePlayer));
     }
 
     public void jumpreset(){
@@ -96,9 +93,9 @@ public class Velocity extends Module {
 
 
             // Set the new velocities
-            ReflectUtil.setMotionX(mc.thePlayer, newX);
-            ReflectUtil.setMotionY(mc.thePlayer, newY);
-            ReflectUtil.setMotionZ(mc.thePlayer, newZ);
+            ReflectUtil.Entity$setMotionX(mc.thePlayer, newX);
+            ReflectUtil.Entity$setMotionY(mc.thePlayer, newY);
+            ReflectUtil.Entity$setMotionZ(mc.thePlayer, newZ);
 
             if(jump.getValue()){
                 if(Math.random() * 100 < probability.getValue()){
