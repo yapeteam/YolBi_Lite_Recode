@@ -49,7 +49,6 @@ public class Velocity extends Module {
 
     @Listener
     public void onUpdate(EventUpdate event) {
-        System.out.println(ReflectUtil.Entity$getMotionX(mc.thePlayer));
     }
 
     public void jumpreset(){
