@@ -30,7 +30,7 @@ public class ReflectUtil {
             EntityRenderer$theShaderGroup, KeyBinding$pressed,
             ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
             EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
-            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ;
+            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ;
 
 
 
@@ -163,6 +163,54 @@ public class ReflectUtil {
         } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
+
+        try {
+            Entity$PosX = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "posX", null, Mapper.Type.Field));
+            Entity$PosX.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try{
+            Entity$PosY = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "posY", null, Mapper.Type.Field));
+            Entity$PosY.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            Entity$PosZ = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "posZ", null, Mapper.Type.Field));
+            Entity$PosZ.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static double Entity$getPosX(Entity entity) {
+        try {
+            return Entity$PosX.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double Entity$getPosY(Entity entity) {
+        try {
+            return Entity$PosY.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double Entity$getPosZ(Entity entity) {
+        try {
+            return Entity$PosZ.getDouble(entity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
     }
 
     public static double Entity$getMotionX(Entity entity) {

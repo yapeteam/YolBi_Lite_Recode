@@ -103,6 +103,10 @@ public class RotationManager implements IMinecraft {
         mc.thePlayer.rotationPitch = fixedRotations.y;
     }
 
+    public static void smooth() {
+        smooth(lastRotations, targetRotations, rotationSpeed);
+    }
+
     public static void smooth(final Vector2f lastRotation, final Vector2f targetRotation, final double speed) {
         float yaw = targetRotation.x;
         float pitch = targetRotation.y;
@@ -152,6 +156,56 @@ public class RotationManager implements IMinecraft {
         rotations = new Vector2f(yaw, pitch);
     }
 
+    public static Vector2f getsmoothrot(final Vector2f lastRotation, final Vector2f targetRotation, final double speed) {
+        float yaw = targetRotation.x;
+        float pitch = targetRotation.y;
+        final float lastYaw = lastRotation.x;
+        final float lastPitch = lastRotation.y;
+
+        if (speed != 0) {
+            final float rotationSpeed = (float) speed;
+
+            final double deltaYaw = MathHelper.wrapAngleTo180_float(targetRotation.x - lastRotation.x);
+            final double deltaPitch = pitch - lastPitch;
+
+            final double distance = Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
+            final double distributionYaw = Math.abs(deltaYaw / distance);
+            final double distributionPitch = Math.abs(deltaPitch / distance);
+
+            final double maxYaw = rotationSpeed * distributionYaw;
+            final double maxPitch = rotationSpeed * distributionPitch;
+
+            final float moveYaw = (float) Math.max(Math.min(deltaYaw, maxYaw), -maxYaw);
+            final float movePitch = (float) Math.max(Math.min(deltaPitch, maxPitch), -maxPitch);
+
+            yaw = lastYaw + moveYaw;
+            pitch = lastPitch + movePitch;
+
+            for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
+
+                if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
+                    yaw += (Math.random() - 0.5) / 1000;
+                    pitch -= Math.random() / 200;
+                }
+
+                /*
+                 * Fixing GCD
+                 */
+                final Vector2f rotations = new Vector2f(yaw, pitch);
+                final Vector2f fixedRotations = RotationManager.applySensitivityPatch(rotations);
+
+                /*
+                 * Setting rotations
+                 */
+                yaw = fixedRotations.x;
+                pitch = Math.max(-90, Math.min(90, fixedRotations.y));
+            }
+        }
+
+        return new Vector2f(yaw, pitch);
+    }
+
+
     public static double[] getDistance(double x, double z, double y) {
         final double distance = MathHelper.sqrt_double(x * x + z * z), // @off
                 yaw = Math.atan2(z, x) * 180.0D / Math.PI - 90.0F,
@@ -191,6 +245,11 @@ public class RotationManager implements IMinecraft {
 
     private Vector2f getPreviousRotation(EntityPlayerSP playerSP) {
         return new Vector2f(ReflectUtil.GetLastReportedYaw(playerSP), ReflectUtil.GetLastReportedPitch(playerSP));
+    }
+
+    public Vector2f calculate(final Entity entity) {
+        return calculate(getCustomPositionVector(entity).add(0, Math.max(0, Math.min(mc.thePlayer.posY - entity.posY +
+                mc.thePlayer.getEyeHeight(), (entity.getEntityBoundingBox().maxY - entity.getEntityBoundingBox().minY) * 0.9)), 0));
     }
 
     public Vector2f calculate(final Vector3d to) {

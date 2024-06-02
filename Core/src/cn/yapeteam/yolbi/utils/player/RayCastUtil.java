@@ -4,7 +4,9 @@ package cn.yapeteam.yolbi.utils.player;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import com.google.common.base.Predicates;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.*;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -17,6 +19,8 @@ import java.util.Objects;
  */
 public final class RayCastUtil implements IMinecraft {
 
+    private static final Frustum FRUSTUM = new Frustum();
+
     public static MovingObjectPosition rayCast(final Vector2f rotation, final double range) {
         return rayCast(rotation, range, 0);
     }
@@ -24,6 +28,7 @@ public final class RayCastUtil implements IMinecraft {
     public static MovingObjectPosition rayCast(final Vector2f rotation, final double range, final float expand) {
         return rayCast(rotation, range, expand, mc.thePlayer);
     }
+
 
     public static MovingObjectPosition rayTraceCustom(Entity entity, double blockReachDistance, float yaw, float pitch) {
         Vec3 vec3 = entity.getPositionEyes(1.0F);
@@ -113,5 +118,15 @@ public final class RayCastUtil implements IMinecraft {
 
     public static Boolean overBlock(final Vector2f rotation, final BlockPos pos, final EnumFacing enumFacing) {
         return overBlock(rotation, enumFacing, pos, true);
+    }
+
+    public static boolean isInViewFrustrum(final Entity entity) {
+        return (isInViewFrustrum(entity.getEntityBoundingBox()) || entity.ignoreFrustumCheck);
+    }
+
+    private static boolean isInViewFrustrum(final AxisAlignedBB bb) {
+        final Entity current = mc.getRenderViewEntity();
+        FRUSTUM.setPosition(current.posX, current.posY, current.posZ);
+        return FRUSTUM.isBoundingBoxInFrustum(bb);
     }
 }
