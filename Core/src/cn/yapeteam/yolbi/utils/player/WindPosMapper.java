@@ -11,6 +11,6 @@ public class WindPosMapper {
     public static List<Vector2f> generatePath(Vector2f start, Vector2f end, double RotationsSpeed, double HorizontalStrength, double VerticalStrength) {
         // first get the difference
 
-
+        return null;
     }
 }

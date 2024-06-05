@@ -102,7 +102,13 @@ public class MainFrame extends JFrame {
                                         progressBar2.setVisible(false);
                                         break;
                                     case "CLOSE":
-                                        System.exit(0);
+                                        try {
+                                            Class.forName("Start");
+                                            socket.close();
+                                            setVisible(false);
+                                        } catch (ClassNotFoundException e) {
+                                            System.exit(0);
+                                        }
                                 }
                             }
                         } catch (IOException ignored) {
@@ -116,6 +122,7 @@ public class MainFrame extends JFrame {
         new Thread(() -> {
             while (true) {
                 ArrayList<Pair<String, Integer>> minecraftProcesses = Utils.getMinecraftProcesses();
+                if (minecraftProcesses.isEmpty()) continue;
                 int selected = process.getSelectedIndex();
                 process.removeAllItems();
                 for (Pair<String, Integer> minecraftProcess : minecraftProcesses)
