@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi.render;
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
+import cn.yapeteam.yolbi.module.impl.visual.ExternalRender;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
@@ -39,6 +40,7 @@ public class JFrameRenderer extends JFrame {
     }
 
     public void display() {
+        externalRenderModule = YolBi.instance.getModuleManager().getModule(ExternalRender.class);
         YolBi.instance.getEventManager().register(this);
         setVisible(true);
         Natives.SetWindowsTransparent(true, getTitle());
@@ -51,11 +53,12 @@ public class JFrameRenderer extends JFrame {
 
     @Getter
     private final CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
+    private ExternalRender externalRenderModule;
 
     class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
-            new Timer(1000 / 60, e -> transparentPanel.repaint()).start();
+            new Timer(1000 / (externalRenderModule != null ? externalRenderModule.getFps().getValue() : 30), e -> transparentPanel.repaint()).start();
             new Timer(1000 / 10, e -> {
                 int titleBarHeight = 30;
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
@@ -64,7 +67,6 @@ public class JFrameRenderer extends JFrame {
                 setFrameSize(scaledResolution.getScaledWidth() * scaleFactor, scaledResolution.getScaledHeight() * scaleFactor);
             }).start();
         }
-
 
         @Override
         protected void paintComponent(Graphics g) {

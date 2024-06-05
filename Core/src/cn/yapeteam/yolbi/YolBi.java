@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
-import cn.yapeteam.yolbi.module.impl.visual.HeadUpDisplay;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
@@ -59,11 +58,9 @@ public class YolBi {
         instance.eventManager.register(instance.moduleManager);
         instance.eventManager.register(instance.jFrameRenderer);
         instance.eventManager.register(Shader.class);
-        instance.moduleManager.load();
-        instance.moduleManager.getModule(HeadUpDisplay.class).setEnabled(true);
         YolBi.instance.getEventManager().register(ESPUtil.class);
         YolBi.instance.getEventManager().register(RotationManager.class);
-
+        instance.moduleManager.load();
         try {
             YolBi.instance.getConfigManager().load();
             WebServer.start();

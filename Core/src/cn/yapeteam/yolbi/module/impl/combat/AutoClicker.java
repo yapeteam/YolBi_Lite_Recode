@@ -1,6 +1,5 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
-import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
@@ -64,7 +63,6 @@ public class AutoClicker extends Module {
     }
 
     public void sendClick(final int button) {
-
         final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
         KeyBinding.onTick(keyBind);
         //thread to release button
@@ -84,12 +82,6 @@ public class AutoClicker extends Module {
 
     @Listener
     private void onTick(EventTick e) {
-        try{
-            Natives.SetKey(65, true);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
