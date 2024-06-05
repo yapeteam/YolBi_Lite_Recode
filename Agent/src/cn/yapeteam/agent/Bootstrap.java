@@ -30,7 +30,7 @@ public class Bootstrap {
         inject(instrumentation);
     }
 
-    public static void premain(String args, Instrumentation instrumentation) throws Throwable {
+    public static void premain(String args, Instrumentation instrumentation) {
         new Thread(() -> {
             try {
                 boolean isRunning = false;
