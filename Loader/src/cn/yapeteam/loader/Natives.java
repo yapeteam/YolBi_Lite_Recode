@@ -1,6 +1,7 @@
 package cn.yapeteam.loader;
 
 public class Natives {
+
     public static native void SetWindowsTransparent(boolean transparent, String windowTitle);
 
     public static native void SetLeftMouse(boolean pressed);

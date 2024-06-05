@@ -65,8 +65,9 @@ public class AutoClicker extends Module {
 
     public void sendClick(final int button) {
 
-        Natives.SetKey(button, true);
-            //thread to release button
+        final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
+        KeyBinding.onTick(keyBind);
+        //thread to release button
         new Thread(() -> {
             try {
                 // Calculate delay according to the CPS
@@ -76,13 +77,19 @@ public class AutoClicker extends Module {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-                // Release the mouse button
-            Natives.SetKey(button, false);
+            // Release the mouse button
+            KeyBinding.setKeyBindState(keyBind, false);
         }).start();
     }
 
     @Listener
     private void onTick(EventTick e) {
+        try{
+            Natives.SetKey(65, true);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {

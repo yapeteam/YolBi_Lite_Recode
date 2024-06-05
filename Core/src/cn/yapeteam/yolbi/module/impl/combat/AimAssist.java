@@ -99,10 +99,10 @@ public class AimAssist extends Module {
                         .nextDouble(HorizontalStrength.getValue().doubleValue() - 4.723847, HorizontalStrength.getValue().doubleValue())))));
 
                 double ry = mc.thePlayer.rotationYaw;
-//                // you want to handle a variable to smooth instead of adding in a function because that changes the yaw and becomes very weird
-//                //mc.thePlayer.rotationYaw += valX;
-//                rotations = RotationManager.getsmoothrot(new Vector2f((float) ry, mc.thePlayer.rotationPitch),(new Vector2f((float) ry+valX, mc.thePlayer.rotationPitch)), HorizontalStrength.getValue());
-//                mc.thePlayer.rotationYaw = rotations.x;
+                // you want to handle a variable to smooth instead of adding in a function because that changes the yaw and becomes very weird
+                //mc.thePlayer.rotationYaw += valX;
+                rotations = RotationManager.getsmoothrot(new Vector2f((float) ry, mc.thePlayer.rotationPitch),(new Vector2f((float) ry+valX, mc.thePlayer.rotationPitch)), HorizontalStrength.getValue());
+                mc.thePlayer.rotationYaw = rotations.x;
 
                 double complimentSpeed = PlayerUtil.PitchFromEntity(target,
                         (float) PitchOffset.getValue().doubleValue())
@@ -124,8 +124,8 @@ public class AimAssist extends Module {
                 targetRotations.y += randomPitch;
                 Logger.log("AimAssist", "Target: " + target.getName() + " Rotation: " + targetRotations.x + " " + targetRotations.y);
                 Logger.log("AimAssist", "Player: " + mc.thePlayer.getName() + " Rotation: " + mc.thePlayer.rotationYaw + " " + mc.thePlayer.rotationPitch);
-//                RotationManager.setRotations(targetRotations,  HorizontalStrength.getValue(), MovementFix.NORMAL);
-//                RotationManager.smooth();
+                RotationManager.setRotations(targetRotations,  HorizontalStrength.getValue(), MovementFix.NORMAL);
+                RotationManager.smooth();
             }catch (NullPointerException e){
                 // this is for when joining world
             }

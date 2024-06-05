@@ -24,26 +24,28 @@ JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstri
     SetWindowLongA(hwnd, GWL_EXSTYLE, wl);
 }
 
-JNICALL SetLeftMouse(JNIEnv *env, jclass _, jboolean pressed)
-{
-    LPPOINT point;
-    GetCursorPos(point);
-    mouse_event(pressed ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP, point->x, point->y, 0, 0);
-    free(point);
-}
-
-JNICALL SetRightMouse(JNIEnv *env, jclass _, jboolean pressed)
-{
-    LPPOINT point;
-    GetCursorPos(point);
-    mouse_event(pressed ? MOUSEEVENTF_RIGHTDOWN : MOUSEEVENTF_RIGHTUP, point->x, point->y, 0, 0);
-    free(point);
-}
 
 JNICALL SetKey(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
 {
-    keybd_event(keycode, 0, pressed ? 0 : 2, 0);
+    INPUT input;
+    input.type = INPUT_KEYBOARD;
+    input.ki.wVk = (WORD)keycode;
+    input.ki.wScan = 0;
+    input.ki.time = 0;
+    input.ki.dwExtraInfo = 0;
+
+    if (pressed)
+    {
+        input.ki.dwFlags = 0;  // key press
+    }
+    else
+    {
+        input.ki.dwFlags = KEYEVENTF_KEYUP;  // key release
+    }
+
+    SendInput(1, &input, sizeof(INPUT));
 }
+
 
 void register_native_methods(JNIEnv *env, jclass clazz)
 {
