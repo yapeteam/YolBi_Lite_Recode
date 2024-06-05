@@ -49,6 +49,7 @@ public class ESPUtil {
                 } catch (Exception ignored) {
                     concurrentProjections.remove(entity);
                 }
+            else concurrentProjections.remove(entity);
 
         finalisedProjections = new ConcurrentHashMap<>(concurrentProjections);
     }
