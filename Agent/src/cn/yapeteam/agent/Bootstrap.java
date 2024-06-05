@@ -23,7 +23,7 @@ public class Bootstrap {
         loadJar(loader, file);
         Class.forName("cn.yapeteam.injector.Main", true, loader)
                 .getMethod("main", String[].class)
-                .invoke(null, (Object) new String[]{"dll", ManagementFactory.getRuntimeMXBean().getName().split("@")[0]});
+                .invoke(null, (Object) new String[]{ManagementFactory.getRuntimeMXBean().getName().split("@")[0]});
     }
 
     public static void agentmain(String args, Instrumentation instrumentation) throws Throwable {
