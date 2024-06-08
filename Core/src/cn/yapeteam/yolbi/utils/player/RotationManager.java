@@ -135,8 +135,8 @@ public class RotationManager implements IMinecraft {
             for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
 
                 if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
-                    yaw += (Math.random() - 0.5) / 1000;
-                    pitch -= Math.random() / 200;
+                    yaw += (float) ((Math.random() - 0.5) / 1000);
+                    pitch -= (float) (Math.random() / 200);
                 }
 
                 /*

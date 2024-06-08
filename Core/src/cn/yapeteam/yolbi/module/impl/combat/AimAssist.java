@@ -12,10 +12,7 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.player.RayCastUtil;
-import cn.yapeteam.yolbi.utils.player.RotationManager;
-import cn.yapeteam.yolbi.utils.player.TargetManager;
-import cn.yapeteam.yolbi.utils.player.WindPosMapper;
+import cn.yapeteam.yolbi.utils.player.*;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.Entity;
 
@@ -32,7 +29,7 @@ public class AimAssist extends Module {
 
     private final BooleanValue View = new BooleanValue("In View", true);
 
-    private final NumberValue<Float> Speed = new NumberValue<>("Speed", 1f, 1f, 10f, 0.1f);
+    private final NumberValue<Float> Speed = new NumberValue<>("Speed", 40f, 40f, 100f, 0.5f);
 
 
     public AimAssist() {
@@ -66,13 +63,16 @@ public class AimAssist extends Module {
         YolBi.instance.getFontManager().getPingFang12().drawString("Target: " + (target == null ? "None" : target.getName()), 10, 10, 0xFFFFFF);
         try {
             if (!aimPath.isEmpty()) {
-                int length = (int) (aimPath.size() * Speed.getValue() / 10);
-                if (length > aimPath.size()) {
+                int length = (int) (aimPath.size() * Speed.getValue() / 100);
+                if (length > aimPath.size())
                     length = aimPath.size();
-                }
                 for (int i = 0; i < length; i++) {
-                    mc.thePlayer.rotationYaw = aimPath.get(i).getX();
-                    mc.thePlayer.rotationPitch = aimPath.get(i).getY();
+                    Vector2f rotations = RotationManager.getsmoothrot(
+                            new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch),
+                            aimPath.get(i), Speed.getValue());
+                    mc.thePlayer.rotationYaw = rotations.x;
+                    mc.thePlayer.rotationPitch = rotations.y;
+                    RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
                 }
                 aimPath.subList(0, length).clear();
             }
