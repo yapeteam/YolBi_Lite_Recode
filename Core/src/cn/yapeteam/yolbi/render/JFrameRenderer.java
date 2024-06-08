@@ -58,7 +58,19 @@ public class JFrameRenderer extends JFrame {
     class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);
-            new Timer(1000 / (externalRenderModule != null ? externalRenderModule.getFps().getValue() : 30), e -> transparentPanel.repaint()).start();
+            new Thread(() -> {
+                while (true) {
+                    //noinspection ConstantValue
+                    if (transparentPanel == null || !isVisible()) continue;
+                    long time = System.currentTimeMillis();
+                    transparentPanel.repaint();
+                    try {
+                        if (externalRenderModule != null)
+                            Thread.sleep(Math.max(0, 1000 / externalRenderModule.getFps().getValue() - (System.currentTimeMillis() - time)));
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }).start();
             new Timer(1000 / 10, e -> {
                 int titleBarHeight = 30;
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());

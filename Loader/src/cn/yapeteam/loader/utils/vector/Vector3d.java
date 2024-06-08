@@ -1,9 +1,12 @@
 package cn.yapeteam.loader.utils.vector;
 
+import lombok.Getter;
+
 /**
  * @author Patrick
  * @since 10/17/2021
  */
+@Getter
 public class Vector3d {
 
     private final double x;
@@ -36,18 +39,6 @@ public class Vector3d {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-
     public Vector3d multiply(final double v) {
         return new Vector3d(x * v, y * v, z * v);
     }
@@ -58,5 +49,15 @@ public class Vector3d {
 
         Vector3d vector = (Vector3d) obj;
         return ((Math.floor(x) == Math.floor(vector.x)) && Math.floor(y) == Math.floor(vector.y) && Math.floor(z) == Math.floor(vector.z));
+    }
+
+    public double distance(Vector2f nextPos) {
+        return Math.sqrt(Math.pow(nextPos.getX() - x, 2) + Math.pow(nextPos.getY() - y, 2));
+    }
+
+    public double angle(Vector2d nextPos) {
+        double dx = nextPos.getX() - x;
+        double dy = nextPos.getY() - y;
+        return Math.atan2(dy, dx);
     }
 }

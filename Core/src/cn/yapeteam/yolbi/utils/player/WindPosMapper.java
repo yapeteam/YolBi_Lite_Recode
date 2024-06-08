@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
 import cn.yapeteam.loader.utils.vector.Vector2f;
-import net.minecraft.util.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,17 +12,14 @@ public class WindPosMapper {
 
     List<Vector2f> path = new ArrayList<>();
 
-    public static float wrapAngleTo180_float(float value)
-    {
+    public static float wrapAngleTo180_float(float value) {
         value = value % 360.0F;
 
-        if (value >= 180.0F)
-        {
+        if (value >= 180.0F) {
             value -= 360.0F;
         }
 
-        if (value < -180.0F)
-        {
+        if (value < -180.0F) {
             value += 360.0F;
         }
 
@@ -93,45 +89,45 @@ public class WindPosMapper {
         return path;
     }
 
-//    public static List<Vector2f> generatePath(Vector2f start, Vector2f end) {
-//        double rotationSpeed = 1;
-//        List<Vector2f> path = new ArrayList<>();
-//
-//        // first get the difference for the yaw and pitch
-//        float deltaYaw = (end.x - start.x);
-//        float deltaPitch = (end.y - start.y);
-//
-//        // now separate them into points
-//        float currentYaw = start.x;
-//        float currentPitch = start.y;
-//
-//        while (Math.abs(deltaYaw) > rotationSpeed || Math.abs(deltaPitch) > rotationSpeed) {
-//            if (Math.abs(deltaYaw) > rotationSpeed) {
-//                // now apply wind and gravity to the path
-//                double gravity = Math.signum(deltaYaw) * rotationSpeed;
-//                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
-//                System.out.println(wind);
-//                currentYaw += gravity + wind;
-//                deltaYaw -= gravity + wind;
-//            }
-//
-//            if (Math.abs(deltaPitch) > rotationSpeed) {
-//                // now apply wind and gravity to the path
-//                double gravity = Math.signum(deltaPitch) * rotationSpeed;
-//                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
-//                System.out.println(wind);
-//                currentPitch += gravity + wind;
-//                deltaPitch -= gravity + wind;
-//            }
-//
-//            path.add(new Vector2f(currentYaw, currentPitch));
-//        }
-//
-//        // add the end point to the path
-//        path.add(end);
-//
-//        return path;
-//    }
+    public static List<Vector2f> generatePath2(Vector2f start, Vector2f end) {
+        double rotationSpeed = 1;
+        List<Vector2f> path = new ArrayList<>();
+
+        // first get the difference for the yaw and pitch
+        float deltaYaw = (end.x - start.x);
+        float deltaPitch = (end.y - start.y);
+
+        // now separate them into points
+        float currentYaw = start.x;
+        float currentPitch = start.y;
+
+        while (Math.abs(deltaYaw) > rotationSpeed || Math.abs(deltaPitch) > rotationSpeed) {
+            if (Math.abs(deltaYaw) > rotationSpeed) {
+                // now apply wind and gravity to the path
+                double gravity = Math.signum(deltaYaw) * rotationSpeed;
+                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
+                System.out.println(wind);
+                currentYaw += gravity + wind;
+                deltaYaw -= gravity + wind;
+            }
+
+            if (Math.abs(deltaPitch) > rotationSpeed) {
+                // now apply wind and gravity to the path
+                double gravity = Math.signum(deltaPitch) * rotationSpeed;
+                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
+                System.out.println(wind);
+                currentPitch += gravity + wind;
+                deltaPitch -= gravity + wind;
+            }
+
+            path.add(new Vector2f(currentYaw, currentPitch));
+        }
+
+        // add the end point to the path
+        path.add(end);
+
+        return path;
+    }
 
 
     public static void main(String[] args) {

@@ -1,6 +1,5 @@
 package cn.yapeteam.yolbi.utils.player;
 
-import cn.yapeteam.yolbi.utils.player.WindPosMapper;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -18,7 +17,7 @@ public class WindPosMapperVisualizer extends Application {
         stage.setTitle("WindPosMapper Visualizer");
 
         // Create start and end points
-        Vector2f start = new Vector2f(0.0f, 90.0f);
+        Vector2f start = new Vector2f(0.0f, 40);
         Vector2f end = new Vector2f(180.0f, 90.0f);
 
         // Define rotation speed

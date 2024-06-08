@@ -4,6 +4,7 @@ import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
+import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.loader.utils.vector.Vector3d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
@@ -18,7 +19,6 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
-import org.lwjgl.util.vector.Vector2f;
 
 @ModuleInfo(name = "Scaffold", category = ModuleCategory.MOVEMENT)
 public class Scaffold extends Module {

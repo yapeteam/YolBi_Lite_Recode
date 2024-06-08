@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
+import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.loader.utils.vector.Vector3d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
@@ -15,7 +16,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import org.lwjgl.util.vector.Vector2f;
 
 @UtilityClass
 public class RotationManager implements IMinecraft {

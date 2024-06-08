@@ -1,14 +1,13 @@
 package cn.yapeteam.yolbi.utils.player;
 
 
+import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import com.google.common.base.Predicates;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.*;
-import org.lwjgl.util.vector.Vector2f;
 
 import java.util.List;
 import java.util.Objects;
