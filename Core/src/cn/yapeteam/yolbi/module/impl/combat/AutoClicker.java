@@ -70,7 +70,7 @@ public class AutoClicker extends Module {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && mc.objectMouseOver != null) {
+            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1)) {
                 time = System.currentTimeMillis();
                 sendClick(0);
             }
