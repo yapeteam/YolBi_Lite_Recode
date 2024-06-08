@@ -6,6 +6,7 @@
 /run/crash-reports/
 /run/generated/
 /run/options.txt
+/run/optionsof.txt
 /run/servers.dat
 /run/usercache.json
 /run/agent.jar

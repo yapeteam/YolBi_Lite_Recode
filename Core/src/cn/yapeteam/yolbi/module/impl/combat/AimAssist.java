@@ -50,6 +50,8 @@ public class AimAssist extends Module {
 
     @Listener
     private void onTick(EventTick e) {
+        if (mc.thePlayer == null)
+            return;
         target = getTargets();
         if (target != null)
             aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
