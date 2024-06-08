@@ -362,8 +362,8 @@ void Inject(const char yolbi_dir[260])
         {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
         {"getLoadedClasses", "()Ljava/util/ArrayList;", (void *)&GetLoadedClasses},
     };
-    jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
+    jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
     register_native_methods(jniEnv, natvieClass);
     printf("Native methods registered\n");
 

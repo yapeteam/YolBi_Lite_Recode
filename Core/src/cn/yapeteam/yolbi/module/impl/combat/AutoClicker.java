@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
@@ -8,7 +9,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -62,22 +62,8 @@ public class AutoClicker extends Module {
         return noise;
     }
 
-    public void sendClick(final int button) {
-        final int keyBind = button == 0 ? mc.gameSettings.keyBindAttack.getKeyCode() : mc.gameSettings.keyBindUseItem.getKeyCode();
-        KeyBinding.onTick(keyBind);
-        //thread to release button
-        new Thread(() -> {
-            try {
-                // Calculate delay according to the CPS
-                long delay = (long) (1000 / generate(cps.getValue(), range.getValue()));
-                // wait for the delay
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // Release the mouse button
-            KeyBinding.setKeyBindState(keyBind, false);
-        }).start();
+    public void sendClick(int button) {
+        Natives.SetMouse(button, true);
     }
 
     @Listener
@@ -101,7 +87,6 @@ public class AutoClicker extends Module {
             }
         }
     }
-
 
 
     @Override

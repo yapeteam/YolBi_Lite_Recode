@@ -24,8 +24,7 @@ JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstri
     SetWindowLongA(hwnd, GWL_EXSTYLE, wl);
 }
 
-
-JNICALL SetKey(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
+JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
 {
     INPUT input;
     input.type = INPUT_KEYBOARD;
@@ -33,27 +32,34 @@ JNICALL SetKey(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
     input.ki.wScan = 0;
     input.ki.time = 0;
     input.ki.dwExtraInfo = 0;
-
-    if (pressed)
-    {
-        input.ki.dwFlags = 0;  // key press
-    }
-    else
-    {
-        input.ki.dwFlags = KEYEVENTF_KEYUP;  // key release
-    }
-
+    input.ki.dwFlags = pressed ? 0 : KEYEVENTF_KEYUP;
     SendInput(1, &input, sizeof(INPUT));
 }
 
+JNICALL SetMouse(JNIEnv *env, jclass _, jint button, jboolean pressed)
+{
+    INPUT input = {0};
+    input.type = INPUT_MOUSE;
+    input.mi.dx = 0;
+    input.mi.dy = 0;
+    input.mi.mouseData = 0;
+    input.mi.time = 0;
+    input.mi.dwExtraInfo = 0;
+    if (button == 0)
+        input.mi.dwFlags = pressed ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP;
+    else if (button == 1)
+        input.mi.dwFlags = pressed ? MOUSEEVENTF_RIGHTDOWN : MOUSEEVENTF_RIGHTUP;
+    else if (button == 2)
+        input.mi.dwFlags = pressed ? MOUSEEVENTF_MIDDLEDOWN : MOUSEEVENTF_MIDDLEUP;
+    SendInput(1, &input, sizeof(INPUT));
+}
 
 void register_native_methods(JNIEnv *env, jclass clazz)
 {
     JNINativeMethod methods[] = {
         {"SetWindowsTransparent", "(ZLjava/lang/String;)V", (void *)&SetWindowsTransparent},
-        {"SetLeftMouse", "(Z)V", (void *)&SetLeftMouse},
-        {"SetRightMouse", "(Z)V", (void *)&SetRightMouse},
-        {"SetKey", "(IZ)V", (void *)SetKey},
+        {"SetKeyBoard", "(IZ)V", (void *)&SetKeyBoard},
+        {"SetMouse", "(IZ)V", (void *)&SetMouse},
     };
     (*env)->RegisterNatives(env, clazz, methods, 4);
 }
