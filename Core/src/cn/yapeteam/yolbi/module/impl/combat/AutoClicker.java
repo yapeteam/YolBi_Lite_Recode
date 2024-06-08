@@ -63,6 +63,7 @@ public class AutoClicker extends Module {
 
     public void sendClick(int button) {
         Natives.SetMouse(button, true);
+        Natives.SetMouse(button, false);
     }
 
     @Listener
