@@ -7,7 +7,6 @@ import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.vector.Vector2f;
-import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
@@ -15,6 +14,7 @@ import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.player.*;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.Entity;
+import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,12 +28,13 @@ public class AimAssist extends Module {
     public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle");
 
     private final BooleanValue View = new BooleanValue("In View", true);
+    private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
 
-    private final NumberValue<Float> Speed = new NumberValue<>("Speed", 40f, 40f, 100f, 0.5f);
+    private final NumberValue<Float> Speed = new NumberValue<>("Speed", 50f, 40f, 100f, 0.5f);
 
 
     public AimAssist() {
-        addValues(Range, TargetPriority, View, Speed);
+        addValues(Range, TargetPriority, ClickAim, View, Speed);
     }
 
     private final List<Vector2f> aimPath = new ArrayList<>();
@@ -43,14 +44,12 @@ public class AimAssist extends Module {
         aimPath.clear();
     }
 
-    private Entity target = null;
-
     @Listener
     private void onTick(EventTick e) {
         try {
             if (mc.thePlayer == null)
                 return;
-            target = getTargets();
+            Entity target = getTargets();
             if (target != null)
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
@@ -60,9 +59,8 @@ public class AimAssist extends Module {
 
     @Listener
     public void onRender(EventRender2D event) {
-        YolBi.instance.getFontManager().getPingFang12().drawString("Target: " + (target == null ? "None" : target.getName()), 10, 10, 0xFFFFFF);
         try {
-            if (!aimPath.isEmpty()) {
+            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Mouse.isButtonDown(0))) {
                 int length = (int) (aimPath.size() * Speed.getValue() / 100);
                 if (length > aimPath.size())
                     length = aimPath.size();
