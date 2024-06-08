@@ -8,7 +8,6 @@ import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -73,12 +72,7 @@ public class AutoClicker extends Module {
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
             if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
-                if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY)
-                    sendClick(0);
-                else if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.MISS) {
-                    mc.thePlayer.swingItem();
-                    ReflectUtil.Minecraft$clickMouse(mc);
-                }
+                sendClick(0);
             }
             if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
