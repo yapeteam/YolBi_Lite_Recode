@@ -73,6 +73,7 @@ public class AimAssist extends Module {
                     mc.thePlayer.rotationYaw = rotations.x;
                     mc.thePlayer.rotationPitch = rotations.y;
                     RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
+                    RotationManager.smooth();
                 }
                 aimPath.subList(0, length).clear();
             }

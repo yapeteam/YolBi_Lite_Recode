@@ -65,7 +65,7 @@ public class JFrameRenderer extends JFrame {
                     long time = System.currentTimeMillis();
                     transparentPanel.repaint();
                     try {
-                        if (externalRenderModule != null)
+                        if (externalRenderModule != null && externalRenderModule.getLimitFps().getValue())
                             Thread.sleep(Math.max(0, 1000 / externalRenderModule.getFps().getValue() - (System.currentTimeMillis() - time)));
                     } catch (InterruptedException ignored) {
                     }
