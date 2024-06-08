@@ -50,11 +50,15 @@ public class AimAssist extends Module {
 
     @Listener
     private void onTick(EventTick e) {
-        if (mc.thePlayer == null)
-            return;
-        target = getTargets();
-        if (target != null)
-            aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
+        try {
+            if (mc.thePlayer == null)
+                return;
+            target = getTargets();
+            if (target != null)
+                aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
+        } catch (Throwable ex) {
+            Logger.exception(ex);
+        }
     }
 
     @Listener
@@ -80,7 +84,6 @@ public class AimAssist extends Module {
     public Entity getTargets() {
         // define targets first to eliminate any null pointer exceptions
         List<Entity> targets = TargetManager.getTargets(Range.getValue());
-        System.out.println(targets.size());
         if (View.getValue())
             targets = targets.stream()
                     .filter(RayCastUtil::isInViewFrustrum)
