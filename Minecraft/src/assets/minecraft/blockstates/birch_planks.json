@@ -1,7 +1,5 @@
 {
-  "variants": {
-    "normal": {
-      "model": "birch_planks"
+    "variants": {
+        "normal": { "model": "birch_planks" }
     }
-  }
 }

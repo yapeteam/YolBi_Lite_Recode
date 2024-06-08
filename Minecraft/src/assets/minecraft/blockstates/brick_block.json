@@ -1,7 +1,5 @@
 {
-  "variants": {
-    "normal": {
-      "model": "brick"
+    "variants": {
+        "normal": { "model": "brick" }
     }
-  }
 }

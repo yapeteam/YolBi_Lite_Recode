@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="opt">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/Minecraft/src/stelix_object_file.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Minecraft/src/sxf.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

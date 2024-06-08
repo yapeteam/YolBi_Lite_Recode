@@ -9,8 +9,6 @@
 §f			Markus Persson
 §f			Jens Bergensten
 §f			Nathan Adams
-§f			Ryan Holtz
-§f			Michael Stoyke
 
 §7Programming:
 §f			Erik Broes

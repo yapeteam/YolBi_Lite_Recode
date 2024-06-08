@@ -1,6 +1,6 @@
 {
-  "parent": "block/fence_nse",
-  "textures": {
-    "texture": "blocks/planks_acacia"
-  }
+    "parent": "block/fence_nse",
+    "textures": {
+        "texture": "blocks/planks_acacia"
+    }
 }

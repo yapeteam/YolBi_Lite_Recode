@@ -73,6 +73,10 @@ options.graphics.tooltip.3=  Fancy - higher quality, slower
 options.graphics.tooltip.4=Changes the appearance of clouds, leaves, water,
 options.graphics.tooltip.5=shadows and grass sides.
 
+of.options.renderDistance.tiny=Tiny
+of.options.renderDistance.short=Short
+of.options.renderDistance.normal=Normal
+of.options.renderDistance.far=Far
 of.options.renderDistance.extreme=Extreme
 of.options.renderDistance.insane=Insane
 of.options.renderDistance.ludicrous=Ludicrous
@@ -556,7 +560,7 @@ options.biomeBlendRadius.tooltip.2=  OFF - no blending (fastest)
 options.biomeBlendRadius.tooltip.3=  5x5 - normal blending (default)
 options.biomeBlendRadius.tooltip.4=  15x15 - maximal blending (slowest)
 options.biomeBlendRadius.tooltip.5=Higher values may generate significant lag spikes
-options.biomeBlendRadius.tooltip.6=and slow down the chunk loading speed.
+options.biomeBlendRadius.tooltip.6=add slow down the chunk loading speed.
 
 # Performance
 
@@ -698,12 +702,12 @@ options.fullscreen.tooltip.3=  OFF - use window mode
 options.fullscreen.tooltip.4=Fullscreen mode may be faster or slower than
 options.fullscreen.tooltip.5=window mode, depending on the graphics card.
 
-of.options.FULLSCREEN_MODE=Fullscreen Mode
-of.options.FULLSCREEN_MODE.tooltip.1=Fullscreen mode
-of.options.FULLSCREEN_MODE.tooltip.2=  Default - use desktop screen resolution, slower
-of.options.FULLSCREEN_MODE.tooltip.3=  WxH - use custom screen resolution, may be faster
-of.options.FULLSCREEN_MODE.tooltip.4=The selected resolution is used in fullscreen mode (F11).
-of.options.FULLSCREEN_MODE.tooltip.5=Lower resolutions should generally be faster.
+options.fullscreen.resolution=Fullscreen Mode
+options.fullscreen.resolution.tooltip.1=Fullscreen mode
+options.fullscreen.resolution.tooltip.2=  Default - use desktop screen resolution, slower
+options.fullscreen.resolution.tooltip.3=  WxH - use custom screen resolution, may be faster
+options.fullscreen.resolution.tooltip.4=The selected resolution is used in fullscreen mode (F11).
+options.fullscreen.resolution.tooltip.5=Lower resolutions should generally be faster.
 
 of.options.SHOW_FPS=Show FPS
 of.options.SHOW_FPS.tooltip.1=Shows compact FPS and render information.
