@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.utils.player;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +13,7 @@ public class TargetManager{
     public static List<Entity> getTargets(final double range) {
         return mc.theWorld.loadedEntityList.stream()
                 // must be a player, not a sheep or something else
-                //.filter(entity -> entity instanceof EntityPlayer)
+                .filter(entity -> entity instanceof EntityLivingBase)
                 // not ourselves
                 .filter(entity -> entity != mc.thePlayer)
                 // no dead entities
