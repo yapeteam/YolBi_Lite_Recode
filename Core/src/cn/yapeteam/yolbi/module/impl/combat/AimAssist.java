@@ -50,7 +50,7 @@ public class AimAssist extends Module {
             if (mc.thePlayer == null)
                 return;
             Entity target = getTargets();
-            if (target != null)
+            if (target != null && !(ClickAim.getValue() && !Mouse.isButtonDown(0)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
             Logger.exception(ex);
