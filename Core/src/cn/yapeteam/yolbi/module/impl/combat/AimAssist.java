@@ -70,7 +70,7 @@ public class AimAssist extends Module {
                 for (int i = 0; i < length; i++) {
                     Vector2f rotations = aimPath.get(i);
                     mc.thePlayer.rotationYaw = rotations.x;
-                    mc.thePlayer.rotationPitch = rotations.x;
+                    mc.thePlayer.rotationPitch = rotations.y;
                     RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
                     RotationManager.smooth();
                 }

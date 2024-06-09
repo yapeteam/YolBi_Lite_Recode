@@ -9,6 +9,20 @@ import java.util.Random;
 public class WindPosMapper {
     private static final Random random = new Random();
 
+    public static float wrapAngleTo180_float(float value) {
+        value = value % 360.0F;
+
+        if (value >= 180.0F) {
+            value -= 360.0F;
+        }
+
+        if (value < -180.0F) {
+            value += 360.0F;
+        }
+
+        return value;
+    }
+
     public static List<Vector2f> generatePath(Vector2f start, Vector2f end) {
         List<Vector2f> path = new ArrayList<>();
         float wind = 6.0f;
@@ -17,7 +31,7 @@ public class WindPosMapper {
         float maxStep = 7.0f;
         float targetArea = 15.0f;
 
-        float currentX = start.x;
+        float currentX = wrapAngleTo180_float(start.x);
         float currentY = start.y;
 
         while (Math.hypot(currentX - end.x, currentY - end.y) > 1) {
@@ -33,7 +47,7 @@ public class WindPosMapper {
 
             currentX = newX;
             currentY = newY;
-            path.add(new Vector2f(currentX, currentY));
+            path.add(new Vector2f(wrapAngleTo180_float(currentX), currentY));
 
             wind = Math.max(0.0f, wind - wind / 3.0f);
             wind += (random.nextFloat() * 2 - 1) * gravity * distance / 1000.0f;
