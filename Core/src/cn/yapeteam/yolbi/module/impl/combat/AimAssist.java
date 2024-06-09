@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class AimAssist extends Module {
     private final NumberValue<Integer> Range = new NumberValue<>("Aim Range", 5, 3, 10, 1);
 
-    public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle");
+    public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle","Clip");
 
     private final BooleanValue View = new BooleanValue("In View", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
@@ -68,6 +68,9 @@ public class AimAssist extends Module {
             if (mc.thePlayer == null)
                 return;
             Entity target = getTargets();
+            if(TargetPriority.getValue().toString().contains("Clip")){
+                target = PlayerUtil.getMouseOver(1,Range.getValue().intValue());
+            }
             if (target != null && !(ClickAim.getValue() && !Mouse.isButtonDown(0)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
@@ -83,11 +86,9 @@ public class AimAssist extends Module {
                 if (length > aimPath.size())
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
-                    Vector2f rotations = RotationManager.getsmoothrot(
-                            new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch),
-                            aimPath.get(i), Speed.getValue());
-                    mc.thePlayer.rotationYaw = rotations.x;
-                    mc.thePlayer.rotationPitch = rotations.y;
+                    Vector2f rotations = new Vector2f(aimPath.get(i).x, aimPath.get(i).y);
+                    mc.thePlayer.rotationYaw = aimPath.get(i).x;
+                    mc.thePlayer.rotationPitch = aimPath.get(i).x;
                     RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
                     RotationManager.smooth();
                 }
