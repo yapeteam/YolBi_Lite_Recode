@@ -50,6 +50,9 @@ public class AimAssist extends Module {
             if (mc.thePlayer == null)
                 return;
             Entity target = getTargets();
+            if (TargetPriority.is("Clip")) {
+                target = PlayerUtil.getMouseOver(1, Range.getValue());
+            }
             if (target != null && !(ClickAim.getValue() && !Natives.IsMouseDown(0)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
@@ -65,11 +68,9 @@ public class AimAssist extends Module {
                 if (length > aimPath.size())
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
-                    Vector2f rotations = RotationManager.getsmoothrot(
-                            new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch),
-                            aimPath.get(i), Speed.getValue());
-                    mc.thePlayer.rotationYaw = rotations.x;
-                    mc.thePlayer.rotationPitch = rotations.y;
+                    Vector2f rotations = aimPath.get(i);
+                    mc.thePlayer.rotationYaw = aimPath.get(i).x;
+                    mc.thePlayer.rotationPitch = aimPath.get(i).x;
                     RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
                     RotationManager.smooth();
                 }
