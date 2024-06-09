@@ -110,7 +110,7 @@ public class AutoClicker extends Module {
                 time = System.currentTimeMillis();
                 sendClick(0);
             }
-            if (rightClick.getValue() && right && mc.objectMouseOver != null) {
+            if (rightClick.getValue() && right) {
                 time = System.currentTimeMillis();
                 if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                     sendClick(1);
