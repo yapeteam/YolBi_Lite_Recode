@@ -13,6 +13,14 @@ const char *jstringToChar(JNIEnv *env, jstring jstr)
     return str;
 }
 
+HWND hwnd = NULL;
+
+JNICALL Init(JNIEnv *env, jclass _, jstring windowTitle)
+{
+    hwnd = FindWindowA(NULL, jstringToChar(env, windowTitle));
+    printf("%2d", hwnd);
+}
+
 JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstring windowTitle)
 {
     HWND hwnd = FindWindowA(NULL, jstringToChar(env, windowTitle));
@@ -36,30 +44,48 @@ JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
     SendInput(1, &input, sizeof(INPUT));
 }
 
-JNICALL SetMouse(JNIEnv *env, jclass _, jint button, jboolean pressed)
+JNICALL SendLeft(JNIEnv *env, jclass _)
 {
-    INPUT input = {0};
-    input.type = INPUT_MOUSE;
-    input.mi.dx = 0;
-    input.mi.dy = 0;
-    input.mi.mouseData = 0;
-    input.mi.time = 0;
-    input.mi.dwExtraInfo = 0;
-    if (button == 0)
-        input.mi.dwFlags = pressed ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_LEFTUP;
-    else if (button == 1)
-        input.mi.dwFlags = pressed ? MOUSEEVENTF_RIGHTDOWN : MOUSEEVENTF_RIGHTUP;
-    else if (button == 2)
-        input.mi.dwFlags = pressed ? MOUSEEVENTF_MIDDLEDOWN : MOUSEEVENTF_MIDDLEUP;
-    SendInput(1, &input, sizeof(INPUT));
+    SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
+    SendMessage(hwnd, WM_LBUTTONUP, 0, 0);
+}
+
+JNICALL SendRight(JNIEnv *env, jclass _)
+{
+    SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
+    SendMessage(hwnd, WM_LBUTTONUP, 0, 0);
+}
+
+JNICALL IsMouseDown(JNIEnv *env, jclass _, jint button)
+{
+    int flag;
+    switch (button)
+    {
+    case 0:
+        flag = VK_LBUTTON;
+        break;
+    case 1:
+        flag = VK_RBUTTON;
+        break;
+    case 2:
+        flag = VK_MBUTTON;
+    }
+    int state = GetAsyncKeyState(flag) & 0x8000;
+    if (state == 0)
+        return 0;
+    else
+        return 1;
 }
 
 void register_native_methods(JNIEnv *env, jclass clazz)
 {
     JNINativeMethod methods[] = {
+        {"Init", "(Ljava/lang/String;)V", (void *)&Init},
         {"SetWindowsTransparent", "(ZLjava/lang/String;)V", (void *)&SetWindowsTransparent},
         {"SetKeyBoard", "(IZ)V", (void *)&SetKeyBoard},
-        {"SetMouse", "(IZ)V", (void *)&SetMouse},
+        {"SendLeft", "()V", (void *)&SendLeft},
+        {"SendRight", "()V", (void *)&SendRight},
+        {"IsMouseDown", "(I)Z", (void *)&IsMouseDown},
     };
-    (*env)->RegisterNatives(env, clazz, methods, 4);
+    (*env)->RegisterNatives(env, clazz, methods, 6);
 }

@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
@@ -8,14 +9,12 @@ import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventMouse;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.player.*;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.Entity;
-import org.lwjgl.input.Mouse;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,30 +44,13 @@ public class AimAssist extends Module {
         aimPath.clear();
     }
 
-    private boolean pressed = false;
-    private long lastClickTime = 0;
-
-    @Listener
-    private void onMouse(EventMouse e) {
-        if (mc.currentScreen == null && e.getButton() == 0) {
-            if (e.isPressed()) {
-                if (System.currentTimeMillis() - lastClickTime > 200)
-                    pressed = true;
-            } else {
-                aimPath.clear();
-                pressed = false;
-            }
-            lastClickTime = System.currentTimeMillis();
-        }
-    }
-
     @Listener
     private void onTick(EventTick e) {
         try {
             if (mc.thePlayer == null)
                 return;
             Entity target = getTargets();
-            if (target != null && !(ClickAim.getValue() && !Mouse.isButtonDown(0)))
+            if (target != null && !(ClickAim.getValue() && !Natives.IsMouseDown(0)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
             Logger.exception(ex);
@@ -78,7 +60,7 @@ public class AimAssist extends Module {
     @Listener
     public void onRender(EventRender2D event) {
         try {
-            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !pressed)) {
+            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsMouseDown(0))) {
                 int length = (int) (aimPath.size() * Speed.getValue() / 100);
                 if (length > aimPath.size())
                     length = aimPath.size();
