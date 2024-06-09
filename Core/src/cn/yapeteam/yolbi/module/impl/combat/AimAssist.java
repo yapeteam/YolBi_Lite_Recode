@@ -54,7 +54,10 @@ public class AimAssist extends Module {
             if (e.isPressed()) {
                 if (System.currentTimeMillis() - lastClickTime > 200)
                     pressed = true;
-            } else pressed = false;
+            } else {
+                aimPath.clear();
+                pressed = false;
+            }
             lastClickTime = System.currentTimeMillis();
         }
     }
