@@ -44,7 +44,7 @@ public class MixinMinecraft {
             method = "runTick", desc = "()V",
             target = @Target(
                     value = "INVOKESTATIC",
-                    target = "org/lwjgl/input/Mouse.getEventButton()Z",
+                    target = "org/lwjgl/input/Mouse.getEventButtonState()Z",
                     shift = Target.Shift.BEFORE
             )
     )
