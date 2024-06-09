@@ -44,6 +44,8 @@ public class AimAssist extends Module {
         aimPath.clear();
     }
 
+    private Entity target = null;
+
     @Listener
     private void onTick(EventTick e) {
         try {
@@ -51,6 +53,10 @@ public class AimAssist extends Module {
                 return;
             if (mc.currentScreen != null) return;
             Entity target = getTargets();
+            if (this.target != target) {
+                aimPath.clear();
+                this.target = target;
+            }
             if (TargetPriority.is("Clip")) {
                 target = PlayerUtil.getMouseOver(1, Range.getValue());
             }
@@ -81,6 +87,11 @@ public class AimAssist extends Module {
         } catch (Throwable e) {
             Logger.exception(e);
         }
+    }
+
+    @Override
+    public String getSuffix() {
+        return "Cache: " + aimPath.size();
     }
 
     public Entity getTargets() {
