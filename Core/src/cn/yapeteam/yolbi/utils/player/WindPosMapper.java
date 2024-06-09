@@ -31,7 +31,7 @@ public class WindPosMapper {
         float maxStep = 7.0f;
         float targetArea = 15.0f;
 
-        float currentX = wrapAngleTo180_float(start.x);
+        float currentX = start.x;
         float currentY = start.y;
 
         while (Math.hypot(currentX - end.x, currentY - end.y) > 1) {
@@ -47,7 +47,7 @@ public class WindPosMapper {
 
             currentX = newX;
             currentY = newY;
-            path.add(new Vector2f(wrapAngleTo180_float(currentX), currentY));
+            path.add(new Vector2f(currentX, currentY));
 
             wind = Math.max(0.0f, wind - wind / 3.0f);
             wind += (random.nextFloat() * 2 - 1) * gravity * distance / 1000.0f;
