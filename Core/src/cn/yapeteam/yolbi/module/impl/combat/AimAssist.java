@@ -69,8 +69,8 @@ public class AimAssist extends Module {
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
                     Vector2f rotations = aimPath.get(i);
-                    mc.thePlayer.rotationYaw = aimPath.get(i).x;
-                    mc.thePlayer.rotationPitch = aimPath.get(i).x;
+                    mc.thePlayer.rotationYaw = rotations.x;
+                    mc.thePlayer.rotationPitch = rotations.x;
                     RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
                     RotationManager.smooth();
                 }
