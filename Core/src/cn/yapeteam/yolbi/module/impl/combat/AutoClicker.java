@@ -7,7 +7,7 @@ import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventMouse;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
+import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
@@ -102,15 +102,15 @@ public class AutoClicker extends Module {
     }
 
     @Listener
-    private void onTick(EventTick e) {
+    private void onRender2D(EventRender2D e) {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (leftClick.getValue() && left && !right) {
+            if (leftClick.getValue() && left) {
                 time = System.currentTimeMillis();
                 sendClick(0);
             }
-            if (rightClick.getValue() && right && !left && mc.objectMouseOver != null) {
+            if (rightClick.getValue() && right && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
                 if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                     sendClick(1);
