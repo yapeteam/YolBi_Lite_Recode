@@ -13,8 +13,8 @@ import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.player.*;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -104,7 +104,7 @@ public class AimAssist extends Module {
         if (TargetPriority.is("Distance"))
             targets.sort(Comparator.comparingDouble(o -> mc.thePlayer.getDistanceToEntity(o)));
         else if (TargetPriority.is("Health"))
-            targets.sort(Comparator.comparingDouble(o -> ((AbstractClientPlayer) o).getHealth()).reversed());
+            targets.sort(Comparator.comparingDouble(o -> ((EntityLivingBase) o).getHealth()).reversed());
         else if (TargetPriority.is("Angle"))
             targets.sort(Comparator.comparingDouble(entity -> RotationManager.getRotationsNeeded(entity)[0]));
         return targets.isEmpty() ? null : targets.get(0);
