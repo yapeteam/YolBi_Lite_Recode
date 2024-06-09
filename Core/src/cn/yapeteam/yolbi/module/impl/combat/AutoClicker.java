@@ -6,11 +6,11 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
+import cn.yapeteam.yolbi.event.impl.game.EventMouse;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.module.Module;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
 import java.util.Random;
 
@@ -65,16 +65,52 @@ public class AutoClicker extends Module {
         Natives.SetMouse(button, true);
     }
 
+    private boolean left = false, right = false, skip = false;
+    private long lastClickTime = 0;
+
+    @Listener
+    private void onMouse(EventMouse e) {
+        if (mc.currentScreen == null && e.getButton() != -1) {
+            if (e.isPressed()) {
+                if (System.currentTimeMillis() - lastClickTime > 200) {
+                    switch (e.getButton()) {
+                        case 0:
+                            left = true;
+                            break;
+                        case 1:
+                            right = true;
+                            break;
+                    }
+                }
+            } else {
+                if (!skip) {
+                    switch (e.getButton()) {
+                        case 0:
+                            left = false;
+                            Natives.SetMouse(0, false);
+                            break;
+                        case 1:
+                            right = false;
+                            Natives.SetMouse(1, false);
+                            break;
+                    }
+                    skip = true;
+                } else skip = false;
+            }
+            lastClickTime = System.currentTimeMillis();
+        }
+    }
+
     @Listener
     private void onTick(EventTick e) {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (leftClick.getValue() && Mouse.isButtonDown(0) && !Mouse.isButtonDown(1)) {
+            if (leftClick.getValue() && left && !right) {
                 time = System.currentTimeMillis();
                 sendClick(0);
             }
-            if (rightClick.getValue() && Mouse.isButtonDown(1) && !Mouse.isButtonDown(0) && mc.objectMouseOver != null) {
+            if (rightClick.getValue() && right && !left && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
                 if (mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                     sendClick(1);

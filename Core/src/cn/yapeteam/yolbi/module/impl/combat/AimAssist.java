@@ -8,6 +8,7 @@ import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.event.Listener;
+import cn.yapeteam.yolbi.event.impl.game.EventMouse;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
@@ -44,6 +45,20 @@ public class AimAssist extends Module {
         aimPath.clear();
     }
 
+    private boolean pressed = false;
+    private long lastClickTime = 0;
+
+    @Listener
+    private void onMouse(EventMouse e) {
+        if (mc.currentScreen == null && e.getButton() == 0) {
+            if (e.isPressed()) {
+                if (System.currentTimeMillis() - lastClickTime > 200)
+                    pressed = true;
+            } else pressed = false;
+            lastClickTime = System.currentTimeMillis();
+        }
+    }
+
     @Listener
     private void onTick(EventTick e) {
         try {
@@ -60,7 +75,7 @@ public class AimAssist extends Module {
     @Listener
     public void onRender(EventRender2D event) {
         try {
-            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Mouse.isButtonDown(0))) {
+            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !pressed)) {
                 int length = (int) (aimPath.size() * Speed.getValue() / 100);
                 if (length > aimPath.size())
                     length = aimPath.size();

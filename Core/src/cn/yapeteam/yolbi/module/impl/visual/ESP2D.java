@@ -40,8 +40,9 @@ public class ESP2D extends Module implements Drawable {
     private void onExternal(EventExternalRender e) {
         cache.clear();
         try {
-            if (mc.theWorld != null)
-                for (Entity entity : mc.theWorld.loadedEntityList) {
+            if (mc.theWorld != null) {
+                for (int i = 0; i < mc.theWorld.loadedEntityList.size(); i++) {
+                    Entity entity = mc.theWorld.loadedEntityList.get(i);
                     Vector4d pos = ESPUtil.get(entity);
                     if (pos == null) continue;
                     double left = pos.getX(),
@@ -94,6 +95,7 @@ public class ESP2D extends Module implements Drawable {
                         }
                     });
                 }
+            }
         } catch (Throwable ex) {
             Logger.exception(ex);
         }
