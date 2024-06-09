@@ -49,6 +49,7 @@ public class AimAssist extends Module {
         try {
             if (mc.thePlayer == null)
                 return;
+            if (mc.currentScreen != null) return;
             Entity target = getTargets();
             if (TargetPriority.is("Clip")) {
                 target = PlayerUtil.getMouseOver(1, Range.getValue());
@@ -63,6 +64,7 @@ public class AimAssist extends Module {
     @Listener
     public void onRender(EventRender2D event) {
         try {
+            if (mc.currentScreen != null) return;
             if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsMouseDown(0))) {
                 int length = (int) (aimPath.size() * Speed.getValue() / 100);
                 if (length > aimPath.size())
