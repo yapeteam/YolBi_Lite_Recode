@@ -17,7 +17,7 @@ public class TargetManager{
                 // not ourselves
                 .filter(entity -> entity != mc.thePlayer)
                 // no dead entities
-                .filter(Entity::isEntityAlive)
+                //.filter(Entity::isEntityAlive)
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 // sort using distance
