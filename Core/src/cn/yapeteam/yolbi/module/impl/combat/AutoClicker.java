@@ -73,7 +73,8 @@ public class AutoClicker extends Module {
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
             if (leftClick.getValue() && Natives.IsMouseDown(0) && !Natives.IsMouseDown(1)) {
                 time = System.currentTimeMillis();
-                sendClick(0);
+                if (!(mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK))
+                    sendClick(0);
             }
             if (rightClick.getValue() && Natives.IsMouseDown(1) & !Natives.IsMouseDown(0) && mc.objectMouseOver != null) {
                 time = System.currentTimeMillis();
