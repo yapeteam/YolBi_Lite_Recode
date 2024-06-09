@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import static cn.yapeteam.yolbi.utils.IMinecraft.mc;
 
-public class TargetManager{
+public class TargetManager {
     public static List<Entity> getTargets(final double range) {
         return mc.theWorld.loadedEntityList.stream()
                 // must be a player, not a sheep or something else
@@ -20,6 +20,7 @@ public class TargetManager{
                 //.filter(Entity::isEntityAlive)
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
+                .filter(entity -> !entity.isInvisibleToPlayer(mc.thePlayer))
                 // sort using distance
                 .sorted(Comparator.comparingDouble(entity -> mc.thePlayer.getDistanceToEntity(entity)))
                 // return a list
