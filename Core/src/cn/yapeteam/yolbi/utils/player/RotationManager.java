@@ -62,8 +62,6 @@ public class RotationManager implements IMinecraft {
         }
     }
 
-    ;
-
 
     @Listener
     public void onPreMotion(EventMotion event) {
