@@ -3,320 +3,510 @@ package cn.yapeteam.yolbi.module.impl.combat;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
+import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventLoop;
-import cn.yapeteam.yolbi.event.impl.network.EventPacketReceive;
-import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
+import cn.yapeteam.yolbi.event.impl.network.EventPacket;
 import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.network.DelayedPacket;
-import cn.yapeteam.yolbi.utils.player.PendingVelocity;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.misc.TimerUtil;
+import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import cn.yapeteam.yolbi.utils.render.RenderUtil;
-import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.client.network.NetHandlerPlayClient;
+import lombok.var;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.network.play.client.C00PacketKeepAlive;
+import net.minecraft.network.play.client.C02PacketUseEntity;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
 import net.minecraft.network.play.server.*;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.Explosion;
 
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("DuplicatedCode")
 @ModuleInfo(name = "Backtrack", category = ModuleCategory.COMBAT)
 public class Backtrack extends Module {
-    private final NumberValue<Integer> delay = new NumberValue<>("Delay", 500, 100, 2000, 50);
-    private final BooleanValue delayPing = new BooleanValue("Delay ping", true);
-    private final BooleanValue delayVelocity = new BooleanValue("Delay velocity", delayPing::getValue, true);
-
-    private final CopyOnWriteArrayList<DelayedPacket> delayedPackets = new CopyOnWriteArrayList<>();
-
-    private EntityLivingBase lastTarget;
-
-    private PendingVelocity lastVelocity;
-    public Field S14PacketEntity$posX = ReflectUtil.getField(S14PacketEntity.class, "posX"),
-            S14PacketEntity$posY = ReflectUtil.getField(S14PacketEntity.class, "posY"),
-            S14PacketEntity$posZ = ReflectUtil.getField(S14PacketEntity.class, "posZ"),
-            S14PacketEntity$yaw = ReflectUtil.getField(S14PacketEntity.class, "yaw"),
-            S14PacketEntity$pitch = ReflectUtil.getField(S14PacketEntity.class, "pitch"),
-            NetHandlerPlayClient$clientWorldController = ReflectUtil.getField(NetHandlerPlayClient.class, "clientWorldController");
+    private final BooleanValue
+            attackTimeFix = new BooleanValue("Attack Time Fix", false),
+            renderBox = new BooleanValue("Render Box", false),
+            onlyAttacking = new BooleanValue("Only Attacking", false),
+            outline = new BooleanValue("Outline", false),
+            rangeFix = new BooleanValue("Range Fix", true),
+            s00 = new BooleanValue("S00", true),
+            s03 = new BooleanValue("S03", true),
+            s12 = new BooleanValue("S12", true),
+            s27 = new BooleanValue("S27", true),
+            s32 = new BooleanValue("S32", true),
+            activity = new BooleanValue("Activity", true);
+    private final NumberValue<Float>
+            hitRange = new NumberValue<>("Hit Range", 5.4f, 2f, 6f, 0.1f),
+            minHitRange = new NumberValue<>("Hit Range", 2f, 1f, 6f, 0.1f),
+            outlineWidth = new NumberValue<>("Outline Width", outline::getValue, 1.5f, 0.5f, 5f, 0.1f);
+    private final NumberValue<Integer> BackTrackDelay = new NumberValue<>("Backtrack Delay", 2000, 800, 10000, 1);
+    private final ModeValue<String>
+            processS12Mode = new ModeValue<>("ProcessS12Mode", "InPut", "Cancel", "InPut"),
+            processS27Mode = new ModeValue<>("ProcessS27Mode", "InPut", "Cancel", "InPut");
 
     public Backtrack() {
-        this.addValues(delay, delayPing, delayVelocity);
+        addValues(
+                attackTimeFix,
+                renderBox,
+                onlyAttacking,
+                outline,
+                rangeFix,
+                s00,
+                s03,
+                s12,
+                s27,
+                s32,
+                activity,
+                hitRange,
+                minHitRange,
+                outlineWidth,
+                BackTrackDelay,
+                processS12Mode,
+                processS27Mode
+        );
     }
 
-    private VirtualEntity virtualEntity = null;
+    private final List<Packet<?>> savePackets = new CopyOnWriteArrayList<>();
+    double cXYZ = 0;
+    boolean attacking = false;
+    private final TimerUtil
+            timer = new TimerUtil(),
+            attackingTimer = new TimerUtil();
+    private double realX = 0, realY = 0, realZ = 0, rXYZ = 0, pXYZ = 0;
+    private double x = 0, y = 0, z = 0;
+    private double distanceToPacket = 0;
 
-    @Listener
-    public void onReceive(EventPacketReceive event) {
+    private Entity getClosestEntity() {
+        List<Entity> filteredEntities = new ArrayList<>();
+        for (Entity entity : mc.theWorld.loadedEntityList)
+            if (entity instanceof EntityPlayer && entity != mc.thePlayer)
+                filteredEntities.add(entity);
+        filteredEntities.sort((a, b) -> {
+            double distanceA = mc.thePlayer.getDistanceToEntity(a);
+            double distanceB = mc.thePlayer.getDistanceToEntity(b);
+            return Double.compare(distanceB, distanceA);
+        });
+        return filteredEntities.isEmpty() ? null : filteredEntities.get(filteredEntities.size() - 1);
+    }
+
+    @Override
+    protected void onEnable() {
+        savePackets.clear();
+        timer.reset();
+        attackingTimer.reset();
+    }
+
+    private void processPacket1(Entity target) {//平滑处理发包
+        if (mc.theWorld == null && mc.thePlayer == null) {
+            return;
+        }
+        if (savePackets.isEmpty()) return;
+        var p = savePackets.remove(0);
+        String type = "";
         try {
-            if (mc.thePlayer == null || mc.thePlayer.ticksExisted < 5) {
-                if (!delayedPackets.isEmpty())
-                    delayedPackets.clear();
-            }
-
-            EntityLivingBase currentTarget = getCurrentTarget();
-
-            if (currentTarget != lastTarget) {
-                clearPackets();
-                if (currentTarget != null) {
-                    virtualEntity = new VirtualEntity(currentTarget);
-                    YolBi.instance.getEventManager().register(virtualEntity);
+            // S14PacketEntity
+            if (p instanceof S14PacketEntity) {
+                S14PacketEntity p1 = (S14PacketEntity) p;
+                var entity = p1.getEntity(mc.theWorld);
+                if (entity != null) {
+                    entity.serverPosX += p1.func_149062_c();
+                    entity.serverPosY += p1.func_149061_d();
+                    entity.serverPosZ += p1.func_149064_e();
+                    var d0 = entity.serverPosX / 32.0;
+                    var d1 = entity.serverPosY / 32.0;
+                    var d2 = entity.serverPosZ / 32.0;
+                    var f = p1.func_149060_h() ? (p1.func_149066_f() * 360) / 256f : entity.rotationYaw;
+                    var f1 = p1.func_149060_h() ? (p1.func_149063_g() * 360) / 256f : entity.rotationPitch;
+                    if (entity instanceof EntityLivingBase) {
+                        entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3, false);
+                    }
+                    entity.onGround = p1.getOnGround();
                 }
+                type = "s14";
             }
-            if (currentTarget == null) {
-                clearPackets();
-                YolBi.instance.getEventManager().unregister(virtualEntity);
-                virtualEntity = null;
-            } else {
-                if (event.getPacket() instanceof S14PacketEntity) {
-                    S14PacketEntity packet = event.getPacket();
+            // S18PacketEntityTeleport
+            if (p instanceof S18PacketEntityTeleport) {
+                S18PacketEntityTeleport p1 = (S18PacketEntityTeleport) p;
+                var entity = mc.theWorld.getEntityByID(p1.getEntityId());
+                if (entity != null) {
+                    entity.serverPosX = p1.getX();
+                    entity.serverPosY = p1.getY();
+                    entity.serverPosZ = p1.getZ();
+                    var d0 = entity.serverPosX / 32.0;
+                    var d1 = entity.serverPosY / 32.0;
+                    var d2 = entity.serverPosZ / 32.0;
+                    var f = (p1.getYaw() * 360) / 256f;
+                    var f1 = (p1.getPitch() * 360) / 256f;
 
-                    if (packet.getEntity(ReflectUtil.getField(NetHandlerPlayClient$clientWorldController, mc.getNetHandler())) == currentTarget) {
-                        byte px = ReflectUtil.getField(S14PacketEntity$posX, packet),
-                                py = ReflectUtil.getField(S14PacketEntity$posY, packet),
-                                pz = ReflectUtil.getField(S14PacketEntity$posZ, packet);
-
-                        int x = currentTarget.serverPosX + px;
-                        int y = currentTarget.serverPosY + py;
-                        int z = currentTarget.serverPosZ + pz;
-
-                        double posX = (double) x / 32.0D;
-                        double posY = (double) y / 32.0D;
-                        double posZ = (double) z / 32.0D;
-
-                        event.setCancelled(true);
-                        delayedPackets.add(new DelayedPacket(packet));
-                        if (virtualEntity != null) virtualEntity.handleVirtualMovement(posX, posY, posZ);
+                    if (entity instanceof EntityLivingBase) {
+                        if (Math.abs(entity.posX - d0) < 0.03125 && Math.abs(entity.posY - d1) < 0.015625
+                                && Math.abs(entity.posZ - d2) < 0.03125) {
+                            entity.setPositionAndRotation2(entity.posX, entity.posY, entity.posZ, f, f1, 3, true);
+                        } else {
+                            entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3, true);
+                        }
                     }
-                } else if (event.getPacket() instanceof S18PacketEntityTeleport) {
-                    S18PacketEntityTeleport packet = event.getPacket();
 
-                    if (packet.getEntityId() == currentTarget.getEntityId()) {
-                        double serverX = packet.getX();
-                        double serverY = packet.getY();
-                        double serverZ = packet.getZ();
-
-                        event.setCancelled(true);
-                        delayedPackets.add(new DelayedPacket(packet));
-                        if (virtualEntity != null) virtualEntity.handleVirtualTeleport(serverX, serverY, serverZ);
-                    }
-                } else if (event.getPacket() instanceof S32PacketConfirmTransaction || event.getPacket() instanceof S00PacketKeepAlive) {
-                    if (!delayedPackets.isEmpty() && delayPing.getValue()) {
-                        event.setCancelled(true);
-                        delayedPackets.add(new DelayedPacket(event.getPacket()));
-                    }
-                } else if (event.getPacket() instanceof S12PacketEntityVelocity) {
-                    S12PacketEntityVelocity packet = event.getPacket();
-
-                    if (packet.getEntityID() == mc.thePlayer.getEntityId()) {
-                        if (!delayedPackets.isEmpty() && delayPing.getValue() && delayVelocity.getValue()) {
-                            event.setCancelled(true);
-                            lastVelocity = new PendingVelocity(packet.getMotionX() / 8000.0, packet.getMotionY() / 8000.0, packet.getMotionZ() / 8000.0);
+                    entity.onGround = p1.getOnGround();
+                }
+                type = "s18";
+            }
+            // S03PacketTimeUpdate
+            if (p instanceof S03PacketTimeUpdate) {
+                S03PacketTimeUpdate p1 = (S03PacketTimeUpdate) p;
+                mc.theWorld.setTotalWorldTime(p1.getTotalWorldTime());
+                mc.theWorld.setWorldTime(p1.getWorldTime());
+                type = "s03";
+            }
+            // S00PacketKeepAlive
+            if (p instanceof S00PacketKeepAlive) {
+                S00PacketKeepAlive p1 = (S00PacketKeepAlive) p;
+                C00PacketKeepAlive packet = new C00PacketKeepAlive(p1.func_149134_c());
+                PacketUtil.skip(packet);
+                PacketUtil.sendPacket(packet);
+                type = "s00";
+            }
+            // S12PacketEntityVelocity
+            if (p instanceof S12PacketEntityVelocity) {
+                S12PacketEntityVelocity p1 = (S12PacketEntityVelocity) p;
+                if (processS12Mode.is("InPut")) {
+                    var entity = mc.theWorld.getEntityByID(p1.getEntityID());
+                    if (entity != null) {
+                        if (p1.getEntityID() == mc.thePlayer.getEntityId()) {//mc.thePlayer packet
+                            mc.thePlayer.setVelocity(((double) (p1.getMotionX() * 100) / 100) / 8000.0,
+                                    ((double) (p1.getMotionY() * 100) / 100) / 8000.0, ((double) (p1.getMotionZ() * 100) / 100) / 8000.0);
+                        } else {//entity packet
+                            entity.setVelocity(((double) (p1.getMotionX() * 100) / 100) / 8000.0,
+                                    ((double) (p1.getMotionY() * 100) / 100) / 8000.0, ((double) (p1.getMotionZ() * 100) / 100) / 8000.0);
                         }
                     }
                 }
+                type = "s12";
             }
+            // S27PacketExplosion
+            if (p instanceof S27PacketExplosion) {
+                S27PacketExplosion p1 = (S27PacketExplosion) p;
+                if (processS27Mode.is("InPut")) {
+                    var explosion = new Explosion(mc.theWorld, target, p1.getX(),
+                            p1.getY(), p1.getZ(), p1.getStrength(), p1.getAffectedBlockPositions());
+                    explosion.doExplosionB(true);
+                    mc.thePlayer.setVelocity(
+                            p1.func_149149_c() + mc.thePlayer.motionX,
+                            p1.func_149144_d() + mc.thePlayer.motionY,
+                            p1.func_149147_e() + mc.thePlayer.motionZ);
+                }
+                type = "s27";
+            }
+            // S06PacketUpdateHealth
+            if (p instanceof S06PacketUpdateHealth) {
+                S06PacketUpdateHealth p1 = (S06PacketUpdateHealth) p;
+                mc.thePlayer.setPlayerSPHealth(p1.getHealth());
+                mc.thePlayer.getFoodStats().setFoodLevel(p1.getFoodLevel());
+                mc.thePlayer.getFoodStats().setFoodSaturationLevel(p1.getSaturationLevel());
+                type = "s06";
+            }
+            // S29PacketSoundEffect 此包为音效包
+            if (p instanceof S29PacketSoundEffect) {
+                S29PacketSoundEffect p1 = (S29PacketSoundEffect) p;
+                mc.theWorld.playSound(p1.getX(), p1.getY(), p1.getZ(),
+                        p1.getSoundName(), p1.getVolume(), p1.getPitch(), false);
+                type = "s29";
+            }
+            // S32PacketConfirmTransaction
+            if (p instanceof S32PacketConfirmTransaction) {
+                S32PacketConfirmTransaction p1 = (S32PacketConfirmTransaction) p;
+                var entityplayer = mc.thePlayer;
+                Container container = null;
+                if (p1.getWindowId() == 0) {
+                    container = entityplayer.inventoryContainer;
+                } else if (p1.getWindowId() == entityplayer.openContainer.windowId) {
+                    container = entityplayer.openContainer;
+                }
+                if (container != null && !p1.func_148888_e()) {
+                    C0FPacketConfirmTransaction packet = new C0FPacketConfirmTransaction(p1.getWindowId(), p1.getActionNumber(), true);
+                    PacketUtil.skip(packet);
+                    PacketUtil.sendPacket(packet);
+                }
+                type = "s32";
+            }
+            // S19PacketEntityHeadLook
+            if (p instanceof S19PacketEntityHeadLook) {
+                S19PacketEntityHeadLook p1 = (S19PacketEntityHeadLook) p;
+                var entity = p1.getEntity(mc.theWorld);
+                if (entity != null) {
+                    entity.setRotationYawHead((p1.getYaw() * 360) / 256f);
+                }
+                type = "s19";
+            }
+            //S08PacketPlayerPosLook
+            if (p instanceof S08PacketPlayerPosLook) {
+                S08PacketPlayerPosLook p1 = (S08PacketPlayerPosLook) p;
+                var entityplayer = mc.thePlayer;
+                var d0 = p1.getX();
+                var d1 = p1.getY();
+                var d2 = p1.getZ();
+                entityplayer.setPositionAndRotation(d0, d1, d2, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
+                C03PacketPlayer.C06PacketPlayerPosLook packet = new C03PacketPlayer.C06PacketPlayerPosLook(
+                        d0, entityplayer.getEntityBoundingBox().minY,
+                        d2, entityplayer.rotationYaw, entityplayer.rotationPitch, false
+                );
+                PacketUtil.skip(packet);
+                PacketUtil.sendPacket(packet);
+                if (mc.thePlayer.isOnLadder()) {
+                    mc.thePlayer.prevPosX = mc.thePlayer.posX;
+                    mc.thePlayer.prevPosY = mc.thePlayer.posY;
+                    mc.thePlayer.prevPosZ = mc.thePlayer.posZ;
+                    mc.displayGuiScreen(null);
+                }
+                type = "s08";
+            }
+            // S0FPacketSpawnMob
+            if (p instanceof S0FPacketSpawnMob) {
+                S0FPacketSpawnMob p1 = (S0FPacketSpawnMob) p;
+                var d0 = p1.getX() / 32.0;
+                var d1 = p1.getY() / 32.0;
+                var d2 = p1.getZ() / 32.0;
+                var f = (p1.getYaw() * 360) / 256f;
+                var f1 = (p1.getPitch() * 360) / 256f;
+                var entitylivingbase = (EntityLivingBase) EntityList.createEntityByID(p1.getEntityType(), mc.theWorld);
+                entitylivingbase.serverPosX = p1.getX();
+                entitylivingbase.serverPosY = p1.getY();
+                entitylivingbase.serverPosZ = p1.getZ();
+                entitylivingbase.renderYawOffset = entitylivingbase.rotationYawHead = (p1.getHeadPitch() * 360) / 256f;
+                var aentity = entitylivingbase.getParts();
+                if (aentity != null) {
+                    var i = p1.getEntityID() - entitylivingbase.getEntityId();
 
-            lastTarget = currentTarget;
+                    for (Entity entity : aentity) {
+                        entity.setEntityId(entity.getEntityId() + i);
+                    }
+                }
+
+                entitylivingbase.setEntityId(p1.getEntityID());
+                entitylivingbase.setPositionAndRotation(d0, d1, d2, f, f1);
+                entitylivingbase.motionX = (p1.getVelocityX() / 8000.0);
+                entitylivingbase.motionY = (p1.getVelocityY() / 8000.0);
+                entitylivingbase.motionZ = (p1.getVelocityZ() / 8000.0);
+                mc.theWorld.addEntityToWorld(p1.getEntityID(), entitylivingbase);
+                var list = p1.func_149027_c();
+
+                if (list != null) {
+                    entitylivingbase.getDataWatcher().updateWatchedObjectsFromList(list);
+                }
+                type = "s0f";
+            }
         } catch (Throwable e) {
+            Logger.error("Backtrack: processPacket1 " + type);
             Logger.exception(e);
         }
     }
 
-    @Listener
-    private void onRender(EventRender3D e) {
-        if (virtualEntity != null)
-            RenderUtil.drawEntityBox(
-                    virtualEntity.getEntityBoundingBox(), virtualEntity.cacheX, virtualEntity.cacheY, virtualEntity.cacheZ, virtualEntity.cacheX, virtualEntity.cacheY, virtualEntity.cacheZ,
-                    new Color(-1), true, true, 1, e.getPartialTicks()
-            );
-    }
-
-    @Listener
-    public void onPostMotion(EventPostMotion event) {
-        updatePackets();
-    }
-
-    public EntityLivingBase getCurrentTarget() {
-        if (mc.theWorld == null) return null;
-        List<Entity> entityList = new ArrayList<>(mc.theWorld.loadedEntityList);
-        entityList = entityList.stream().filter(entity ->
-                entity != mc.thePlayer &&
-                        entity instanceof EntityLivingBase &&
-                        entity.getDistanceToEntity(mc.thePlayer) <= 6
-        ).sorted(
-                Comparator.comparingInt(entity -> (int) (entity.getDistanceToEntity(mc.thePlayer) * 100))
-        ).collect(Collectors.toList());
-        if (!entityList.isEmpty()) return (EntityLivingBase) entityList.get(0);
-        return null;
-    }
-
-    public void updatePackets() {
-        if (!delayedPackets.isEmpty()) {
-            for (int i = 0; i < delayedPackets.size(); i++) {
-                DelayedPacket p = delayedPackets.get(i);
-                if (p.getTimer().getTimeElapsed() >= delay.getValue()) {
-                    handlePacket(p.getPacket());
-                    if (lastVelocity != null) {
-                        mc.thePlayer.motionX = lastVelocity.getX();
-                        mc.thePlayer.motionY = lastVelocity.getY();
-                        mc.thePlayer.motionZ = lastVelocity.getZ();
-                        lastVelocity = null;
+    double getPacketsDistance(Entity target) {
+        if (!savePackets.isEmpty()) {
+            var p = savePackets.get(savePackets.size() - 1);
+            if (p instanceof S14PacketEntity) {
+                S14PacketEntity p1 = (S14PacketEntity) p;
+                var entity = p1.getEntity(mc.theWorld);
+                if (entity == target) {
+                    if (target instanceof EntityLivingBase) {
+                        distanceToPacket = mc.thePlayer.getDistance(p1.func_149062_c() / 32.0, p1.func_149061_d() / 32.0, p1.func_149064_e() / 32.0);
                     }
-                    delayedPackets.remove(i);
-                    i--;
                 }
             }
+            if (p instanceof S18PacketEntityTeleport) {
+                S18PacketEntityTeleport p1 = (S18PacketEntityTeleport) p;
+                var entity = mc.theWorld.getEntityByID(p1.getEntityId());
+                if (entity == target) {
+                    if (target instanceof EntityLivingBase) {
+                        distanceToPacket = mc.thePlayer.getDistance(p1.getX() / 32.0, p1.getY() / 32.0, p1.getZ() / 32.0);
+                    }
+                }
+            }
+        } else {
+            distanceToPacket = cXYZ;
+        }
+        return distanceToPacket;
+    }
+
+    private void processPacket2(Entity target) {
+        double _5 = minHitRange.getValue();
+        if (cXYZ > _5) {
+            if (rangeFix.getValue() && cXYZ > pXYZ) {
+                processPacket1(target);
+                timer.reset();
+                return;
+            }
+            if (getPacketsDistance(target) <= _5 || cXYZ <= _5) {
+                processPacket1(target);
+                timer.reset();
+                return;
+            }
+            if (timer.hasTimePassed(BackTrackDelay.getValue())) {
+                processPacket1(target);
+            }
         }
     }
 
-    public void clearPackets() {
-        if (lastVelocity != null) {
-            mc.thePlayer.motionX = lastVelocity.getX();
-            mc.thePlayer.motionY = lastVelocity.getY();
-            mc.thePlayer.motionZ = lastVelocity.getZ();
-            lastVelocity = null;
-        }
-
-        if (!delayedPackets.isEmpty()) {
-            for (DelayedPacket p : delayedPackets)
-                handlePacket(p.getPacket());
-            delayedPackets.clear();
+    void addPackets(Packet<?> packet, EventPacket event) {
+        if (blockPacket(packet)) {
+            savePackets.add(packet);
+            event.setCancelled(true);
         }
     }
 
-    public void handlePacket(Packet<INetHandlerPlayClient> packet) {
+    boolean blockPacket(Packet<? extends INetHandler> packet) {//要存的包
+        if (s00.getValue()) {
+            if (packet instanceof S03PacketTimeUpdate) {
+                return true;
+            }
+        }
+        if (s03.getValue()) {
+            if (packet instanceof S03PacketTimeUpdate) {
+                return true;
+            }
+        }
+        if (s12.getValue()) {
+            if (packet instanceof S12PacketEntityVelocity) {
+                return true;
+            }
+        }
+        if (s32.getValue()) {
+            if (packet instanceof S32PacketConfirmTransaction) {
+                return true;
+            }
+        }
+        if (s27.getValue()) {
+            if (packet instanceof S27PacketExplosion) {
+                return true;
+            }
+        }
+        return (packet instanceof S14PacketEntity
+                || packet instanceof S18PacketEntityTeleport
+                || packet instanceof S19PacketEntityHeadLook
+                || packet instanceof S08PacketPlayerPosLook
+                || packet instanceof S0FPacketSpawnMob);
+    }
+
+    @Listener
+    private void onPacket(EventPacket e) {
+        if (!e.isServerSide()) return;
+        Packet<?> packet = e.getPacket();
+        Entity target = getClosestEntity();
+        if (target == null) return;
+        double cx = target.posX, cy = target.posY, cz = target.posZ;
+        double _3 = hitRange.getValue();
+        //int LengthDisPlay = getPing(mc.thePlayer);
+        //获得服务器位置信息
+        if (target instanceof EntityLivingBase) {
+            if (target.serverPosX != 0 && target.serverPosY != 0 && target.serverPosZ != 0 && target.width != 0 && target.height != 0) {
+                realX = target.serverPosX / 32d;
+                realY = target.serverPosY / 32d;
+                realZ = target.serverPosZ / 32d;
+            }
+            cXYZ = mc.thePlayer.getDistance(cx, cy, cz);
+            rXYZ = mc.thePlayer.getDistance(realX, realY, realZ);
+            pXYZ = mc.thePlayer.getDistance(x, y, z);
+        }
+        //实时获取真实位置
         if (packet instanceof S14PacketEntity) {
-            handleEntityMovement((S14PacketEntity) packet);
-        } else if (packet instanceof S18PacketEntityTeleport) {
-            handleEntityTeleport((S18PacketEntityTeleport) packet);
-        } else if (packet instanceof S32PacketConfirmTransaction) {
-            handleConfirmTransaction((S32PacketConfirmTransaction) packet);
-        } else if (packet instanceof S00PacketKeepAlive) {
-            mc.getNetHandler().handleKeepAlive((S00PacketKeepAlive) packet);
-        }
-    }
-
-    public void handleEntityMovement(S14PacketEntity packetIn) {
-        Entity entity = packetIn.getEntity(ReflectUtil.getField(NetHandlerPlayClient$clientWorldController, mc.getNetHandler()));
-
-        if (entity != null) {
-            byte posX = ReflectUtil.getField(S14PacketEntity$posX, packetIn),
-                    posY = ReflectUtil.getField(S14PacketEntity$posY, packetIn),
-                    posZ = ReflectUtil.getField(S14PacketEntity$posZ, packetIn);
-            entity.serverPosX += posX;
-            entity.serverPosY += posY;
-            entity.serverPosZ += posZ;
-            byte yaw = ReflectUtil.getField(S14PacketEntity$yaw, packetIn);
-            byte pitch = ReflectUtil.getField(S14PacketEntity$pitch, packetIn);
-            double d0 = (double) entity.serverPosX / 32.0D;
-            double d1 = (double) entity.serverPosY / 32.0D;
-            double d2 = (double) entity.serverPosZ / 32.0D;
-            float f = packetIn.func_149060_h() ? (float) (yaw * 360) / 256.0F : entity.rotationYaw;
-            float f1 = packetIn.func_149060_h() ? (float) (pitch * 360) / 256.0F : entity.rotationPitch;
-            entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3, false);
-            entity.onGround = packetIn.getOnGround();
-        }
-    }
-
-    public void handleEntityTeleport(S18PacketEntityTeleport packetIn) {
-        Entity entity = ReflectUtil.<WorldClient>getField(NetHandlerPlayClient$clientWorldController, mc.getNetHandler()).getEntityByID(packetIn.getEntityId());
-
-        if (entity != null) {
-            entity.serverPosX = packetIn.getX();
-            entity.serverPosY = packetIn.getY();
-            entity.serverPosZ = packetIn.getZ();
-            double d0 = (double) entity.serverPosX / 32.0D;
-            double d1 = (double) entity.serverPosY / 32.0D;
-            double d2 = (double) entity.serverPosZ / 32.0D;
-            float f = (float) (packetIn.getYaw() * 360) / 256.0F;
-            float f1 = (float) (packetIn.getPitch() * 360) / 256.0F;
-
-            if (Math.abs(entity.posX - d0) < 0.03125D && Math.abs(entity.posY - d1) < 0.015625D && Math.abs(entity.posZ - d2) < 0.03125D) {
-                entity.setPositionAndRotation2(entity.posX, entity.posY, entity.posZ, f, f1, 3, true);
-            } else {
-                entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3, true);
-            }
-
-            entity.onGround = packetIn.getOnGround();
-        }
-    }
-
-    public void handleConfirmTransaction(S32PacketConfirmTransaction packetIn) {
-        Container container = null;
-        EntityPlayer entityplayer = mc.thePlayer;
-
-        if (packetIn.getWindowId() == 0) {
-            container = entityplayer.inventoryContainer;
-        } else if (packetIn.getWindowId() == entityplayer.openContainer.windowId) {
-            container = entityplayer.openContainer;
-        }
-
-        if (container != null && !packetIn.func_148888_e()) {
-            mc.getNetHandler().addToSendQueue(new C0FPacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), true));
-        }
-    }
-
-    private static class VirtualEntity {
-        private double posX, posY, posZ;
-        private double cacheX, cacheY, cacheZ;
-        private final float width, height;
-
-        public VirtualEntity(Entity entity) {
-            cacheX = this.posX = entity.posX;
-            cacheY = this.posY = entity.posY;
-            cacheZ = this.posZ = entity.posZ;
-            this.width = entity.width;
-            this.height = entity.height;
-        }
-
-        public void handleVirtualMovement(double posX, double posY, double posZ) {
-            this.posX = posX;
-            this.posY = posY;
-            this.posZ = posZ;
-        }
-
-        public void handleVirtualTeleport(double serverPosX, double serverPosY, double serverPosZ) {
-            double d0 = serverPosX / 32.0D;
-            double d1 = serverPosY / 32.0D;
-            double d2 = serverPosZ / 32.0D;
-
-            if (!(Math.abs(posX - d0) < 0.03125D && Math.abs(posY - d1) < 0.015625D && Math.abs(posZ - d2) < 0.03125D)) {
-                posX = d0;
-                posY = d1;
-                posZ = d2;
+            S14PacketEntity packet1 = (S14PacketEntity) packet;
+            var entity = packet1.getEntity(mc.theWorld);
+            if (entity == target) {
+                x += packet1.func_149062_c() / 32.0;
+                y += packet1.func_149061_d() / 32.0;
+                z += packet1.func_149064_e() / 32.0;
             }
         }
-
-        @Listener
-        private void onUpdate(EventLoop e) {
-            cacheX += (posX - cacheX) * 0.2;
-            cacheY += (posY - cacheY) * 0.2;
-            cacheZ += (posZ - cacheZ) * 0.2;
+        if (packet instanceof S18PacketEntityTeleport) {
+            S18PacketEntityTeleport packet1 = (S18PacketEntityTeleport) packet;
+            var entity = mc.theWorld.getEntityByID(packet1.getEntityId());
+            if (entity == target) {
+                x = packet1.getX() / 32.0;
+                y = packet1.getY() / 32.0;
+                z = packet1.getZ() / 32.0;
+            }
         }
-
-        public AxisAlignedBB getEntityBoundingBox() {
-            float f = this.width / 2.0F;
-            return new AxisAlignedBB(cacheX - (double) f, cacheY, cacheZ - (double) f, cacheX + (double) f, cacheY + (double) this.height, cacheZ + (double) f);
+        //回溯判断
+        if (mc.thePlayer != null && !mc.thePlayer.isDead && mc.theWorld != null) {
+            addPackets(packet, e);
+        } else {
+            processPacket1(target);
+        }
+        if (!thing3(target) || !thing5()) {
+            processPacket1(target);
+            if (activity.getValue()) {
+                timer.reset();
+            }
+        }
+        if (rXYZ > _3 || pXYZ > _3) {
+            processPacket1(target);
+            timer.reset();
+        } else {
+            processPacket2(target);
+        }
+        //攻击判断
+        if (packet instanceof C02PacketUseEntity) {
+            attacking = true;
+            attackingTimer.reset();
+        }
+        if (attacking) {
+            if (attackingTimer.hasTimePassed(400)) {
+                attacking = false;
+            }
         }
     }
 
-    public boolean isDelaying() {
-        return this.isEnabled() && !delayedPackets.isEmpty();
+    public AxisAlignedBB getEntityBoundingBox(double posX, double posY, double posZ, double width, double height) {
+        double f = width / 2;
+        return new AxisAlignedBB(
+                posX - f, posY, posZ - f,
+                posX + f, posY + height,
+                posZ + f
+        );
+    }
+
+    @Override
+    protected void onDisable() {
+        savePackets.clear();
+        timer.reset();
+        attackingTimer.reset();
+    }
+
+    @Listener
+    private void onRender3D(EventRender3D event) {
+        if (!savePackets.isEmpty() && renderBox.getValue())
+            RenderUtil.drawEntityBox(getEntityBoundingBox(x, y, z, 0.6, 1.8), x, y, z, x, y, z, new Color(-1), outline.getValue(), true, outlineWidth.getValue(), event.getPartialTicks());
+    }
+
+    boolean thing3(Entity target) {//形成连击
+        if (!attackTimeFix.getValue()) {
+            return true;
+        }
+        if (target instanceof EntityLivingBase) {
+            return (target.posY - target.lastTickPosY) > 0 || mc.thePlayer.posY <= target.posY
+                    || mc.thePlayer.onGround;
+        }
+        return false;
+    }
+
+    boolean thing5() {
+        if (onlyAttacking.getValue()) {
+            return attacking;
+        }
+        return true;
     }
 }

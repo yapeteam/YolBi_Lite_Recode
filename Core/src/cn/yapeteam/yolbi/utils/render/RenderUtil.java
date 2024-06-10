@@ -3,6 +3,8 @@ package cn.yapeteam.yolbi.utils.render;
 import cn.yapeteam.loader.Mapper;
 import cn.yapeteam.yolbi.shader.GaussianFilter;
 import cn.yapeteam.yolbi.shader.impl.ShaderScissor;
+import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -12,7 +14,10 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.Timer;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -21,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -820,5 +826,51 @@ public class RenderUtil {
             shadowCache.put(identifier, TextureUtil.uploadTextureImageAllocate(TextureUtil.glGenTextures(), blurred, true, false));
         }
         drawImage(shadowCache.get(identifier), x, y, width, height, color.getRGB());
+    }
+
+    public static void drawBlockBox(final BlockPos blockPos, final Color color, final boolean outline, final boolean box, final float outlineWidth) {
+        final RenderManager renderManager = mc.getRenderManager();
+        final Timer timer = Objects.requireNonNull(ReflectUtil.Minecraft$getTimer(mc));
+
+
+        final double x = blockPos.getX() - ReflectUtil.GetRenderManager$renderPosX(renderManager);
+        final double y = blockPos.getY() - ReflectUtil.GetRenderManager$renderPosY(renderManager);
+        final double z = blockPos.getZ() - ReflectUtil.GetRenderManager$renderPosZ(renderManager);
+
+        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(x, y, z, x + 1.0, y + 1.0, z + 1.0);
+        final Block block = mc.theWorld.getBlockState(blockPos).getBlock();
+
+        if (block != null) {
+            final EntityPlayer player = mc.thePlayer;
+
+            final double posX = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) timer.renderPartialTicks;
+            final double posY = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) timer.renderPartialTicks;
+            final double posZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) timer.renderPartialTicks;
+            axisAlignedBB = block.getSelectedBoundingBox(mc.theWorld, blockPos)
+                    .expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D)
+                    .offset(-posX, -posY, -posZ);
+        }
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        enableGlCap(GL_BLEND);
+        disableGlCap(GL_TEXTURE_2D, GL_DEPTH_TEST);
+        glDepthMask(false);
+
+        if (box) {
+            glColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() != 255 ? color.getAlpha() : outline ? 26 : 35);
+            drawFilledBox(axisAlignedBB);
+        }
+
+        if (outline) {
+            glLineWidth(outlineWidth);
+            enableGlCap(GL_LINE_SMOOTH);
+            glColor(color);
+
+            drawSelectionBoundingBox(axisAlignedBB);
+        }
+
+        GlStateManager.resetColor();
+        glDepthMask(true);
+        resetCaps();
     }
 }

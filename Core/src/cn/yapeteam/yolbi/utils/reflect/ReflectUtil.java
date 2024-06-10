@@ -33,7 +33,6 @@ public class ReflectUtil {
             ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ;
 
 
-
     private static Method
             EntityRenderer$loadShader, EntityRenderer$setupCameraTransform, EntityRenderer$setupOverlayRendering,
             Minecraft$clickMouse, Minecraft$rightClickMouse,
@@ -171,7 +170,7 @@ public class ReflectUtil {
             Logger.exception(e);
         }
 
-        try{
+        try {
             Entity$PosY = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "posY", null, Mapper.Type.Field));
             Entity$PosY.setAccessible(true);
         } catch (NoSuchFieldException e) {

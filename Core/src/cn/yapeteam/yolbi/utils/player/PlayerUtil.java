@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi.utils.player;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import com.google.common.base.Predicates;
 import lombok.experimental.UtilityClass;
+import lombok.val;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockLiquid;
@@ -34,6 +35,11 @@ public class PlayerUtil implements IMinecraft {
         put(3, 11); // Haste
         put(13, 12); // Water Breathing
     }};
+
+    private int getPing(Entity entity) {
+        val uniqueID = mc.getNetHandler().getPlayerInfo(entity.getUniqueID());
+        return uniqueID != null ? uniqueID.getResponseTime() : 0;
+    }
 
     public static double fovFromEntity(Entity en) {
         return ((((double) (mc.thePlayer.rotationYaw - fovToEntity(en)) % 360.0D) + 540.0D) % 360.0D) - 180.0D;
