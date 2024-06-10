@@ -401,7 +401,6 @@ public class Backtrack extends Module {
 
     @Listener
     private void onPacket(EventPacket e) {
-        if (!e.isServerSide()) return;
         Packet<?> packet = e.getPacket();
         Entity target = getClosestEntity();
         if (target == null) return;
