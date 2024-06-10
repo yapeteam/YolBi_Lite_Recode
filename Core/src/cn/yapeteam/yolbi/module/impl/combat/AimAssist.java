@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class AimAssist extends Module {
     private final NumberValue<Integer> Range = new NumberValue<>("Aim Range", 5, 3, 10, 1);
 
-    public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle","Clip");
+    public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle", "Clip");
 
     private final BooleanValue View = new BooleanValue("In View", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
@@ -53,17 +53,12 @@ public class AimAssist extends Module {
                 return;
             if (mc.currentScreen != null) return;
             Entity target;
-            if (TargetPriority.is("Clip")){
+            if (TargetPriority.is("Clip"))
                 target = PlayerUtil.getMouseOver(1, Range.getValue());
-            }else{
-                target = getTargets();
-            }
+            else target = getTargets();
             if (this.target != target) {
                 aimPath.clear();
                 this.target = target;
-            }
-            if (TargetPriority.is("Clip")) {
-                target = PlayerUtil.getMouseOver(1, Range.getValue());
             }
             if (target != null && !(ClickAim.getValue() && !Natives.IsMouseDown(0)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
