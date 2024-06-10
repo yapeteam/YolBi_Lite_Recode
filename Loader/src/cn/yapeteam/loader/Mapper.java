@@ -9,7 +9,6 @@ import lombok.val;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
-import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,11 +135,8 @@ public class Mapper {
     }
 
     public static Mode guessMappingMode() {
-        JOptionPane.showMessageDialog(null, "1-1", "Warning", JOptionPane.WARNING_MESSAGE);
         Class<?> clazz = ClassUtils.getClass("net.minecraft.client.Minecraft");
-        JOptionPane.showMessageDialog(null, "1-2", "Warning", JOptionPane.WARNING_MESSAGE);
         if (clazz == null) return Mode.Vanilla;
-        JOptionPane.showMessageDialog(null, "1-3", "Warning", JOptionPane.WARNING_MESSAGE);
         byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
         ClassNode node = ASMUtils.node(bytes);
         if (node.methods.stream().anyMatch(m -> m.name.equals("runTick")))

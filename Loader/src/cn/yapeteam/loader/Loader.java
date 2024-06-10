@@ -21,15 +21,10 @@ public class Loader {
             if (JVMTIWrapper.instance == null)
                 JVMTIWrapper.instance = new NativeWrapper();
             Logger.info("Start PreLoading...");
-            JOptionPane.showMessageDialog(null, "1", "Warning", JOptionPane.WARNING_MESSAGE);
             Mapper.Mode mode = Mapper.guessMappingMode();
-            JOptionPane.showMessageDialog(null, "2", "Warning", JOptionPane.WARNING_MESSAGE);
             Logger.info("Reading mappings, mode: {}", mode.name());
-            JOptionPane.showMessageDialog(null, "3", "Warning", JOptionPane.WARNING_MESSAGE);
             Mapper.setMode(mode);
-            JOptionPane.showMessageDialog(null, "4", "Warning", JOptionPane.WARNING_MESSAGE);
             Mapper.readMappings();
-            JOptionPane.showMessageDialog(null, "5", "Warning", JOptionPane.WARNING_MESSAGE);
             SocketSender.init();
             try {
                 for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
