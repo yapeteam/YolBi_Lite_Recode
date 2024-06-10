@@ -91,6 +91,7 @@ public class Backtrack extends Module {
     private double distanceToPacket = 0;
 
     private Entity getClosestEntity() {
+        if (mc.theWorld == null) return null;
         List<Entity> filteredEntities = new ArrayList<>();
         for (Entity entity : mc.theWorld.loadedEntityList)
             if (entity instanceof EntityPlayer && entity != mc.thePlayer)
@@ -401,69 +402,73 @@ public class Backtrack extends Module {
 
     @Listener
     private void onPacket(EventPacket e) {
-        Packet<?> packet = e.getPacket();
-        Entity target = getClosestEntity();
-        if (target == null) return;
-        double cx = target.posX, cy = target.posY, cz = target.posZ;
-        double _3 = hitRange.getValue();
-        //int LengthDisPlay = getPing(mc.thePlayer);
-        //获得服务器位置信息
-        if (target instanceof EntityLivingBase) {
-            if (target.serverPosX != 0 && target.serverPosY != 0 && target.serverPosZ != 0 && target.width != 0 && target.height != 0) {
-                realX = target.serverPosX / 32d;
-                realY = target.serverPosY / 32d;
-                realZ = target.serverPosZ / 32d;
+        try {
+            Packet<?> packet = e.getPacket();
+            Entity target = getClosestEntity();
+            if (target == null) return;
+            double cx = target.posX, cy = target.posY, cz = target.posZ;
+            double _3 = hitRange.getValue();
+            //int LengthDisPlay = getPing(mc.thePlayer);
+            //获得服务器位置信息
+            if (target instanceof EntityLivingBase) {
+                if (target.serverPosX != 0 && target.serverPosY != 0 && target.serverPosZ != 0 && target.width != 0 && target.height != 0) {
+                    realX = target.serverPosX / 32d;
+                    realY = target.serverPosY / 32d;
+                    realZ = target.serverPosZ / 32d;
+                }
+                cXYZ = mc.thePlayer.getDistance(cx, cy, cz);
+                rXYZ = mc.thePlayer.getDistance(realX, realY, realZ);
+                pXYZ = mc.thePlayer.getDistance(x, y, z);
             }
-            cXYZ = mc.thePlayer.getDistance(cx, cy, cz);
-            rXYZ = mc.thePlayer.getDistance(realX, realY, realZ);
-            pXYZ = mc.thePlayer.getDistance(x, y, z);
-        }
-        //实时获取真实位置
-        if (packet instanceof S14PacketEntity) {
-            S14PacketEntity packet1 = (S14PacketEntity) packet;
-            var entity = packet1.getEntity(mc.theWorld);
-            if (entity == target) {
-                x += packet1.func_149062_c() / 32.0;
-                y += packet1.func_149061_d() / 32.0;
-                z += packet1.func_149064_e() / 32.0;
+            //实时获取真实位置
+            if (packet instanceof S14PacketEntity) {
+                S14PacketEntity packet1 = (S14PacketEntity) packet;
+                var entity = packet1.getEntity(mc.theWorld);
+                if (entity == target) {
+                    x += packet1.func_149062_c() / 32.0;
+                    y += packet1.func_149061_d() / 32.0;
+                    z += packet1.func_149064_e() / 32.0;
+                }
             }
-        }
-        if (packet instanceof S18PacketEntityTeleport) {
-            S18PacketEntityTeleport packet1 = (S18PacketEntityTeleport) packet;
-            var entity = mc.theWorld.getEntityByID(packet1.getEntityId());
-            if (entity == target) {
-                x = packet1.getX() / 32.0;
-                y = packet1.getY() / 32.0;
-                z = packet1.getZ() / 32.0;
+            if (packet instanceof S18PacketEntityTeleport) {
+                S18PacketEntityTeleport packet1 = (S18PacketEntityTeleport) packet;
+                var entity = mc.theWorld.getEntityByID(packet1.getEntityId());
+                if (entity == target) {
+                    x = packet1.getX() / 32.0;
+                    y = packet1.getY() / 32.0;
+                    z = packet1.getZ() / 32.0;
+                }
             }
-        }
-        //回溯判断
-        if (mc.thePlayer != null && !mc.thePlayer.isDead && mc.theWorld != null) {
-            addPackets(packet, e);
-        } else {
-            processPacket1(target);
-        }
-        if (!thing3(target) || !thing5()) {
-            processPacket1(target);
-            if (activity.getValue()) {
+            //回溯判断
+            if (mc.thePlayer != null && !mc.thePlayer.isDead && mc.theWorld != null) {
+                addPackets(packet, e);
+            } else {
+                processPacket1(target);
+            }
+            if (!thing3(target) || !thing5()) {
+                processPacket1(target);
+                if (activity.getValue()) {
+                    timer.reset();
+                }
+            }
+            if (rXYZ > _3 || pXYZ > _3) {
+                processPacket1(target);
                 timer.reset();
+            } else {
+                processPacket2(target);
             }
-        }
-        if (rXYZ > _3 || pXYZ > _3) {
-            processPacket1(target);
-            timer.reset();
-        } else {
-            processPacket2(target);
-        }
-        //攻击判断
-        if (packet instanceof C02PacketUseEntity) {
-            attacking = true;
-            attackingTimer.reset();
-        }
-        if (attacking) {
-            if (attackingTimer.hasTimePassed(400)) {
-                attacking = false;
+            //攻击判断
+            if (packet instanceof C02PacketUseEntity) {
+                attacking = true;
+                attackingTimer.reset();
             }
+            if (attacking) {
+                if (attackingTimer.hasTimePassed(400)) {
+                    attacking = false;
+                }
+            }
+        } catch (Throwable ex) {
+            Logger.exception(ex);
         }
     }
 
