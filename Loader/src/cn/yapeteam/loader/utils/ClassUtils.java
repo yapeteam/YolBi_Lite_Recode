@@ -5,10 +5,13 @@ import cn.yapeteam.loader.ResourceManager;
 
 public class ClassUtils {
     public static Class<?> getClass(String name) {
-        String finalName = name;
+        name = name.replace('/', '.');
         Class<?> clazz = null;
         if (JVMTIWrapper.instance != null) {
-            clazz = JVMTIWrapper.instance.getLoadedClasses().stream().filter(c -> finalName.equals(c.getName())).findFirst().orElse(null);
+            try {
+                clazz = JVMTIWrapper.instance.FindClass(name);
+            } catch (Throwable ignored) {
+            }
             if (clazz != null) return clazz;
         }
         name = name.replace('/', '.');

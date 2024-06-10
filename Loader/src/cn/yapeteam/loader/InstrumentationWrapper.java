@@ -64,12 +64,15 @@ public class InstrumentationWrapper extends JVMTIWrapper {
         return null;
     }
 
+
     @Override
-    public ArrayList<Class<?>> getLoadedClasses() {
+    public Class<?> FindClass(String name) {
+        name = name.replace('/', '.');
         ArrayList<Class<?>> list = new ArrayList<>();
         //noinspection ManualArrayToCollectionCopy
         for (Class<?> aClass : instrumentation.getAllLoadedClasses())
             list.add(aClass);
-        return list;
+        String finalName = name;
+        return list.stream().filter(c -> finalName.equals(c.getName())).findFirst().orElse(null);
     }
 }
