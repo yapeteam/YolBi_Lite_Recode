@@ -336,9 +336,7 @@ public class Backtrack extends Module {
                     }
                 }
             }
-        } else {
-            distanceToPacket = cXYZ;
-        }
+        } else distanceToPacket = cXYZ;
         return distanceToPacket;
     }
 
