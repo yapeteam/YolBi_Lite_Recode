@@ -66,7 +66,7 @@ public class InstrumentationWrapper extends JVMTIWrapper {
 
 
     @Override
-    public Class<?> FindClass(String name) {
+    public Class<?> FindClass(String name, Object loader) {
         name = name.replace('/', '.');
         ArrayList<Class<?>> list = new ArrayList<>();
         //noinspection ManualArrayToCollectionCopy

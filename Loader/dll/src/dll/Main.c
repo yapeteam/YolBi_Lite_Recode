@@ -34,7 +34,14 @@ static struct TransformCallback *callback_list = NULL;
 
 jclass findThreadClass(const char *name, jobject classLoader)
 {
-    return (*jniEnv)->FindClass(jniEnv, name);
+    jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
+    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName",
+                                                     "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+    jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
+    jclass result = (jclass)(*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
+                                                                                              className,
+                                                                                              JNI_TRUE, classLoader));
+    return result;
 }
 
 unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray)
@@ -135,9 +142,9 @@ void *allocate(jlong size)
     return resultBuffer;
 }
 
-JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name)
+JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject loader)
 {
-    return (*env)->FindClass(env, jstringToChar(env, name));
+    return findThreadClass(name, loader);
 }
 
 JNIEXPORT jbyteArray
@@ -298,8 +305,7 @@ void Inject(const char yolbi_dir[260])
         {
             char jarPath[260];
             sprintf_s(jarPath, 260, "%s\\%s", yolbi_dir, entry->d_name);
-            (*jvmti)->AddToSystemClassLoaderSearch(jvmti, jarPath);
-            // loadJar(jarPath, clientThread);
+            loadJar(jarPath, clientThread);
             printf("loaded: %s\n", jarPath);
         }
     }
@@ -328,7 +334,7 @@ void Inject(const char yolbi_dir[260])
     (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
-    jclass wrapperClass = findThreadClass("cn/yapeteam/loader/NativeWrapper", classLoader);
+    jclass wrapperClass = findThreadClass("cn.yapeteam.loader.NativeWrapper", classLoader);
     if (!wrapperClass)
     {
         printf("Failed to find NativeWrapper class\n");
@@ -339,14 +345,14 @@ void Inject(const char yolbi_dir[260])
         {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
         {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
         {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
-        {"FindClass", "(Ljava/lang/String;)Ljava/lang/Class;", (void *)&FindClass},
+        {"FindClass", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Class;", (void *)&FindClass},
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
-    jclass natvieClass = findThreadClass("cn/yapeteam/loader/Natives", classLoader);
+    jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
     register_native_methods(jniEnv, natvieClass);
     printf("Native methods registered\n");
 
-    jclass PreLoad = findThreadClass("cn/yapeteam/loader/Loader", classLoader);
+    jclass PreLoad = findThreadClass("cn.yapeteam.loader.Loader", classLoader);
     if (!PreLoad)
     {
         printf("Failed to find Loader class\n");
@@ -357,11 +363,10 @@ void Inject(const char yolbi_dir[260])
     (*jniEnv)->CallStaticVoidMethod(jniEnv, PreLoad, preload);
     printf("Preload method called\n");
 
-    (*jvmti)->AddToSystemClassLoaderSearch(jvmti, injectionOutPath);
-    // loadJar(injectionOutPath, clientThread);
+    loadJar(injectionOutPath, clientThread);
     printf("Injection jar loaded\n");
 
-    jclass Start = findThreadClass("cn/yapeteam/yolbi/Loader", classLoader);
+    jclass Start = findThreadClass("cn.yapeteam.yolbi.Loader", classLoader);
     if (!Start)
     {
         printf("Failed to find Loader class\n");

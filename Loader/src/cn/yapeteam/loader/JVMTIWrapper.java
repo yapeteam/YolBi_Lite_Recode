@@ -10,5 +10,5 @@ public abstract class JVMTIWrapper {
 
     public abstract Class<?> defineClass(ClassLoader loader, byte[] array);
 
-    public abstract Class<?> FindClass(String name);
+    public abstract Class<?> FindClass(String name, Object classLoader);
 }

@@ -7,5 +7,5 @@ public class NativeWrapper extends JVMTIWrapper {
 
     public native Class<?> defineClass(ClassLoader loader, byte[] array);
 
-    public native Class<?> FindClass(String name);
+    public native Class<?> FindClass(String name, Object loader);
 }
