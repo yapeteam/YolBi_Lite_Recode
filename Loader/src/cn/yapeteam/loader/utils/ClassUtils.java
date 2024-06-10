@@ -5,7 +5,7 @@ import cn.yapeteam.loader.ResourceManager;
 
 public class ClassUtils {
     public static Class<?> getClass(String name) {
-        name = name.replace('/', '.');
+        name = name.replace('.', '/');
         Class<?> clazz = null;
         if (JVMTIWrapper.instance != null) {
             try {
