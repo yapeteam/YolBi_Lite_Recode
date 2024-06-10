@@ -7,6 +7,7 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.module.Module;
 
+@Deprecated
 @ModuleInfo(name = "Derp", category = ModuleCategory.MISC)
 public class Derp extends Module {
     private float yaw;

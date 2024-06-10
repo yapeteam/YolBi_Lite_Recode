@@ -18,6 +18,7 @@ import net.minecraft.network.play.client.*;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Deprecated
 @ModuleInfo(name = "FakeLag", category = ModuleCategory.COMBAT)
 public class FakeLag extends Module {
     public FakeLag() {
