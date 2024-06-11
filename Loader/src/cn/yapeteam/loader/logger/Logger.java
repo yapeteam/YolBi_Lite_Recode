@@ -64,8 +64,10 @@ public class Logger {
         return builder.toString();
     }
 
+    private static final boolean debug = false;
 
     public static void log(String str, String color, Object... o) {
+        if (!debug) return;
         for (Object o1 : o)
             if (o1 != null)
                 str = replaceFirst(str, "{}", o1.toString());

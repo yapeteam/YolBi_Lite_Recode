@@ -41,7 +41,6 @@ jclass findThreadClass(const char *name, jobject classLoader)
     jclass result = (jclass)(*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
                                                                                               className,
                                                                                               JNI_TRUE, classLoader));
-    (*jniEnv)->DeleteLocalRef(jniEnv, className);
     return result;
 }
 
@@ -143,23 +142,9 @@ void *allocate(jlong size)
     return resultBuffer;
 }
 
-JNIEXPORT jobject
-
-    JNICALL
-    GetLoadedClasses(JNIEnv *env, jclass _)
+JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject loader)
 {
-    jint classcount = 0;
-    jclass *classes = NULL;
-    (*jvmti)->GetLoadedClasses((jvmtiEnv *)
-                                   jvmti,
-                               &classcount, &classes);
-    jclass ArrayList = (*env)->FindClass(env, "java/util/ArrayList");
-    jmethodID add = (*env)->GetMethodID(env, ArrayList, "add", "(Ljava/lang/Object;)Z");
-    jobject list = (*env)->NewObject(env, ArrayList, (*env)->GetMethodID(env, ArrayList, "<init>", "()V"));
-    for (int i = 0; i < classcount; i++)
-        (*env)->CallBooleanMethod(env, list, add, classes[i]);
-    free(classes);
-    return list;
+    return findThreadClass(name, loader);
 }
 
 JNIEXPORT jbyteArray
@@ -303,14 +288,14 @@ void Inject(const char yolbi_dir[260])
     jobject classLoader = (*jniEnv)->CallObjectMethod(jniEnv, clientThread, (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, clientThread), "getContextClassLoader", "()Ljava/lang/ClassLoader;"));
     if (!classLoader)
         return;
-    else
-        printf("classLoader found\n");
+    //  else
+    //      printf("classLoader found\n");
 
     jclass Thread = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
     jmethodID setContextClassLoader = (*jniEnv)->GetMethodID(jniEnv, Thread, "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
     jobject currentThread = (*jniEnv)->CallStaticObjectMethod(jniEnv, Thread, (*jniEnv)->GetStaticMethodID(jniEnv, Thread, "currentThread", "()Ljava/lang/Thread;"));
     (*jniEnv)->CallVoidMethod(jniEnv, currentThread, setContextClassLoader, classLoader);
-    printf("currentThread contextClassLoader set\n");
+    // printf("currentThread contextClassLoader set\n");
 
     DIR *dir = opendir(yolbi_dir);
     struct dirent *entry;
@@ -321,7 +306,7 @@ void Inject(const char yolbi_dir[260])
             char jarPath[260];
             sprintf_s(jarPath, 260, "%s\\%s", yolbi_dir, entry->d_name);
             loadJar(jarPath, clientThread);
-            printf("loaded: %s\n", jarPath);
+            // printf("loaded: %s\n", jarPath);
         }
     }
     closedir(dir);
@@ -352,43 +337,44 @@ void Inject(const char yolbi_dir[260])
     jclass wrapperClass = findThreadClass("cn.yapeteam.loader.NativeWrapper", classLoader);
     if (!wrapperClass)
     {
-        printf("Failed to find NativeWrapper class\n");
+        // printf("Failed to find NativeWrapper class\n");
         return;
     }
-    printf("NativeWrapper class found\n");
+    // printf("NativeWrapper class found\n");
     JNINativeMethod methods[] = {
         {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
         {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
         {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
-        {"getLoadedClasses", "()Ljava/util/ArrayList;", (void *)&GetLoadedClasses},
+        {"FindClass", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Class;", (void *)&FindClass},
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
     jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
     register_native_methods(jniEnv, natvieClass);
-    printf("Native methods registered\n");
+    // printf("Native methods registered\n");
 
     jclass PreLoad = findThreadClass("cn.yapeteam.loader.Loader", classLoader);
     if (!PreLoad)
     {
-        printf("Failed to find Loader class\n");
+        // printf("Failed to find Loader class\n");
         return;
     }
-    jmethodID preload = (*jniEnv)->GetStaticMethodID(jniEnv, PreLoad, "preload", "(Ljava/lang/String;)V");
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, PreLoad, preload, (*jniEnv)->NewStringUTF(jniEnv, yolbi_dir));
-    printf("Preload method called\n");
+
+    jmethodID preload = (*jniEnv)->GetStaticMethodID(jniEnv, PreLoad, "preload", "()V");
+    (*jniEnv)->CallStaticVoidMethod(jniEnv, PreLoad, preload);
+    // printf("Preload method called\n");
 
     loadJar(injectionOutPath, clientThread);
-    printf("Injection jar loaded\n");
+    // printf("Injection jar loaded\n");
 
     jclass Start = findThreadClass("cn.yapeteam.yolbi.Loader", classLoader);
     if (!Start)
     {
-        printf("Failed to find Loader class\n");
+        // printf("Failed to find Loader class\n");
         return;
     }
     jmethodID start = (*jniEnv)->GetStaticMethodID(jniEnv, Start, "start", "()V");
     (*jniEnv)->CallStaticVoidMethod(jniEnv, Start, start);
-    printf("Start method called\n");
+    // printf("Start method called\n");
 }
 
 #include <windows.h>

@@ -1,7 +1,5 @@
 package cn.yapeteam.loader;
 
-import java.util.ArrayList;
-
 @SuppressWarnings("unused")
 public abstract class JVMTIWrapper {
     public static JVMTIWrapper instance = null;
@@ -12,5 +10,5 @@ public abstract class JVMTIWrapper {
 
     public abstract Class<?> defineClass(ClassLoader loader, byte[] array);
 
-    public abstract ArrayList<Class<?>> getLoadedClasses();
+    public abstract Class<?> FindClass(String name, Object classLoader);
 }

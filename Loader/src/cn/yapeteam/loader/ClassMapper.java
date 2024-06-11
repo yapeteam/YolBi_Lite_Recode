@@ -1,5 +1,6 @@
 package cn.yapeteam.loader;
 
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.mixin.annotations.DontMap;
 import cn.yapeteam.loader.mixin.annotations.Mixin;
 import cn.yapeteam.loader.mixin.annotations.Shadow;
@@ -25,7 +26,7 @@ public class ClassMapper {
     public static byte[] map(byte[] bytes) throws Throwable {
         ClassNode node = ASMUtils.node(bytes);
         if (DontMap.Helper.hasAnnotation(node)) return bytes;
-        System.out.println(node.name);
+        Logger.info("Mapping class " + node.name);
         node.superName = Mapper.getObfClass(node.superName);
         List<String> interfaces = new ArrayList<>();
         for (String anInterface : node.interfaces)

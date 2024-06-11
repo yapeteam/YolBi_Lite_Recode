@@ -1,5 +1,7 @@
 package cn.yapeteam.yolbi;
 
+import cn.yapeteam.loader.JVMTIWrapper;
+import cn.yapeteam.loader.NativeWrapper;
 import cn.yapeteam.loader.SocketSender;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.mixin.MixinManager;
@@ -13,6 +15,8 @@ import java.awt.*;
 public class Loader {
     public static void start() {
         try {
+            if (JVMTIWrapper.instance == null)
+                JVMTIWrapper.instance = new NativeWrapper();
             Logger.info("Start Loading!");
             Logger.info("Initializing MixinLoader...");
             MixinManager.init();

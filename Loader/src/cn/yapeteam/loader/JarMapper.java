@@ -1,5 +1,6 @@
 package cn.yapeteam.loader;
 
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.mixin.annotations.DontMap;
 import cn.yapeteam.loader.mixin.annotations.Mixin;
 import cn.yapeteam.loader.utils.ASMUtils;
@@ -56,7 +57,7 @@ public class JarMapper {
                     bytes = ClassMapper.map(bytes);
                     val node = ASMUtils.node(bytes);
                     if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
-                        System.out.println(se.getName());
+                        Logger.info("Mapping mixin class: {}", se.getName());
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
                     }
                     if (DontMap.Helper.hasAnnotation(node)) {
