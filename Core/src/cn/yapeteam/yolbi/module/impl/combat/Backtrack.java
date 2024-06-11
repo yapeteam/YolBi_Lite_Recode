@@ -53,7 +53,7 @@ public class Backtrack extends Module {
             hitRange = new NumberValue<>("Hit Range", 5.4f, 2f, 6f, 0.1f),
             minHitRange = new NumberValue<>("Hit Range", 2f, 1f, 6f, 0.1f),
             outlineWidth = new NumberValue<>("Outline Width", outline::getValue, 1.5f, 0.5f, 5f, 0.1f);
-    private final NumberValue<Integer> BackTrackDelay = new NumberValue<>("Backtrack Delay", 2000, 800, 10000, 1);
+    private final NumberValue<Integer> BackTrackDelay = new NumberValue<>("Backtrack Delay", 300, 100, 1000, 10);
     private final ModeValue<String>
             processS12Mode = new ModeValue<>("ProcessS12Mode", "InPut", "Cancel", "InPut"),
             processS27Mode = new ModeValue<>("ProcessS27Mode", "InPut", "Cancel", "InPut");
