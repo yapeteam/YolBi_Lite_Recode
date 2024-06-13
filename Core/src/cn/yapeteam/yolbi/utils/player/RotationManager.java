@@ -24,6 +24,10 @@ public class RotationManager implements IMinecraft {
     private static double rotationSpeed;
     private static MovementFix correctMovement;
 
+    public float renderPitchHead;
+
+    public float prevRenderPitchHead;
+
     /*
      * This method must be called on Pre Update Event to work correctly
      */
@@ -75,7 +79,7 @@ public class RotationManager implements IMinecraft {
             mc.thePlayer.renderYawOffset = yaw;
             mc.thePlayer.rotationYawHead = yaw;
             //todo: fix this
-            //mc.thePlayer.renderPitchHead = pitch;
+            renderPitchHead = pitch;
 
             lastServerRotations = new Vector2f(yaw, pitch);
 
@@ -227,10 +231,16 @@ public class RotationManager implements IMinecraft {
 
     public Vector2f calculate(final Vector3d from, final Vector3d to) {
         final Vector3d diff = to.subtract(from);
-        final double distance = Math.hypot(diff.getX(), diff.getZ());
-        final float yaw = (float) (MathHelper.atan2(diff.getZ(), diff.getX()) * MathConst.TO_DEGREES) - 90.0F;
-        final float pitch = (float) (-(MathHelper.atan2(diff.getY(), distance) * MathConst.TO_DEGREES));
+        final double diffX = diff.getX();
+        final double diffY = diff.getY();
+        final double diffZ = diff.getZ();
+        float yaw = (float) (from.getX() + MathHelper.wrapAngleTo180_float((float) ((float)(Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
+        float pitch = clamp((float) (from.getY() + MathHelper.wrapAngleTo180_float((float) ((float)(-(Math.atan2(diffY, MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
         return new Vector2f(yaw, pitch);
+    }
+
+    public static float clamp(final float n) {
+        return MathHelper.clamp_float(n, -90.0f, 90.0f);
     }
 
     public Vector2f calculate(final Vec3 to, final EnumFacing enumFacing) {

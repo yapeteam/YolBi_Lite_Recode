@@ -6,6 +6,7 @@ import cn.yapeteam.yolbi.event.impl.player.EventChat;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.utils.player.RotationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -32,6 +33,8 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
             )
     )
     public void onUpdate() {
+        RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
+        RotationManager.renderPitchHead = rotationPitch;
         YolBi.instance.getEventManager().post(new EventUpdate());
     }
 

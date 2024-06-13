@@ -490,7 +490,7 @@ public class Backtrack extends Module {
 
     @Listener
     private void onRender3D(EventRender3D event) {
-        if (!savePackets.isEmpty() && renderBox.getValue())
+        if (renderBox.getValue())
             RenderUtil.drawEntityBox(getEntityBoundingBox(x, y, z, 0.6, 1.8), x, y, z, x, y, z, new Color(-1), outline.getValue(), true, outlineWidth.getValue(), event.getPartialTicks());
     }
 

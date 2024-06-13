@@ -6,6 +6,7 @@ import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.loader.utils.vector.Vector3d;
+import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
@@ -137,17 +138,18 @@ public class Scaffold extends Module {
     }
 
     public void getRotations(final float yawOffset) {
-        double calculatedyaw = RotationManager.calculate(convertVec3d(targetBlock)).x;
-        if (calculatedyaw == 180) {
-            calculatedyaw = 45;
-        } else if (calculatedyaw == 0) {
-            calculatedyaw = -45;
+        boolean found = false;
+        if(PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir){
+            final Vector2f rotations = RotationManager.calculate(
+                    new Vector3d(blockFace.getX(), blockFace.getY(), blockFace.getZ()), enumFacing.getEnumFacing());
+//            targetYaw = rotations.x;
+            targetYaw = rotations.x;
+            targetPitch = 78.1F;
+        }else{
+            found = true;
+            // target yaw and pitch stays the same
         }
 
-        System.out.println(calculatedyaw);
-        targetYaw = (float) Math.round(calculatedyaw / 45) * 45 - 180 + yawOffset;
-
-        targetPitch = RotationManager.calculate(convertVec3d(targetBlock)).y;
     }
 
     @AllArgsConstructor
