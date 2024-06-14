@@ -44,7 +44,8 @@ public class MixinModelBiped extends ModelBiped{
     @Inject(
             method = "setRotationAngles", desc = "(FFFFFFLnet/minecraft/entity/Entity;)V",
             target = @Target(
-                    value = "FMUL",
+                    value = "INVOKESTATIC",
+                    target = "net/minecraft/util/MathHelper.cos(F)F",
                     shift = Target.Shift.BEFORE
             )
     )
