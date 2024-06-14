@@ -19,7 +19,7 @@ public class Natives {
 
     public static native void SetKeyBoard(int key, boolean pressed);
 
-    public static native void SendLeft();
+    public static native void SendLeft(boolean pressed);
 
-    public static native void SendRight();
+    public static native void SendRight(boolean pressed);
 }

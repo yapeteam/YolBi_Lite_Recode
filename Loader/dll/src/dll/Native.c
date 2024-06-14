@@ -44,16 +44,22 @@ JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
     SendInput(1, &input, sizeof(INPUT));
 }
 
-JNICALL SendLeft(JNIEnv *env, jclass _)
+JNICALL SendLeft(JNIEnv *env, jclass _,jboolean pressed)
 {
-    SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
-    SendMessage(hwnd, WM_LBUTTONUP, 0, 0);
+    if(pressed){
+        SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
+    }else{
+        SendMessage(hwnd, WM_LBUTTONUP, 0, 0);}
+    }
 }
 
-JNICALL SendRight(JNIEnv *env, jclass _)
+JNICALL SendRight(JNIEnv *env, jclass _,jboolean pressed)
 {
-    SendMessage(hwnd, WM_RBUTTONDOWN, 0, 0);
-    SendMessage(hwnd, WM_RBUTTONUP, 0, 0);
+    if(pressed){
+        SendMessage(hwnd, WM_RBUTTONDOWN, 0, 0);
+    }else{
+        SendMessage(hwnd, WM_RBUTTONUP, 0, 0);
+    }
 }
 
 JNICALL IsMouseDown(JNIEnv *env, jclass _, jint button)
@@ -83,8 +89,8 @@ void register_native_methods(JNIEnv *env, jclass clazz)
         {"Init", "(Ljava/lang/String;)V", (void *)&Init},
         {"SetWindowsTransparent", "(ZLjava/lang/String;)V", (void *)&SetWindowsTransparent},
         {"SetKeyBoard", "(IZ)V", (void *)&SetKeyBoard},
-        {"SendLeft", "()V", (void *)&SendLeft},
-        {"SendRight", "()V", (void *)&SendRight},
+        {"SendLeft", "(Z)V", (void *)&SendLeft},
+        {"SendRight", "(Z)V", (void *)&SendRight},
         {"IsMouseDown", "(I)Z", (void *)&IsMouseDown},
     };
     (*env)->RegisterNatives(env, clazz, methods, 6);

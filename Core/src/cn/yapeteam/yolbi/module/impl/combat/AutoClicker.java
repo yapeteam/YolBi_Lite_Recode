@@ -10,11 +10,15 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.utils.misc.TimerUtil;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT, key = Keyboard.KEY_F)
 public class AutoClicker extends Module {
@@ -69,13 +73,28 @@ public class AutoClicker extends Module {
     }
 
     public void sendClick(int button) {
-        if (button == 0)
-            Natives.SendLeft();
-        else Natives.SendRight();
+
+
+
+        System.out.println(delay);
+
+        // Simulate left click
+        if (button == 0) {
+            Natives.SendLeft(true);
+            Natives.SendLeft(false);
+        }
+        // Simulate right click
+        else if (button == 1) {
+            Natives.SendRight(true);
+            // Schedule the release of the click to be executed after the delay
+            Natives.SendRight(false);
+        }
     }
 
     @Listener
     private void onRender2D(EventRender2D e) {
+        Natives.SendLeft(true);
+        Natives.SendRight(true);
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
