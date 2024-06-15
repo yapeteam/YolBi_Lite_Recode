@@ -64,16 +64,16 @@ public class Logger {
         return builder.toString();
     }
 
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     public static void log(String str, String color, Object... o) {
-        if (!debug) return;
         for (Object o1 : o)
             if (o1 != null)
                 str = replaceFirst(str, "{}", o1.toString());
             else str = replaceFirst(str, "{}", "null");
         str = "[" + dateFormat.format(new Date()) + "]" + " " + color + str + ConsoleColors.RESET;
-        System.out.println(str);
+        if (debug)
+            System.out.println(str);
         cache.add(str);
         if (cache.size() >= 50)
             try {
