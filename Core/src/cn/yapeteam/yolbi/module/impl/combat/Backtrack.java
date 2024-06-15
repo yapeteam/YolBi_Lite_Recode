@@ -262,8 +262,8 @@ public class Backtrack extends Module {
                 var d2 = p1.getZ();
                 entityplayer.setPositionAndRotation(d0, d1, d2, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
                 C03PacketPlayer.C06PacketPlayerPosLook packet = new C03PacketPlayer.C06PacketPlayerPosLook(
-                        d0, entityplayer.getEntityBoundingBox().minY,
-                        d2, entityplayer.rotationYaw, entityplayer.rotationPitch, false
+                        entityplayer.posX, entityplayer.getEntityBoundingBox().minY,
+                        entityplayer.posZ, entityplayer.rotationYaw, entityplayer.rotationPitch, false
                 );
                 PacketUtil.skip(packet);
                 PacketUtil.sendPacket(packet);
@@ -324,7 +324,7 @@ public class Backtrack extends Module {
                 var entity = p1.getEntity(mc.theWorld);
                 if (entity == target) {
                     if (target instanceof EntityLivingBase) {
-                        distanceToPacket = mc.thePlayer.getDistance(p1.func_149062_c() / 32.0, p1.func_149061_d() / 32.0, p1.func_149064_e() / 32.0);
+                        distanceToPacket = mc.thePlayer.getDistance(target.posX + (((S14PacketEntity) p).func_149062_c() / 32.0), target.posY + (((S14PacketEntity) p).func_149061_d() / 32.0), target.posZ + (((S14PacketEntity) p).func_149064_e() / 32.0));
                     }
                 }
             }
@@ -337,7 +337,7 @@ public class Backtrack extends Module {
                     }
                 }
             }
-        } else distanceToPacket = cXYZ;
+        }
         return distanceToPacket;
     }
 
