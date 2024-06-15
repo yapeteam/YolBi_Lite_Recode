@@ -6,19 +6,14 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
-import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.misc.TimerUtil;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT, key = Keyboard.KEY_F)
 public class AutoClicker extends Module {
@@ -33,7 +28,7 @@ public class AutoClicker extends Module {
     private final ModeValue<String> clickprio = new ModeValue<>("Click Priority", "Left", "Left", "Right");
 
     public AutoClicker() {
-        addValues(cps, range, leftClick, rightClick,noeat,nomine,clickprio);
+        addValues(cps, range, leftClick, rightClick, noeat, nomine, clickprio);
     }
 
     private double delay = 0, time = 0;
@@ -73,11 +68,6 @@ public class AutoClicker extends Module {
     }
 
     public void sendClick(int button) {
-
-
-
-        System.out.println(delay);
-
         // Simulate left click
         if (button == 0) {
             Natives.SendLeft(true);
@@ -96,7 +86,7 @@ public class AutoClicker extends Module {
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if(clickprio.is("Left")){
+            if (clickprio.is("Left")) {
                 if (leftClick.getValue() && Natives.IsMouseDown(0) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
                     time = System.currentTimeMillis();
                     sendClick(0);
@@ -105,7 +95,7 @@ public class AutoClicker extends Module {
                     time = System.currentTimeMillis();
                     sendClick(1);
                 }
-            }else{
+            } else {
                 if (rightClick.getValue() && Natives.IsMouseDown(1) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
                     time = System.currentTimeMillis();
                     sendClick(1);
