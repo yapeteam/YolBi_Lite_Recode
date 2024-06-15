@@ -93,8 +93,6 @@ public class AutoClicker extends Module {
 
     @Listener
     private void onRender2D(EventRender2D e) {
-        Natives.SendLeft(true);
-        Natives.SendRight(true);
         delay = generate(cps.getValue(), range.getValue());
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {

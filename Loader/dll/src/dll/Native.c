@@ -44,7 +44,7 @@ JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
     SendInput(1, &input, sizeof(INPUT));
 }
 
-JNICALL SendLeft(JNIEnv *env, jclass _,jboolean pressed)
+JNICALL SendLeft(JNIEnv *env, jclass _, jboolean pressed)
 {
     if(pressed){
         SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
@@ -53,7 +53,7 @@ JNICALL SendLeft(JNIEnv *env, jclass _,jboolean pressed)
     }
 }
 
-JNICALL SendRight(JNIEnv *env, jclass _,jboolean pressed)
+JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
 {
     if(pressed){
         SendMessage(hwnd, WM_RBUTTONDOWN, 0, 0);
