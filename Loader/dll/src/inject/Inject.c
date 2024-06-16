@@ -32,7 +32,7 @@
 
 #pragma comment(lib, "Advapi32.lib")
 
-#define RETURN_WITH_ERROR(e) { printf( "[-] %s. Error=%d", e, (int) GetLastError() ); return; }
+#define RETURN_WITH_ERROR(e) { printf( "[-] %s. Error=%d\n", e, (int) GetLastError() ); return; }
 
 const char *jstringToChar(JNIEnv *env, jstring jstr) {
     const char *str = (*env)->GetStringUTFChars(env, jstr, 0);
@@ -85,7 +85,7 @@ Java_cn_yapeteam_injector_Utils_injectDLL(JNIEnv *env, jclass _, jint dwProcessI
     hModule = LoadRemoteLibraryR(hProcess, lpBuffer, dwLength, NULL);
     if (!hModule) RETURN_WITH_ERROR("Failed to inject the DLL")
 
-    printf("[+] Injected the DLL into process %lu.", dwProcessId);
+    printf("[+] Injected the DLL into process %lu.\n", dwProcessId);
 
     WaitForSingleObject(hModule, -1);
 
