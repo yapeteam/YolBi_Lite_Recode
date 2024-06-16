@@ -122,9 +122,9 @@ public class MainFrame extends JFrame {
         new Thread(() -> {
             while (true) {
                 ArrayList<Pair<String, Integer>> minecraftProcesses = Utils.getMinecraftProcesses();
-                if (minecraftProcesses.isEmpty()) continue;
                 int selected = process.getSelectedIndex();
                 process.removeAllItems();
+                if (minecraftProcesses.isEmpty()) continue;
                 for (Pair<String, Integer> minecraftProcess : minecraftProcesses)
                     process.addItem(minecraftProcess.a);
                 if (selected != -1)

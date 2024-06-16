@@ -58,8 +58,19 @@ void replace(char *str, char *fstr, char *rstr)
 
 jclass findThreadClass(const char *name, jobject classLoader)
 {
-    replace(name, ".", "/");
-    return (*jniEnv)->FindClass(jniEnv, name);
+    jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
+    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName",
+                                                     "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+    jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
+    jclass result = (jclass)(*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
+                                                                                              className,
+                                                                                              JNI_TRUE, classLoader));
+    if (!result)
+    {
+        replace(name, ".", "/");
+        return (*jniEnv)->FindClass(jniEnv, name);
+    }
+    return result;
 }
 
 unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray)
