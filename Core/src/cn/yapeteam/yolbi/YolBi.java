@@ -10,8 +10,7 @@ import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.NotificationManager;
-
-import cn.yapeteam.yolbi.render.RenderManager;
+import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
@@ -33,7 +32,7 @@ public class YolBi {
     private ModuleManager moduleManager;
     private FontManager fontManager;
     private NotificationManager notificationManager;
-    private RenderManager renderManager;
+    private JFrameRenderer jFrameRenderer;
 
     public EventManager getEventManager() {
         if (eventManager == null)
@@ -57,10 +56,10 @@ public class YolBi {
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
         instance.notificationManager = new NotificationManager();
-        instance.renderManager = new RenderManager();
+        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
-        instance.eventManager.register(instance.renderManager);
+        instance.eventManager.register(instance.jFrameRenderer);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(YolBi.class);
@@ -69,7 +68,7 @@ public class YolBi {
         try {
             YolBi.instance.getConfigManager().load();
             WebServer.start();
-            instance.renderManager.initwindow();
+            instance.jFrameRenderer.display();
         } catch (Throwable e) {
             Logger.exception(e);
         }
@@ -84,7 +83,7 @@ public class YolBi {
         try {
             configManager.save();
             WebServer.stop();
-            instance.renderManager.destroywindow();
+            instance.jFrameRenderer.close();
             YolBi.instance = new YolBi();
             System.gc();
         } catch (IOException e) {
