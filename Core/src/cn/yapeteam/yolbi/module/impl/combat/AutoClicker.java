@@ -14,6 +14,9 @@ import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT, key = Keyboard.KEY_F)
 public class AutoClicker extends Module {
@@ -68,16 +71,20 @@ public class AutoClicker extends Module {
     }
 
     public void sendClick(int button) {
+
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
         // Simulate left click
         if (button == 0) {
             Natives.SendLeft(true);
-            Natives.SendLeft(false);
+            // Schedule the release of the click to be executed after the delay
+            executor.schedule(() -> Natives.SendLeft(false), (int) delay, TimeUnit.MILLISECONDS);
         }
         // Simulate right click
         else if (button == 1) {
             Natives.SendRight(true);
             // Schedule the release of the click to be executed after the delay
-            Natives.SendRight(false);
+            executor.schedule(() -> Natives.SendRight(false), (int) delay, TimeUnit.MILLISECONDS);
         }
     }
 
