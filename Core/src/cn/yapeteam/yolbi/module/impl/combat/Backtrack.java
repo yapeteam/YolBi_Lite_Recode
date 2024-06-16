@@ -48,12 +48,17 @@ public class Backtrack extends Module {
             s12 = new BooleanValue("S12", true),
             s27 = new BooleanValue("S27", true),
             s32 = new BooleanValue("S32", true),
-            activity = new BooleanValue("Activity", true);
+            activity = new BooleanValue("Activity", true),
+            updateOnAttacking = new BooleanValue("Update On Attacking", true);
+
     private final NumberValue<Float>
             hitRange = new NumberValue<>("Hit Range", 5.4f, 2f, 6f, 0.1f),
-            minHitRange = new NumberValue<>("Hit Range", 2f, 1f, 6f, 0.1f),
-            outlineWidth = new NumberValue<>("Outline Width", outline::getValue, 1.5f, 0.5f, 5f, 0.1f);
-    private final NumberValue<Integer> BackTrackDelay = new NumberValue<>("Backtrack Delay", 300, 100, 1000, 10);
+            minHitRange = new NumberValue<>("Min Hit Range", 2f, 1f, 6f, 0.1f),
+            outlineWidth = new NumberValue<>("Outline Width", outline::getValue, 1.5f, 0.5f, 5f, 0.1f),
+            updateOnAttackingDelay = new NumberValue<>("Update On Attacking Delay", 300f, 100f, 800f, 10f);
+
+    private final NumberValue<Integer> backTrackDelay = new NumberValue<>("Backtrack Delay", 300, 100, 1000, 10);
+
     private final ModeValue<String>
             processS12Mode = new ModeValue<>("ProcessS12Mode", "InPut", "Cancel", "InPut"),
             processS27Mode = new ModeValue<>("ProcessS27Mode", "InPut", "Cancel", "InPut");
@@ -74,18 +79,23 @@ public class Backtrack extends Module {
                 hitRange,
                 minHitRange,
                 outlineWidth,
-                BackTrackDelay,
+                backTrackDelay,
                 processS12Mode,
-                processS27Mode
+                processS27Mode,
+                updateOnAttacking,
+                updateOnAttackingDelay
         );
     }
 
     private final List<Packet<?>> savePackets = new CopyOnWriteArrayList<>();
     double cXYZ = 0;
     boolean attacking = false;
+    double updateAttack = 0;
+
     private final TimerUtil
             timer = new TimerUtil(),
-            attackingTimer = new TimerUtil();
+            attackingTimer = new TimerUtil(),
+            updateTimer = new TimerUtil();
     private double realX = 0, realY = 0, realZ = 0, rXYZ = 0, pXYZ = 0;
     private double x = 0, y = 0, z = 0;
     private double distanceToPacket = 0;
@@ -93,9 +103,11 @@ public class Backtrack extends Module {
     private Entity getClosestEntity() {
         if (mc.theWorld == null) return null;
         List<Entity> filteredEntities = new ArrayList<>();
-        for (Entity entity : mc.theWorld.loadedEntityList)
-            if (entity instanceof EntityPlayer && entity != mc.thePlayer)
+        for (Entity entity : mc.theWorld.loadedEntityList) {
+            if (entity instanceof EntityPlayer && entity != mc.thePlayer) {
                 filteredEntities.add(entity);
+            }
+        }
         filteredEntities.sort((a, b) -> {
             double distanceA = mc.thePlayer.getDistanceToEntity(a);
             double distanceB = mc.thePlayer.getDistanceToEntity(b);
@@ -111,7 +123,7 @@ public class Backtrack extends Module {
         attackingTimer.reset();
     }
 
-    private void processPacket1(Entity target) {//平滑处理发包
+    private void processPacket1(Entity target) {
         if (mc.theWorld == null && mc.thePlayer == null) {
             return;
         }
@@ -152,7 +164,6 @@ public class Backtrack extends Module {
                     var d2 = entity.serverPosZ / 32.0;
                     var f = (p1.getYaw() * 360) / 256f;
                     var f1 = (p1.getPitch() * 360) / 256f;
-
                     if (entity instanceof EntityLivingBase) {
                         if (Math.abs(entity.posX - d0) < 0.03125 && Math.abs(entity.posY - d1) < 0.015625
                                 && Math.abs(entity.posZ - d2) < 0.03125) {
@@ -161,7 +172,6 @@ public class Backtrack extends Module {
                             entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3, true);
                         }
                     }
-
                     entity.onGround = p1.getOnGround();
                 }
                 type = "s18";
@@ -187,12 +197,16 @@ public class Backtrack extends Module {
                 if (processS12Mode.is("InPut")) {
                     var entity = mc.theWorld.getEntityByID(p1.getEntityID());
                     if (entity != null) {
-                        if (p1.getEntityID() == mc.thePlayer.getEntityId()) {//mc.thePlayer packet
-                            mc.thePlayer.setVelocity(((double) (p1.getMotionX() * 100) / 100) / 8000.0,
-                                    ((double) (p1.getMotionY() * 100) / 100) / 8000.0, ((double) (p1.getMotionZ() * 100) / 100) / 8000.0);
-                        } else {//entity packet
-                            entity.setVelocity(((double) (p1.getMotionX() * 100) / 100) / 8000.0,
-                                    ((double) (p1.getMotionY() * 100) / 100) / 8000.0, ((double) (p1.getMotionZ() * 100) / 100) / 8000.0);
+                        if (p1.getEntityID() == mc.thePlayer.getEntityId()) {
+                            mc.thePlayer.setVelocity(
+                                    (p1.getMotionX() * 100 / 100) / 8000.0,
+                                    (p1.getMotionY() * 100 / 100) / 8000.0,
+                                    (p1.getMotionZ() * 100 / 100) / 8000.0);
+                        } else {
+                            entity.setVelocity(
+                                    (p1.getMotionX() * 100 / 100) / 8000.0,
+                                    (p1.getMotionY() * 100 / 100) / 8000.0,
+                                    (p1.getMotionZ() * 100 / 100) / 8000.0);
                         }
                     }
                 }
@@ -220,7 +234,7 @@ public class Backtrack extends Module {
                 mc.thePlayer.getFoodStats().setFoodSaturationLevel(p1.getSaturationLevel());
                 type = "s06";
             }
-            // S29PacketSoundEffect 此包为音效包
+            // S29PacketSoundEffect
             if (p instanceof S29PacketSoundEffect) {
                 S29PacketSoundEffect p1 = (S29PacketSoundEffect) p;
                 mc.theWorld.playSound(p1.getX(), p1.getY(), p1.getZ(),
@@ -262,9 +276,8 @@ public class Backtrack extends Module {
                 var d2 = p1.getZ();
                 entityplayer.setPositionAndRotation(d0, d1, d2, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
                 C03PacketPlayer.C06PacketPlayerPosLook packet = new C03PacketPlayer.C06PacketPlayerPosLook(
-                        d0, entityplayer.getEntityBoundingBox().minY,
-                        d2, entityplayer.rotationYaw, entityplayer.rotationPitch, false
-                );
+                        entityplayer.posX, entityplayer.getEntityBoundingBox().minY,
+                        entityplayer.posZ, entityplayer.rotationYaw, entityplayer.rotationPitch, false);
                 PacketUtil.skip(packet);
                 PacketUtil.sendPacket(packet);
                 if (mc.thePlayer.isOnLadder()) {
@@ -291,12 +304,10 @@ public class Backtrack extends Module {
                 var aentity = entitylivingbase.getParts();
                 if (aentity != null) {
                     var i = p1.getEntityID() - entitylivingbase.getEntityId();
-
                     for (Entity entity : aentity) {
                         entity.setEntityId(entity.getEntityId() + i);
                     }
                 }
-
                 entitylivingbase.setEntityId(p1.getEntityID());
                 entitylivingbase.setPositionAndRotation(d0, d1, d2, f, f1);
                 entitylivingbase.motionX = (p1.getVelocityX() / 8000.0);
@@ -304,7 +315,6 @@ public class Backtrack extends Module {
                 entitylivingbase.motionZ = (p1.getVelocityZ() / 8000.0);
                 mc.theWorld.addEntityToWorld(p1.getEntityID(), entitylivingbase);
                 var list = p1.func_149027_c();
-
                 if (list != null) {
                     entitylivingbase.getDataWatcher().updateWatchedObjectsFromList(list);
                 }
@@ -324,7 +334,8 @@ public class Backtrack extends Module {
                 var entity = p1.getEntity(mc.theWorld);
                 if (entity == target) {
                     if (target instanceof EntityLivingBase) {
-                        distanceToPacket = mc.thePlayer.getDistance(p1.func_149062_c() / 32.0, p1.func_149061_d() / 32.0, p1.func_149064_e() / 32.0);
+                        distanceToPacket = mc.thePlayer.getDistance(target.posX + (p1.func_149062_c() / 32.0),
+                                target.posY + (p1.func_149061_d() / 32.0), target.posZ + (p1.func_149064_e() / 32.0));
                     }
                 }
             }
@@ -337,25 +348,40 @@ public class Backtrack extends Module {
                     }
                 }
             }
-        } else distanceToPacket = cXYZ;
+        }
         return distanceToPacket;
     }
 
     private void processPacket2(Entity target) {
         double _5 = minHitRange.getValue();
         if (cXYZ > _5) {
-            if (rangeFix.getValue() && cXYZ > pXYZ) {
+            if (attacking) {
+                if (updateTimer.hasTimePassed(updateOnAttackingDelay.getValue().longValue())) {
+                    updateAttack += 1;
+                    updateTimer.reset();
+                }
+            } else {
+                updateAttack = 0;
+            }
+            if (updateAttack > 0) {
+                processPacket1(target);
+                updateAttack--;
+                return;
+            }
+            if (rangeFix.getValue() && (cXYZ > pXYZ)) {
                 processPacket1(target);
                 timer.reset();
                 return;
             }
-            if (getPacketsDistance(target) <= _5 || cXYZ <= _5) {
+            if (getPacketsDistance(target) <= _5) {
                 processPacket1(target);
                 timer.reset();
                 return;
             }
-            if (timer.hasTimePassed(BackTrackDelay.getValue())) {
+            if (timer.hasTimePassed(backTrackDelay.getValue())) {
                 processPacket1(target);
+                timer.reset();
+                return;
             }
         }
     }
@@ -367,31 +393,21 @@ public class Backtrack extends Module {
         }
     }
 
-    boolean blockPacket(Packet<? extends INetHandler> packet) {//要存的包
-        if (s00.getValue()) {
-            if (packet instanceof S03PacketTimeUpdate) {
-                return true;
-            }
+    boolean blockPacket(Packet<? extends INetHandler> packet) {
+        if (s00.getValue() && packet instanceof S03PacketTimeUpdate) {
+            return true;
         }
-        if (s03.getValue()) {
-            if (packet instanceof S03PacketTimeUpdate) {
-                return true;
-            }
+        if (s03.getValue() && packet instanceof S03PacketTimeUpdate) {
+            return true;
         }
-        if (s12.getValue()) {
-            if (packet instanceof S12PacketEntityVelocity) {
-                return true;
-            }
+        if (s12.getValue() && packet instanceof S12PacketEntityVelocity) {
+            return true;
         }
-        if (s32.getValue()) {
-            if (packet instanceof S32PacketConfirmTransaction) {
-                return true;
-            }
+        if (s32.getValue() && packet instanceof S32PacketConfirmTransaction) {
+            return true;
         }
-        if (s27.getValue()) {
-            if (packet instanceof S27PacketExplosion) {
-                return true;
-            }
+        if (s27.getValue() && packet instanceof S27PacketExplosion) {
+            return true;
         }
         return (packet instanceof S14PacketEntity
                 || packet instanceof S18PacketEntityTeleport
@@ -408,8 +424,6 @@ public class Backtrack extends Module {
             if (target == null) return;
             double cx = target.posX, cy = target.posY, cz = target.posZ;
             double _3 = hitRange.getValue();
-            //int LengthDisPlay = getPing(mc.thePlayer);
-            //获得服务器位置信息
             if (target instanceof EntityLivingBase) {
                 if (target.serverPosX != 0 && target.serverPosY != 0 && target.serverPosZ != 0 && target.width != 0 && target.height != 0) {
                     realX = target.serverPosX / 32d;
@@ -420,7 +434,6 @@ public class Backtrack extends Module {
                 rXYZ = mc.thePlayer.getDistance(realX, realY, realZ);
                 pXYZ = mc.thePlayer.getDistance(x, y, z);
             }
-            //实时获取真实位置
             if (packet instanceof S14PacketEntity) {
                 S14PacketEntity packet1 = (S14PacketEntity) packet;
                 var entity = packet1.getEntity(mc.theWorld);
@@ -439,13 +452,12 @@ public class Backtrack extends Module {
                     z = packet1.getZ() / 32.0;
                 }
             }
-            //回溯判断
             if (mc.thePlayer != null && !mc.thePlayer.isDead && mc.theWorld != null) {
                 addPackets(packet, e);
             } else {
                 processPacket1(target);
             }
-            if (!thing3(target) || !thing5()) {
+            if (!thing2() || !thing3(target) || !thing5()) {
                 processPacket1(target);
                 if (activity.getValue()) {
                     timer.reset();
@@ -457,7 +469,6 @@ public class Backtrack extends Module {
             } else {
                 processPacket2(target);
             }
-            //攻击判断
             if (packet instanceof C02PacketUseEntity) {
                 attacking = true;
                 attackingTimer.reset();
@@ -470,15 +481,6 @@ public class Backtrack extends Module {
         } catch (Throwable ex) {
             Logger.exception(ex);
         }
-    }
-
-    public AxisAlignedBB getEntityBoundingBox(double posX, double posY, double posZ, double width, double height) {
-        double f = width / 2;
-        return new AxisAlignedBB(
-                posX - f, posY, posZ - f,
-                posX + f, posY + height,
-                posZ + f
-        );
     }
 
     @Override
@@ -494,7 +496,20 @@ public class Backtrack extends Module {
             RenderUtil.drawEntityBox(getEntityBoundingBox(x, y, z, 0.6, 1.8), x, y, z, x, y, z, new Color(-1), outline.getValue(), true, outlineWidth.getValue(), event.getPartialTicks());
     }
 
-    boolean thing3(Entity target) {//形成连击
+    public AxisAlignedBB getEntityBoundingBox(double posX, double posY, double posZ, double width, double height) {
+        double f = width / 2;
+        return new AxisAlignedBB(
+                posX - f, posY, posZ - f,
+                posX + f, posY + height,
+                posZ + f
+        );
+    }
+
+    boolean thing2() {
+        return true; // Adjust this to match your specific logic
+    }
+
+    boolean thing3(Entity target) {
         if (!attackTimeFix.getValue()) {
             return true;
         }
