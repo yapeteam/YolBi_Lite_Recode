@@ -18,7 +18,6 @@ HWND hwnd = NULL;
 JNICALL Init(JNIEnv *env, jclass _, jstring windowTitle)
 {
     hwnd = FindWindowA(NULL, jstringToChar(env, windowTitle));
-    printf("%2d", hwnd);
 }
 
 JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstring windowTitle)
