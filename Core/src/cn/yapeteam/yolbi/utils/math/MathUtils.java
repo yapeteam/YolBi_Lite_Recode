@@ -13,4 +13,8 @@ public class MathUtils {
         }
         return ThreadLocalRandom.current().nextDouble(min, max);
     }
+
+    public static double clamp(double num, double min, double max) {
+        return num < min ? min : Math.min(num, max);
+    }
 }
