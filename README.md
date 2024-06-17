@@ -1,6 +1,6 @@
 # YolBi Inject - Recode
 
-Easier to compile
+- ***Powered by 吴硕科技***
 
 # Development
 
