@@ -36,7 +36,10 @@ public class Velocity extends Module {
     private final NumberValue<Double> minJumpHold = new NumberValue<>("Min Jump Hold", 0.0, 0.0, 1000.0, 10.0);
 
 
-    public Velocity() {
+    public Velocity()
+    {
+        NumberValue.setBound(minJumpDelay, maxJumpDelay);
+        NumberValue.setBound(minJumpHold, maxJumpHold);
         addValues(probability, maxJumpDelay, minJumpDelay, maxJumpHold, minJumpHold);
     }
 

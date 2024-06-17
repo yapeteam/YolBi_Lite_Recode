@@ -15,6 +15,7 @@ import cn.yapeteam.yolbi.utils.player.*;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import lombok.AllArgsConstructor;
 import net.minecraft.block.BlockAir;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
@@ -23,10 +24,10 @@ import net.minecraft.util.MovingObjectPosition;
 @ModuleInfo(name = "Scaffold", category = ModuleCategory.MOVEMENT)
 public class Scaffold extends Module {
     private final ModeValue<String> sameY = new ModeValue<>("Same Y", "Off", "Off", "On", "Auto Jump");
-    private final NumberValue<Integer> minRotationSpeed = new NumberValue<>("Rotation Speed", 0, 0, 10, 1);
-    private final NumberValue<Integer> maxRotationSpeed = new NumberValue<>("Rotation Speed", 5, 0, 10, 1);
-    private final NumberValue<Integer> minPlaceDelay = new NumberValue<>("Place Delay", 0, 0, 5, 1);
-    private final NumberValue<Integer> maxPlaceDelay = new NumberValue<>("Place Delay", 0, 0, 5, 1);
+    private final NumberValue<Integer> minRotationSpeed = new NumberValue<>("Min Rotation Speed", 0, 0, 10, 1);
+    private final NumberValue<Integer> maxRotationSpeed = new NumberValue<>("Max Rotation Speed", 5, 0, 10, 1);
+    private final NumberValue<Integer> minPlaceDelay = new NumberValue<>("Min Place Delay", 0, 0, 5, 1);
+    private final NumberValue<Integer> maxPlaceDelay = new NumberValue<>("Max Place Delay", 0, 0, 5, 1);
 
     private Vec3 targetBlock;
     private EnumFacingOffset enumFacing;
@@ -36,6 +37,8 @@ public class Scaffold extends Module {
     private double startY;
 
     public Scaffold() {
+        NumberValue.setBound(minRotationSpeed, maxRotationSpeed);
+        NumberValue.setBound(minPlaceDelay, maxPlaceDelay);
         addValues(sameY, minRotationSpeed, maxRotationSpeed, minPlaceDelay, maxPlaceDelay);
     }
 
@@ -48,6 +51,11 @@ public class Scaffold extends Module {
         }
         startY = Math.floor(mc.thePlayer.posY);
         targetBlock = null;
+    }
+
+    @Override
+    protected void onDisable() {
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
     }
 
     public void calculateRotations() {

@@ -81,4 +81,9 @@ public class NumberValue<T extends Number> extends Value<T> {
             return Double.parseDouble(String.valueOf(value.doubleValue()));
         throw new RuntimeException("invalid type" + type);
     }
+
+    public static void setBound(NumberValue<? extends Number> min, NumberValue<? extends Number> max) {
+        min.setCallback((oldV, newV) -> newV.doubleValue() > max.getValue().doubleValue() ? oldV : newV);
+        max.setCallback((oldV, newV) -> newV.doubleValue() < min.getValue().doubleValue() ? oldV : newV);
+    }
 }

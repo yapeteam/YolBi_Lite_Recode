@@ -7,7 +7,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.settings.KeyBinding;
@@ -18,14 +17,14 @@ import net.minecraft.util.BlockPos;
 @ModuleInfo(name = "Eagle", category = ModuleCategory.MOVEMENT)
 public class Eagle extends Module {
 
-    private final BooleanValue onlyblocks = new BooleanValue("Only Blocks",true);
+    private final BooleanValue onlyblocks = new BooleanValue("Only Blocks", true);
 
-    private final BooleanValue onlybackwards = new BooleanValue("Only Backwards",true);
+    private final BooleanValue onlybackwards = new BooleanValue("Only Backwards", true);
 
     private final BooleanValue onlyground = new BooleanValue("Only Ground", false);
 
     public Eagle() {
-        addValues(onlyblocks,onlybackwards);
+        addValues(onlyblocks, onlybackwards);
     }
 
 
@@ -46,8 +45,8 @@ public class Eagle extends Module {
         }
         if ((mc.thePlayer.onGround || !onlyground.getValue()) &&
                 (PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir) &&
-                (ReflectUtil.IsPressed(mc.gameSettings.keyBindBack) || !onlybackwards.getValue())) {
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
+                !(mc.gameSettings.keyBindBack.isKeyDown() && onlybackwards.getValue())) {
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
         } else if (!(PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir)) {
             KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
         }
