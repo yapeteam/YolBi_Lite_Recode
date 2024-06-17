@@ -15,7 +15,7 @@ public class Natives {
 
     public static native void SetWindowsTransparent(boolean transparent, String windowTitle);
 
-    public static native boolean IsMouseDown(int button);
+    public static native boolean IsKeyDown(int button);
 
     /**
      * @param key Must be Virtual Key Code

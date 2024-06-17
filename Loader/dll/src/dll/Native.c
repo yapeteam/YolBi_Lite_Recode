@@ -67,21 +67,10 @@ JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
     }
 }
 
-JNICALL IsMouseDown(JNIEnv *env, jclass _, jint button)
+
+JNICALL IsKeyDown(JNIEnv *env, jclass _, jint key)
 {
-    int flag;
-    switch (button)
-    {
-    case 0:
-        flag = VK_LBUTTON;
-        break;
-    case 1:
-        flag = VK_RBUTTON;
-        break;
-    case 2:
-        flag = VK_MBUTTON;
-    }
-    int state = GetAsyncKeyState(flag) & 0x8000;
+    int state = GetAsyncKeyState(key) & 0x8000;
     if (state == 0)
         return 0;
     else
@@ -96,7 +85,7 @@ void register_native_methods(JNIEnv *env, jclass clazz)
         {"SetKeyBoard", "(IZ)V", (void *)&SetKeyBoard},
         {"SendLeft", "(Z)V", (void *)&SendLeft},
         {"SendRight", "(Z)V", (void *)&SendRight},
-        {"IsMouseDown", "(I)Z", (void *)&IsMouseDown},
+        {"IsKeyDown", "(I)Z", (void *)&IsKeyDown},
     };
     (*env)->RegisterNatives(env, clazz, methods, 6);
 }

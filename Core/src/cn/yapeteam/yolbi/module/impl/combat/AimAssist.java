@@ -12,6 +12,7 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -60,7 +61,7 @@ public class AimAssist extends Module {
                 aimPath.clear();
                 this.target = target;
             }
-            if (target != null && !(ClickAim.getValue() && !Natives.IsMouseDown(0)))
+            if (target != null && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON)))
                 aimPath.addAll(WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target)));
         } catch (Throwable ex) {
             Logger.exception(ex);
@@ -71,7 +72,7 @@ public class AimAssist extends Module {
     public void onRender(EventRender2D event) {
         try {
             if (mc.currentScreen != null) return;
-            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsMouseDown(0))) {
+            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
                 int length = (int) (aimPath.size() * Speed.getValue() / 100);
                 if (length > aimPath.size())
                     length = aimPath.size();

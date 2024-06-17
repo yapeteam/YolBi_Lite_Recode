@@ -12,7 +12,6 @@ import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.util.BlockPos;
 
 @ModuleInfo(name = "Eagle", category = ModuleCategory.MOVEMENT)
 public class Eagle extends Module {
@@ -25,11 +24,6 @@ public class Eagle extends Module {
 
     public Eagle() {
         addValues(onlyblocks, onlybackwards, onlyground);
-    }
-
-
-    public Block getBlock(BlockPos pos) {
-        return mc.theWorld.getBlockState(pos).getBlock();
     }
 
     public Block getBlockUnderPlayer() {
@@ -47,20 +41,25 @@ public class Eagle extends Module {
                 (mc.gameSettings.keyBindBack.isKeyDown() || !onlybackwards.getValue())) {
             Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, true);
         } else if (!(getBlockUnderPlayer() instanceof BlockAir)) {
-            Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, false);
+            reset();
         }
+    }
+
+    private void reset() {
+        if (Natives.IsKeyDown(VirtualKeyBoard.VK_LSHIFT))
+            Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, false);
     }
 
     @Override
     public void onEnable() {
         if (mc.thePlayer == null) return;
-        Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, false);
+        reset();
         super.onEnable();
     }
 
     @Override
     public void onDisable() {
-        Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, false);
+        reset();
         super.onDisable();
     }
 }

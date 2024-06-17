@@ -9,6 +9,7 @@ import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
@@ -93,20 +94,20 @@ public class AutoClicker extends Module {
         if (mc.currentScreen != null) return;
         if (System.currentTimeMillis() - time >= (1000 / delay)) {
             if (clickprio.is("Left")) {
-                if (leftClick.getValue() && Natives.IsMouseDown(0) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
                     time = System.currentTimeMillis();
                     sendClick(0);
                 }
-                if (rightClick.getValue() && Natives.IsMouseDown(1) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
                     time = System.currentTimeMillis();
                     sendClick(1);
                 }
             } else {
-                if (rightClick.getValue() && Natives.IsMouseDown(1) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
                     time = System.currentTimeMillis();
                     sendClick(1);
                 }
-                if (leftClick.getValue() && Natives.IsMouseDown(0) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
                     time = System.currentTimeMillis();
                     sendClick(0);
                 }
