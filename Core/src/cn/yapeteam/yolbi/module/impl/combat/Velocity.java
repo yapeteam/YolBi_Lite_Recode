@@ -7,7 +7,6 @@ import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.network.EventPacket;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
@@ -43,10 +42,6 @@ public class Velocity extends Module {
         addValues(probability, maxJumpDelay, minJumpDelay, maxJumpHold, minJumpHold);
     }
 
-    @Listener
-    public void onUpdate(EventUpdate event) {
-    }
-
     public void jumpreset() {
         Natives.SetKeyBoard(VirtualKeyBoard.VK_SPACE, true);
 
@@ -65,6 +60,7 @@ public class Velocity extends Module {
 
     @Listener
     public void onPacket(EventPacket event) {
+        if (mc.currentScreen != null) return;
         if (event.getPacket() instanceof S12PacketEntityVelocity && ((S12PacketEntityVelocity) event.getPacket()).getEntityID() == mc.thePlayer.getEntityId()) {
             YolBi.instance.getNotificationManager().post(
                     new Notification(

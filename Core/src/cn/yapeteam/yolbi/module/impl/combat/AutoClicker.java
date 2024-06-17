@@ -111,7 +111,6 @@ public class AutoClicker extends Module {
                     sendClick(0);
                 }
             }
-
         }
     }
 
