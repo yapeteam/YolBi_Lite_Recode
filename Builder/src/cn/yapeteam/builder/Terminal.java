@@ -36,7 +36,16 @@ public class Terminal {
                 String line;
                 while (reading) {
                     line = reader.readLine();
-                    if (line != null) System.err.println(line);
+                    if (line != null) {
+                        if (line.contains("error:"))
+                            System.err.println(line);
+                        else if (line.contains("warning:"))
+                            System.out.printf("\033[33m%s\033[0m\n", line);
+                        else if (line.contains("note:"))
+                            System.out.printf("\033[0;36m%s\033[0m\n", line);
+                        else
+                            System.out.println(line);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
