@@ -17,6 +17,9 @@ public class Natives {
 
     public static native boolean IsMouseDown(int button);
 
+    /**
+     * @param key Must be Virtual Key Code
+     */
     public static native void SetKeyBoard(int key, boolean pressed);
 
     public static native void SendLeft(boolean pressed);
