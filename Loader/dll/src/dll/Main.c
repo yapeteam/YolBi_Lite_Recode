@@ -32,7 +32,7 @@ struct TransformCallback
 
 static struct TransformCallback *callback_list = NULL;
 
-void replace(char *str, char *fstr, char *rstr)
+void replace(char *str, const char *fstr, const char *rstr)
 {
     int i, j, k;
     int len_str = strlen(str);
@@ -67,6 +67,7 @@ jclass findThreadClass(const char *name, jobject classLoader)
                                                                                               JNI_TRUE, classLoader));
     if (!result)
     {
+        printf("FindClass\n");
         replace(name, ".", "/");
         return (*jniEnv)->FindClass(jniEnv, name);
     }
@@ -173,7 +174,7 @@ void *allocate(jlong size)
 
 JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject loader)
 {
-    return findThreadClass(name, loader);
+    return findThreadClass(jstringToChar(jniEnv, name), loader);
 }
 
 JNIEXPORT jbyteArray

@@ -33,6 +33,10 @@ public class AutoClicker extends Module {
 
     public AutoClicker() {
         addValues(cps, range, leftClick, rightClick, noeat, nomine, clickprio);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Natives.SendLeft(false);
+            Natives.SendRight(false);
+        }));
     }
 
     private double delay = 0, time = 0;

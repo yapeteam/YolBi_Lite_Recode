@@ -6,6 +6,8 @@
 #include "../jvm/jni.h"
 #include "../jvm/jvmti.h"
 
+HWND hwnd = NULL;
+
 const char *jstringToChar(JNIEnv *env, jstring jstr)
 {
     const char *str = (*env)->GetStringUTFChars(env, jstr, 0);
@@ -13,16 +15,14 @@ const char *jstringToChar(JNIEnv *env, jstring jstr)
     return str;
 }
 
-HWND hwnd = NULL;
-
-JNICALL Init(JNIEnv *env, jclass _, jstring windowTitle)
+JNIEXPORT void JNICALL Init(JNIEnv *env, jclass _, jstring windowTitle)
 {
-    hwnd = FindWindowA(NULL, jstringToChar(env, windowTitle));
+    hwnd = FindWindowA(NULL, (LPCSTR)jstringToChar(env, windowTitle));
 }
 
-JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstring windowTitle)
+JNIEXPORT void JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstring windowTitle)
 {
-    HWND hwnd = FindWindowA(NULL, jstringToChar(env, windowTitle));
+    HWND hwnd = FindWindowA(NULL, (LPCSTR)jstringToChar(env, windowTitle));
     int wl = GetWindowLongA(hwnd, GWL_EXSTYLE);
     if (transparent)
         wl |= WS_EX_LAYERED | WS_EX_TRANSPARENT;
@@ -31,7 +31,7 @@ JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstri
     SetWindowLongA(hwnd, GWL_EXSTYLE, wl);
 }
 
-JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
+JNIEXPORT void JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
 {
     INPUT input;
     input.type = INPUT_KEYBOARD;
@@ -43,7 +43,7 @@ JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
     SendInput(1, &input, sizeof(INPUT));
 }
 
-JNICALL SendLeft(JNIEnv *env, jclass _, jboolean pressed)
+JNIEXPORT void JNICALL SendLeft(JNIEnv *env, jclass _, jboolean pressed)
 {
     if (pressed)
     {
@@ -55,7 +55,7 @@ JNICALL SendLeft(JNIEnv *env, jclass _, jboolean pressed)
     }
 }
 
-JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
+JNIEXPORT void JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
 {
     if (pressed)
     {
@@ -67,8 +67,7 @@ JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
     }
 }
 
-
-JNICALL IsKeyDown(JNIEnv *env, jclass _, jint key)
+JNIEXPORT jboolean JNICALL IsKeyDown(JNIEnv *env, jclass _, jint key)
 {
     int state = GetAsyncKeyState(key) & 0x8000;
     if (state == 0)
