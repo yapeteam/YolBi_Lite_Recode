@@ -1,13 +1,18 @@
+<p align="center">
+  <img src="https://avatars.githubusercontent.com/u/159465859?s=64&v=4"</img>
+</p>
+
 # YolBi Inject - Recode
 
 - ***Powered by 吴硕科技***
 
-# Development
+## Development
 
 C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
 
-https://winlibs.com/#download-release
+[MinGW](https://winlibs.com/#download-release)
 
+### Steps
 
 1. Open this project
 
@@ -15,8 +20,16 @@ https://winlibs.com/#download-release
 
 3. Run the ProjectRunConfiguration: "BUILD"
 
-4. Your jar will appear in ./build
+4. Your jar will appear in `./build`
 
-# Custom
+## Custom
 
-For custom build, please edit YBuild.xml
+For custom build, please edit `YBuild.xml`
+
+<hr>
+
+## TODO
+
+- [ ] Legit TellyBridge
+- [ ] Legit KillAura
+- [ ] Legit AimAssist
