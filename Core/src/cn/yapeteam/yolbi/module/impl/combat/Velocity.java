@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
@@ -12,7 +13,6 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
 import java.util.concurrent.Executors;
@@ -36,8 +36,7 @@ public class Velocity extends Module {
     private final NumberValue<Double> minJumpHold = new NumberValue<>("Min Jump Hold", 0.0, 0.0, 1000.0, 10.0);
 
 
-    public Velocity()
-    {
+    public Velocity() {
         NumberValue.setBound(minJumpDelay, maxJumpDelay);
         NumberValue.setBound(minJumpHold, maxJumpHold);
         addValues(probability, maxJumpDelay, minJumpDelay, maxJumpHold, minJumpHold);
@@ -48,7 +47,7 @@ public class Velocity extends Module {
     }
 
     public void jumpreset() {
-        ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, true);
+        Natives.SetKeyBoard(mc.gameSettings.keyBindJump.getKeyCode(), true);
 
         // Create a ScheduledExecutorService
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -57,7 +56,7 @@ public class Velocity extends Module {
         int delay = (int) MathUtils.getRandom(minJumpHold.getValue(), maxJumpDelay.getValue()); // replace 1000 with the maximum delay you want
 
         // Schedule a task to set the jump keybind to false after the delay
-        executorService.schedule(() -> ReflectUtil.SetPressed(mc.gameSettings.keyBindJump, false), delay, TimeUnit.MILLISECONDS);
+        executorService.schedule(() -> Natives.SetKeyBoard(mc.gameSettings.keyBindJump.getKeyCode(), false), delay, TimeUnit.MILLISECONDS);
 
         // Shut down the executor service
         executorService.shutdown();

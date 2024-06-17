@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.movement;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
@@ -9,7 +10,6 @@ import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.BlockPos;
@@ -45,10 +45,10 @@ public class Eagle extends Module {
         }
         if ((mc.thePlayer.onGround || !onlyground.getValue()) &&
                 (PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir) &&
-                !(mc.gameSettings.keyBindBack.isKeyDown() && onlybackwards.getValue())) {
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), true);
+                !(!mc.gameSettings.keyBindBack.isKeyDown() && onlybackwards.getValue())) {
+            Natives.SetKeyBoard(mc.gameSettings.keyBindSneak.getKeyCode(), true);
         } else if (!(PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir)) {
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+            Natives.SetKeyBoard(mc.gameSettings.keyBindSneak.getKeyCode(), false);
         }
     }
 
@@ -61,7 +61,7 @@ public class Eagle extends Module {
 
     @Override
     public void onDisable() {
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+        Natives.SetKeyBoard(mc.gameSettings.keyBindSneak.getKeyCode(), false);
         super.onDisable();
     }
 }
