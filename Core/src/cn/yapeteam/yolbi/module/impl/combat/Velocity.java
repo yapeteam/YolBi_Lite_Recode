@@ -13,6 +13,7 @@ import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
+import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
 import java.util.concurrent.Executors;
@@ -47,7 +48,7 @@ public class Velocity extends Module {
     }
 
     public void jumpreset() {
-        Natives.SetKeyBoard(mc.gameSettings.keyBindJump.getKeyCode(), true);
+        Natives.SetKeyBoard(VirtualKeyBoard.VK_SPACE, true);
 
         // Create a ScheduledExecutorService
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -56,7 +57,7 @@ public class Velocity extends Module {
         int delay = (int) MathUtils.getRandom(minJumpHold.getValue(), maxJumpDelay.getValue()); // replace 1000 with the maximum delay you want
 
         // Schedule a task to set the jump keybind to false after the delay
-        executorService.schedule(() -> Natives.SetKeyBoard(mc.gameSettings.keyBindJump.getKeyCode(), false), delay, TimeUnit.MILLISECONDS);
+        executorService.schedule(() -> Natives.SetKeyBoard(VirtualKeyBoard.VK_SPACE, false), delay, TimeUnit.MILLISECONDS);
 
         // Shut down the executor service
         executorService.shutdown();
