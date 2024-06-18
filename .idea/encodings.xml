@@ -2,19 +2,17 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Agent/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Agent/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Builder/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Builder/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Agent/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Builder/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Core/src" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Core/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Injector/deps" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Injector/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Injector/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Injector/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Loader/src" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Loader/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Loader/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/deps" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/include" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/YMixin/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

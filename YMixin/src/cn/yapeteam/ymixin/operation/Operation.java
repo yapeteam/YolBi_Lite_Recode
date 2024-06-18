@@ -1,9 +1,9 @@
-package cn.yapeteam.loader.mixin.operation;
+package cn.yapeteam.ymixin.operation;
 
 
-import cn.yapeteam.loader.Mapper;
-import cn.yapeteam.loader.mixin.Mixin;
-import cn.yapeteam.loader.mixin.utils.DescParser;
+import cn.yapeteam.ymixin.utils.Mapper;
+import cn.yapeteam.ymixin.Mixin;
+import cn.yapeteam.ymixin.utils.DescParser;
 import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.tree.MethodNode;
 
@@ -11,6 +11,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 public interface Operation {
+    int ASM_API = Opcodes.ASM9;
+
     void dispose(Mixin mixin);
 
     static boolean isLoadOpe(int opcode) {

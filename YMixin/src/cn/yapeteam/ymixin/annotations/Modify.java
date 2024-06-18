@@ -1,6 +1,6 @@
-package cn.yapeteam.loader.mixin.annotations;
+package cn.yapeteam.ymixin.annotations;
 
-import cn.yapeteam.loader.utils.ASMUtils;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm_9_2.tree.AnnotationNode;
@@ -13,19 +13,25 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @java.lang.annotation.Target(ElementType.METHOD)
-public @interface Inject {
+public @interface Modify {
     String method();
 
     String desc();
 
-    Target target();
+    String replacepath();
+
+    String replacementfunc();
+
+    String funcdesc();
+
+
 
     class Helper {
-        public static Inject fromNode(AnnotationNode annotation) {
-            return new Inject() {
+        public static Modify fromNode(AnnotationNode annotation) {
+            return new Modify() {
                 @Override
                 public Class<? extends Annotation> annotationType() {
-                    return Inject.class;
+                    return Modify.class;
                 }
 
                 @Override
@@ -39,23 +45,32 @@ public @interface Inject {
                 }
 
                 @Override
-                public Target target() {
-                    AnnotationNode annotationNode = ASMUtils.getAnnotationValue(annotation, "target");
-                    if (annotationNode == null) return null;
-                    return Target.Helper.fromNode(annotationNode);
+                public String replacepath() {
+                    return ASMUtils.getAnnotationValue(annotation, "replacepath");
+                }
+
+                @Override
+                public String replacementfunc() {
+                    return ASMUtils.getAnnotationValue(annotation, "replacementfunc");
+                }
+
+                @Override
+                public String funcdesc() {
+                    return ASMUtils.getAnnotationValue(annotation, "funcdesc");
                 }
             };
         }
 
+
         public static boolean isAnnotation(@NotNull AnnotationNode node) {
-            return node.desc.contains(ASMUtils.slash(Inject.class.getName()));
+            return node.desc.contains(ASMUtils.slash(Modify.class.getName()));
         }
 
         public static boolean hasAnnotation(@NotNull MethodNode node) {
             return node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(Helper::isAnnotation);
         }
 
-        public static @Nullable Inject getAnnotation(MethodNode node) {
+        public static @Nullable Modify getAnnotation(MethodNode node) {
             if (!hasAnnotation(node)) return null;
             return fromNode(node.visibleAnnotations.stream().filter(Helper::isAnnotation).findFirst().orElse(null));
         }

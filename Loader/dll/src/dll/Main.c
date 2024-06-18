@@ -7,6 +7,7 @@
 #include <string.h>
 #include <dirent.h>
 #include "Native.c"
+#include "utils.h"
 #include "../jvm/jni.h"
 #include "../jvm/jvmti.h"
 
@@ -418,27 +419,79 @@ void Inject(const char yolbi_dir[260])
 
 #include <windows.h>
 
-void entry()
+void HookMain()
 {
+    printf("1\n");
     HMODULE jvmHandle = GetModuleHandle("jvm.dll");
     if (!jvmHandle)
         return;
+    printf("2\n");
     typedef jint(JNICALL * fnJNI_GetCreatedJavaVMs)(JavaVM **, jsize, jsize *);
-    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs)GetProcAddress(jvmHandle,
-                                                                                            "JNI_GetCreatedJavaVMs");
-    if (!JNI_GetCreatedJavaVMs)
-        return;
-    if (JNI_GetCreatedJavaVMs(&jvm, 1, NULL) != JNI_OK ||
-        (*jvm)->AttachCurrentThread(jvm, (void **)&jniEnv, NULL) != JNI_OK)
-        return;
-    (*jvm)->GetEnv(jvm, (void **)&jvmti, JVMTI_VERSION);
-    if (!jvmti)
-        return;
+    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs)GetProcAddress(jvmHandle, "JNI_GetCreatedJavaVMs");
+    jint num = JNI_GetCreatedJavaVMs(&jvm, 1, NULL);
+    jint num1 = (*jvm)->GetEnv(jvm, (void **)(&jvmti), JVMTI_VERSION);
+    printf("3\n");
+    printf("%d\n", num);
+    printf("%d\n", num1);
     char userProfile[MAX_PATH];
     GetEnvironmentVariableA("USERPROFILE", userProfile, MAX_PATH);
     char yolbiPath[MAX_PATH];
     sprintf_s(yolbiPath, MAX_PATH, "%s\\.yolbi", userProfile);
     Inject(yolbiPath);
+}
+
+BYTE OldCode[12] = {0x00};
+BYTE HookCode[12] = {0x48, 0xB8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xFF, 0xE0};
+
+void HookFunction64(char *lpModule, LPCSTR lpFuncName, LPVOID lpFunction)
+{
+    DWORD_PTR FuncAddress = (UINT64)GetProcAddressPeb(GetModuleHandle(lpModule), lpFuncName);
+    DWORD OldProtect = 0;
+
+    if (VirtualProtect((LPVOID)FuncAddress, 12, PAGE_EXECUTE_READWRITE, &OldProtect))
+    {
+        memcpy(OldCode, (LPVOID)FuncAddress, 12);     // 拷贝原始机器码指令
+        *(PINT64)(HookCode + 2) = (UINT64)lpFunction; // 填充90为指定跳转地址
+    }
+    memcpy((LPVOID)FuncAddress, &HookCode, sizeof(HookCode)); // 拷贝Hook机器指令
+    VirtualProtect((LPVOID)FuncAddress, 12, OldProtect, &OldProtect);
+}
+void UnHookFunction64(char *lpModule, LPCSTR lpFuncName)
+{
+    DWORD OldProtect = 0;
+    UINT64 FuncAddress = (UINT64)GetProcAddressPeb(GetModuleHandleA(lpModule), lpFuncName);
+    if (VirtualProtect((LPVOID)FuncAddress, 12, PAGE_EXECUTE_READWRITE, &OldProtect))
+    {
+        memcpy((LPVOID)FuncAddress, OldCode, sizeof(OldCode));
+    }
+    VirtualProtect((LPVOID)FuncAddress, 12, OldProtect, &OldProtect);
+}
+
+typedef void (*JVM_MonitorNotify)(JNIEnv *env, jobject obj);
+
+JVM_MonitorNotify MonitorNotify = NULL;
+
+void MonitorNotify_Hook(JNIEnv *env, jobject obj)
+{
+    UnHookFunction64("jvm.dll", "JVM_MonitorNotify");
+    MonitorNotify(env, obj);
+
+    jniEnv = env;
+    HookMain();
+}
+
+PVOID WINAPI remote()
+{
+    HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    HMODULE jvm = GetModuleHandle("jvm.dll");
+    MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, "JVM_MonitorNotify");
+
+    return NULL;
+}
+
+void entry()
+{
+    CreateThread(NULL, 4096, (LPTHREAD_START_ROUTINE)(&remote), NULL, 0, NULL);
 }
 
 #pragma clang diagnostic pop

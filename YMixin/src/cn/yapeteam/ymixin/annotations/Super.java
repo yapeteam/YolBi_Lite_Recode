@@ -1,6 +1,6 @@
-package cn.yapeteam.loader.mixin.annotations;
+package cn.yapeteam.ymixin.annotations;
 
-import cn.yapeteam.loader.utils.ASMUtils;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm_9_2.tree.AnnotationNode;
 import org.objectweb.asm_9_2.tree.MethodNode;

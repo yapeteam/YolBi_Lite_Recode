@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile default="true" name="Default" enabled="true" />
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="core" />
-        <module name="Agent" />
-        <module name="agent" />
-        <module name="injector" />
-        <module name="loader" />
-        <module name="Builder" />
-      </profile>
-    </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Loader" target="1.5" />
-    </bytecodeTargetLevel>
-  </component>
+    <component name="CompilerConfiguration">
+        <annotationProcessing>
+            <profile default="true" name="Default" enabled="true"/>
+            <profile name="Maven default annotation processors profile" enabled="true">
+                <sourceOutputDir name="target/generated-sources/annotations"/>
+                <sourceTestOutputDir name="target/generated-test-sources/test-annotations"/>
+                <outputRelativeToContentRoot value="true"/>
+                <module name="ymixin"/>
+                <module name="loader"/>
+                <module name="core"/>
+                <module name="agent"/>
+                <module name="Builder"/>
+                <module name="injector"/>
+            </profile>
+        </annotationProcessing>
+    </component>
 </project>

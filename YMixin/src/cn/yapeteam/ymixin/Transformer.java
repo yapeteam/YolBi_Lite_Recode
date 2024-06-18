@@ -1,12 +1,10 @@
-package cn.yapeteam.loader.mixin;
+package cn.yapeteam.ymixin;
 
-import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.operation.Operation;
-import cn.yapeteam.loader.mixin.operation.impl.InjectOperation;
-import cn.yapeteam.loader.mixin.operation.impl.ModifyOperation;
-import cn.yapeteam.loader.mixin.operation.impl.OverwriteOperation;
-import cn.yapeteam.loader.utils.ASMUtils;
-import cn.yapeteam.loader.utils.ClassUtils;
+import cn.yapeteam.ymixin.operation.Operation;
+import cn.yapeteam.ymixin.operation.impl.InjectOperation;
+import cn.yapeteam.ymixin.operation.impl.ModifyOperation;
+import cn.yapeteam.ymixin.operation.impl.OverwriteOperation;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import lombok.Getter;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
@@ -16,13 +14,13 @@ import java.util.Map;
 
 @Getter
 public class Transformer {
-    private final ClassProvider provider;
-    private final ArrayList<Mixin> mixins;
+    private final ClassBytesProvider provider;
+    private final ArrayList<cn.yapeteam.ymixin.Mixin> mixins;
     private final ArrayList<Operation> operations;
     private final Map<String, byte[]> oldBytes = new HashMap<>();
 
-    public Transformer(ClassProvider classProvider) {
-        this.provider = classProvider;
+    public Transformer(ClassBytesProvider classBytesProvider) {
+        this.provider = classBytesProvider;
         this.mixins = new ArrayList<>();
         this.operations = new ArrayList<>();
         operations.add(new InjectOperation());
@@ -30,10 +28,12 @@ public class Transformer {
         operations.add(new ModifyOperation());
     }
 
-    public void addMixin(Class<?> theClass) throws Throwable {
-        byte[] bytes = ClassUtils.getClassBytes(theClass.getName());
-        ClassNode source = ASMUtils.node(bytes);
-        mixins.add(new Mixin(source, theClass, provider));
+    public void addMixin(ClassNode node) throws Throwable {
+        mixins.add(new Mixin(node, provider));
+    }
+
+    public void addMixin(byte[] bytes) throws Throwable {
+        addMixin(ASMUtils.node(bytes));
     }
 
     public Map<String, byte[]> transform() {

@@ -1,10 +1,9 @@
-package cn.yapeteam.loader.mixin.operation.impl;
+package cn.yapeteam.ymixin.operation.impl;
 
-import cn.yapeteam.loader.Mapper;
-import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Modify;
-import cn.yapeteam.loader.mixin.operation.Operation;
+import cn.yapeteam.ymixin.utils.Mapper;
+import cn.yapeteam.ymixin.Mixin;
+import cn.yapeteam.ymixin.annotations.Modify;
+import cn.yapeteam.ymixin.operation.Operation;
 import org.objectweb.asm_9_2.tree.*;
 
 import java.util.Arrays;

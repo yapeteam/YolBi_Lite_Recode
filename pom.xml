@@ -20,11 +20,12 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>Injector</module>
+        <module>Builder</module>
+        <module>YMixin</module>
         <module>Loader</module>
         <module>Core</module>
-        <module>Builder</module>
         <module>Agent</module>
+        <module>Injector</module>
     </modules>
 
     <properties>

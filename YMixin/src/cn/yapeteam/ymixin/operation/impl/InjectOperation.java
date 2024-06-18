@@ -1,15 +1,13 @@
-package cn.yapeteam.loader.mixin.operation.impl;
+package cn.yapeteam.ymixin.operation.impl;
 
-import cn.yapeteam.loader.Loader;
-import cn.yapeteam.loader.Mapper;
-import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Inject;
-import cn.yapeteam.loader.mixin.annotations.Local;
-import cn.yapeteam.loader.mixin.annotations.Target;
-import cn.yapeteam.loader.mixin.operation.Operation;
-import cn.yapeteam.loader.mixin.utils.DescParser;
-import cn.yapeteam.loader.utils.ASMUtils;
+import cn.yapeteam.ymixin.Mixin;
+import cn.yapeteam.ymixin.annotations.Inject;
+import cn.yapeteam.ymixin.annotations.Local;
+import cn.yapeteam.ymixin.annotations.Target;
+import cn.yapeteam.ymixin.operation.Operation;
+import cn.yapeteam.ymixin.utils.ASMUtils;
+import cn.yapeteam.ymixin.utils.DescParser;
+import cn.yapeteam.ymixin.utils.Mapper;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm_9_2.Label;
 import org.objectweb.asm_9_2.MethodVisitor;
@@ -21,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static cn.yapeteam.ymixin.YMixin.Logger;
 
 public class InjectOperation implements Operation {
     private static AbstractInsnNode[] getBlock(AbstractInsnNode node, InsnList list) {
@@ -61,7 +61,7 @@ public class InjectOperation implements Operation {
         } catch (Exception ignored) {
         }
         final int[] varIndex = {-1};
-        node.accept(new MethodVisitor(Loader.ASM_API) {
+        node.accept(new MethodVisitor(ASM_API) {
             @Override
             public void visitLocalVariable(String varName, String descriptor, String signature, Label start, Label end, int index) {
                 if (name.equals(varName))
@@ -206,7 +206,7 @@ public class InjectOperation implements Operation {
     //"INVOKEVIRTUAL net/minecraft/client/Minecraft.runTick()V"
     private static String getMethodInsnNodeOperation(@NotNull AbstractInsnNode node) {
         final String[] target = {null};
-        node.accept(new MethodVisitor(Loader.ASM_API) {
+        node.accept(new MethodVisitor(ASM_API) {
             @Override
             public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
                 target[0] = owner + "." + name + descriptor;
@@ -218,7 +218,7 @@ public class InjectOperation implements Operation {
     //"GETSTATIC net/minecraft/client/Minecraft.res Lnet/minecraft/utils/ResourceLocation;"
     private static String getFieldInsnNodeOperation(@NotNull AbstractInsnNode node) {
         final String[] target = {null};
-        node.accept(new MethodVisitor(Loader.ASM_API) {
+        node.accept(new MethodVisitor(ASM_API) {
             @Override
             public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
                 target[0] = owner + "." + name + " " + descriptor;

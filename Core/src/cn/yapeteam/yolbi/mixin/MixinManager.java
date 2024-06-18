@@ -71,7 +71,7 @@ public class MixinManager {
                 if (code != 0)
                     failed.add(mixin.getSimpleName());
                 Logger.success("Redefined {}, Return Code {}.", targetClass, code);
-                Thread.sleep(200);
+                Thread.sleep(100);
             }
         }
         SocketSender.send("E2");

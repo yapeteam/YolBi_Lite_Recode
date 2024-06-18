@@ -1,6 +1,5 @@
-package cn.yapeteam.loader.mixin.utils;
+package cn.yapeteam.ymixin.utils;
 
-import cn.yapeteam.loader.Mapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

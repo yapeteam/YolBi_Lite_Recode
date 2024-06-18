@@ -1,6 +1,6 @@
-package cn.yapeteam.loader.mixin.annotations;
+package cn.yapeteam.ymixin.annotations;
 
-import cn.yapeteam.loader.utils.ASMUtils;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm_9_2.tree.AnnotationNode;
@@ -13,17 +13,19 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @java.lang.annotation.Target(ElementType.METHOD)
-public @interface Overwrite {
+public @interface Inject {
     String method();
 
     String desc();
 
+    Target target();
+
     class Helper {
-        public static Overwrite fromNode(AnnotationNode annotation) {
-            return new Overwrite() {
+        public static Inject fromNode(AnnotationNode annotation) {
+            return new Inject() {
                 @Override
                 public Class<? extends Annotation> annotationType() {
-                    return Overwrite.class;
+                    return Inject.class;
                 }
 
                 @Override
@@ -35,20 +37,27 @@ public @interface Overwrite {
                 public String desc() {
                     return ASMUtils.getAnnotationValue(annotation, "desc");
                 }
+
+                @Override
+                public Target target() {
+                    AnnotationNode annotationNode = ASMUtils.getAnnotationValue(annotation, "target");
+                    if (annotationNode == null) return null;
+                    return Target.Helper.fromNode(annotationNode);
+                }
             };
         }
 
         public static boolean isAnnotation(@NotNull AnnotationNode node) {
-            return node.desc.contains(ASMUtils.slash(Overwrite.class.getName()));
+            return node.desc.contains(ASMUtils.slash(Inject.class.getName()));
         }
 
         public static boolean hasAnnotation(@NotNull MethodNode node) {
-            return node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(Overwrite.Helper::isAnnotation);
+            return node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(Helper::isAnnotation);
         }
 
-        public static @Nullable Overwrite getAnnotation(MethodNode node) {
+        public static @Nullable Inject getAnnotation(MethodNode node) {
             if (!hasAnnotation(node)) return null;
-            return fromNode(node.visibleAnnotations.stream().filter(Overwrite.Helper::isAnnotation).findFirst().orElse(null));
+            return fromNode(node.visibleAnnotations.stream().filter(Helper::isAnnotation).findFirst().orElse(null));
         }
     }
 }

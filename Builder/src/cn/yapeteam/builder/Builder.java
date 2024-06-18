@@ -238,7 +238,8 @@ public class Builder {
         Terminal terminal = new Terminal(dir, null);
         terminal.execute(new String[]{gcc_path, "-c", "../src/dll/Main.c", "-o", "Main.o"});
         terminal.execute(new String[]{gcc_path, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
-        terminal.execute(new String[]{gcc_path, "-shared", "Main.o", "ReflectiveLoader.o", "-o", "libinjection.dll"});
+        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/utils.c", "-o", "utils.o"});
+        terminal.execute(new String[]{gcc_path, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
 
         terminal.execute(new String[]{gcc_path, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
         terminal.execute(new String[]{gcc_path, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});

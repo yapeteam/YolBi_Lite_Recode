@@ -1,5 +1,6 @@
-package cn.yapeteam.loader.utils;
+package cn.yapeteam.ymixin.utils;
 
+import cn.yapeteam.ymixin.YMixin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm_9_2.ClassReader;
@@ -38,8 +39,8 @@ public class ASMUtils {
             @Override
             protected @NotNull String getCommonSuperClass(@NotNull String type1, @NotNull String type2) {
                 try {
-                    Class<?> class1 = ClassUtils.getClass(type1);
-                    Class<?> class2 = ClassUtils.getClass(type2);
+                    Class<?> class1 = YMixin.classProvider.get(type1);
+                    Class<?> class2 = YMixin.classProvider.get(type2);
                     if (class1 != null && class2 != null) {
                         if (class1.isAssignableFrom(class2)) {
                             return type1;

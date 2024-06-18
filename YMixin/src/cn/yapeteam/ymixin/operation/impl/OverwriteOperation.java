@@ -1,10 +1,9 @@
-package cn.yapeteam.loader.mixin.operation.impl;
+package cn.yapeteam.ymixin.operation.impl;
 
-import cn.yapeteam.loader.Mapper;
-import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Overwrite;
-import cn.yapeteam.loader.mixin.operation.Operation;
+import cn.yapeteam.ymixin.Mixin;
+import cn.yapeteam.ymixin.annotations.Overwrite;
+import cn.yapeteam.ymixin.operation.Operation;
+import cn.yapeteam.ymixin.utils.Mapper;
 import org.objectweb.asm_9_2.tree.ClassNode;
 import org.objectweb.asm_9_2.tree.MethodNode;
 
@@ -17,7 +16,7 @@ public class OverwriteOperation implements Operation {
         ClassNode source = mixin.getSource();
         ClassNode target = mixin.getTarget();
         List<MethodNode> replacements = source.methods.stream()
-                .filter(Overwrite.Helper::hasAnnotation)
+                .filter(cn.yapeteam.ymixin.annotations.Overwrite.Helper::hasAnnotation)
                 .collect(Collectors.toList());
         for (MethodNode replacement : replacements) {
             Overwrite info = Overwrite.Helper.getAnnotation(replacement);

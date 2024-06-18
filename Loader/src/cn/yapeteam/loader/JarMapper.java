@@ -1,8 +1,8 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.annotations.DontMap;
-import cn.yapeteam.loader.mixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.DontMap;
+import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.loader.utils.ASMUtils;
 import lombok.val;
 import lombok.var;

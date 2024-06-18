@@ -1,18 +1,13 @@
-package cn.yapeteam.loader;
+package cn.yapeteam.ymixin.utils;
 
-import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ASMUtils;
-import cn.yapeteam.loader.utils.ClassUtils;
+import cn.yapeteam.ymixin.YMixin;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm_9_2.tree.ClassNode;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class Mapper {
     @Getter
@@ -29,6 +24,8 @@ public class Mapper {
     public enum Mode {
         None, Vanilla, Searge
     }
+
+
 
     /**
      * friendly→obf
@@ -100,9 +97,7 @@ public class Mapper {
         }
     }
 
-    public static void readMappings() {
-        String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/vanilla.srg")), StandardCharsets.UTF_8);
-        String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/forge.srg")), StandardCharsets.UTF_8);
+    public static void readMappings(String vanilla, String forge) {
         readMapping(vanilla, getVanilla());
         readMapping(forge, getSearges());
     }
@@ -132,16 +127,6 @@ public class Mapper {
         String result = applyMode(map);
         cache.put(identifier, result);
         return result;
-    }
-
-    public static Mode guessMappingMode() {
-        Class<?> clazz = ClassUtils.getClass("net.minecraft.client.Minecraft");
-        if (clazz == null) return Mode.Vanilla;
-        byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
-        ClassNode node = ASMUtils.node(bytes);
-        if (node.methods.stream().anyMatch(m -> m.name.equals("runTick")))
-            return Mode.None;
-        return Mode.Searge;
     }
 
     public static void setMode(Mode mode) {
@@ -182,7 +167,7 @@ public class Mapper {
                 m.type == type && m.name.equals(name) && (desc == null || m.desc == null || desc.equals(m.desc))
         ).forEach(m -> owners.put(m.owner, m));
         String mappedOwner = map(null, owner, null, Type.Class);
-        Class<?> theClass = ClassUtils.getClass(mappedOwner);
+        Class<?> theClass = YMixin.classProvider.get(mappedOwner);
         while (theClass != Object.class) {
             if (theClass != null) {
                 Class<?> finalTheClass = theClass;
@@ -194,10 +179,7 @@ public class Mapper {
                     return applyMode(entry.getValue());
                 }
                 theClass = theClass.getSuperclass();
-            } else {
-                Logger.warn("Owner not found: {}", mappedOwner);
-                break;
-            }
+            } else break;
         }
         return name;
     }

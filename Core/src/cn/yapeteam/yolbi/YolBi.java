@@ -9,10 +9,13 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
+import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
+import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
+import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
 import lombok.Getter;
@@ -26,6 +29,7 @@ public class YolBi {
     public static final String name = "YolBi Lite";
     public static final String version = "0.3.2";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
+    public static boolean initialized = false;
     private EventManager eventManager;
     private CommandManager commandManager;
     private ConfigManager configManager;
@@ -47,8 +51,8 @@ public class YolBi {
     }
 
     public static void initialize() {
-        if (YolBi.instance == null)
-            YolBi.instance = new YolBi();
+        if (initialized || instance == null) return;
+        initialized = true;
         boolean ignored = YOLBI_DIR.mkdirs();
         System.setProperty("sun.java2d.opengl", "true");
         instance.eventManager = new EventManager();
@@ -66,12 +70,21 @@ public class YolBi {
         instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
         try {
-            YolBi.instance.getConfigManager().load();
+            instance.getConfigManager().load();
             WebServer.start();
-            instance.jFrameRenderer.display();
+            if (instance.jFrameRenderer != null)
+                instance.jFrameRenderer.display();
         } catch (Throwable e) {
             Logger.exception(e);
         }
+        instance.getNotificationManager().post(
+                new Notification(
+                        "Injected successfully",
+                        Easing.EASE_IN_OUT_QUAD,
+                        Easing.EASE_IN_OUT_QUAD,
+                        2500, NotificationType.INIT
+                )
+        );
     }
 
     @Listener
@@ -83,8 +96,9 @@ public class YolBi {
         try {
             configManager.save();
             WebServer.stop();
-            instance.jFrameRenderer.close();
-            YolBi.instance = new YolBi();
+            if (instance.jFrameRenderer != null)
+                instance.jFrameRenderer.close();
+            instance = new YolBi();
             System.gc();
         } catch (IOException e) {
             Logger.exception(e);

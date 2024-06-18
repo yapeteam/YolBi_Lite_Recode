@@ -1,12 +1,13 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.mixin.annotations.DontMap;
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Shadow;
-import cn.yapeteam.loader.mixin.annotations.Super;
-import cn.yapeteam.loader.mixin.utils.DescParser;
 import cn.yapeteam.loader.utils.ASMUtils;
+import cn.yapeteam.ymixin.annotations.DontMap;
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Shadow;
+import cn.yapeteam.ymixin.annotations.Super;
+import cn.yapeteam.ymixin.utils.DescParser;
+import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.AllArgsConstructor;
 import org.objectweb.asm_9_2.Handle;
 import org.objectweb.asm_9_2.Type;
@@ -14,8 +15,6 @@ import org.objectweb.asm_9_2.tree.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -149,12 +148,6 @@ public class ClassMapper {
     @AllArgsConstructor
     public static class Name_Desc {
         public String name, desc;
-    }
-
-    public static void main(String[] args) throws Throwable {
-        Mapper.setMode(Mapper.Mode.Vanilla);
-        Mapper.readMappings();
-        map(readStream(Files.newInputStream(Paths.get("AimAssist.class"))));
     }
 
     public static void method(MethodNode source, ClassNode parent, String targetName) throws Throwable {
