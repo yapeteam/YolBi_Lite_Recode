@@ -1,4 +1,4 @@
-package cn.yapeteam.loader.mixin.operation.test;
+package cn.yapeteam.ymixin.operation.test;
 
 public class target {
     public static void func() {

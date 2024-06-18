@@ -1,9 +1,9 @@
-package cn.yapeteam.loader.mixin.operation.test;
+package cn.yapeteam.ymixin.operation.test;
 
-import cn.yapeteam.loader.mixin.annotations.Inject;
-import cn.yapeteam.loader.mixin.annotations.Local;
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Target;
+import cn.yapeteam.ymixin.annotations.Inject;
+import cn.yapeteam.ymixin.annotations.Local;
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Target;
 
 @Mixin(target.class)
 public class source {
