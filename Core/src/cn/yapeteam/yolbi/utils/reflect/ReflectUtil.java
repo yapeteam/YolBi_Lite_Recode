@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.utils.reflect;
 
-import cn.yapeteam.loader.Mapper;
+import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.loader.logger.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;

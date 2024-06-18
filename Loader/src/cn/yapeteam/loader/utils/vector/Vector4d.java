@@ -1,6 +1,6 @@
 package cn.yapeteam.loader.utils.vector;
 
-import cn.yapeteam.loader.mixin.annotations.DontMap;
+import cn.yapeteam.ymixin.annotations.DontMap;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

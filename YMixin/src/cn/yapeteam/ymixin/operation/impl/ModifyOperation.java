@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cn.yapeteam.ymixin.YMixin.Logger;
 import static org.objectweb.asm_9_2.Opcodes.*;
 import static org.objectweb.asm_9_2.TypeReference.NEW;
 

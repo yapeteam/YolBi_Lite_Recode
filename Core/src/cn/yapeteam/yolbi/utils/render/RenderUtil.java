@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.utils.render;
 
-import cn.yapeteam.loader.Mapper;
+import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.yolbi.shader.GaussianFilter;
 import cn.yapeteam.yolbi.shader.impl.ShaderScissor;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;

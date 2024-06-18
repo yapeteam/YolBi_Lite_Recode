@@ -1,9 +1,9 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.Inject;
-import cn.yapeteam.loader.mixin.annotations.Local;
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Target;
+import cn.yapeteam.ymixin.annotations.Inject;
+import cn.yapeteam.ymixin.annotations.Local;
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Target;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.block.EventNote;
 import net.minecraft.block.BlockNote;

@@ -4,7 +4,7 @@
     <output>build</output>
     <artifacts>
         <artifact name="injector.jar">
-            <binary>Injector/target/classes</binary>
+            <binary>out/production/Injector</binary>
             <includes>
                 <dir>Injector/META-INF</dir>
                 <extract>deps/asm-all-9.2.jar</extract>
@@ -16,16 +16,16 @@
                     <dir>resources</dir>
                     <dir name="injection">
                         <archive name="injection.jar">
-                            <files>Core/target/classes</files>
+                            <files>out/production/Core</files>
                         </archive>
                     </dir>
                     <files>deps</files>
                     <archive name="loader.jar">
-                        <files>Loader/target/classes</files>
+                        <files>out/production/Loader</files>
                     </archive>
                     <archive name="agent.jar">
                         <dir>Agent/META-INF</dir>
-                        <files>Agent/target/classes</files>
+                        <files>out/production/Agent</files>
                     </archive>
                     <file>Loader/dll/build/libinjection.dll</file>
                     <file>Loader/dll/build/libapi.dll</file>

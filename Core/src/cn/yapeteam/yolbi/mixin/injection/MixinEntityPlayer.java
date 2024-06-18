@@ -1,8 +1,8 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Overwrite;
-import cn.yapeteam.loader.mixin.annotations.Shadow;
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Overwrite;
+import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.yolbi.utils.misc.ObjectStore;
 import net.minecraft.entity.player.EntityPlayer;
 

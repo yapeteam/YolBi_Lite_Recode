@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.utils.network;
 
-import cn.yapeteam.loader.Mapper;
+import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.network.EventFinalPacketSend;

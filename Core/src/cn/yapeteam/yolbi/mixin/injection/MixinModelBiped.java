@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.*;
+import cn.yapeteam.ymixin.annotations.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelRenderer;

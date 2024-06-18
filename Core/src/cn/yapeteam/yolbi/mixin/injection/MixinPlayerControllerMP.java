@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.*;
+import cn.yapeteam.ymixin.annotations.*;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.event.type.CancellableEvent;

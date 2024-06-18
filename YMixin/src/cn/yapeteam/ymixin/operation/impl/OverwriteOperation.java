@@ -10,6 +10,8 @@ import org.objectweb.asm_9_2.tree.MethodNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cn.yapeteam.ymixin.YMixin.Logger;
+
 public class OverwriteOperation implements Operation {
     @Override
     public void dispose(Mixin mixin) {

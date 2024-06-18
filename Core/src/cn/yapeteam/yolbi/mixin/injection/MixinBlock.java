@@ -1,8 +1,8 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.loader.mixin.annotations.Mixin;
-import cn.yapeteam.loader.mixin.annotations.Overwrite;
-import cn.yapeteam.loader.mixin.annotations.Shadow;
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Overwrite;
+import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.block.EventBlockBB;
 import net.minecraft.block.Block;

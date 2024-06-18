@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cn.yapeteam.ymixin.YMixin.*;
+
 @Getter
 public class Transformer {
     private final ClassBytesProvider provider;
