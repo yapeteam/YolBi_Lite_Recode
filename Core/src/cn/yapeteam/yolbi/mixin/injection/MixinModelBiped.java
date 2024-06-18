@@ -6,8 +6,7 @@ import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 
-import static cn.yapeteam.yolbi.utils.player.RotationManager.prevRenderPitchHead;
-import static cn.yapeteam.yolbi.utils.player.RotationManager.renderPitchHead;
+import static cn.yapeteam.yolbi.utils.player.RotationManager.*;
 
 @Mixin(ModelBiped.class)
 public class MixinModelBiped {
