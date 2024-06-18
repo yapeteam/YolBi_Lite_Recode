@@ -20,6 +20,9 @@
                         </archive>
                     </dir>
                     <files>deps</files>
+                    <archive name="ymixin.jar">
+                        <files>out/production/YMixin</files>
+                    </archive>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
                     </archive>
