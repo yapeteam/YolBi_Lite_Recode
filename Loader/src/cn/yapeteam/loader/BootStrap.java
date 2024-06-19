@@ -22,22 +22,18 @@ import java.util.zip.ZipInputStream;
 
 @SuppressWarnings("unused")
 public class BootStrap {
-    private static native void loadJar(String path, ClassLoader loader);
+    private static native void loadInjection();
 
     private static boolean initialized = false;
 
     public static void initHook() {
-        if (initialized) return;
-        initialized = true;
-        new Thread(() -> {
-            Loader.preload();
-            try {
-                loadJar(Loader.YOLBI_DIR + "/" + "injection.jar", client_thread.getContextClassLoader());
-                Class.forName("cn.yapeteam.yolbi.Loader", true, client_thread.getContextClassLoader()).getMethod("start").invoke(null);
-            } catch (Throwable e) {
-                Logger.exception(e);
-            }
-        }).start();
+        if (!initialized) {
+            initialized = true;
+            new Thread(() -> {
+                Loader.preload();
+                loadInjection();
+            }).start();
+        }
     }
 
     private static byte[] readStream(InputStream inStream) throws Exception {

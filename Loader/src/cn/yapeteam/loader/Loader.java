@@ -1,23 +1,14 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ClassUtils;
-import cn.yapeteam.ymixin.YMixin;
-import cn.yapeteam.ymixin.utils.ASMUtils;
 import cn.yapeteam.ymixin.utils.Mapper;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
-import org.objectweb.asm_9_2.Opcodes;
-import org.objectweb.asm_9_2.tree.ClassNode;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
-@SuppressWarnings("unused")
 public class Loader {
-    public static final int ASM_API = Opcodes.ASM9;
     public static final String YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi").getAbsolutePath();
     public static final int port = 20181;
 
