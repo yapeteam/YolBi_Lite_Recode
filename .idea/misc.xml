@@ -2,10 +2,6 @@
 <project version="4">
   <component name="EntryPointsManager">
     <list size="9">
-      <item index="0" class="java.lang.String" itemvalue="cn.yapeteam.loader.api.module.ModuleInfo" />
-      <item index="1" class="java.lang.String" itemvalue="cn.yapeteam.loader.mixin.annotations.Inject" />
-      <item index="2" class="java.lang.String" itemvalue="cn.yapeteam.loader.mixin.annotations.Overwrite" />
-      <item index="3" class="java.lang.String" itemvalue="cn.yapeteam.loader.mixin.annotations.Shadow" />
       <item index="4" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Inject" />
       <item index="5" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Mixin" />
       <item index="6" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Overwrite" />
@@ -13,19 +9,10 @@
       <item index="8" class="java.lang.String" itemvalue="cn.yapeteam.yolbi.event.Listener" />
     </list>
     <writeAnnotations>
-      <writeAnnotation name="cn.yapeteam.loader.mixin.annotations.Shadow" />
       <writeAnnotation name="cn.yapeteam.ymixin.annotations.Shadow" />
     </writeAnnotations>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="MavenProjectsManager">
-    <option name="originalFiles">
-      <list>
-        <option value="$PROJECT_DIR$/pom.xml" />
-        <option value="$PROJECT_DIR$/YMixin/pom.xml" />
-      </list>
-    </option>
-  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
