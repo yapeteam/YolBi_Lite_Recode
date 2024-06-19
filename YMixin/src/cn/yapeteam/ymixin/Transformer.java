@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cn.yapeteam.ymixin.YMixin.*;
+import static cn.yapeteam.ymixin.YMixin.Logger;
 
 @Getter
 public class Transformer {
@@ -42,6 +42,10 @@ public class Transformer {
         Map<String, byte[]> classMap = new HashMap<>();
         oldBytes.clear();
         for (Mixin mixin : mixins) {
+            if (mixin.getTarget() == null) {
+                Logger.warn("Mixin {} has no target class, skipping.", mixin.getSource().name);
+                continue;
+            }
             String name = mixin.getTarget().name.replace('/', '.');
             oldBytes.put(name, mixin.getTargetOldBytes());
             for (Operation operation : operations)
