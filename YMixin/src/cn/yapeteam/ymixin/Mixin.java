@@ -6,7 +6,7 @@ import org.objectweb.asm_9_2.tree.ClassNode;
 
 import java.util.Objects;
 
-import static cn.yapeteam.ymixin.YMixin.*;
+import static cn.yapeteam.ymixin.YMixin.Logger;
 
 @Getter
 public class Mixin {
@@ -19,28 +19,20 @@ public class Mixin {
         this.source = source;
         Class<?> targetClass = Objects.requireNonNull(cn.yapeteam.ymixin.annotations.Mixin.Helper.getAnnotation(source)).value();
         targetName = targetClass.getName().replace('.', '/');
-        Logger.info("Loading mixin {}", source.name);
-        int byte_tries = 0;
-        while (targetOldBytes == null && byte_tries < 5) {
+        Logger.info("Loading mixin {} target class {}", source.name, targetName);
+        int try_count = 0;
+        while (target == null && try_count < 10) {
             try {
                 targetOldBytes = provider.getClassBytes(targetClass);
-            } catch (Throwable ignored) {
-                byte_tries++;
-                Thread.sleep(500);
-            }
-        }
-        int node_tries = 0;
-        while (target == null && node_tries < 5) {
-            try {
                 target = ASMUtils.node(targetOldBytes);
             } catch (Throwable ignored) {
-                node_tries++;
+                try_count++;
                 Thread.sleep(500);
             }
         }
         if (target == null)
             Logger.error("Failed to load target class {} for mixin {}", targetClass.getName(), source.name);
         else
-            Logger.info("Loaded target class {} for mixin {}, tries: {}+{}", targetClass.getName(), source.name, byte_tries, node_tries);
+            Logger.info("Loaded target class {} for mixin {}, tries: {}", targetClass.getName(), source.name, try_count);
     }
 }
