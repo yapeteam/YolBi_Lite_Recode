@@ -16,11 +16,9 @@ C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
 
 1. Open this project
 
-2. Init maven & download deps
+2. Run the ProjectRunConfiguration: "BUILD"
 
-3. Run the ProjectRunConfiguration: "BUILD"
-
-4. Your jar will appear in `./build`
+3. Your jar will appear in `./build`
 
 ## Custom
 
