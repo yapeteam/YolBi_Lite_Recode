@@ -20,7 +20,7 @@ import java.util.Objects;
 public class MixinManager {
     public static final ArrayList<ClassNode> mixins = new ArrayList<>();
     public static Transformer transformer;
-    public static final String MIXIN_PACKAGE = MixinManager.class.getPackage().getName() + ".injection";
+    public static final String MIXIN_PACKAGE = "cn.yapeteam.yolbi.mixin.injection";
 
     public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
