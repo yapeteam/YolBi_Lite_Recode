@@ -67,19 +67,18 @@ jclass findThreadClass(const char *name, jobject classLoader)
 {
     jclass urlClassLoader = (*jniEnv)->FindClass(jniEnv, "java/net/URLClassLoader");
     jclass result = NULL;
-    if ((*jniEnv)->IsInstanceOf(jniEnv, classLoader, urlClassLoader))
-    {
-        replace(name, "/", ".");
-        jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
-        jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
-        jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
-        return (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
-    }
-    else
-    {
-        replace(name, ".", "/");
-        return (*jniEnv)->FindClass(jniEnv, name);
-    }
+    replace(name, "/", ".");
+    jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
+    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+    jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
+    result = (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    if (result)
+        return result;
+    replace(name, ".", "/");
+    result = (*jniEnv)->FindClass(jniEnv, name);
+    if (result)
+        return result;
+    return NULL;
 }
 
 unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray)
