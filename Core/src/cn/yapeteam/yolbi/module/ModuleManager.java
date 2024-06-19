@@ -15,8 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -24,7 +24,7 @@ import java.util.zip.ZipInputStream;
 @Getter
 @SuppressWarnings({"unchecked", "unused"})
 public class ModuleManager {
-    private final List<Module> modules = new ArrayList<>();
+    private final List<Module> modules = new CopyOnWriteArrayList<>();
 
     public void load() {
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YolBi.YOLBI_DIR, "injection.jar").toPath()))) {
