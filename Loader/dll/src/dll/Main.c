@@ -57,22 +57,26 @@ void replace(char *str, const char *fstr, const char *rstr)
     }
 }
 
+jclass JNICALL loadClass(JNIEnv *jniEnv, const char *name, jobject classloader)
+{
+    jmethodID loadClass = (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, classloader), "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    return (jclass)(*jniEnv)->CallObjectMethod(jniEnv, classloader, loadClass, (*jniEnv)->NewStringUTF(jniEnv, name));
+}
+
 jclass findThreadClass(const char *name, jobject classLoader)
 {
+    jclass result = NULL;
     jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
-    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName",
-                                                     "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
     jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
-    jclass result = (jclass)(*jniEnv)->NewGlobalRef(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName,
-                                                                                              className,
-                                                                                              JNI_TRUE, classLoader));
-    if (!result)
-    {
-        printf("FindClass\n");
-        replace(name, ".", "/");
-        return (*jniEnv)->FindClass(jniEnv, name);
-    }
-    return result;
+    result = (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    if (result != NULL)
+        return result;
+    replace(name, ".", "/");
+    result = (*jniEnv)->FindClass(jniEnv, name);
+    if (result != NULL)
+        return result;
+    return NULL;
 }
 
 unsigned char *jbyteArrayToUnsignedCharArray(JNIEnv *env, jbyteArray byteArray)
@@ -178,10 +182,7 @@ JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject 
     return findThreadClass(jstringToChar(jniEnv, name), loader);
 }
 
-JNIEXPORT jbyteArray
-
-    JNICALL
-    GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
+JNIEXPORT jbyteArray JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
 {
     struct Callback *retransform_callback = (struct Callback *)allocate(sizeof(struct Callback));
     retransform_callback->success = 0;
@@ -240,11 +241,10 @@ jclass DefineClass(JNIEnv *env, jobject obj, jobject classLoader, jbyteArray byt
     jmethodID defineClass = (*env)->GetMethodID(env, clClass, "defineClass", "([BII)Ljava/lang/Class;");
     jobject classDefined = (*env)->CallObjectMethod(env, classLoader, defineClass, bytes, 0,
                                                     (*env)->GetArrayLength(env, bytes));
-    return (jclass)
-        classDefined;
+    return (jclass)classDefined;
 }
 
-void loadJar(const char *path, jobject thread)
+void loadJar(const char *path, jobject loader)
 {
     jclass urlClassLoader = (*jniEnv)->FindClass(jniEnv, "java/net/URLClassLoader");
     jclass fileClass = (*jniEnv)->FindClass(jniEnv, "java/io/File");
@@ -257,8 +257,6 @@ void loadJar(const char *path, jobject thread)
     jclass URIClass = (*jniEnv)->FindClass(jniEnv, "java/net/URI");
     jmethodID toURL = (*jniEnv)->GetMethodID(jniEnv, URIClass, "toURL", "()Ljava/net/URL;");
     jobject url = (*jniEnv)->CallObjectMethod(jniEnv, uri, toURL);
-    jmethodID getContextClassLoader = (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, thread), "getContextClassLoader", "()Ljava/lang/ClassLoader;");
-    jobject loader = (*jniEnv)->CallObjectMethod(jniEnv, thread, getContextClassLoader);
     if ((*jniEnv)->IsInstanceOf(jniEnv, loader, urlClassLoader))
     {
         printf("jni\n");
@@ -268,6 +266,11 @@ void loadJar(const char *path, jobject thread)
     {
         printf("jvmti:%d\n", (*jvmti)->AddToSystemClassLoaderSearch(jvmti, path));
     }
+}
+
+JNIEXPORT void JNICALL loadJar0(JNIEnv *env, jclass _, jstring path, jobject loader)
+{
+    loadJar(jstringToChar(env, path), loader);
 }
 
 int str_endwith(const char *str, const char *reg)
@@ -345,14 +348,11 @@ void Inject(const char yolbi_dir[260])
         {
             char jarPath[260];
             sprintf_s(jarPath, 260, "%s\\%s", yolbi_dir, entry->d_name);
-            loadJar(jarPath, clientThread);
+            loadJar(jarPath, classLoader);
             printf("loaded: %s\n", jarPath);
         }
     }
     closedir(dir);
-
-    char injectionOutPath[260];
-    sprintf_s(injectionOutPath, 260, "%s\\injection.jar", yolbi_dir);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
@@ -392,29 +392,13 @@ void Inject(const char yolbi_dir[260])
     register_native_methods(jniEnv, natvieClass);
     printf("Native methods registered\n");
 
-    jclass PreLoad = findThreadClass("cn.yapeteam.loader.Loader", classLoader);
-    if (!PreLoad)
-    {
-        printf("Failed to find Loader class\n");
-        return;
-    }
-
-    jmethodID preload = (*jniEnv)->GetStaticMethodID(jniEnv, PreLoad, "preload", "()V");
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, PreLoad, preload);
-    printf("Preload method called\n");
-
-    loadJar(injectionOutPath, clientThread);
-    printf("Injection jar loaded\n");
-
-    jclass Start = findThreadClass("cn.yapeteam.yolbi.Loader", classLoader);
-    if (!Start)
-    {
-        printf("Failed to find Loader class\n");
-        return;
-    }
-    jmethodID start = (*jniEnv)->GetStaticMethodID(jniEnv, Start, "start", "()V");
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, Start, start);
-    printf("Start method called\n");
+    jclass BootStrap = findThreadClass("cn.yapeteam.loader.BootStrap", classLoader);
+    JNINativeMethod BootMethods[] = {
+        {"loadJar", "(Ljava/lang/String;Ljava/lang/ClassLoader;)V", (void *)&loadJar0},
+    };
+    (*jniEnv)->RegisterNatives(jniEnv, BootStrap, BootMethods, 1);
+    jmethodID entryPoint = (*jniEnv)->GetStaticMethodID(jniEnv, BootStrap, "entry", "()V");
+    (*jniEnv)->CallStaticVoidMethod(jniEnv, BootStrap, entryPoint);
 }
 
 #include <windows.h>

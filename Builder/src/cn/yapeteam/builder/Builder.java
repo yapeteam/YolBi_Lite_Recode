@@ -249,7 +249,7 @@ public class Builder {
 
     private static void buildAgentForDebug() throws Exception {
         File output_file = new File("Minecraft/run/agent.jar");
-        String artifact_binary = "Agent/target/classes";
+        String artifact_binary = "out/production/Agent";
         ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(output_file.toPath()));
         Action action = file -> {
             String path = file.toString().replace("\\", "/");
