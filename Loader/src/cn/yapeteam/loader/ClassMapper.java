@@ -13,14 +13,11 @@ import org.objectweb.asm_9_2.Handle;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("unused")
 public class ClassMapper {
     public static byte[] map(byte[] bytes) throws Throwable {
         ClassNode node = ASMUtils.node(bytes);
@@ -90,7 +87,7 @@ public class ClassMapper {
                 }
             }
             if (Mapper.getMode() != Mapper.Mode.None)
-                method(method, node, targetName);
+                method(method, node);
         }
         for (FieldNode field : node.fields) {
             if (Mapper.getMode() != Mapper.Mode.None)
@@ -133,24 +130,12 @@ public class ClassMapper {
         return Mapper.getVanilla().stream().anyMatch(m -> m.getType() == Mapper.Type.Class && m.getName().equals(type));
     }
 
-    public static byte[] readStream(InputStream inStream) throws Exception {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = inStream.read(buffer)) != -1) {
-            outStream.write(buffer, 0, len);
-        }
-        outStream.close();
-        inStream.close();
-        return outStream.toByteArray();
-    }
-
     @AllArgsConstructor
     public static class Name_Desc {
         public String name, desc;
     }
 
-    public static void method(MethodNode source, ClassNode parent, String targetName) throws Throwable {
+    public static void method(MethodNode source, ClassNode parent) throws Throwable {
         if (source.visibleAnnotations != null) {
             for (AnnotationNode visibleAnnotation : source.visibleAnnotations) {
                 if (Super.Helper.isAnnotation(visibleAnnotation)) {
