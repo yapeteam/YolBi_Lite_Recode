@@ -6,6 +6,7 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
@@ -94,28 +95,32 @@ public class AutoClicker extends Module {
 
     @Listener
     private void onRender2D(EventRender2D e) {
-        delay = generate(cps.getValue(), range.getValue());
-        if (mc.currentScreen != null) return;
-        if (System.currentTimeMillis() - time >= (1000 / delay)) {
-            if (clickprio.is("Left")) {
-                if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                    time = System.currentTimeMillis();
-                    sendClick(0);
-                }
-                if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                    time = System.currentTimeMillis();
-                    sendClick(1);
-                }
-            } else {
-                if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                    time = System.currentTimeMillis();
-                    sendClick(1);
-                }
-                if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                    time = System.currentTimeMillis();
-                    sendClick(0);
+        try {
+            delay = generate(cps.getValue(), range.getValue());
+            if (mc.currentScreen != null) return;
+            if (System.currentTimeMillis() - time >= (1000 / delay)) {
+                if (clickprio.is("Left")) {
+                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                        time = System.currentTimeMillis();
+                        sendClick(0);
+                    }
+                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !(mc.thePlayer.getHeldItem() != null && (mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                        time = System.currentTimeMillis();
+                        sendClick(1);
+                    }
+                } else {
+                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !(mc.thePlayer.getHeldItem() != null && (mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                        time = System.currentTimeMillis();
+                        sendClick(1);
+                    }
+                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                        time = System.currentTimeMillis();
+                        sendClick(0);
+                    }
                 }
             }
+        } catch (Exception ex) {
+            Logger.exception(ex);
         }
     }
 
