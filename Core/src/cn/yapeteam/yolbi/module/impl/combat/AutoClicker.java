@@ -83,13 +83,13 @@ public class AutoClicker extends Module {
         if (button == 0) {
             Natives.SendLeft(true);
             // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendLeft(false), (int) delay, TimeUnit.MILLISECONDS);
+            executor.schedule(() -> Natives.SendLeft(false), 450, TimeUnit.MILLISECONDS);
         }
         // Simulate right click
         else if (button == 1) {
             Natives.SendRight(true);
             // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendRight(false), (int) delay, TimeUnit.MILLISECONDS);
+            executor.schedule(() -> Natives.SendRight(false), 450, TimeUnit.MILLISECONDS);
         }
     }
 
