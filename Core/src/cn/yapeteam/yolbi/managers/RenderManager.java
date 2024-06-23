@@ -19,6 +19,7 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
@@ -36,43 +37,41 @@ import java.util.*;
 
 import static org.lwjgl.opengl.GL11.GL_LINE_STRIP;
 import static org.lwjgl.opengl.GL11.glColor4f;
-
-
+@Getter
+@SuppressWarnings({"unchecked", "unused"})
 public class RenderManager{
 
-    public static Map<String, Shape> shapesMap = new HashMap<>();
+    public Map<String, Shape> shapesMap = new HashMap<>();
 
-    public static List<String> modifiedidbuffer = new ArrayList<>(); // Corrected initialization
-    private static final Frustum FRUSTUM = new Frustum();
-    private static final Pane root = new Pane(); // Static reference to the root pane
-    private static Stage primaryStage; // Static reference to the primary stage
+    public List<String> modifiedidbuffer = new ArrayList<>(); // Corrected initialization
+    private final Pane root = new Pane(); // reference to the root pane
+    private Stage primaryStage; // reference to the primary stage
 
-    private static AnimationTimer animationTimer;
-    private static Scene scene; // Static reference to the scene
-    private static Minecraft mc = Minecraft.getMinecraft();
-    private static ScaledResolution scaledResolution = new ScaledResolution(mc);
-    private static boolean isopen = true;
-    private static double lastX = -1;
-    private static double lastY = -1;
+    private AnimationTimer animationTimer;
+    private Scene scene; // reference to the scene
+    private Minecraft mc = Minecraft.getMinecraft();
+    private ScaledResolution scaledResolution = new ScaledResolution(mc);
+    private boolean isopen = true;
+    private double lastX = -1;
+    private double lastY = -1;
 
-    private static double lastwidth = -1;
-    private static double lastheight = -1;
+    private double lastwidth = -1;
+    private double lastheight = -1;
 
-
-
-    // A reference to the current GUI
-    public static GuiScreen currentGui;
-
-
-    public static boolean isdrawinggui = false;
 
     static {
         new JFXPanel(); // Initialize JavaFX toolkit
     }
 
+    // A reference to the current GUI
+    public GuiScreen currentGui;
+
+
+    public boolean isdrawinggui = false;
+
 
     // Check the window position every second
-    public static void CheckWindowPosition() {
+    public void CheckWindowPosition() {
 
         Timer timer = new Timer();
         TimerTask checkPositionTask = new TimerTask() {
@@ -95,7 +94,7 @@ public class RenderManager{
     }
 
 
-    public static void setupAnimationTimer() {
+    public void setupAnimationTimer() {
         animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -107,7 +106,7 @@ public class RenderManager{
         animationTimer.start();
     }
 
-    public static void CheckCanvas() {
+    public void CheckCanvas() {
         // Iterates over the map using an iterator to avoid ConcurrentModificationException
         Iterator<Map.Entry<String, Shape>> iterator = shapesMap.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -164,7 +163,7 @@ public class RenderManager{
 
 
     // Create the overlay window
-    private static void createOverlayWindow(double width, double height) {
+    private void createOverlayWindow(double width, double height) {
 
         Platform.runLater(() -> {
             System.out.println("started rendering");
@@ -193,7 +192,7 @@ public class RenderManager{
     }
 
 
-    public static void updateWindowLocation() {
+    public void updateWindowLocation() {
         Platform.runLater(() -> {
             if(isopen){
                 if (primaryStage != null) {
@@ -217,13 +216,13 @@ public class RenderManager{
     }
 
 
-    public static void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color) {
+    public void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color) {
         roundedRectangle(id, x, y, width, height, arcWidth, arcHeight, color, false, false);
     }
 
 
 
-    public static void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color,boolean blur, boolean bloom) {
+    public void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color,boolean blur, boolean bloom) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -271,7 +270,7 @@ public class RenderManager{
 
 
 
-    public static void horizontalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color leftColor, final java.awt.Color rightColor) {
+    public void horizontalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color leftColor, final java.awt.Color rightColor) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -301,7 +300,7 @@ public class RenderManager{
     }
 
 
-    public static void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color) {
+    public void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -326,7 +325,7 @@ public class RenderManager{
 
     }
 
-    public static void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color,boolean bloom, boolean Blur) {
+    public void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color,boolean bloom, boolean Blur) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -364,7 +363,7 @@ public class RenderManager{
 
     }
 
-    public static void verticalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color topColor, final java.awt.Color bottomColor) {
+    public void verticalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color topColor, final java.awt.Color bottomColor) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -397,17 +396,17 @@ public class RenderManager{
     }
 
 
-    public static boolean isInViewFrustrum(final Entity entity) {
-        return (isInViewFrustrum(entity.getEntityBoundingBox()) || entity.ignoreFrustumCheck);
-    }
+//    public boolean isInViewFrustrum(final Entity entity) {
+//        return (isInViewFrustrum(entity.getEntityBoundingBox()) || entity.ignoreFrustumCheck);
+//    }
 
-    private static boolean isInViewFrustrum(final AxisAlignedBB bb) {
-        final Entity current = mc.getRenderViewEntity();
-        FRUSTUM.setPosition(current.posX, current.posY, current.posZ);
-        return FRUSTUM.isBoundingBoxInFrustum(bb);
-    }
+//    private boolean isInViewFrustrum(final AxisAlignedBB bb) {
+//        final Entity current = mc.getRenderViewEntity();
+//        FRUSTUM.setPosition(current.posX, current.posY, current.posZ);
+//        return FRUSTUM.isBoundingBoxInFrustum(bb);
+//    }
 
-    private static Color convertColor(java.awt.Color color) {
+    private Color convertColor(java.awt.Color color) {
         return new Color(
                 color.getRed() / 255.0,
                 color.getGreen() / 255.0,
@@ -417,7 +416,7 @@ public class RenderManager{
     }
 
     // Convert ARGB integer color to JavaFX Color
-    private static Color convertARGBtoColor(int argb) {
+    private Color convertARGBtoColor(int argb) {
         double alpha = (argb >> 24 & 0xFF) / 255.0;
         double red = (argb >> 16 & 0xFF) / 255.0;
         double green = (argb >> 8 & 0xFF) / 255.0;
@@ -426,7 +425,7 @@ public class RenderManager{
     }
 
     // Adapted drawBorderedRect for JavaFX
-    public static void drawBorderedRect(String id, double x, double y, double width, double height, double lineSize, int borderColor, int fillColor) {
+    public void drawBorderedRect(String id, double x, double y, double width, double height, double lineSize, int borderColor, int fillColor) {
         if(isopen){
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
@@ -474,11 +473,11 @@ public class RenderManager{
         }
     }
 
-    public static void drawTextWithBox(String id, double x, double y, String text, java.awt.Color backgroundcolor, java.awt.Color textColor, double boxWidth, double boxHeight, double boxarc, double fontSize) {
+    public void drawTextWithBox(String id, double x, double y, String text, java.awt.Color backgroundcolor, java.awt.Color textColor, double boxWidth, double boxHeight, double boxarc, double fontSize) {
         drawTextWithBox(id, x, y, text, backgroundcolor, textColor, boxWidth, boxHeight, boxarc, fontSize, false, false);
     }
 
-    public static void drawTextWithBox(String id, double x, double y, String text, java.awt.Color backgroundcolor, java.awt.Color textColor, double boxWidth, double boxHeight, double boxarc, double fontSize, boolean blur, boolean bloom) {
+    public void drawTextWithBox(String id, double x, double y, String text, java.awt.Color backgroundcolor, java.awt.Color textColor, double boxWidth, double boxHeight, double boxarc, double fontSize, boolean blur, boolean bloom) {
         if(isopen){
             Color newbackgroundcolor = convertColor(backgroundcolor);
             roundedRectangle(id+"_bgbox", x, y, boxWidth, boxHeight, boxarc, boxarc, backgroundcolor,blur,bloom);
@@ -524,7 +523,7 @@ public class RenderManager{
 
     }
 
-    public static void drawText(String id, double x, double y, String text, java.awt.Color color, double fontSize) {
+    public void drawText(String id, double x, double y, String text, java.awt.Color color, double fontSize) {
         if(isopen){
             Platform.runLater(() -> {
                 Text textNode = (Text) shapesMap.get(id);
@@ -550,7 +549,7 @@ public class RenderManager{
 
 
 
-    public static void drawEntityBox(AxisAlignedBB entityBox, double posX, double posY, double posZ, final java.awt.Color color, final boolean outline, final boolean box, final float outlineWidth) {
+    public void drawEntityBox(AxisAlignedBB entityBox, double posX, double posY, double posZ, final java.awt.Color color, final boolean outline, final boolean box, final float outlineWidth) {
         final net.minecraft.client.renderer.entity.RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_BLEND);
@@ -591,7 +590,7 @@ public class RenderManager{
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
-    public static void drawFilledBox(final AxisAlignedBB axisAlignedBB) {
+    public void drawFilledBox(final AxisAlignedBB axisAlignedBB) {
         final Tessellator tessellator = Tessellator.getInstance();
         final WorldRenderer worldRenderer = tessellator.getWorldRenderer();
 
@@ -652,7 +651,7 @@ public class RenderManager{
         tessellator.draw();
     }
 
-    public static void drawSelectionBoundingBox(AxisAlignedBB boundingBox) {
+    public void drawSelectionBoundingBox(AxisAlignedBB boundingBox) {
         Tessellator tessellator = Tessellator.getInstance();
         WorldRenderer worldrenderer = tessellator.getWorldRenderer();
 

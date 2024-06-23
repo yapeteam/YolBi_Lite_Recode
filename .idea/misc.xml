@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="9">
-      <item index="4" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Inject" />
-      <item index="5" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Mixin" />
-      <item index="6" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Overwrite" />
-      <item index="7" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Shadow" />
-      <item index="8" class="java.lang.String" itemvalue="cn.yapeteam.yolbi.event.Listener" />
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Inject" />
+      <item index="1" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Mixin" />
+      <item index="2" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Overwrite" />
+      <item index="3" class="java.lang.String" itemvalue="cn.yapeteam.ymixin.annotations.Shadow" />
+      <item index="4" class="java.lang.String" itemvalue="cn.yapeteam.yolbi.event.Listener" />
     </list>
     <writeAnnotations>
       <writeAnnotation name="cn.yapeteam.ymixin.annotations.Shadow" />

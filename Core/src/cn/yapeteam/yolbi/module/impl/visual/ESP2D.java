@@ -6,6 +6,7 @@ import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.utils.vector.Vector4d;
+import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
@@ -170,10 +171,10 @@ public class ESP2D extends Module{
                     double yvalue = endPosY;
                     if(EntityHealth > 40){
                         // prevent lagging out because of too many rectangles
-                        RenderManager.rectangle(entityName + "_health_total",posX - 3.5, posY -0.5, 1.5, (endPosY - posY) * HealthRatio, healthColor);
+                        YolBi.instance.getRenderManager().rectangle(entityName + "_health_total",posX - 3.5, posY -0.5, 1.5, (endPosY - posY) * HealthRatio, healthColor);
                     }else{
                         for (int i = 0; i < EntityHealth; i++) {
-                            RenderManager.rectangle(entityName + "_health_" + i, posX - 1.5, yvalue - barheight, 1, barheight, healthColor);
+                            YolBi.instance.getRenderManager().rectangle(entityName + "_health_" + i, posX - 1.5, yvalue - barheight, 1, barheight, healthColor);
                             yvalue -= barheight + gap;
                         }
                     }
@@ -326,7 +327,7 @@ public class ESP2D extends Module{
         float red = (float)(color >> 16 & 0xFF) / 255.0f;
         float green = (float)(color >> 8 & 0xFF) / 255.0f;
         float blue = (float)(color & 0xFF) / 255.0f;
-        RenderManager.rectangle(id, x, y, Math.abs(x-x2), Math.abs(y-y2),new Color(red,green,blue,alpha));
+        YolBi.instance.getRenderManager().rectangle(id, x, y, Math.abs(x-x2), Math.abs(y-y2),new Color(red,green,blue,alpha));
     }
 
     public static void newDrawRect(String id, double left, double top, double right, double bottom, int hex) {
@@ -334,7 +335,7 @@ public class ESP2D extends Module{
         float red = (float)(hex >> 16 & 0xFF) / 255.0f;
         float green = (float)(hex >> 8 & 0xFF) / 255.0f;
         float blue = (float)(hex & 0xFF) / 255.0f;
-        RenderManager.rectangle(id, left, top, Math.abs(right - left), Math.abs(bottom - top), new Color(red, green, blue, alpha));
+        YolBi.instance.getRenderManager().rectangle(id, left, top, Math.abs(right - left), Math.abs(bottom - top), new Color(red, green, blue, alpha));
     }
     public static void color(Color color) {
         if (color == null) {
