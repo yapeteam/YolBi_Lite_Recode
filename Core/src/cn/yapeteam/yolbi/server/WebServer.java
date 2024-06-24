@@ -15,20 +15,12 @@ public class WebServer {
     public static final int PORT = 1342;
 
     public static void start() throws IOException {
-
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/", new HtmlHttpHandler());
         server.createContext("/api/modulesList", new ModulesHttpHandler());
-//        server.createContext("/api/setStatus", new StatusHttpHandler());
         server.createContext("/api/updateModulesInfo", new ModuleInfoHttpHandler());
-//        server.createContext("/api/categoriesList", new CategoriesHttpHandler());
         server.createContext("/api/getModuleSetting", new ModuleSettingsHttpHandler());
         server.createContext("/api/setModuleSettingValue", new SetModuleSettingsHttpHandler());
-        //server.createContext("/api/getAltAccounts", new HtmlAltAccountHandler());
-        //server.createContext("/api/AltLogin", new HtmlAltLoginHandler());
-        //server.createContext("/api/DeleteAlt", new HtmlAltDeleteHandler());
-        //server.createContext("/api/AddAlt", new HtmlAddAltHandler());
-//        server.createContext("/api/setBind", new BindHttpHandler());
         server.setExecutor(Executors.newFixedThreadPool(10));
 
         server.start();
@@ -36,6 +28,7 @@ public class WebServer {
     }
 
     public static void stop() {
-        server.stop(0);
+        if (server != null)
+            server.stop(0);
     }
 }
