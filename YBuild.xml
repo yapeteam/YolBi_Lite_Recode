@@ -12,13 +12,6 @@
                 <extract>deps/flatlaf.jar</extract>
                 <extract>deps/flatlaf-intellij-themes.jar</extract>
                 <extract>deps/tools.jar</extract>
-                <extract>deps/javafx-swt.jar</extract>
-                <extract>deps/jrt-fs.jar</extract>
-                <extract>deps/ant-javafx.jar</extract>
-                <extract>deps/javafx-mx.jar</extract>
-                <extract>deps/jfxrt.jar</extract>
-                <extract>deps/jfxswt.jar</extract>
-                <extract>deps/rt.jar</extract>
                 <archive name="injection.zip">
                     <dir>resources</dir>
                     <dir name="injection">
