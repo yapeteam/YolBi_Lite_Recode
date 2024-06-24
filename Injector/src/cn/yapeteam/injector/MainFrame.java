@@ -21,7 +21,7 @@ public class MainFrame extends JFrame {
     private ArrayList<Pair<String, Integer>> targets = new ArrayList<>();
 
     public MainFrame() {
-        super("inject Your YolBi Lite");
+        super("Inject Your YolBi Lite");
         float width = 500, height = width * 0.618f;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
