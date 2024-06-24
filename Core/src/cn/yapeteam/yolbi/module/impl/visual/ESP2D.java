@@ -87,6 +87,7 @@ public class ESP2D extends Module {
                 int m;
                 int color = this.getColor().getRGB();
                 Vector4d position = ESPUtil.get(collectedEntity);
+                if (position == null) continue;
                 double posX = position.getX();
                 double posY = position.getY();
                 double endPosX = position.getZ();
