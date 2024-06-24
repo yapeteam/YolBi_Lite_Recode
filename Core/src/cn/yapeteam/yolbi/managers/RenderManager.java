@@ -154,16 +154,16 @@ public class RenderManager {
 
     // Initialize the overlay window
     public void initwindow() {
-        shapesMap = new HashMap<>();
-        modifiedidbuffer = new ArrayList<>(); // Corrected initialization
-        root = new Pane(); // reference to the root pane
-        mc = Minecraft.getMinecraft();
         try {
             unzip(RenderManager.class.getResourceAsStream("/jfx-natives.zip"), new File(System.getProperty("java.library.path")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         new JFXPanel(); // Initialize JavaFX toolkit
+        shapesMap = new HashMap<>();
+        modifiedidbuffer = new ArrayList<>(); // Corrected initialization
+        root = new Pane(); // reference to the root pane
+        mc = Minecraft.getMinecraft();
         ScaledResolution scaledResolution = new ScaledResolution(mc);
         double width = scaledResolution.getScaledWidth_double();
         double height = scaledResolution.getScaledHeight_double();
