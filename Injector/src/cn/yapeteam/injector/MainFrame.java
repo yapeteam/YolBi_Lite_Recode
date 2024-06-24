@@ -1,8 +1,5 @@
 package cn.yapeteam.injector;
 
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
