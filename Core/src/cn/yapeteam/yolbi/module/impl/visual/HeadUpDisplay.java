@@ -21,7 +21,7 @@ public class HeadUpDisplay extends Module {
     private ClientTheme theme = null;
     private final BooleanValue waterMark = new BooleanValue("Water Mark", true);
     private final BooleanValue moduleList = new BooleanValue("Module List", true);
-    private final ModeValue<String> font = new ModeValue<>("Font", "Jello", "Jello", "PingFang", "default");
+    private final ModeValue<String> font = new ModeValue<>("Font", "PingFang", "Jello", "PingFang", "default");
 
     public HeadUpDisplay() {
         addValues(waterMark, moduleList, font);
