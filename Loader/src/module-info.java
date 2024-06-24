@@ -15,5 +15,6 @@ module cn.yapeteam.loader {
     exports cn.yapeteam.loader;
     exports cn.yapeteam.loader.utils.vector;
     exports cn.yapeteam.loader.utils;
+    exports cn.yapeteam.loader.api.module;
     // include other exports as necessary
 }
