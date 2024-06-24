@@ -32,10 +32,8 @@ public class Eagle extends Module {
 
     @Listener
     public void onUpdate(EventUpdate event) {
-        if (mc.currentScreen != null) {
-            reset();
+        if (mc.currentScreen != null)
             return;
-        }
         if (mc.thePlayer.isInWater() || mc.thePlayer.isInLava()) return;
         if ((mc.thePlayer.getHeldItem() == null || (mc.thePlayer.getHeldItem().getItem() instanceof ItemBlock)) && onlyblocks.getValue())
             return;
