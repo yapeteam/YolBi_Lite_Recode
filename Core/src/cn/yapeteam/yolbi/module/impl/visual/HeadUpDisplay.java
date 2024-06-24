@@ -36,7 +36,10 @@ public class HeadUpDisplay extends Module {
             font.drawString(YolBi.name + " " + YolBi.version, 2, 2, -1);
         }
         if (moduleList.getValue()) {
-            List<Module> activeModules = YolBi.instance.getModuleManager().getModules().stream().filter(Module::isEnabled).sorted(Comparator.comparingInt(m -> -(m.getName() + (m.getSuffix() != null ? " " + m.getSuffix() : "")).length())).collect(Collectors.toList());
+            List<Module> activeModules = YolBi.instance.getModuleManager().getModules().stream()
+                    .filter(Module::isEnabled)
+                    .sorted(Comparator.comparingInt(m -> (int) -font.getStringWidth(m.getName() + (m.getSuffix() != null ? " " + m.getSuffix() : ""))))
+                    .collect(Collectors.toList());
             for (int i = 0; i < activeModules.size(); i++) {
                 Module module = activeModules.get(i);
                 String text = module.getName() + (module.getSuffix() != null ? " " + module.getSuffix() : "");
