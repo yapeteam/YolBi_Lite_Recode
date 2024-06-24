@@ -1,8 +1,5 @@
 package cn.yapeteam.injector;
 
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachine;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -142,27 +139,8 @@ public class MainFrame extends JFrame {
         inject_ui();
     }
 
-    @Deprecated
-    public boolean inject_agent(int pid) {
-        try {
-            VirtualMachine virtualMachine = VirtualMachine.attach(String.valueOf(pid));
-            new Thread(() -> {
-                try {
-                    virtualMachine.loadAgent(new File(Main.YolBi_Dir, Main.agentName).getAbsolutePath());
-                } catch (Throwable ignored) {
-                }
-            }).start();
-        } catch (AttachNotSupportedException | IOException ex) {
-            ex.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
     public void inject_dll(int pid) {
         new Thread(() -> Utils.injectDLL(pid, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath())).start();
-        /*WinNT.HANDLE hdl = Utils.kernel32.OpenProcess(0x1F1FFB, false, pid);
-        Utils.loadLibrary(hdl, new File(Main.YolBi_Dir, Main.dllName).getAbsolutePath());*/
     }
 
     public void inject_ui() {
