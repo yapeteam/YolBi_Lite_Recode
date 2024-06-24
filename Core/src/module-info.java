@@ -1,0 +1,15 @@
+module cn.yapeteam.yolbi {
+    requires javafx.base;
+    requires javafx.controls;
+    requires javafx.graphics;
+    requires javafx.swing;
+    requires static lombok;
+    requires minecraft;
+    requires lwjgl;
+    requires cn.yapeteam.loader;
+    requires gson;
+    requires cn.yapeteam.ymixin;
+
+    // Add this line to allow access to the internal JDK class
+    opens javafx.embed.swing to java.base;
+}

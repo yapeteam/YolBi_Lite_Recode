@@ -18,6 +18,7 @@
                 <extract>deps/javafx-mx.jar</extract>
                 <extract>deps/jfxrt.jar</extract>
                 <extract>deps/jfxswt.jar</extract>
+                <extract>deps/rt.jar</extract>
                 <archive name="injection.zip">
                     <dir>resources</dir>
                     <dir name="injection">
