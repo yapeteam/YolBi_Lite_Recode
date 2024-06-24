@@ -33,13 +33,21 @@ import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.lwjgl.opengl.GL11.GL_LINE_STRIP;
 import static org.lwjgl.opengl.GL11.glColor4f;
+
 @Getter
-@SuppressWarnings({"unchecked", "unused"})
-public class RenderManager{
+@SuppressWarnings({"unused"})
+public class RenderManager {
 
     public Map<String, Shape> shapesMap = new HashMap<>();
 
@@ -58,8 +66,43 @@ public class RenderManager{
     private double lastwidth = -1;
     private double lastheight = -1;
 
+    public static void unzip(InputStream zipFile, File desDir) throws Exception {
+        boolean ignored = desDir.mkdir();
+        ZipInputStream zipInputStream = new ZipInputStream(zipFile);
+        ZipEntry zipEntry = zipInputStream.getNextEntry();
+        while (zipEntry != null) {
+            String unzipFilePath = desDir.getAbsolutePath() + File.separator + zipEntry.getName();
+            if (zipEntry.isDirectory())
+                mkdir(new File(unzipFilePath));
+            else {
+                File file = new File(unzipFilePath);
+                mkdir(file.getParentFile());
+                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(unzipFilePath)));
+                byte[] bytes = new byte[1024];
+                int readLen;
+                while ((readLen = zipInputStream.read(bytes)) != -1)
+                    bufferedOutputStream.write(bytes, 0, readLen);
+                bufferedOutputStream.close();
+            }
+            zipInputStream.closeEntry();
+            zipEntry = zipInputStream.getNextEntry();
+        }
+        zipInputStream.close();
+    }
+
+    public static void mkdir(File file) {
+        if (null == file || file.exists())
+            return;
+        mkdir(file.getParentFile());
+        boolean ignored = file.mkdir();
+    }
 
     static {
+        try {
+            unzip(RenderManager.class.getResourceAsStream("/jfx-natives.zip"), new File(System.getProperty("java.library.path")));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         new JFXPanel(); // Initialize JavaFX toolkit
     }
 
@@ -77,8 +120,8 @@ public class RenderManager{
         TimerTask checkPositionTask = new TimerTask() {
             @Override
             public void run() {
-                if(isopen){
-                    if(Display.getX() != lastX || Display.getY() != lastY || Display.getHeight() != lastheight || Display.getWidth() != lastwidth) {
+                if (isopen) {
+                    if (Display.getX() != lastX || Display.getY() != lastY || Display.getHeight() != lastheight || Display.getWidth() != lastwidth) {
                         lastX = Display.getX();
                         lastY = Display.getY();
                         lastwidth = Display.getWidth();
@@ -122,16 +165,16 @@ public class RenderManager{
         }
         modifiedidbuffer.clear(); // Clear the buffer for the next check
 
-        if(isdrawinggui){
-            if(!isopen){
+        if (isdrawinggui) {
+            if (!isopen) {
                 isopen = true;
             }
-        }else if(mc.theWorld != null && mc.thePlayer != null && mc.currentScreen == null){
+        } else if (mc.theWorld != null && mc.thePlayer != null && mc.currentScreen == null) {
             // means ingame
-            if(!isopen){
+            if (!isopen) {
                 isopen = true;
             }
-        }else{
+        } else {
             isopen = false;
         }
 //        rectangle("capture",0,0, root.getWidth(), root.getHeight(), new java.awt.Color(0,0,0));
@@ -152,7 +195,7 @@ public class RenderManager{
 
     }
 
-    public void destroywindow(){
+    public void destroywindow() {
         animationTimer.stop();
         primaryStage.close();
         shapesMap.clear();
@@ -194,7 +237,7 @@ public class RenderManager{
 
     public void updateWindowLocation() {
         Platform.runLater(() -> {
-            if(isopen){
+            if (isopen) {
                 if (primaryStage != null) {
                     ScaledResolution scaledResolution = new ScaledResolution(mc);
                     final int factor = scaledResolution.getScaleFactor();
@@ -221,9 +264,8 @@ public class RenderManager{
     }
 
 
-
-    public void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color,boolean blur, boolean bloom) {
-        if(isopen){
+    public void roundedRectangle(String id, final double x, final double y, final double width, final double height, final double arcWidth, final double arcHeight, final java.awt.Color color, boolean blur, boolean bloom) {
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -239,10 +281,10 @@ public class RenderManager{
                     roundedRectangle.setFill(fillcolor);
                     shapesMap.put(id, roundedRectangle);
                     roundedRectangle.setMouseTransparent(true);
-                    if(blur){
+                    if (blur) {
                         roundedRectangle.setEffect(blurEffect);
                     }
-                    if(bloom){
+                    if (bloom) {
                         roundedRectangle.setEffect(bloomEffect);
                     }
                     root.getChildren().add(roundedRectangle);
@@ -255,10 +297,10 @@ public class RenderManager{
                     roundedRectangle.setArcWidth(arcWidth * factor);
                     roundedRectangle.setArcHeight(arcHeight * factor);
                     roundedRectangle.setFill(fillcolor);
-                    if(blur){
+                    if (blur) {
                         roundedRectangle.setEffect(blurEffect);
                     }
-                    if(bloom){
+                    if (bloom) {
                         roundedRectangle.setEffect(bloomEffect);
                     }
                 }
@@ -268,10 +310,8 @@ public class RenderManager{
     }
 
 
-
-
     public void horizontalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color leftColor, final java.awt.Color rightColor) {
-        if(isopen){
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -301,7 +341,7 @@ public class RenderManager{
 
 
     public void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color) {
-        if(isopen){
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -325,8 +365,8 @@ public class RenderManager{
 
     }
 
-    public void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color,boolean bloom, boolean Blur) {
-        if(isopen){
+    public void rectangle(String id, final double x, final double y, final double width, final double height, final java.awt.Color color, boolean bloom, boolean Blur) {
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -336,10 +376,10 @@ public class RenderManager{
                 if (rect == null) {
                     rect = new Rectangle(x * factor, y * factor, width * factor, height * factor);
                     shapesMap.put(id, rect);
-                    if(bloom){
+                    if (bloom) {
                         rect.setEffect(bloomEffect);
                     }
-                    if(Blur){
+                    if (Blur) {
                         rect.setEffect(blurEffect);
                     }
                     rect.setMouseTransparent(true);
@@ -349,10 +389,10 @@ public class RenderManager{
                     rect.setY(y * factor);
                     rect.setWidth(width * factor);
                     rect.setHeight(height * factor);
-                    if(bloom){
+                    if (bloom) {
                         rect.setEffect(bloomEffect);
                     }
-                    if(Blur){
+                    if (Blur) {
                         rect.setEffect(blurEffect);
                     }
                 }
@@ -364,7 +404,7 @@ public class RenderManager{
     }
 
     public void verticalGradient(String id, final double x, final double y, final double width, final double height, final java.awt.Color topColor, final java.awt.Color bottomColor) {
-        if(isopen){
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -426,7 +466,7 @@ public class RenderManager{
 
     // Adapted drawBorderedRect for JavaFX
     public void drawBorderedRect(String id, double x, double y, double width, double height, double lineSize, int borderColor, int fillColor) {
-        if(isopen){
+        if (isopen) {
             Platform.runLater(() -> {
                 ScaledResolution scaledResolution = new ScaledResolution(mc);
                 final double factor = scaledResolution.getScaleFactor();
@@ -478,34 +518,34 @@ public class RenderManager{
     }
 
     public void drawTextWithBox(String id, double x, double y, String text, java.awt.Color backgroundcolor, java.awt.Color textColor, double boxWidth, double boxHeight, double boxarc, double fontSize, boolean blur, boolean bloom) {
-        if(isopen){
+        if (isopen) {
             Color newbackgroundcolor = convertColor(backgroundcolor);
-            roundedRectangle(id+"_bgbox", x, y, boxWidth, boxHeight, boxarc, boxarc, backgroundcolor,blur,bloom);
+            roundedRectangle(id + "_bgbox", x, y, boxWidth, boxHeight, boxarc, boxarc, backgroundcolor, blur, bloom);
             Platform.runLater(() -> {
                 GaussianBlur blurEffect = new GaussianBlur();
                 Bloom bloomEffect = new Bloom();
                 Color newtextColor = convertColor(textColor);
                 Text textNode = (Text) shapesMap.get(id + "_text");
-                if(textNode == null){
+                if (textNode == null) {
                     textNode = new Text(text);
                     textNode.setFont(javafx.scene.text.Font.font("Arial", fontSize));
                     textNode.setFill(newtextColor);
-                    if(blur){
+                    if (blur) {
                         textNode.setEffect(blurEffect);
                     }
-                    if(bloom){
+                    if (bloom) {
                         textNode.setEffect(bloomEffect);
                     }
                     shapesMap.put(id + "_text", textNode);
                     root.getChildren().add(textNode);
-                }else{
+                } else {
                     textNode.setText(text);
                     textNode.setFont(javafx.scene.text.Font.font("Arial", fontSize));
                     textNode.setFill(newtextColor);
-                    if(blur){
+                    if (blur) {
                         textNode.setEffect(blurEffect);
                     }
-                    if(bloom){
+                    if (bloom) {
                         textNode.setEffect(bloomEffect);
                     }
                 }
@@ -524,16 +564,16 @@ public class RenderManager{
     }
 
     public void drawText(String id, double x, double y, String text, java.awt.Color color, double fontSize) {
-        if(isopen){
+        if (isopen) {
             Platform.runLater(() -> {
                 Text textNode = (Text) shapesMap.get(id);
-                if(textNode == null){
+                if (textNode == null) {
                     textNode = new Text(text);
                     textNode.setFont(javafx.scene.text.Font.font("Arial", fontSize));
                     textNode.setFill(convertColor(color));
                     shapesMap.put(id, textNode);
                     root.getChildren().add(textNode);
-                }else{
+                } else {
                     textNode.setText(text);
                     textNode.setFont(javafx.scene.text.Font.font("Arial", fontSize));
                     textNode.setFill(convertColor(color));
@@ -545,8 +585,6 @@ public class RenderManager{
         }
 
     }
-
-
 
 
     public void drawEntityBox(AxisAlignedBB entityBox, double posX, double posY, double posZ, final java.awt.Color color, final boolean outline, final boolean box, final float outlineWidth) {
@@ -683,7 +721,6 @@ public class RenderManager{
 
         tessellator.draw();
     }
-
 
 
 }

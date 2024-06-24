@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="opt" level="project" />
     <orderEntry type="library" name="vanillia" level="project" />
+    <orderEntry type="library" name="injector" level="project" />
   </component>
 </module>
