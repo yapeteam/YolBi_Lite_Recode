@@ -7,11 +7,9 @@
             <binary>out/production/Injector</binary>
             <includes>
                 <dir>Injector/META-INF</dir>
-                <extract>deps/asm-all-9.2.jar</extract>
                 <extract>deps/jna.jar</extract>
                 <extract>deps/flatlaf.jar</extract>
                 <extract>deps/flatlaf-intellij-themes.jar</extract>
-                <extract>deps/tools.jar</extract>
                 <archive name="injection.zip">
                     <dir>resources</dir>
                     <dir name="injection">
