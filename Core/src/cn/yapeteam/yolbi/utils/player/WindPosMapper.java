@@ -27,9 +27,8 @@ public class WindPosMapper {
         List<Vector2f> path = new ArrayList<>();
         float wind = 6.0f;
         float gravity = 19.0f;
-        float maxWait = 15.0f;
         float maxStep = 7.0f;
-        float targetArea = 15.0f;
+        float targetArea = 5.0f;
 
         float currentX = start.x;
         float currentY = start.y;
@@ -51,7 +50,6 @@ public class WindPosMapper {
 
             wind = Math.max(0.0f, wind - wind / 3.0f);
             wind += (random.nextFloat() * 2 - 1) * gravity * distance / 1000.0f;
-            gravity = maxWait;
         }
 
         path.add(end);

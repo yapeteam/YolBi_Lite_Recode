@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.shader.impl;
 
 import cn.yapeteam.yolbi.shader.Shader;
+import lombok.var;
 
 public class ShaderBackGround extends Shader {
     public ShaderBackGround(int level, boolean antiAlias, boolean multithreading) {

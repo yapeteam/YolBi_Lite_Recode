@@ -21,6 +21,8 @@
                     <files>deps</files>
                     <archive name="ymixin.jar">
                         <files>out/production/YMixin</files>
+                        <files>YMixin/src</files>
+                        <file>module-infos/Ymixin/module-info.java</file>
                     </archive>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
@@ -31,6 +33,14 @@
                     </archive>
                     <file>Loader/dll/build/libinjection.dll</file>
                     <file>Loader/dll/build/libapi.dll</file>
+                </archive>
+                <archive name="injection.jar">
+                    <files>out/production/Core</files>
+                    <file>module-infos/core/module-info.java</file>
+                </archive>
+                <archive name="loader.jar">
+                    <files>out/production/Loader</files>
+                    <file>module-infos/loader/module-info.java</file>
                 </archive>
             </includes>
         </artifact>

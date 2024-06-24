@@ -5,6 +5,7 @@ import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.loader.utils.ASMUtils;
 import lombok.val;
+import lombok.var;
 
 
 import java.io.*;

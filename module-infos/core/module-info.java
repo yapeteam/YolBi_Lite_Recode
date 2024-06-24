@@ -17,6 +17,6 @@ module cn.yapeteam.yolbi {
     requires org.jetbrains.annotations;
     requires guava;
 
-    // Add this line to allow access to the internal JDK class
-    opens javafx.embed.swing to java.base;
+    // Modify this line to open to javafx.swing instead of java.base
+    opens javafx.swing to java.base;
 }
