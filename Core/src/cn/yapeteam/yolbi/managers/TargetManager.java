@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TargetManager implements IMinecraft {
-    public static List<Entity> getTargets(final double range) {
+    public static List<Entity> getTargets(double range) {
         return mc.theWorld.loadedEntityList.stream()
                 // must be a player, not a sheep or somethin
                 .filter(entity -> entity instanceof EntityPlayer)
                 // not ourselfs
                 .filter(entity -> entity != mc.thePlayer)
                 // no dead entities
-                .filter(entity -> entity.isEntityAlive())
+                .filter(Entity::isEntityAlive)
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 // no bots
