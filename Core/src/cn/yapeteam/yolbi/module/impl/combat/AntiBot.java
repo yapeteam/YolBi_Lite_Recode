@@ -1,0 +1,46 @@
+package cn.yapeteam.yolbi.module.impl.combat;
+
+import cn.yapeteam.loader.api.module.ModuleCategory;
+import cn.yapeteam.loader.api.module.ModuleInfo;
+import cn.yapeteam.loader.api.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.event.Listener;
+import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.module.Module;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+
+@ModuleInfo(name = "AntiBot", category = ModuleCategory.COMBAT)
+public class AntiBot extends Module {
+    private final ModeValue<String> mode = new ModeValue<>("Check Mode", "Hypixel", "Hypixel");
+
+    public AntiBot() {
+        addValues(mode);
+    }
+
+    @Listener
+    private void onUpdate(EventUpdate event) {
+        if (mode.is("Hypixel")) {
+            for (int i = 0; i < mc.theWorld.getLoadedEntityList().size(); i++) {
+                Entity entity = mc.theWorld.getLoadedEntityList().get(i);
+
+                if (!(entity instanceof EntityPlayer)) continue;
+
+                if (entity.getName().contains("\u00A7") || (entity.hasCustomName() && entity.getCustomNameTag().contains(entity.getName())) || (entity.getName().equals(mc.thePlayer.getName()) && entity != mc.thePlayer)) {
+                    mc.theWorld.removeEntity(entity);
+                }
+            }
+        }
+    }
+
+    public boolean isServerBot(Entity entity) {
+        if (!this.isEnabled()) {
+            return false;
+        }
+
+        if (mode.is("Hypixel")) {
+            return entity.getDisplayName().getFormattedText().startsWith("\u00a7") || entity.isInvisible() || entity.getDisplayName().getFormattedText().toLowerCase().contains("npc");
+        }
+
+        return false;
+    }
+}
