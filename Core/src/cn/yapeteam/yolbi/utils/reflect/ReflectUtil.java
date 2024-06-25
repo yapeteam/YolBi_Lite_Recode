@@ -1,7 +1,7 @@
 package cn.yapeteam.yolbi.utils.reflect;
 
-import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.loader.logger.Logger;
+import cn.yapeteam.ymixin.utils.Mapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -12,6 +12,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.Vec3;
@@ -30,7 +31,8 @@ public class ReflectUtil {
             EntityRenderer$theShaderGroup, KeyBinding$pressed,
             ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
             EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
-            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ;
+            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ,
+            S12PacketEntityVelocity$motionX, S12PacketEntityVelocity$motionY, S12PacketEntityVelocity$motionZ;
 
 
     private static Method
@@ -181,6 +183,78 @@ public class ReflectUtil {
             Entity$PosZ = Entity.class.getDeclaredField(Mapper.map("net/minecraft/entity/Entity", "posZ", null, Mapper.Type.Field));
             Entity$PosZ.setAccessible(true);
         } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            S12PacketEntityVelocity$motionX = S12PacketEntityVelocity.class.getDeclaredField(Mapper.map("net/minecraft/network/play/server/S12PacketEntityVelocity", "motionX", null, Mapper.Type.Field));
+            S12PacketEntityVelocity$motionX.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            S12PacketEntityVelocity$motionY = S12PacketEntityVelocity.class.getDeclaredField(Mapper.map("net/minecraft/network/play/server/S12PacketEntityVelocity", "motionY", null, Mapper.Type.Field));
+            S12PacketEntityVelocity$motionY.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            S12PacketEntityVelocity$motionZ = S12PacketEntityVelocity.class.getDeclaredField(Mapper.map("net/minecraft/network/play/server/S12PacketEntityVelocity", "motionZ", null, Mapper.Type.Field));
+            S12PacketEntityVelocity$motionZ.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static double S12PacketEntityVelocity$getMotionX(S12PacketEntityVelocity s12PacketEntityVelocity) {
+        try {
+            return S12PacketEntityVelocity$motionX.getDouble(s12PacketEntityVelocity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double S12PacketEntityVelocity$getMotionY(S12PacketEntityVelocity s12PacketEntityVelocity) {
+        try {
+            return S12PacketEntityVelocity$motionY.getDouble(s12PacketEntityVelocity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static double S12PacketEntityVelocity$getMotionZ(S12PacketEntityVelocity s12PacketEntityVelocity) {
+        try {
+            return S12PacketEntityVelocity$motionZ.getDouble(s12PacketEntityVelocity);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+        return 0;
+    }
+
+    public static void S12PacketEntityVelocity$setMotionX(S12PacketEntityVelocity s12PacketEntityVelocity, double value) {
+        try {
+            S12PacketEntityVelocity$motionX.setDouble(s12PacketEntityVelocity, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void S12PacketEntityVelocity$setMotionY(S12PacketEntityVelocity s12PacketEntityVelocity, double value) {
+        try {
+            S12PacketEntityVelocity$motionY.setDouble(s12PacketEntityVelocity, value);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void S12PacketEntityVelocity$setMotionZ(S12PacketEntityVelocity s12PacketEntityVelocity, double value) {
+        try {
+            S12PacketEntityVelocity$motionZ.setDouble(s12PacketEntityVelocity, value);
+        } catch (Exception e) {
             Logger.exception(e);
         }
     }
