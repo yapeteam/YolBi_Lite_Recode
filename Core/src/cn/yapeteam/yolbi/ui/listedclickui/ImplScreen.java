@@ -91,8 +91,8 @@ public class ImplScreen extends GuiScreen {
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        float wheel = Mouse.getEventDWheel();
-        panels.forEach(p -> p.setWheel(wheel));
+        int wheel = Mouse.getEventDWheel();
+        if (wheel != 0) panels.forEach(p -> p.setWheel(wheel));
     }
 
     public void update(int mouseX, int mouseY) {
