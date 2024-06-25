@@ -16,7 +16,7 @@ public abstract class AbstractComponent implements Component {
     @Setter
     private boolean dragging = false;
     @Setter
-    private float wheel = 0;
+    private int wheel = 0;
     private final AbstractComponent parent;
 
     public AbstractComponent(AbstractComponent parent) {

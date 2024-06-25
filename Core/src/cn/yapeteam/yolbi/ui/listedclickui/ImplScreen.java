@@ -96,9 +96,7 @@ public class ImplScreen extends GuiScreen {
     }
 
     public void update(int mouseX, int mouseY) {
-        float wheel = Mouse.getDWheel();
         panels.forEach(p -> {
-            p.setWheel(wheel);
             if (p.isFullHovering(mouseX, mouseY))
                 p.update();
         });
