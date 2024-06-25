@@ -49,4 +49,9 @@ public class Criticals extends Module {
                 break;
         }
     }
+
+    @Override
+    public String getSuffix() {
+        return mode.getValue();
+    }
 }

@@ -1,57 +1,37 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
+import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.network.PacketUtil;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
+import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 
 @ModuleInfo(name = "WTap", category = ModuleCategory.COMBAT)
 public class WTap extends Module {
-    private boolean sprinting;
-    private int ticks;
+    private boolean unSprint, canDo;
 
     @Listener
-    private void onAttack(EventPacketSend event) {
-        if (event.getPacket() instanceof C02PacketUseEntity) {
-            C02PacketUseEntity packet = event.getPacket();
-            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK)
-                ticks = 0;
-        }
-        if (event.getPacket() instanceof C0BPacketEntityAction) {
-            final C0BPacketEntityAction wrapper = event.getPacket();
+    private void onAttack(EventAttack event) {
+        canDo = Math.random() * 100 < 95;
 
-            switch (wrapper.getAction()) {
-                case START_SPRINTING:
-                    sprinting = true;
-                    break;
+        if (!canDo) return;
 
-                case STOP_SPRINTING:
-                    sprinting = false;
-                    break;
-            }
+        if (mc.thePlayer.isSprinting() || Natives.IsKeyDown(VirtualKeyBoard.VK_LCONTROL)) {
+            Natives.SetKeyBoard(VirtualKeyBoard.VK_LCONTROL, true);
+            unSprint = true;
         }
     }
 
     @Listener
-    private void onMotion(EventMotion e) {
-        ticks++;
+    private void onPreMotion(EventMotion event) {
+        if (!canDo) return;
 
-        switch (ticks) {
-            case 1:
-                if (sprinting)
-                    PacketUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING));
-                else
-                    PacketUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-                break;
-            case 2:
-                if (!sprinting)
-                    PacketUtil.sendPacket(new C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.START_SPRINTING));
-                break;
+        if (unSprint) {
+            Natives.SetKeyBoard(VirtualKeyBoard.VK_LCONTROL, false);
+            unSprint = false;
         }
     }
 }
