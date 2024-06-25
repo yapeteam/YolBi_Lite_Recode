@@ -12,3 +12,15 @@
 /run/usercache.json
 /run/agent.jar
 *.log
+
+/run/natives/decora_sse.dll
+/run/natives/fxplugins.dll
+/run/natives/glass.dll
+/run/natives/glib-lite.dll
+/run/natives/gstreamer-lite.dll
+/run/natives/javafx_font.dll
+/run/natives/javafx_iio.dll
+/run/natives/prism_common.dll
+/run/natives/prism_d3d.dll
+/run/natives/prism_sw.dll
+/run/natives/ucrtbase.dll
