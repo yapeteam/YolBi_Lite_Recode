@@ -23,6 +23,8 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemFishingRod;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import org.lwjgl.input.Keyboard;
 
@@ -33,16 +35,17 @@ public class KillAura extends Module {
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
-        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, player, monster, animal, villager, invisibility, death);
+        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, player, monster, animal, villager, invisibility, death);
     }
 
     private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
     private final NumberValue<Double> maxCps = new NumberValue<>("MaxCPS", 8.0, 1.0, 20.0, 1.0);
     private final NumberValue<Double> minCps = new NumberValue<>("MinCPS", 6.0, 1.0, 20.0, 1.0);
-    private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 1.0);
-    private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 1.0);
+    private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 5.0);
+    private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 5.0);
     private final BooleanValue autoBlock = new BooleanValue("AutoBlock", false);
     private final NumberValue<Double> blockDelay = new NumberValue<>("BlockDelay", autoBlock::getValue, 2.0, 1.0, 10.0, 1.0);
+    private final BooleanValue autoRod = new BooleanValue("AutoRod", false);
     private final BooleanValue player = new BooleanValue("Player", true);
     private final BooleanValue monster = new BooleanValue("Monster", false);
     private final BooleanValue animal = new BooleanValue("Animal", false);
@@ -53,14 +56,14 @@ public class KillAura extends Module {
     private final TimerUtil timer = new TimerUtil();
     private EntityLivingBase target = null;
     private boolean blocking = false;
+    private boolean fishingRodThrow = false;
+    private int fishingRodSwitchOld = 0;
 
     @Listener
-    private void onTick(EventTick e) {
-        if (mc.theWorld == null || mc.thePlayer == null)
-            return;
+    private void onTick(EventTick event) {
+        if (mc.theWorld == null || mc.thePlayer == null) return;
 
-        if (mc.theWorld.loadedEntityList.isEmpty())
-            return;
+        if (mc.theWorld.loadedEntityList.isEmpty()) return;
 
         target = null;
 
@@ -89,6 +92,30 @@ public class KillAura extends Module {
                 ReflectUtil.Minecraft$clickMouse(mc);
                 reset();
             }
+
+            if (autoRod.getValue()) {
+                for (int i = 0; i < mc.thePlayer.inventory.mainInventory.length; i++) {
+                    if (i > 9) break;
+
+                    ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
+
+                    if (itemStack.getItem() instanceof ItemFishingRod) {
+                        if (fishingRodThrow) {
+                            ReflectUtil.SetRightClickDelayTimer(mc, 0);
+                            ReflectUtil.Minecraft$rightClickMouse(mc);
+                            mc.thePlayer.inventory.currentItem = fishingRodSwitchOld;
+                            fishingRodThrow = false;
+                        } else {
+                            fishingRodSwitchOld = mc.thePlayer.inventory.currentItem;
+                            mc.thePlayer.inventory.currentItem = i;
+                            ReflectUtil.SetRightClickDelayTimer(mc, 0);
+                            ReflectUtil.Minecraft$rightClickMouse(mc);
+                            fishingRodThrow = true;
+                        }
+                        break;
+                    }
+                }
+            }
         } else {
             RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
             stopBlock();
@@ -115,24 +142,21 @@ public class KillAura extends Module {
 
     @Override
     protected void onEnable() {
-        if (mc.theWorld == null || mc.thePlayer == null)
-            return;
+        if (mc.theWorld == null || mc.thePlayer == null) return;
 
         RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
     }
 
     @Override
     protected void onDisable() {
-        if (mc.theWorld == null || mc.thePlayer == null)
-            return;
+        if (mc.theWorld == null || mc.thePlayer == null) return;
 
         stopBlock();
     }
 
     @Listener
     private void onPreUpdate(EventMotion event) {
-        if (mc.theWorld == null || mc.thePlayer == null)
-            return;
+        if (mc.theWorld == null || mc.thePlayer == null) return;
 
         if (target != null) {
             float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
@@ -188,6 +212,6 @@ public class KillAura extends Module {
 
     @Override
     public String getSuffix() {
-        return searchRange.getValue() + "|" + minCps.getValue() + "-" + maxCps.getValue();
+        return searchRange.getValue() + " | " + minCps.getValue() + "-" + maxCps.getValue();
     }
 }
