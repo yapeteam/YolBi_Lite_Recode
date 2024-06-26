@@ -5,110 +5,122 @@ import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
-import cn.yapeteam.yolbi.event.impl.network.EventPacket;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.event.impl.game.EventTick;
+import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
+import cn.yapeteam.yolbi.event.impl.player.EventAttack;
+import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
-import net.minecraft.network.INetHandler;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraft.network.play.client.*;
+import net.minecraft.network.play.client.C02PacketUseEntity;
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C0APacketAnimation;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
 
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Deprecated
 @ModuleInfo(name = "FakeLag", category = ModuleCategory.COMBAT)
 public class FakeLag extends Module {
+    private final NumberValue<Double> delay = new NumberValue<>("Lag Delay", 100.0, 50.0, 2000.0, 50.0);
+    private final BooleanValue render = new BooleanValue("Render", false);
+    private final List<Packet<INetHandlerPlayServer>> packetList = new CopyOnWriteArrayList<>();
+    private final TimerUtil timer = new TimerUtil();
+
+    private double x;
+    private double y;
+    private double z;
+    private float yaw;
+    private float pitch;
+    private boolean attacked = false;
+
     public FakeLag() {
-        this.addValues(fakeLagPosValue, fakeLagBlockValue, fakeLagAttackValue, fakeLagSpoofValue, lagDelayValue, lagDurationValue);
-    }
-
-    private final BooleanValue fakeLagPosValue = new BooleanValue("fakeLagPos", true);
-    private final BooleanValue fakeLagBlockValue = new BooleanValue("fakeLagBloc", true);
-    private final BooleanValue fakeLagAttackValue = new BooleanValue("fakeLagAttack", true);
-    private final BooleanValue fakeLagSpoofValue = new BooleanValue("fakeLagSpoof", false);
-    private final NumberValue<Integer> lagDelayValue = new NumberValue<>("lagDelay", 1, 1, 2000, 1);
-    private final NumberValue<Integer> lagDurationValue = new NumberValue<>("lagDuration", 200, 0, 1000, 1);
-    private final CopyOnWriteArrayList<Packet<? extends INetHandler>> packetBuffer = new CopyOnWriteArrayList<>();
-    private boolean isSent = false;
-    private final TimerUtil fakeLagDelay = new TimerUtil();
-    private final TimerUtil fakeLagDuration = new TimerUtil();
-
-
-    @Override
-    public void onEnable() {
-        isSent = false;
-        packetBuffer.clear();
+        addValues(delay, render);
     }
 
     @Override
-    public void onDisable() {
-        for (Packet<? extends INetHandler> packet : packetBuffer) {
-            PacketUtil.skip(packet);
-            mc.getNetHandler().getNetworkManager().sendPacket(packet);
-        }
-        packetBuffer.clear();
+    protected void onEnable() {
+        attacked = false;
     }
 
     @Listener
-    public void onWorld(EventLoadWorld eventLoadWorld) {
-        isSent = false;
-        fakeLagDuration.reset();
-        fakeLagDelay.reset();
-        packetBuffer.clear();
+    private void onAttack(EventAttack event) {
+        attacked = true;
     }
 
     @Listener
-    public void onUpdate(EventUpdate eventUpdate) {
-        if (!fakeLagDelay.hasTimePassed(lagDelayValue.getValue().longValue())) fakeLagDuration.reset();
-        // Send
-        if (fakeLagDuration.hasTimePassed(lagDurationValue.getValue().longValue())) {
-            fakeLagDelay.reset();
-            fakeLagDuration.reset();
+    private void onTick(EventTick event) {
+        if (attacked || mc.thePlayer.hurtTime > 0 || timer.hasTimePassed(delay.getValue().longValue())) {
+            if (!this.packetList.isEmpty()) {
+                for (Packet<INetHandlerPlayServer> packet : this.packetList) {
+                    if (packet instanceof C03PacketPlayer) {
+                        x = ((C03PacketPlayer) packet).getPositionX();
+                        y = ((C03PacketPlayer) packet).getPositionY();
+                        z = ((C03PacketPlayer) packet).getPositionZ();
+                        yaw = ((C03PacketPlayer) packet).getYaw();
+                        pitch = ((C03PacketPlayer) packet).getPitch();
+                    }
 
-            for (Packet<? extends INetHandler> packet : packetBuffer) {
-                PacketUtil.skip(packet);
-                mc.getNetHandler().getNetworkManager().sendPacket(packet);
-            }
-            isSent = true;
-            packetBuffer.clear();
-        }
-    }
-
-    @Listener
-    public void onSentPacket(EventPacket eventPacket) {
-        Packet<? extends INetHandler> packet = eventPacket.getPacket();
-        if (fakeLagDelay.hasTimePassed(lagDelayValue.getValue().longValue())) {
-            if (isSent && fakeLagSpoofValue.getValue() && !eventPacket.isServerSide()) {
-                Packet<INetHandlerPlayServer> packet1 = new C03PacketPlayer(true);
-                PacketUtil.skip(packet1);
-                mc.getNetHandler().getNetworkManager().sendPacket(packet1);
-                if (lagDurationValue.getValue() >= 300) {
-                    Packet<INetHandlerPlayServer> packet2 = new C03PacketPlayer(true);
-                    PacketUtil.skip(packet2);
-                    mc.getNetHandler().getNetworkManager().sendPacket(packet2);
+                    PacketUtil.sendPacketNoEvent(packet);
+                    this.packetList.remove(packet);
                 }
-                isSent = false;
             }
-            if (packet instanceof C00PacketKeepAlive || packet instanceof C0FPacketConfirmTransaction) {
-                eventPacket.setCancelled(true);
-                packetBuffer.add(packet);
+
+            if (attacked) {
+                attacked = false;
             }
-            if (fakeLagAttackValue.getValue() && (packet instanceof C02PacketUseEntity || packet instanceof C0APacketAnimation)) {
-                eventPacket.setCancelled(true);
-                packetBuffer.add(packet);
-                if (packet instanceof C0APacketAnimation) return;
-            }
-            if (fakeLagBlockValue.getValue() && (packet instanceof C07PacketPlayerDigging || packet instanceof C08PacketPlayerBlockPlacement || packet instanceof C0APacketAnimation)) {
-                eventPacket.setCancelled(true);
-                packetBuffer.add(packet);
-            }
-            if (fakeLagPosValue.getValue() && (packet instanceof C03PacketPlayer || packet instanceof C0BPacketEntityAction)) {
-                eventPacket.setCancelled(true);
-                packetBuffer.add(packet);
+
+            this.timer.reset();
+        }
+    }
+
+    @Listener
+    private void onPacketSend(EventPacketSend event) {
+        Packet<INetHandlerPlayServer> packet = event.getPacket();
+
+        if (packet instanceof C03PacketPlayer || (packet instanceof C02PacketUseEntity && ((C02PacketUseEntity) packet).getAction() == C02PacketUseEntity.Action.ATTACK) || packet instanceof C0BPacketEntityAction || packet instanceof C0APacketAnimation) {
+            packetList.add(packet);
+            event.setCancelled(true);
+        }
+    }
+
+    @Listener
+    private void onRender3D(EventRender3D event) {
+        if (render.getValue()) {
+            if (mc.gameSettings.thirdPersonView == 1 || mc.gameSettings.thirdPersonView == 2) {
+                GlStateManager.pushMatrix();
+                GlStateManager.disableAlpha();
+                renderFrozenEntity(event);
+                GlStateManager.enableAlpha();
+                GlStateManager.resetColor();
+                GlStateManager.popMatrix();
             }
         }
+    }
+
+    private void renderFrozenEntity(EventRender3D event) {
+        EntityOtherPlayerMP mp = new EntityOtherPlayerMP(mc.theWorld, mc.thePlayer.getGameProfile());
+        mp.posX = this.x;
+        mp.posY = this.y;
+        mp.posZ = this.z;
+        mp.prevPosX = mp.posX;
+        mp.prevPosY = mp.posY;
+        mp.prevPosZ = mp.posZ;
+        mp.lastTickPosX = mp.posX;
+        mp.lastTickPosY = mp.posY;
+        mp.lastTickPosZ = mp.posZ;
+        mp.rotationYaw = this.yaw;
+        mp.rotationPitch = this.pitch;
+        mp.rotationYawHead = mc.thePlayer.rotationYawHead;
+        mp.prevRotationYaw = this.yaw;
+        mp.prevRotationPitch = this.pitch;
+        mp.prevRotationYawHead = mc.thePlayer.prevRotationYawHead;
+        mp.swingProgress = mc.thePlayer.swingProgress;
+        mp.swingProgressInt = mc.thePlayer.swingProgressInt;
+        mc.getRenderManager().renderEntityStatic(mp, event.getPartialTicks(), false);
     }
 }
