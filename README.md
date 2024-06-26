@@ -9,6 +9,7 @@
 # Join Us
 
 Discord: https://discord.gg/7SyrPcreJw
+
 QQ Group: 699481681
 
 ## Development
