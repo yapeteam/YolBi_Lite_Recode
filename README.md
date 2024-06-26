@@ -6,6 +6,11 @@
 
 - ***Powered by 吴硕科技***
 
+# Join Us
+
+Discord: https://discord.gg/7SyrPcreJw
+QQ Group: 699481681
+
 ## Development
 
 C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
