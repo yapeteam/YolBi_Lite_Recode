@@ -25,9 +25,9 @@ public class WindPosMapper {
 
     public static List<Vector2f> generatePath(Vector2f start, Vector2f end) {
         List<Vector2f> path = new ArrayList<>();
-        float wind = 6.0f;
-        float gravity = 19.0f;
-        float maxStep = 7.0f;
+        float wind = 14.0f;
+        float gravity = 25.0f;
+        float maxStep = 15.0f;
         float targetArea = 5.0f;
 
         float currentX = start.x;
