@@ -1,124 +1,192 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
+import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.api.module.ModuleCategory;
 import cn.yapeteam.loader.api.module.ModuleInfo;
+import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.loader.api.module.values.impl.NumberValue;
+import cn.yapeteam.loader.utils.vector.Vector2f;
+import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.Priority;
+import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
-import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
-import cn.yapeteam.yolbi.utils.render.RenderUtil;
-import lombok.Getter;
+import cn.yapeteam.yolbi.utils.math.MathUtils;
+import cn.yapeteam.yolbi.utils.misc.TimerUtil;
+import cn.yapeteam.yolbi.utils.player.MovementFix;
+import cn.yapeteam.yolbi.utils.player.RotationManager;
+import cn.yapeteam.yolbi.utils.player.RotationsUtil;
+import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.MathHelper;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemSword;
 import org.lwjgl.input.Keyboard;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-@Deprecated
 @ModuleInfo(name = "KillAura", category = ModuleCategory.COMBAT, key = Keyboard.KEY_R)
 public class KillAura extends Module {
     public KillAura() {
-        min.setCallback((oldV, newV) -> newV > max.getValue() ? oldV : newV);
-        max.setCallback((oldV, newV) -> newV < min.getValue() ? oldV : newV);
-        addValues(range, min, max);
+        minCps.setCallback((oldV, newV) -> newV > maxCps.getValue() ? oldV : newV);
+        maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
+        minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
+        maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
+        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, player, monster, animal, villager, invisibility);
     }
 
-    @Getter
-    private Entity target = null;
-    private final NumberValue<Float> range = new NumberValue<>("range", 3f, 1f, 6f, 0.1f);
-    private final NumberValue<Integer> min = new NumberValue<>("min", 10, 0, 100, 1);
-    private final NumberValue<Integer> max = new NumberValue<>("max", 20, 0, 100, 1);
+    private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
+    private final NumberValue<Double> maxCps = new NumberValue<>("MaxCPS", 8.0, 1.0, 20.0, 1.0);
+    private final NumberValue<Double> minCps = new NumberValue<>("MinCPS", 6.0, 1.0, 20.0, 1.0);
+    private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 1.0);
+    private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 1.0);
+    private final BooleanValue autoBlock = new BooleanValue("AutoBlock", false);
+    private final NumberValue<Double> blockDelay = new NumberValue<>("BlockDelay", autoBlock::getValue, 2.0, 1.0, 10.0, 1.0);
+    private final BooleanValue player = new BooleanValue("Player", true);
+    private final BooleanValue monster = new BooleanValue("Monster", false);
+    private final BooleanValue animal = new BooleanValue("Animal", false);
+    private final BooleanValue villager = new BooleanValue("Villager", false);
+    private final BooleanValue invisibility = new BooleanValue("Invisibility", false);
 
-    private long delay = 0, time = 0;
-
-    @Override
-    public void onEnable() {
-        if (mc.thePlayer == null) {
-            setEnabled(false);
-            return;
-        }
-        delay = random(min.getValue(), max.getValue());
-        time = System.currentTimeMillis();
-    }
-
-    @Override
-    protected void onDisable() {
-        target = null;
-    }
-
-    public static long random(double minCPS, double maxCPS) {
-        int min = (int) minCPS, max = (int) maxCPS;
-        if (maxCPS - minCPS <= 0) return min;
-        return newRandom().nextInt((max - min + 1)) + min;
-    }
-
-    private static Random newRandom() {
-        return new Random((long) (Math.random() * Math.random() * 114514000L));
-    }
-
-    @Listener(Priority.LOW)
-    private void onMotion(EventMotion e) {
-        if (mc.thePlayer == null || mc.theWorld == null) return;
-        if (target != null && target.getDistanceToEntity(mc.thePlayer) <= range.getValue()) {
-            double[] rotations = getNeededRotations(target);
-            //jitter
-            e.setYaw((float) rotations[0] + (newRandom().nextInt(10) - 5) / 2f);
-            e.setPitch((float) rotations[1] + (newRandom().nextInt(10) - 5) / 2f);
-        } else if (target == null) {
-            List<Entity> entityList = new ArrayList<>(mc.theWorld.loadedEntityList);
-            entityList = entityList.stream().filter(entity ->
-                    entity != mc.thePlayer &&
-                            entity instanceof EntityLivingBase &&
-                            entity.getDistanceToEntity(mc.thePlayer) <= range.getValue()
-            ).sorted(
-                    Comparator.comparingInt(entity -> (int) (entity.getDistanceToEntity(mc.thePlayer) * 100))
-            ).collect(Collectors.toList());
-            if (!entityList.isEmpty()) target = entityList.get(0);
-        } else if (target.getDistanceToEntity(mc.thePlayer) > range.getValue())
-            target = null;
-        if (target != null && (target.isDead || !target.isEntityAlive()))
-            target = null;
-    }
+    private final TimerUtil timer = new TimerUtil();
+    private EntityLivingBase target = null;
+    private boolean blocking = false;
 
     @Listener
-    private void onPostMotion(EventPostMotion e) {
-        if (delay != 0 && System.currentTimeMillis() - time >= (1000 / delay)) {
-            delay = random(min.getValue(), max.getValue());
-            time = System.currentTimeMillis();
-            if (target != null) {
-                mc.thePlayer.swingItem();
-                mc.playerController.attackEntity(mc.thePlayer, target);
+    private void onTick(EventTick e) {
+        if (mc.theWorld == null || mc.thePlayer == null)
+            return;
+
+        if (mc.theWorld.loadedEntityList.isEmpty())
+            return;
+
+        target = null;
+
+        if (!autoBlock.getValue()) {
+            blocking = false;
+        }
+
+        for (Entity entity : mc.theWorld.loadedEntityList) {
+            if (shouldAddEntity(entity)) {
+                target = (EntityLivingBase) entity;
+                break;
+            }
+        }
+
+        if (target != null) {
+            int cps = (int) (minCps.getValue().equals(maxCps.getValue()) ? maxCps.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue()));
+
+            if (mc.thePlayer.ticksExisted % blockDelay.getValue().intValue() == 0) {
+                startBlock();
+            } else {
+                stopBlock();
+            }
+
+            if (shouldAttack(cps)) {
+                stopBlock();
+                ReflectUtil.Minecraft$clickMouse(mc);
+                reset();
+            }
+        } else {
+            RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+            stopBlock();
+        }
+    }
+
+    private void startBlock() {
+        if (autoBlock.getValue() && !blocking) {
+            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+                Natives.SendRight(true);
+                blocking = true;
             }
         }
     }
 
-    @Listener
-    private void onRender(EventRender3D e) {
-        if (target != null)
-            RenderUtil.drawEntityBox((EntityLivingBase) target, new Color(-1), true, true, 1, e.getPartialTicks());
+    private void stopBlock() {
+        if (autoBlock.getValue() && blocking) {
+            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+                Natives.SendRight(false);
+                blocking = false;
+            }
+        }
     }
 
-    public double[] getNeededRotations(Entity entityIn) {
-        double d0 = entityIn.posX - mc.thePlayer.posX;
-        double d1 = entityIn.posZ - mc.thePlayer.posZ;
-        double d2 = entityIn.posY + entityIn.getEyeHeight() - (mc.thePlayer.getEntityBoundingBox().minY + ((Entity) mc.thePlayer).getEyeHeight());
-        double d3 = MathHelper.sqrt_double(d0 * d0 + d1 * d1);
-        double f = (MathHelper.atan2(d1, d0) * 180.0 / Math.PI) - 90.0f;
-        double f1 = (-(MathHelper.atan2(d2, d3) * 180.0 / Math.PI));
-        return new double[]{f, f1};
+    @Override
+    protected void onEnable() {
+        if (mc.theWorld == null || mc.thePlayer == null)
+            return;
+
+        RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+    }
+
+    @Override
+    protected void onDisable() {
+        if (mc.theWorld == null || mc.thePlayer == null)
+            return;
+
+        stopBlock();
+    }
+
+    @Listener
+    private void onPreUpdate(EventMotion event) {
+        if (mc.theWorld == null || mc.thePlayer == null)
+            return;
+
+        if (target != null) {
+            float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
+            if (maxRotationSpeed.getValue().equals(180.0) && minRotationSpeed.getValue().equals(180.0)) {
+                mc.thePlayer.rotationYaw = rotation[0];
+                mc.thePlayer.rotationPitch = rotation[1];
+            } else {
+                double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
+                Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
+
+                RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
+                RotationManager.smooth();
+
+                mc.thePlayer.rotationYaw = RotationManager.rotations.x;
+                mc.thePlayer.rotationPitch = RotationManager.rotations.y;
+            }
+        }
+    }
+
+    private boolean shouldAddEntity(Entity entity) {
+        if (entity == mc.thePlayer) return false;
+        if (!(entity instanceof EntityLivingBase)) return false;
+        if (!entity.isEntityAlive()) return false;
+        if (mc.thePlayer.getDistanceToEntity(entity) > searchRange.getValue()) return false;
+        if (YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled() && YolBi.instance.getModuleManager().getModule(AntiBot.class).isServerBot(entity))
+            return false;
+
+        if (!invisibility.getValue() && entity.isInvisible()) return false;
+
+        if (player.getValue() && entity instanceof EntityPlayer) {
+            return true;
+        }
+
+        if (monster.getValue() && entity instanceof EntityMob) {
+            return true;
+        }
+
+        if (animal.getValue() && entity instanceof EntityAnimal) {
+            return true;
+        }
+
+        return villager.getValue() && entity instanceof EntityVillager;
+    }
+
+    private boolean shouldAttack(int cps) {
+        int aps = 20 / cps;
+        return timer.hasTimePassed(50 * aps);
+    }
+
+    private void reset() {
+        timer.reset();
     }
 
     @Override
     public String getSuffix() {
-        return range.getValue() + " | " + min.getValue() + "~" + max.getValue() + " : " + delay;
+        return searchRange.getValue() + "|" + minCps.getValue() + "-" + maxCps.getValue();
     }
 }
