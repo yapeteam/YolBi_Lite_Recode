@@ -33,7 +33,7 @@ public class KillAura extends Module {
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
-        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, player, monster, animal, villager, invisibility);
+        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, player, monster, animal, villager, invisibility, death);
     }
 
     private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
@@ -48,6 +48,7 @@ public class KillAura extends Module {
     private final BooleanValue animal = new BooleanValue("Animal", false);
     private final BooleanValue villager = new BooleanValue("Villager", false);
     private final BooleanValue invisibility = new BooleanValue("Invisibility", false);
+    private final BooleanValue death = new BooleanValue("Death", false);
 
     private final TimerUtil timer = new TimerUtil();
     private EntityLivingBase target = null;
@@ -154,7 +155,7 @@ public class KillAura extends Module {
     private boolean shouldAddEntity(Entity entity) {
         if (entity == mc.thePlayer) return false;
         if (!(entity instanceof EntityLivingBase)) return false;
-        if (!entity.isEntityAlive()) return false;
+        if (!death.getValue() && !entity.isEntityAlive()) return false;
         if (mc.thePlayer.getDistanceToEntity(entity) > searchRange.getValue()) return false;
         if (YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled() && YolBi.instance.getModuleManager().getModule(AntiBot.class).isServerBot(entity))
             return false;
