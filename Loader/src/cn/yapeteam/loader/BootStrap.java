@@ -141,13 +141,17 @@ public class BootStrap {
         Logger.warn("Loading Hooks...");
         Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
 
-        byte[] classFindHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getClassFindHook()))));
-        ClassNode classFindHookNode = ASMUtils.node(classFindHook);
-        Class<?> LaunchClassLoaderClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(classFindHookNode)).value();
-
-        boolean hasLaunchClassLoader = LaunchClassLoaderClass != null;
-        if (hasLaunchClassLoader)
+        boolean hasLaunchClassLoader = true;
+        Class<?> LaunchClassLoaderClass = null;
+        try {
+            Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
+            byte[] classFindHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getClassFindHook()))));
+            ClassNode classFindHookNode = ASMUtils.node(classFindHook);
+            LaunchClassLoaderClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(classFindHookNode)).value();
             transformer.addMixin(classFindHookNode);
+        } catch (ClassNotFoundException ignored) {
+            hasLaunchClassLoader = false;
+        }
 
         byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
         ClassNode initHookNode = ASMUtils.node(initHook);
