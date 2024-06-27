@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static cn.yapeteam.ymixin.utils.ASMUtils.node;
+
 @SuppressWarnings("unused")
 public class BootStrap {
     private static native void loadInjection();
@@ -46,20 +48,6 @@ public class BootStrap {
         return outStream.toByteArray();
     }
 
-    private static byte[] getClassFindHook() throws Throwable {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    String name = entry.getName().replace('/', '.');
-                    name = name.substring(0, name.length() - 6);
-                    if (name.equals(LaunchClassLoaderMixin.class.getName())) return readStream(zis);
-                }
-            }
-        }
-        return null;
-    }
-
     private static byte[] getInitHook() throws Throwable {
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
             ZipEntry entry;
@@ -74,17 +62,18 @@ public class BootStrap {
         return null;
     }
 
+
+    public static Thread client_thread = null;
+
     public static Mapper.Mode guessMappingMode() {
         Class<?> clazz = ClassUtils.getClass("net.minecraft.client.Minecraft");
         if (clazz == null) return Mapper.Mode.Vanilla;
         byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
-        ClassNode node = cn.yapeteam.ymixin.utils.ASMUtils.node(bytes);
+        ClassNode node = node(bytes);
         if (node.methods.stream().anyMatch(m -> m.name.equals("runTick")))
             return Mapper.Mode.None;
         return Mapper.Mode.Searge;
     }
-
-    public static Thread client_thread = null;
 
     public static void entry() throws Throwable {
         if (JVMTIWrapper.instance == null)
@@ -141,26 +130,12 @@ public class BootStrap {
         Logger.warn("Loading Hooks...");
         Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
 
-        boolean hasLaunchClassLoader = true;
-        Class<?> LaunchClassLoaderClass = null;
-        try {
-            Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
-            byte[] classFindHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getClassFindHook()))));
-            ClassNode classFindHookNode = ASMUtils.node(classFindHook);
-            LaunchClassLoaderClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(classFindHookNode)).value();
-            transformer.addMixin(classFindHookNode);
-        } catch (ClassNotFoundException ignored) {
-            hasLaunchClassLoader = false;
-        }
-
         byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
         ClassNode initHookNode = ASMUtils.node(initHook);
         Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
         transformer.addMixin(initHookNode);
 
         val map = transformer.transform();
-        if (hasLaunchClassLoader)
-            Logger.info("Redefined {} ReturnCode: {}", LaunchClassLoaderClass, JVMTIWrapper.instance.redefineClass(LaunchClassLoaderClass, map.get(LaunchClassLoaderClass.getName())));
         Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
     }
 }

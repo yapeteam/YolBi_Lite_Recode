@@ -19,12 +19,18 @@
                             <extract>deps/jfxrt.jar</extract>
                         </archive>
                     </dir>
-                    <files>deps</files>
-                    <archive name="ymixin.jar">
+                    <archive name="deps.jar">
+                        <extract>deps/asm-all-9.2.jar</extract>
+                        <extract>deps/flatlaf.jar</extract>
+                        <extract>deps/flatlaf-intellij-themes.jar</extract>
+                        <extract>deps/jfxrt.jar</extract>
                         <files>out/production/YMixin</files>
                     </archive>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
+                    </archive>
+                    <archive name="hooker.jar">
+                        <files>out/production/Hooker</files>
                     </archive>
                     <archive name="agent.jar">
                         <dir>Agent/META-INF</dir>

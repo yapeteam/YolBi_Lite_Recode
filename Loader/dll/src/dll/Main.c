@@ -308,6 +308,10 @@ int str_endwith(const char *str, const char *reg)
 
 void Inject()
 {
+    jclass ClassLoader = (*jniEnv)->FindClass(jniEnv, "java/lang/ClassLoader");
+    jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, "getSystemClassLoader", "()Ljava/lang/ClassLoader;");
+    jobject systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
+
     jclass threadClass = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
     jmethodID getAllStackTraces = (*jniEnv)->GetStaticMethodID(jniEnv, threadClass, "getAllStackTraces",
                                                                "()Ljava/util/Map;");
@@ -351,25 +355,9 @@ void Inject()
     else
         printf("classLoader found\n");
 
-    jclass Thread = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
-    jmethodID setContextClassLoader = (*jniEnv)->GetMethodID(jniEnv, Thread, "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
-    jobject currentThread = (*jniEnv)->CallStaticObjectMethod(jniEnv, Thread, (*jniEnv)->GetStaticMethodID(jniEnv, Thread, "currentThread", "()Ljava/lang/Thread;"));
-    (*jniEnv)->CallVoidMethod(jniEnv, currentThread, setContextClassLoader, classLoader);
-    printf("currentThread contextClassLoader set\n");
-
-    DIR *dir = opendir(yolbiPath);
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (str_endwith(entry->d_name, ".jar") && strcmp(entry->d_name, "injection.jar") != 0)
-        {
-            char jarPath[260];
-            sprintf_s(jarPath, 260, "%s\\%s", yolbiPath, entry->d_name);
-            loadJar(jniEnv, jarPath, classLoader);
-            printf("loaded: %s\n", jarPath);
-        }
-    }
-    closedir(dir);
+    char jarPath[260];
+    sprintf_s(jarPath, 260, "%s\\deps.jar", yolbiPath);
+    loadJar(jniEnv, jarPath, systemClassLoader);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
@@ -391,6 +379,33 @@ void Inject()
     (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
+    char hookerPath[260];
+    sprintf_s(hookerPath, 260, "%s\\hooker.jar", yolbiPath);
+    loadJar(jniEnv, hookerPath, systemClassLoader);
+
+    jclass Hooker = findThreadClass("cn.yapeteam.hooker.Hooker", systemClassLoader);
+
+    if (!Hooker)
+    {
+        printf("Failed to find Hooker class\n");
+        return;
+    }
+
+    printf("Hooker class found\n");
+
+    JNINativeMethod HookerMethods[] = {
+        {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
+        {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
+    };
+    (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 2);
+
+    jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
+    (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
+
+    char loaderPath[260];
+    sprintf_s(loaderPath, 260, "%s\\loader.jar", yolbiPath);
+    loadJar(jniEnv, loaderPath, classLoader);
+
     jclass wrapperClass = findThreadClass("cn.yapeteam.loader.NativeWrapper", classLoader);
     if (!wrapperClass)
     {
@@ -406,10 +421,20 @@ void Inject()
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
     jclass natvieClass = findThreadClass("cn.yapeteam.loader.Natives", classLoader);
+    if (!natvieClass)
+    {
+        printf("Failed to find Natives class\n");
+        return;
+    }
     register_native_methods(jniEnv, natvieClass);
     printf("Native methods registered\n");
 
     jclass BootStrap = findThreadClass("cn.yapeteam.loader.BootStrap", classLoader);
+    if (!BootStrap)
+    {
+        printf("Failed to find BootStrap class\n");
+        return;
+    }
     JNINativeMethod BootMethods[] = {
         {"loadInjection", "()V", (void *)&loadInjection},
     };

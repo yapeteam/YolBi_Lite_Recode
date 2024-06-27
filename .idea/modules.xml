@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Agent/Agent.iml" filepath="$PROJECT_DIR$/Agent/Agent.iml" />
       <module fileurl="file://$PROJECT_DIR$/Builder/Builder.iml" filepath="$PROJECT_DIR$/Builder/Builder.iml" />
       <module fileurl="file://$PROJECT_DIR$/Core/Core.iml" filepath="$PROJECT_DIR$/Core/Core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Hooker/Hooker.iml" filepath="$PROJECT_DIR$/Hooker/Hooker.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/Injector.iml" filepath="$PROJECT_DIR$/Injector/Injector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loader/Loader.iml" filepath="$PROJECT_DIR$/Loader/Loader.iml" />
       <module fileurl="file://$PROJECT_DIR$/Minecraft/Minecraft.iml" filepath="$PROJECT_DIR$/Minecraft/Minecraft.iml" />
