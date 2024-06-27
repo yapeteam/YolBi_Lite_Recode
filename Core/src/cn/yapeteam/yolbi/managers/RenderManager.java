@@ -2,6 +2,7 @@ package cn.yapeteam.yolbi.managers;
 
 
 import cn.yapeteam.loader.Natives;
+import cn.yapeteam.yolbi.utils.IMinecraft;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -35,7 +36,7 @@ import java.util.zip.ZipInputStream;
 
 @Getter
 @SuppressWarnings("unused")
-public class RenderManager {
+public class RenderManager implements IMinecraft {
     public Map<String, Shape> shapesMap;
 
     public List<String> modifiedidbuffer;
@@ -44,7 +45,6 @@ public class RenderManager {
 
     private AnimationTimer animationTimer;
     private Scene scene; // reference to the scene
-    private Minecraft mc;
     private boolean isopen = true;
     private double lastX = -1;
     private double lastY = -1;
@@ -163,7 +163,6 @@ public class RenderManager {
         shapesMap = new HashMap<>();
         modifiedidbuffer = new ArrayList<>(); // Corrected initialization
         root = new Pane(); // reference to the root pane
-        mc = Minecraft.getMinecraft();
         ScaledResolution scaledResolution = new ScaledResolution(mc);
         double width = scaledResolution.getScaledWidth_double();
         double height = scaledResolution.getScaledHeight_double();

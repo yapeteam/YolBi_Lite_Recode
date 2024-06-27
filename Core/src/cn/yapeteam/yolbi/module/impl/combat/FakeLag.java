@@ -54,6 +54,9 @@ public class FakeLag extends Module {
 
     @Listener
     private void onTick(EventTick event) {
+        if (mc.thePlayer == null || mc.theWorld == null)
+            return;
+
         if (attacked || mc.thePlayer.hurtTime > 0 || timer.hasTimePassed(delay.getValue().longValue())) {
             if (!this.packetList.isEmpty()) {
                 for (Packet<INetHandlerPlayServer> packet : this.packetList) {
