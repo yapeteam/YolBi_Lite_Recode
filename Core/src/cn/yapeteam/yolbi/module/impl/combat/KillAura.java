@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
@@ -61,64 +62,69 @@ public class KillAura extends Module {
 
     @Listener
     private void onTick(EventTick event) {
-        if (mc.theWorld == null || mc.thePlayer == null) return;
+        try {
 
-        if (mc.theWorld.loadedEntityList.isEmpty()) return;
+            if (mc.theWorld == null || mc.thePlayer == null) return;
 
-        target = null;
+            if (mc.theWorld.loadedEntityList.isEmpty()) return;
 
-        if (!autoBlock.getValue()) {
-            blocking = false;
-        }
+            target = null;
 
-        for (Entity entity : mc.theWorld.loadedEntityList) {
-            if (shouldAddEntity(entity)) {
-                target = (EntityLivingBase) entity;
-                break;
-            }
-        }
-
-        if (target != null) {
-            int cps = (int) (minCps.getValue().equals(maxCps.getValue()) ? maxCps.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue()));
-
-            if (mc.thePlayer.ticksExisted % blockDelay.getValue().intValue() == 0) {
-                startBlock();
-            } else {
-                stopBlock();
+            if (!autoBlock.getValue()) {
+                blocking = false;
             }
 
-            if (shouldAttack(cps)) {
-                stopBlock();
-                ReflectUtil.Minecraft$clickMouse(mc);
-                reset();
-            }
-
-            if (autoRod.getValue()) {
-                for (int i = 0; i < mc.thePlayer.inventory.mainInventory.length; i++) {
-                    if (i > 9) break;
-
-                    ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
-
-                    if (itemStack.getItem() instanceof ItemFishingRod) {
-                        if (fishingRodThrow) {
-                            ReflectUtil.SetRightClickDelayTimer(mc, 0);
-                            ReflectUtil.Minecraft$rightClickMouse(mc);
-                            mc.thePlayer.inventory.currentItem = fishingRodSwitchOld;
-                            fishingRodThrow = false;
-                        } else {
-                            fishingRodSwitchOld = mc.thePlayer.inventory.currentItem;
-                            mc.thePlayer.inventory.currentItem = i;
-                            ReflectUtil.SetRightClickDelayTimer(mc, 0);
-                            ReflectUtil.Minecraft$rightClickMouse(mc);
-                            fishingRodThrow = true;
-                        }
-                        break;
-                    }
+            for (Entity entity : mc.theWorld.loadedEntityList) {
+                if (shouldAddEntity(entity)) {
+                    target = (EntityLivingBase) entity;
+                    break;
                 }
             }
-        } else {
-            RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
-            stopBlock();
+
+            if (target != null) {
+                int cps = (int) (minCps.getValue().equals(maxCps.getValue()) ? maxCps.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue()));
+
+                if (mc.thePlayer.ticksExisted % blockDelay.getValue().intValue() == 0) {
+                    startBlock();
+                } else {
+                    stopBlock();
+                }
+
+                if (shouldAttack(cps)) {
+                    stopBlock();
+                    ReflectUtil.Minecraft$clickMouse(mc);
+                    reset();
+                }
+
+                if (autoRod.getValue()) {
+                    for (int i = 0; i < mc.thePlayer.inventory.mainInventory.length; i++) {
+                        if (i > 9) break;
+
+                        ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
+
+                        if (itemStack != null && itemStack.getItem() instanceof ItemFishingRod) {
+                            if (fishingRodThrow) {
+                                ReflectUtil.SetRightClickDelayTimer(mc, 0);
+                                ReflectUtil.Minecraft$rightClickMouse(mc);
+                                mc.thePlayer.inventory.currentItem = fishingRodSwitchOld;
+                                fishingRodThrow = false;
+                            } else {
+                                fishingRodSwitchOld = mc.thePlayer.inventory.currentItem;
+                                mc.thePlayer.inventory.currentItem = i;
+                                ReflectUtil.SetRightClickDelayTimer(mc, 0);
+                                ReflectUtil.Minecraft$rightClickMouse(mc);
+                                fishingRodThrow = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else {
+                RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+                stopBlock();
+            }
+        } catch (Exception e) {
+            Logger.exception(e);
         }
     }
 
