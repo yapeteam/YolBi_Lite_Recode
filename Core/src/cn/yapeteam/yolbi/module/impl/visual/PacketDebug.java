@@ -1,7 +1,5 @@
 package cn.yapeteam.yolbi.module.impl.visual;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
@@ -10,6 +8,8 @@ import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.font.AbstractFontRenderer;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 

@@ -1,9 +1,7 @@
-package cn.yapeteam.loader.api.module.values.impl;
+package cn.yapeteam.yolbi.module.values.impl;
 
-import cn.yapeteam.loader.api.module.values.Value;
-import cn.yapeteam.loader.api.module.values.Visibility;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonPrimitive;
+import cn.yapeteam.yolbi.module.values.Value;
+import cn.yapeteam.yolbi.module.values.Visibility;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,10 +1,10 @@
 package cn.yapeteam.yolbi.module.impl.misc;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.mixin.MixinManager;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;

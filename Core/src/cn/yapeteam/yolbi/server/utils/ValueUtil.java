@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.server.utils;
 
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 

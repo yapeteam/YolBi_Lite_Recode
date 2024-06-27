@@ -1,12 +1,12 @@
 package cn.yapeteam.yolbi.server.handlers.modules;
 
-import cn.yapeteam.loader.api.module.values.Value;
-import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
-import cn.yapeteam.loader.api.module.values.impl.ColorValue;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
-import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.values.Value;
+import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
+import cn.yapeteam.yolbi.module.values.impl.ColorValue;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.server.utils.ValueUtil;
 import cn.yapeteam.yolbi.utils.web.URLUtil;
 import com.google.gson.JsonArray;

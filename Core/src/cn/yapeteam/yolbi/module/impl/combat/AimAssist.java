@@ -1,17 +1,17 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
-import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
-import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.*;
 import lombok.val;

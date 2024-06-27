@@ -1,17 +1,18 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import net.minecraft.network.play.client.C03PacketPlayer;
 
 @ModuleInfo(name = "Criticals", category = ModuleCategory.COMBAT)
 public class Criticals extends Module {
-    private final ModeValue<String> mode = new ModeValue<>("Mode", "Packet", "Packet", "Single Packet", "Old Remix", "Low Jump", "Jump");
+    private final ModeValue<String> mode = new ModeValue<>("Mode", "Packet", "Packet", "Single Packet", "Low Jump", "Jump");
 
     public Criticals() {
         addValues(mode);
@@ -33,14 +34,11 @@ public class Criticals extends Module {
             case "Packet":
                 PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y + 0.0625, z, false));
                 PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y, z, false));
-                PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y + 0.01001337, z, false));
+                PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y + MathUtils.getRandom(0.001, 0.01), z, false));
                 PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y, z, false));
                 break;
             case "Single Packet":
                 PacketUtil.sendPacket(new C03PacketPlayer.C04PacketPlayerPosition(x, y + 0.11, z, false));
-                break;
-            case "Old Remix":
-                mc.thePlayer.moveEntity(0, 0.005, 0);
                 break;
             case "Low Jump":
                 // just for fun :)

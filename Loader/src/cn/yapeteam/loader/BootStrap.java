@@ -123,7 +123,7 @@ public class BootStrap {
         Mapper.readMappings(vanilla, forge);
         Logger.warn("Loading Initialize Hook...");
         Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
-        byte[] hookClassBytes = ClassMapper.map(getHook());
+        byte[] hookClassBytes = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getHook()))));
         ClassNode hookClassNode = ASMUtils.node(hookClassBytes);
         transformer.addMixin(hookClassNode);
         Class<?> targetClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(hookClassNode)).value();

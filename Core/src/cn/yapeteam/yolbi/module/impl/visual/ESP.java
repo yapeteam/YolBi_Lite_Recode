@@ -1,11 +1,11 @@
 package cn.yapeteam.yolbi.module.impl.visual;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.utils.render.RenderUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

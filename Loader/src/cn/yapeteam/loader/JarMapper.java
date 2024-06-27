@@ -1,12 +1,11 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
+import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.ymixin.annotations.Mixin;
-import cn.yapeteam.loader.utils.ASMUtils;
 import lombok.val;
 import lombok.var;
-
 
 import java.io.*;
 import java.nio.file.Files;
@@ -55,27 +54,26 @@ public class JarMapper {
                 new Thread(() -> SocketSender.send("P1" + " " + (float) finalCount / finalAll * 100f)).start();
                 if (!se.isDirectory() && se.getName().endsWith(".class")) {
                     var bytes = readStream(zis);
-                    bytes = ClassMapper.map(bytes);
                     val node = ASMUtils.node(bytes);
+                    if (DontMap.Helper.hasAnnotation(node)) {
+                        val de = new ZipEntry(se.getName());
+                        zos.putNextEntry(de);
+                        zos.write(bytes);
+                        zos.closeEntry();
+                        continue;
+                    }
+                    bytes = ASMUtils.rewriteClass(ClassMapper.map(node));
                     if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
                         Logger.info("Mapping mixin class: {}", se.getName());
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
                     }
-                    if (DontMap.Helper.hasAnnotation(node)) {
-                        val de = new ZipEntry(se);
-                        de.setCompressedSize(-1);
-                        zos.putNextEntry(de);
-                        copyStream(zos, zis);
-                        zos.closeEntry();
-                        continue;
-                    }
-                    val de = newEntry(se, bytes);
+
+                    val de = new ZipEntry(se.getName());
                     zos.putNextEntry(de);
                     zos.write(bytes);
                     zos.closeEntry();
                 } else {
                     val de = new ZipEntry(se);
-                    de.setCompressedSize(-1);
                     zos.putNextEntry(de);
                     copyStream(zos, zis);
                     zos.closeEntry();

@@ -1,14 +1,14 @@
 package cn.yapeteam.yolbi.module.impl.movement;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
-import cn.yapeteam.loader.api.module.values.impl.NumberValue;
 import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.loader.utils.vector.Vector3d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
+import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import cn.yapeteam.yolbi.utils.player.*;

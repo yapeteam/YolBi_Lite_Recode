@@ -19,9 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClassMapper {
-    public static byte[] map(byte[] bytes) throws Throwable {
-        ClassNode node = ASMUtils.node(bytes);
-        if (DontMap.Helper.hasAnnotation(node)) return bytes;
+    public static ClassNode map(ClassNode node) throws Throwable {
+        if (DontMap.Helper.hasAnnotation(node)) return node;
         Logger.info("Mapping class " + node.name);
         node.superName = Mapper.getObfClass(node.superName);
         List<String> interfaces = new ArrayList<>();
@@ -93,8 +92,7 @@ public class ClassMapper {
             if (Mapper.getMode() != Mapper.Mode.None)
                 field(field);
         }
-        bytes = ASMUtils.rewriteClass(node);
-        return bytes;
+        return node;
     }
 
     private static String parseDesc(String desc) {

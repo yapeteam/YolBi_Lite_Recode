@@ -1,11 +1,11 @@
 package cn.yapeteam.yolbi.module.impl.misc;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
-import cn.yapeteam.loader.api.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.Packet;

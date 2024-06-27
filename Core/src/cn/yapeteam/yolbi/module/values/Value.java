@@ -1,4 +1,4 @@
-package cn.yapeteam.loader.api.module.values;
+package cn.yapeteam.yolbi.module.values;
 
 import lombok.Getter;
 import lombok.Setter;
