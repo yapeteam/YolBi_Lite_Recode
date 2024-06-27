@@ -2,6 +2,7 @@ package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.ModuleInfo;
@@ -26,21 +27,10 @@ public class AntiBot extends Module {
                 if (!(entity instanceof EntityPlayer)) continue;
 
                 if (entity.getName().contains("\u00A7") || (entity.hasCustomName() && entity.getCustomNameTag().contains(entity.getName())) || (entity.getName().equals(mc.thePlayer.getName()) && entity != mc.thePlayer)) {
+                    BotManager.addBot(entity);
                     mc.theWorld.removeEntity(entity);
                 }
             }
         }
-    }
-
-    public boolean isServerBot(Entity entity) {
-        if (!this.isEnabled()) {
-            return false;
-        }
-
-        if (mode.is("Hypixel")) {
-            return entity.getDisplayName().getFormattedText().startsWith("\u00a7") || entity.isInvisible() || entity.getDisplayName().getFormattedText().toLowerCase().contains("npc");
-        }
-
-        return false;
     }
 }

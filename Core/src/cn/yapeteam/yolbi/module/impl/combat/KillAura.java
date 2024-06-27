@@ -6,6 +6,7 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
+import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.ModuleInfo;
@@ -183,10 +184,14 @@ public class KillAura extends Module {
 
     private boolean shouldAddEntity(Entity entity) {
         if (entity == mc.thePlayer) return false;
+
         if (!(entity instanceof EntityLivingBase)) return false;
+
         if (!death.getValue() && !entity.isEntityAlive()) return false;
+
         if (mc.thePlayer.getDistanceToEntity(entity) > searchRange.getValue()) return false;
-        if (YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled() && YolBi.instance.getModuleManager().getModule(AntiBot.class).isServerBot(entity))
+
+        if (YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled() && BotManager.bots.contains(entity))
             return false;
 
         if (!invisibility.getValue() && entity.isInvisible()) return false;
