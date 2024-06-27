@@ -20,7 +20,7 @@ public class WTap extends Module {
         if (!canDo) return;
 
         if (mc.thePlayer.isSprinting() || Natives.IsKeyDown(VirtualKeyBoard.VK_LCONTROL)) {
-            Natives.SetKeyBoard(VirtualKeyBoard.VK_LCONTROL, true);
+            mc.thePlayer.setSprinting(true);
             unSprint = true;
         }
     }
@@ -30,7 +30,7 @@ public class WTap extends Module {
         if (!canDo) return;
 
         if (unSprint) {
-            Natives.SetKeyBoard(VirtualKeyBoard.VK_LCONTROL, false);
+            mc.thePlayer.setSprinting(false);
             unSprint = false;
         }
     }
