@@ -7,6 +7,7 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.mixin.MixinManager;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unused")
 public class Loader {
@@ -23,6 +24,12 @@ public class Loader {
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();
+        } catch (InvocationTargetException e) {
+            Logger.exception(e);
+            Logger.error("Cause:");
+            Logger.exception(e.getCause());
+            Logger.error("Target exception:");
+            Logger.exception(e.getTargetException());
         } catch (Throwable e) {
             Logger.exception(e);
             try {

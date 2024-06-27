@@ -16,14 +16,7 @@
                     <dir name="injection">
                         <archive name="injection.jar">
                             <files>out/production/Core</files>
-                            <extract>deps/javafx.base.jar</extract>
-                            <extract>deps/javafx.controls.jar</extract>
-                            <extract>deps/javafx.fxml.jar</extract>
-                            <extract>deps/javafx.graphics.jar</extract>
-                            <extract>deps/javafx.media.jar</extract>
-                            <extract>deps/javafx.swing.jar</extract>
-                            <extract>deps/javafx.web.jar</extract>
-                            <extract>deps/javafx-swt.jar</extract>
+                            <extract>deps/jfxrt.jar</extract>
                         </archive>
                     </dir>
                     <files>deps</files>

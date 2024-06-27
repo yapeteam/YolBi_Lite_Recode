@@ -25,7 +25,6 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
 
     @Inject(method = "findClass", desc = "(Ljava/lang/String;)Ljava/lang/Class;", target = @Target("HEAD"))
     private void onFindClass(@Local(source = "name", index = 1) String name) {
-        System.out.println("Finding class: " + name);
         if ((
                 name.startsWith("cn.yapeteam.yolbi.") ||
                         name.startsWith("javafx.") ||
@@ -37,7 +36,7 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
                         name.startsWith("com.sun.webkit.")
         ) && !cachedClasses.containsKey(name)) {
             try {
-                byte[] classBytes = null;
+                byte[] bytes = null;
                 File injection = new File(System.getProperty("user.home"), ".yolbi/injection.jar");
                 val zis = new ZipInputStream(Files.newInputStream(injection.toPath()));
                 ZipEntry entry;
@@ -49,7 +48,7 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
                         while ((len = zis.read(buffer)) != -1)
                             outStream.write(buffer, 0, len);
                         outStream.close();
-                        classBytes = outStream.toByteArray();
+                        bytes = outStream.toByteArray();
                         break;
                     }
                 }
@@ -57,15 +56,13 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
                 for (Method declaredMethod : ClassLoader.class.getDeclaredMethods())
                     if (declaredMethod.getName().equals("defineClass") && declaredMethod.getParameterCount() == 4)
                         method = declaredMethod;
-                method.setAccessible(true);
-                Class<?> clazz;
-                if (classBytes != null) {
-                    clazz = (Class<?>) method.invoke(this, name, classBytes, 0, classBytes.length);
-                    cachedClasses.put(name, clazz);
-                    System.out.println("Loaded class: " + clazz);
-                } else System.out.println("Failed to load class: " + name);
-            } catch (Exception e) {
-                e.printStackTrace();
+                if (method != null) {
+                    method.setAccessible(true);
+                    if (bytes != null)
+                        cachedClasses.put(name, (Class<?>) method.invoke(this, null, bytes, 0, bytes.length));
+                    else System.err.println("Failed to load class: " + name);
+                } else System.err.println("Failed to find defineClass method in ClassLoader");
+            } catch (Exception ignored) {
             }
         }
     }
