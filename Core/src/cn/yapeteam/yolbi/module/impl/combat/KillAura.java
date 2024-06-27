@@ -63,7 +63,6 @@ public class KillAura extends Module {
     @Listener
     private void onTick(EventTick event) {
         try {
-
             if (mc.theWorld == null || mc.thePlayer == null) return;
 
             if (mc.theWorld.loadedEntityList.isEmpty()) return;
