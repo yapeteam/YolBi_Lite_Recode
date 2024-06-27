@@ -1,12 +1,14 @@
 package cn.yapeteam.hooker;
 
-import cn.yapeteam.ymixin.Transformer;
-import cn.yapeteam.ymixin.YMixin;
-import cn.yapeteam.ymixin.annotations.Mixin;
-import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.val;
-import org.objectweb.asm_9_2.tree.ClassNode;
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm_9_2.ClassReader;
+import org.objectweb.asm_9_2.ClassWriter;
+import org.objectweb.asm_9_2.Opcodes;
+import org.objectweb.asm_9_2.Type;
+import org.objectweb.asm_9_2.tree.*;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -14,12 +16,11 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static cn.yapeteam.ymixin.utils.ASMUtils.node;
-import static cn.yapeteam.ymixin.utils.ASMUtils.rewriteClass;
+import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_FRAMES;
+import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_MAXS;
 
 @SuppressWarnings("unused")
 public class Hooker {
@@ -48,6 +49,20 @@ public class Hooker {
         return outStream.toByteArray();
     }
 
+    private static byte[] getNeteaseHook() throws Throwable {
+        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YOLBI_DIR, "hooker.jar").toPath()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (!entry.isDirectory()) {
+                    if (entry.getName().equals("cn/yapeteam/hooker/FuckNetEaseMixin.class")) {
+                        return readStream(zis);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private static byte[] getClassFindHook() throws Throwable {
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YOLBI_DIR, "hooker.jar").toPath()))) {
             ZipEntry entry;
@@ -68,10 +83,17 @@ public class Hooker {
     private native static int redefineClass(Class<?> clazz, byte[] bytes);
 
     public static Method defineClass;
-
     public static Thread client_thread = null;
     public static final Map<String, byte[]> classes = new HashMap<>();
-    public static boolean cachedInjection = false;
+    public static final Map<String, Class<?>> cachedClasses = new HashMap<>();
+
+    private static Class<?> getClass(String name) {
+        try {
+            return Class.forName(name, true, client_thread.getContextClassLoader());
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
 
     public static void cacheJar(File file) throws Exception {
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(file.toPath()))) {
@@ -81,6 +103,66 @@ public class Hooker {
                     if (entry.getName().endsWith(".class"))
                         classes.put(entry.getName().replace("/", ".").substring(0, entry.getName().length() - 6), readStream(zis));
         }
+    }
+
+    private static ClassNode node(byte[] bytes) {
+        if (bytes != null && bytes.length != 0) {
+            ClassReader reader = new ClassReader(bytes);
+            ClassNode node = new ClassNode();
+            reader.accept(node, 0);
+            return node;
+        }
+
+        return null;
+    }
+
+    private static byte[] rewriteClass(@NotNull ClassNode node) {
+        ClassWriter writer = new ClassWriter(COMPUTE_MAXS | COMPUTE_FRAMES) {
+            @Override
+            protected @NotNull String getCommonSuperClass(@NotNull String type1, @NotNull String type2) {
+                try {
+                    Class<?> class1 = Hooker.getClass(type1);
+                    Class<?> class2 = Hooker.getClass(type2);
+                    if (class1 != null && class2 != null) {
+                        if (class1.isAssignableFrom(class2)) {
+                            return type1;
+                        } else if (class2.isAssignableFrom(class1)) {
+                            return type2;
+                        } else if (!class1.isInterface() && !class2.isInterface()) {
+                            do {
+                                class1 = class1.getSuperclass();
+                            } while (!class1.isAssignableFrom(class2));
+                            return class1.getName().replace('.', '/');
+                        }
+                    }
+                } catch (Throwable ignored) {
+                }
+                return "java/lang/Object";
+            }
+        };
+        node.accept(writer);
+        return writer.toByteArray();
+    }
+
+    public static Class<?> onFindClass(ClassLoader cl, String name) {
+        try {
+            if (shouldHook(name)) {
+                if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
+                    Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
+                byte[] bytes = Hooker.classes.get(name);
+                if (bytes == null) {
+                    return null;
+                }
+                if (cachedClasses.containsKey(name))
+                    return cachedClasses.get(name);
+                Class<?> clazz = (Class<?>) Hooker.defineClass.invoke(cl, name, bytes, 0, bytes.length);
+                cachedClasses.put(name, clazz);
+                return clazz;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void hook() {
@@ -95,12 +177,10 @@ public class Hooker {
         for (Method declaredMethod : ClassLoader.class.getDeclaredMethods()) {
             if (declaredMethod.getName().equals("defineClass") && declaredMethod.getParameterCount() == 4) {
                 defineClass = declaredMethod;
+                defineClass.setAccessible(true);
                 break;
             }
         }
-        if (defineClass == null)
-            throw new RuntimeException("Failed to find defineClass method.");
-        System.out.println("Starting hooker...");
         for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
             Thread thread = (Thread) o;
             if (thread.getName().equals("Client thread")) {
@@ -109,46 +189,42 @@ public class Hooker {
             }
         }
 
-        System.out.println("Initializing YMixin...");
-        Mapper.setMode(Mapper.Mode.None);
-        YMixin.init(
-                name -> {
-                    try {
-                        return Class.forName(name.replace("/", "."), true, client_thread.getContextClassLoader());
-                    } catch (ClassNotFoundException e) {
-                        return null;
-                    }
-                }, null
-        );
+        JOptionPane.showMessageDialog(null, "Hooker loaded.");
 
-        System.out.println("Hooking LaunchClassLoader...");
+        boolean hasLaunchClassLoader = true;
+        Class<?> LaunchClassLoaderClass = null;
         try {
-            Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
-
+            LaunchClassLoaderClass = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
+        } catch (ClassNotFoundException e) {
+            hasLaunchClassLoader = false;
+        }
+        if (hasLaunchClassLoader) {
             try {
-                System.out.println("Transforming LaunchClassLoader...");
-                Transformer transformer = new Transformer(Hooker::getClassBytes);
-                System.out.println("Transforming LaunchClassLoader mixin...");
-                byte[] classFindHook = rewriteClass(Objects.requireNonNull(ShadowTransformer.transform(Objects.requireNonNull(node(getClassFindHook())))));
-                if (classFindHook == null)
-                    System.out.println("Transforming LaunchClassLoader mixin failed.");
-                System.out.println("Transforming LaunchClassLoader mixin done.");
-                ClassNode classFindHookNode = node(classFindHook);
-                if (classFindHookNode == null)
-                    System.out.println("Transforming LaunchClassLoader mixin failed.");
-                System.out.println("Transforming LaunchClassLoader...");
-                Class<?> LaunchClassLoaderClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(classFindHookNode)).value();
-                System.out.println("Transforming LaunchClassLoader done.");
-                transformer.addMixin(classFindHookNode);
-                System.out.println("Transforming LaunchClassLoader done.");
-                val bytes = transformer.transform().get(LaunchClassLoaderClass.getName());
-                System.out.println("Hooked LaunchClassLoader, return code: " + redefineClass(LaunchClassLoaderClass, bytes));
+                byte[] targetBytes = getClassBytes(LaunchClassLoaderClass);
+                ClassNode targetNode = node(targetBytes);
+                for (MethodNode method : targetNode.methods) {
+                    if (method.name.equals("findClass") && method.desc.equals("(Ljava/lang/String;)Ljava/lang/Class;")) {
+                        LabelNode labelNode = new LabelNode();
+                        InsnList insnList = new InsnList();
+                        insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                        insnList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                        insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(Hooker.class),
+                                "onFindClass", "(Ljava/lang/ClassLoader;Ljava/lang/String;)Ljava/lang/Class;"));
+                        insnList.add(new VarInsnNode(Opcodes.ASTORE, 2));
+                        insnList.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                        insnList.add(new JumpInsnNode(Opcodes.IFNULL, labelNode));
+                        insnList.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                        insnList.add(new InsnNode(Opcodes.ARETURN));
+                        insnList.add(labelNode);
+                        method.instructions.insert(insnList);
+                        break;
+                    }
+                }
+                val bytes = rewriteClass(targetNode);
+                redefineClass(LaunchClassLoaderClass, bytes);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-        } catch (
-                ClassNotFoundException ignored) {
-            System.out.println("LaunchClassLoader not found, skipping hook.");
         }
     }
 }

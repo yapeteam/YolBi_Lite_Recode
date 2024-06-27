@@ -7,7 +7,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="YMixin" />
     <orderEntry type="library" name="deps" level="project" />
     <orderEntry type="library" name="libs" level="project" />
   </component>
