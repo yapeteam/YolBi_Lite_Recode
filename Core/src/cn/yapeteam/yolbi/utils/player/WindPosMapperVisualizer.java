@@ -20,9 +20,6 @@ public class WindPosMapperVisualizer extends Application {
         Vector2f start = new Vector2f(0.0f, 40);
         Vector2f end = new Vector2f(180.0f, 90.0f);
 
-        // Define rotation speed
-        double rotationSpeed = 10.0;
-
         // Generate path
         List<Vector2f> path = WindPosMapper.generatePath(start, end);
 

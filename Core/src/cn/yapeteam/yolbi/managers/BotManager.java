@@ -35,11 +35,6 @@ public class BotManager implements IMinecraft {
     @Listener
     public void TickEvent(EventTick e){
         if(mc.theWorld == null) return;
-//        StringBuilder botNames = new StringBuilder();
-//        for (Entity bot : bots) {
-//            botNames.append(bot.getName()).append(", ");
-//        }
-//        Logger.info(botNames.toString());
         mc.theWorld.playerEntities.forEach(entity -> {
             if (entity != mc.thePlayer && (!bots.contains(entity) && isbot(entity))) {
                 if(!bots.contains(entity)) addBot(entity);
