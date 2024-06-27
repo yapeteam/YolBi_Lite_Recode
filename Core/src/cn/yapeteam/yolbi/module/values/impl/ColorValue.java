@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.values.impl;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 
+@DontMap
 public class ColorValue extends Value<Color> {
 
     @Getter

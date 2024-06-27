@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
@@ -18,6 +17,7 @@ import cn.yapeteam.yolbi.utils.player.MovementFix;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.player.RotationsUtil;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;

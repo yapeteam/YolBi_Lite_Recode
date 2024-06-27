@@ -16,6 +16,7 @@ public class Loader {
         Logger.init();
         try {
             Logger.info("Start PreLoading...");
+            Logger.warn("ClassLoader: " + BootStrap.client_thread.getContextClassLoader().getClass().getName());
             SocketSender.init();
             try {
                 UIManager.getDefaults().put("ClassLoader", BootStrap.client_thread.getContextClassLoader());
@@ -24,7 +25,7 @@ public class Loader {
                 Logger.exception(e);
             }
             Logger.warn("Start Mapping Injection!");
-            JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), new File(YOLBI_DIR, "injection.jar"));
+            JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar");
             Logger.success("Completed");
             Mapper.getCache().clear();
         } catch (Throwable e) {

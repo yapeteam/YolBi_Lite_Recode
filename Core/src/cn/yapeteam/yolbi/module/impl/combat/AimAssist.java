@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
@@ -14,6 +13,7 @@ import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.*;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import lombok.val;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

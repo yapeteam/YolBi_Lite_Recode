@@ -1,10 +1,10 @@
 package cn.yapeteam.yolbi.utils.render;
 
-import cn.yapeteam.loader.utils.vector.Vector3d;
-import cn.yapeteam.loader.utils.vector.Vector4d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector3d;
+import cn.yapeteam.yolbi.utils.vector.Vector4d;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.culling.Frustum;

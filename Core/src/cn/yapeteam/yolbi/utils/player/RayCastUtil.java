@@ -1,9 +1,9 @@
 package cn.yapeteam.yolbi.utils.player;
 
 
-import cn.yapeteam.loader.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import com.google.common.base.Predicates;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.entity.Entity;

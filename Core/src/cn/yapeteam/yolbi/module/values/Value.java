@@ -1,8 +1,10 @@
 package cn.yapeteam.yolbi.module.values;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import lombok.Getter;
 import lombok.Setter;
 
+@DontMap
 @Getter
 public class Value<T> {
     protected T value;

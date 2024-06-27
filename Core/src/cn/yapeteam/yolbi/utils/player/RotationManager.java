@@ -1,14 +1,13 @@
 package cn.yapeteam.yolbi.utils.player;
 
-import cn.yapeteam.loader.utils.vector.Vector2f;
-import cn.yapeteam.loader.utils.vector.Vector3d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.utils.IMinecraft;
-import cn.yapeteam.yolbi.utils.math.MathConst;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
+import cn.yapeteam.yolbi.utils.vector.Vector3d;
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;

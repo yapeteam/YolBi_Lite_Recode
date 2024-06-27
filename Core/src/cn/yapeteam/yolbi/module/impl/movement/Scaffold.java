@@ -1,7 +1,5 @@
 package cn.yapeteam.yolbi.module.impl.movement;
 
-import cn.yapeteam.loader.utils.vector.Vector2f;
-import cn.yapeteam.loader.utils.vector.Vector3d;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
@@ -13,6 +11,8 @@ import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import cn.yapeteam.yolbi.utils.player.*;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
+import cn.yapeteam.yolbi.utils.vector.Vector3d;
 import lombok.AllArgsConstructor;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.settings.KeyBinding;

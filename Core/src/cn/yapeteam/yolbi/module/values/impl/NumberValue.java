@@ -1,8 +1,10 @@
 package cn.yapeteam.yolbi.module.values.impl;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 
+@DontMap
 @SuppressWarnings("unchecked")
 public class NumberValue<T extends Number> extends Value<T> {
     /**

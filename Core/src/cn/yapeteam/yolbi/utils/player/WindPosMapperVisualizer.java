@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
-import cn.yapeteam.loader.utils.vector.Vector2f;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;

@@ -9,6 +9,8 @@ import lombok.var;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -37,13 +39,21 @@ public class JarMapper {
         return outStream.toByteArray();
     }
 
-    public static void dispose(File file, File out) throws Throwable {
+    private static void write(String name, byte[] bytes, ZipOutputStream zos) throws IOException {
+        zos.putNextEntry(new ZipEntry(name));
+        zos.write(bytes);
+        zos.closeEntry();
+    }
+
+    public static void dispose(File file, String jarName) throws Throwable {
         SocketSender.send("S1");
         var all = 0;
         try (val zis = new ZipInputStream(Files.newInputStream(file.toPath()))) {
             while (zis.getNextEntry() != null) all++;
         }
-        val zos = new ZipOutputStream(Files.newOutputStream(out.toPath()));
+        val zos = new ZipOutputStream(Files.newOutputStream(Paths.get(Loader.YOLBI_DIR + "/" + jarName)));
+        zos.setMethod(ZipOutputStream.DEFLATED);
+        zos.setLevel(Deflater.BEST_COMPRESSION);
         try (val zis = new ZipInputStream(Files.newInputStream(file.toPath()))) {
             ZipEntry se;
             int count = 0;
@@ -52,14 +62,13 @@ public class JarMapper {
                 int finalCount = count;
                 int finalAll = all;
                 new Thread(() -> SocketSender.send("P1" + " " + (float) finalCount / finalAll * 100f)).start();
+                var bytes = readStream(zis);
                 if (!se.isDirectory() && se.getName().endsWith(".class")) {
-                    var bytes = readStream(zis);
+                    if (!se.getName().startsWith("cn/yapeteam/")) continue;
                     val node = ASMUtils.node(bytes);
                     if (DontMap.Helper.hasAnnotation(node)) {
-                        val de = new ZipEntry(se.getName());
-                        zos.putNextEntry(de);
-                        zos.write(bytes);
-                        zos.closeEntry();
+                        write(se.getName(), bytes, zos);
+                        System.out.println("Skipping class: " + se.getName());
                         continue;
                     }
                     bytes = ASMUtils.rewriteClass(ClassMapper.map(node));
@@ -67,36 +76,10 @@ public class JarMapper {
                         Logger.info("Mapping mixin class: {}", se.getName());
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
                     }
-
-                    val de = new ZipEntry(se.getName());
-                    zos.putNextEntry(de);
-                    zos.write(bytes);
-                    zos.closeEntry();
-                } else {
-                    val de = new ZipEntry(se);
-                    zos.putNextEntry(de);
-                    copyStream(zos, zis);
-                    zos.closeEntry();
-                }
+                    write(se.getName(), bytes, zos);
+                } else if (!se.isDirectory()) write(se.getName(), bytes, zos);
             }
+            zos.close();
         }
-        zos.close();
-    }
-
-    private static ZipEntry newEntry(ZipEntry se, byte[] bytes) {
-        val de = new ZipEntry(se.getName());
-        if (se.getLastModifiedTime() != null)
-            de.setLastModifiedTime(se.getLastModifiedTime());
-        if (se.getLastAccessTime() != null)
-            de.setLastAccessTime(se.getLastAccessTime());
-        if (se.getCreationTime() != null)
-            de.setCreationTime(se.getCreationTime());
-        de.setSize(bytes.length);
-        val method = se.getMethod();
-        if (!(method != ZipEntry.STORED && method != ZipEntry.DEFLATED))
-            de.setMethod(method);
-        de.setExtra(se.getExtra());
-        de.setComment(se.getComment());
-        return de;
     }
 }

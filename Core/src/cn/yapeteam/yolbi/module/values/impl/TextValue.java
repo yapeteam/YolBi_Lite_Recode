@@ -1,8 +1,10 @@
 package cn.yapeteam.yolbi.module.values.impl;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 
+@DontMap
 public class TextValue extends Value<String> {
     public TextValue(String name, String value) {
         super(name);

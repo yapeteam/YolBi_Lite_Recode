@@ -1,4 +1,4 @@
-package cn.yapeteam.loader.utils.vector;
+package cn.yapeteam.yolbi.utils.vector;
 
 import cn.yapeteam.ymixin.annotations.DontMap;
 import lombok.AllArgsConstructor;

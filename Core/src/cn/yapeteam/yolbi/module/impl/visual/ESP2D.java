@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.visual;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.vector.Vector4d;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
@@ -14,6 +13,7 @@ import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.player.InventoryUtils;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
+import cn.yapeteam.yolbi.utils.vector.Vector4d;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

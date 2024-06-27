@@ -1,8 +1,10 @@
 package cn.yapeteam.yolbi.module.values.impl;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 
+@DontMap
 public class BooleanValue extends Value<Boolean> {
     public BooleanValue(String name, boolean value) {
         super(name);

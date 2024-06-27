@@ -46,7 +46,21 @@ public class BootStrap {
         return outStream.toByteArray();
     }
 
-    private static byte[] getHook() throws Throwable {
+    private static byte[] getClassFindHook() throws Throwable {
+        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (!entry.isDirectory()) {
+                    String name = entry.getName().replace('/', '.');
+                    name = name.substring(0, name.length() - 6);
+                    if (name.equals(LaunchClassLoaderMixin.class.getName())) return readStream(zis);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static byte[] getInitHook() throws Throwable {
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -121,13 +135,24 @@ public class BootStrap {
         String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/vanilla.srg")), StandardCharsets.UTF_8);
         String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/forge.srg")), StandardCharsets.UTF_8);
         Mapper.readMappings(vanilla, forge);
-        Logger.warn("Loading Initialize Hook...");
+
+        Logger.warn("Loading Hooks...");
         Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
-        byte[] hookClassBytes = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getHook()))));
-        ClassNode hookClassNode = ASMUtils.node(hookClassBytes);
-        transformer.addMixin(hookClassNode);
-        Class<?> targetClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(hookClassNode)).value();
-        byte[] transformedBytes = transformer.transform().get(targetClass.getName());
-        Logger.info("Redefined {} ReturnCode: {}", targetClass, JVMTIWrapper.instance.redefineClass(targetClass, transformedBytes));
+
+        byte[] classFindHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getClassFindHook()))));
+        byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
+        ClassNode classFindHookNode = ASMUtils.node(classFindHook);
+        ClassNode initHookNode = ASMUtils.node(initHook);
+
+        transformer.addMixin(classFindHookNode);
+        transformer.addMixin(initHookNode);
+
+        val map = transformer.transform();
+
+        Class<?> LaunchClassLoaderClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(classFindHookNode)).value();
+        Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
+
+        Logger.info("Redefined {} ReturnCode: {}", LaunchClassLoaderClass, JVMTIWrapper.instance.redefineClass(LaunchClassLoaderClass, map.get(LaunchClassLoaderClass.getName())));
+        Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
     }
 }

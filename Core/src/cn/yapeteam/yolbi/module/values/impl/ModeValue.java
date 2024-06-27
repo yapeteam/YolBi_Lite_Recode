@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.module.values.impl;
 
+import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 import java.util.Arrays;
 
+@DontMap
 @Setter
 @Getter
 public class ModeValue<T> extends Value<T> {
@@ -48,7 +50,6 @@ public class ModeValue<T> extends Value<T> {
         int index = Arrays.asList(modes).indexOf(getValue());
         setValue(modes[index > 0 ? index - 1 : modes.length - 1]);
     }
-
 
 
 }

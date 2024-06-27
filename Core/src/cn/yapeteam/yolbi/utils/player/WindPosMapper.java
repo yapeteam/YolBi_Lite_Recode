@@ -1,6 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
-import cn.yapeteam.loader.utils.vector.Vector2f;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
