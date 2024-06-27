@@ -28,7 +28,13 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
         System.out.println("Finding class: " + name);
         if ((
                 name.startsWith("cn.yapeteam.yolbi.") ||
-                        name.startsWith("javafx.")
+                        name.startsWith("javafx.") ||
+                        name.startsWith("com.sun.glass.") ||
+                        name.startsWith("com.sun.javafx.") ||
+                        name.startsWith("com.sun.media.") ||
+                        name.startsWith("com.sun.prism.") ||
+                        name.startsWith("com.sun.scenario.") ||
+                        name.startsWith("com.sun.webkit.")
         ) && !cachedClasses.containsKey(name)) {
             try {
                 byte[] classBytes = null;
@@ -57,7 +63,7 @@ public class LaunchClassLoaderMixin extends LaunchClassLoader {
                     clazz = (Class<?>) method.invoke(this, name, classBytes, 0, classBytes.length);
                     cachedClasses.put(name, clazz);
                     System.out.println("Loaded class: " + clazz);
-                }
+                } else System.out.println("Failed to load class: " + name);
             } catch (Exception e) {
                 e.printStackTrace();
             }

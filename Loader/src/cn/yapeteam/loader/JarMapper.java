@@ -63,8 +63,7 @@ public class JarMapper {
                 int finalAll = all;
                 new Thread(() -> SocketSender.send("P1" + " " + (float) finalCount / finalAll * 100f)).start();
                 var bytes = readStream(zis);
-                if (!se.isDirectory() && se.getName().endsWith(".class")) {
-                    if (!se.getName().startsWith("cn/yapeteam/")) continue;
+                if (!se.isDirectory() && se.getName().endsWith(".class") && se.getName().startsWith("cn/yapeteam/")) {
                     val node = ASMUtils.node(bytes);
                     if (DontMap.Helper.hasAnnotation(node)) {
                         write(se.getName(), bytes, zos);
