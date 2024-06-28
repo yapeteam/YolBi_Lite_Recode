@@ -11,7 +11,6 @@ import org.objectweb.asm_9_2.tree.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,9 +49,10 @@ public class Hooker {
 
     private native static byte[] getClassBytes(Class<?> clazz);
 
+    public native static Class<?> defineClass(ClassLoader loader, byte[] bytes);
+
     private native static int redefineClass(Class<?> clazz, byte[] bytes);
 
-    public static Method defineClass;
     public static Thread client_thread = null;
     public static final Map<String, byte[]> classes = new HashMap<>();
     public static final Map<String, Class<?>> cachedClasses = new HashMap<>();
@@ -121,12 +121,11 @@ public class Hooker {
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
                 byte[] bytes = Hooker.classes.get(name);
-                if (bytes == null) {
+                if (bytes == null)
                     return null;
-                }
                 if (cachedClasses.containsKey(name))
                     return cachedClasses.get(name);
-                Class<?> clazz = (Class<?>) Hooker.defineClass.invoke(cl, name, bytes, 0, bytes.length);
+                Class<?> clazz = defineClass(cl, bytes);
                 cachedClasses.put(name, clazz);
                 return clazz;
             }
@@ -146,13 +145,6 @@ public class Hooker {
         try {
             cacheJar(new File(YOLBI_DIR, "deps.jar"));
         } catch (Exception ignored) {
-        }
-        for (Method declaredMethod : ClassLoader.class.getDeclaredMethods()) {
-            if (declaredMethod.getName().equals("defineClass") && declaredMethod.getParameterCount() == 4) {
-                defineClass = declaredMethod;
-                defineClass.setAccessible(true);
-                break;
-            }
         }
         for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
             Thread thread = (Thread) o;

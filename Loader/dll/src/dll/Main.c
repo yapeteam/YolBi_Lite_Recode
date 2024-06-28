@@ -122,8 +122,7 @@ jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsig
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"
 
-void JNICALL
-classFileLoadHook(jvmtiEnv
+void JNICALL classFileLoadHook(jvmtiEnv
                       *jvmti_env,
                   JNIEnv *env,
                   jclass
@@ -214,10 +213,7 @@ JNIEXPORT jbyteArray JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
     return output;
 }
 
-JNIEXPORT jint
-
-    JNICALL
-    RedefineClass(JNIEnv *env, jclass _, jclass clazz, jbyteArray classBytes)
+JNIEXPORT jint JNICALL RedefineClass(JNIEnv *env, jclass _, jclass clazz, jbyteArray classBytes)
 {
     jbyte *classByteArray = (*env)->GetByteArrayElements(env, classBytes, NULL);
     struct Callback *retransform_callback = (struct Callback *)allocate(sizeof(struct Callback));
@@ -237,7 +233,7 @@ JNIEXPORT jint
     return error;
 }
 
-jclass DefineClass(JNIEnv *env, jobject obj, jobject classLoader, jbyteArray bytes)
+JNIEXPORT jclass JNICALL DefineClass(JNIEnv *env, jclass _, jobject classLoader, jbyteArray bytes)
 {
     jclass clClass = (*env)->FindClass(env, "java/lang/ClassLoader");
     jmethodID defineClass = (*env)->GetMethodID(env, clClass, "defineClass", "([BII)Ljava/lang/Class;");
@@ -395,9 +391,10 @@ void Inject()
 
     JNINativeMethod HookerMethods[] = {
         {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
+        {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
         {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
     };
-    (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 2);
+    (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
 
     jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
     (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
