@@ -77,8 +77,8 @@ public class YolBi {
         instance.eventManager.register(instance.renderManager);
         instance.eventManager.register(instance.targetManager);
         instance.moduleManager.load();
+        instance.getRenderManager().initwindow();
         try {
-            instance.getRenderManager().initwindow();
             instance.getConfigManager().load();
             WebServer.start();
         } catch (Throwable e) {

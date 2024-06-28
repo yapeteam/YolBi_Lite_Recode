@@ -176,11 +176,15 @@ public class RenderManager implements IMinecraft {
 
     public void destroywindow() {
         animationTimer.stop();
-        primaryStage.close();
         shapesMap.clear();
         modifiedidbuffer.clear();
         isopen = false;
-        primaryStage = null;
+        Platform.runLater(() -> {
+            if (root != null) {
+                primaryStage.close();
+                root.getChildren().clear();
+            }
+        });
     }
 
 
@@ -196,9 +200,9 @@ public class RenderManager implements IMinecraft {
             primaryStage.setScene(scene);
             // Handle the close request by consuming the event, which prevents the window from being closed
             primaryStage.setOnCloseRequest(Event::consume);
-            primaryStage.setTitle("External Renderer");
-            primaryStage.show();
+            primaryStage.setTitle("YolBi Lite Overlay");
             Natives.SetWindowsTransparent(true, primaryStage.getTitle());
+            primaryStage.show();
         });
     }
 
