@@ -1,5 +1,6 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
-  <img src="https://avatars.githubusercontent.com/u/159465859?s=64&v=4"</img>
+  <img src="https://avatars.githubusercontent.com/u/159465859?s=64&v=4" alt="YolBi Inject" img>
 </p>
 
 # YolBi Inject - Recode
@@ -18,11 +19,15 @@ C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
 
 [MinGW](https://winlibs.com/#download-release)
 
-### Steps
+### Debug
+
+Run `DEBUG`
+
+### Build
 
 1. Open this project
 
-2. Run the ProjectRunConfiguration: "BUILD"
+2. Run `BUILD`
 
 3. Your jar will appear in `./build`
 
