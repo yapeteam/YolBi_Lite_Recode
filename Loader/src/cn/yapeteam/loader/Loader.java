@@ -19,11 +19,12 @@ public class Loader {
             Logger.warn("ClassLoader: " + BootStrap.client_thread.getContextClassLoader().getClass().getName());
             SocketSender.init();
             try {
-                UIManager.getDefaults().put("ClassLoader", BootStrap.client_thread.getContextClassLoader());
+                UIManager.getDefaults().put("ClassLoader", ClassLoader.getSystemClassLoader());
                 UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } catch (UnsupportedLookAndFeelException e) {
                 Logger.exception(e);
             }
+            JOptionPane.showMessageDialog(null, "Yolbi Loader 已启动！", "提示", JOptionPane.INFORMATION_MESSAGE);
             Logger.warn("Start Mapping Injection!");
             JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar");
             Logger.success("Completed");

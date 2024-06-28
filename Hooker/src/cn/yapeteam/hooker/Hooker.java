@@ -8,7 +8,6 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
-import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -137,6 +136,7 @@ public class Hooker {
         return null;
     }
 
+
     @SuppressWarnings("unused")
     public static void hook() {
         try {
@@ -161,8 +161,6 @@ public class Hooker {
                 break;
             }
         }
-
-        JOptionPane.showMessageDialog(null, "Hooker loaded.");
 
         boolean hasLaunchClassLoader = true;
         Class<?> LaunchClassLoaderClass = null;

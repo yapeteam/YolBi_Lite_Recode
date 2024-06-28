@@ -10,7 +10,6 @@ import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.val;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
-import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -82,7 +81,6 @@ public class BootStrap {
             Thread thread = (Thread) o;
             if (thread.getName().equals("Client thread")) {
                 client_thread = thread;
-                UIManager.getDefaults().put("ClassLoader", thread.getContextClassLoader());
                 break;
             }
         }
