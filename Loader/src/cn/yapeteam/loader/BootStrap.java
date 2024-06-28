@@ -123,8 +123,8 @@ public class BootStrap {
         );
         Logger.info("Reading mappings, mode: {}", mode.name());
         Mapper.setMode(mode);
-        String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/vanilla.srg")), StandardCharsets.UTF_8);
-        String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/forge.srg")), StandardCharsets.UTF_8);
+        String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/vanilla.srg")), StandardCharsets.UTF_8);
+        String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/forge.srg")), StandardCharsets.UTF_8);
         Mapper.readMappings(vanilla, forge);
 
         Logger.warn("Loading Hooks...");
