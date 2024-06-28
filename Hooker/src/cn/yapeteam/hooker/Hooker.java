@@ -8,7 +8,6 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
-import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -201,7 +200,7 @@ public class Hooker {
                     }
                 }
                 val bytes = rewriteClass(targetNode);
-                JOptionPane.showConfirmDialog(null, "Hooked LaunchClassLoader: " + redefineClass(client_thread.getContextClassLoader().getClass(), bytes), "Hooker", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                redefineClass(client_thread.getContextClassLoader().getClass(), bytes);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
