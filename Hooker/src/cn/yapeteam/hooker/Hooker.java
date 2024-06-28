@@ -8,6 +8,7 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -129,13 +130,16 @@ public class Hooker {
                             Hooker.cacheJar(file);
                 }
                 byte[] bytes = Hooker.classes.get(name);
-                if (bytes == null)
-                    return null;
-                if (cachedClasses.containsKey(name))
-                    return cachedClasses.get(name);
-                Class<?> clazz = defineClass(cl, bytes);
-                cachedClasses.put(name, clazz);
-                return clazz;
+                if (bytes == null) {
+                    System.out.println("Failed to find class: " + name);
+                    throw new RuntimeException(name);
+                }
+                Class<?> clz = cachedClasses.get(name);
+                if (clz != null)
+                    return clz;
+                clz = defineClass(cl, bytes);
+                cachedClasses.put(name, clz);
+                return clz;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,6 +150,10 @@ public class Hooker {
 
     @SuppressWarnings("unused")
     public static void hook() {
+        try {
+            cacheJar(new File(YOLBI_DIR, "ymixin.jar"));
+        } catch (Exception ignored) {
+        }
         try {
             cacheJar(new File(YOLBI_DIR, "loader.jar"));
         } catch (Exception ignored) {
@@ -193,7 +201,7 @@ public class Hooker {
                     }
                 }
                 val bytes = rewriteClass(targetNode);
-                redefineClass(client_thread.getContextClassLoader().getClass(), bytes);
+                JOptionPane.showConfirmDialog(null, "Hooked LaunchClassLoader: " + redefineClass(client_thread.getContextClassLoader().getClass(), bytes), "Hooker", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
