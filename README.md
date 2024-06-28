@@ -31,6 +31,8 @@ Run `DEBUG`
 
 3. Your jar will appear in `./build`
 
+- YolBi Dir is `<userhome>/.yolbi`
+
 ## Custom
 
 For custom build, please edit `YBuild.xml`
