@@ -4,7 +4,6 @@ import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
@@ -62,7 +61,7 @@ public class KillAura extends Module {
     private int fishingRodSwitchOld = 0;
 
     @Listener
-    private void onTick(EventTick event) {
+    private void onTick(EventMotion event) {
         try {
             if (mc.theWorld == null || mc.thePlayer == null) return;
 
@@ -81,6 +80,25 @@ public class KillAura extends Module {
                 }
             }
 
+            // Rotations
+            if (target != null) {
+                float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
+                if (maxRotationSpeed.getValue().equals(180.0) && minRotationSpeed.getValue().equals(180.0)) {
+                    mc.thePlayer.rotationYaw = rotation[0];
+                    mc.thePlayer.rotationPitch = rotation[1];
+                } else {
+                    double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
+                    Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
+
+                    RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
+                    RotationManager.smooth();
+
+                    mc.thePlayer.rotationYaw = RotationManager.rotations.x;
+                    mc.thePlayer.rotationPitch = RotationManager.rotations.y;
+                }
+            }
+
+            // Attack & AutoRod
             if (target != null) {
                 int cps = (int) (minCps.getValue().equals(maxCps.getValue()) ? maxCps.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue()));
 
@@ -150,7 +168,7 @@ public class KillAura extends Module {
     protected void onEnable() {
         if (mc.theWorld == null || mc.thePlayer == null) return;
 
-        RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+//        RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
     }
 
     @Override
@@ -158,28 +176,6 @@ public class KillAura extends Module {
         if (mc.theWorld == null || mc.thePlayer == null) return;
 
         stopBlock();
-    }
-
-    @Listener
-    private void onPreUpdate(EventMotion event) {
-        if (mc.theWorld == null || mc.thePlayer == null) return;
-
-        if (target != null) {
-            float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
-            if (maxRotationSpeed.getValue().equals(180.0) && minRotationSpeed.getValue().equals(180.0)) {
-                mc.thePlayer.rotationYaw = rotation[0];
-                mc.thePlayer.rotationPitch = rotation[1];
-            } else {
-                double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
-                Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
-
-                RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
-                RotationManager.smooth();
-
-                mc.thePlayer.rotationYaw = RotationManager.rotations.x;
-                mc.thePlayer.rotationPitch = RotationManager.rotations.y;
-            }
-        }
     }
 
     private boolean shouldAddEntity(Entity entity) {
