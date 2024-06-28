@@ -30,9 +30,9 @@ public class FoodStats
         this.foodSaturationLevel = Math.min(this.foodSaturationLevel + (float)foodLevelIn * foodSaturationModifier * 2.0F, (float)this.foodLevel);
     }
 
-    public void addStats(ItemFood foodItem, ItemStack p_151686_2_)
+    public void addStats(ItemFood foodItem, ItemStack stack)
     {
-        this.addStats(foodItem.getHealAmount(p_151686_2_), foodItem.getSaturationModifier(p_151686_2_));
+        this.addStats(foodItem.getHealAmount(stack), foodItem.getSaturationModifier(stack));
     }
 
     /**
@@ -40,7 +40,7 @@ public class FoodStats
      */
     public void onUpdate(EntityPlayer player)
     {
-        EnumDifficulty enumdifficulty = player.worldObj.getDifficulty();
+        EnumDifficulty enumdifficulty = player.world.getDifficulty();
         this.prevFoodLevel = this.foodLevel;
 
         if (this.foodExhaustionLevel > 4.0F)
@@ -57,14 +57,28 @@ public class FoodStats
             }
         }
 
-        if (player.worldObj.getGameRules().getBoolean("naturalRegeneration") && this.foodLevel >= 18 && player.shouldHeal())
+        boolean flag = player.world.getGameRules().getBoolean("naturalRegeneration");
+
+        if (flag && this.foodSaturationLevel > 0.0F && player.shouldHeal() && this.foodLevel >= 20)
+        {
+            ++this.foodTimer;
+
+            if (this.foodTimer >= 10)
+            {
+                float f = Math.min(this.foodSaturationLevel, 6.0F);
+                player.heal(f / 6.0F);
+                this.addExhaustion(f);
+                this.foodTimer = 0;
+            }
+        }
+        else if (flag && this.foodLevel >= 18 && player.shouldHeal())
         {
             ++this.foodTimer;
 
             if (this.foodTimer >= 80)
             {
                 player.heal(1.0F);
-                this.addExhaustion(3.0F);
+                this.addExhaustion(6.0F);
                 this.foodTimer = 0;
             }
         }
@@ -91,26 +105,26 @@ public class FoodStats
     /**
      * Reads the food data for the player.
      */
-    public void readNBT(NBTTagCompound p_75112_1_)
+    public void readNBT(NBTTagCompound compound)
     {
-        if (p_75112_1_.hasKey("foodLevel", 99))
+        if (compound.hasKey("foodLevel", 99))
         {
-            this.foodLevel = p_75112_1_.getInteger("foodLevel");
-            this.foodTimer = p_75112_1_.getInteger("foodTickTimer");
-            this.foodSaturationLevel = p_75112_1_.getFloat("foodSaturationLevel");
-            this.foodExhaustionLevel = p_75112_1_.getFloat("foodExhaustionLevel");
+            this.foodLevel = compound.getInteger("foodLevel");
+            this.foodTimer = compound.getInteger("foodTickTimer");
+            this.foodSaturationLevel = compound.getFloat("foodSaturationLevel");
+            this.foodExhaustionLevel = compound.getFloat("foodExhaustionLevel");
         }
     }
 
     /**
      * Writes the food data for the player.
      */
-    public void writeNBT(NBTTagCompound p_75117_1_)
+    public void writeNBT(NBTTagCompound compound)
     {
-        p_75117_1_.setInteger("foodLevel", this.foodLevel);
-        p_75117_1_.setInteger("foodTickTimer", this.foodTimer);
-        p_75117_1_.setFloat("foodSaturationLevel", this.foodSaturationLevel);
-        p_75117_1_.setFloat("foodExhaustionLevel", this.foodExhaustionLevel);
+        compound.setInteger("foodLevel", this.foodLevel);
+        compound.setInteger("foodTickTimer", this.foodTimer);
+        compound.setFloat("foodSaturationLevel", this.foodSaturationLevel);
+        compound.setFloat("foodExhaustionLevel", this.foodExhaustionLevel);
     }
 
     /**
@@ -119,11 +133,6 @@ public class FoodStats
     public int getFoodLevel()
     {
         return this.foodLevel;
-    }
-
-    public int getPrevFoodLevel()
-    {
-        return this.prevFoodLevel;
     }
 
     /**
@@ -137,9 +146,9 @@ public class FoodStats
     /**
      * adds input to foodExhaustionLevel to a max of 40
      */
-    public void addExhaustion(float p_75113_1_)
+    public void addExhaustion(float exhaustion)
     {
-        this.foodExhaustionLevel = Math.min(this.foodExhaustionLevel + p_75113_1_, 40.0F);
+        this.foodExhaustionLevel = Math.min(this.foodExhaustionLevel + exhaustion, 40.0F);
     }
 
     /**

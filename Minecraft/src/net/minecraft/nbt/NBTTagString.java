@@ -3,6 +3,7 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Objects;
 
 public class NBTTagString extends NBTBase
 {
@@ -11,17 +12,13 @@ public class NBTTagString extends NBTBase
 
     public NBTTagString()
     {
-        this.data = "";
+        this("");
     }
 
     public NBTTagString(String data)
     {
+        Objects.requireNonNull(data, "Null string not allowed");
         this.data = data;
-
-        if (data == null)
-        {
-            throw new IllegalArgumentException("Empty string not allowed");
-        }
     }
 
     /**
@@ -44,18 +41,18 @@ public class NBTTagString extends NBTBase
      */
     public byte getId()
     {
-        return (byte)8;
+        return 8;
     }
 
     public String toString()
     {
-        return "\"" + this.data.replace("\"", "\\\"") + "\"";
+        return func_193588_a(this.data);
     }
 
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagString copy()
     {
         return new NBTTagString(this.data);
     }
@@ -77,7 +74,7 @@ public class NBTTagString extends NBTBase
         else
         {
             NBTTagString nbttagstring = (NBTTagString)p_equals_1_;
-            return this.data == null && nbttagstring.data == null || this.data != null && this.data.equals(nbttagstring.data);
+            return this.data == null && nbttagstring.data == null || Objects.equals(this.data, nbttagstring.data);
         }
     }
 
@@ -89,5 +86,24 @@ public class NBTTagString extends NBTBase
     public String getString()
     {
         return this.data;
+    }
+
+    public static String func_193588_a(String p_193588_0_)
+    {
+        StringBuilder stringbuilder = new StringBuilder("\"");
+
+        for (int i = 0; i < p_193588_0_.length(); ++i)
+        {
+            char c0 = p_193588_0_.charAt(i);
+
+            if (c0 == '\\' || c0 == '"')
+            {
+                stringbuilder.append('\\');
+            }
+
+            stringbuilder.append(c0);
+        }
+
+        return stringbuilder.append('"').toString();
     }
 }

@@ -11,9 +11,11 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class EnumTypeAdapterFactory implements TypeAdapterFactory
 {
+    @Nullable
     public <T> TypeAdapter<T> create(Gson p_create_1_, TypeToken<T> p_create_2_)
     {
         Class<T> oclass = (Class<T>)p_create_2_.getRawType();
@@ -28,7 +30,7 @@ public class EnumTypeAdapterFactory implements TypeAdapterFactory
 
             for (T t : oclass.getEnumConstants())
             {
-                map.put(this.func_151232_a(t), t);
+                map.put(this.getName(t), t);
             }
 
             return new TypeAdapter<T>()
@@ -41,9 +43,10 @@ public class EnumTypeAdapterFactory implements TypeAdapterFactory
                     }
                     else
                     {
-                        p_write_1_.value(EnumTypeAdapterFactory.this.func_151232_a(p_write_2_));
+                        p_write_1_.value(EnumTypeAdapterFactory.this.getName(p_write_2_));
                     }
                 }
+                @Nullable
                 public T read(JsonReader p_read_1_) throws IOException
                 {
                     if (p_read_1_.peek() == JsonToken.NULL)
@@ -53,15 +56,15 @@ public class EnumTypeAdapterFactory implements TypeAdapterFactory
                     }
                     else
                     {
-                        return (T)map.get(p_read_1_.nextString());
+                        return map.get(p_read_1_.nextString());
                     }
                 }
             };
         }
     }
 
-    private String func_151232_a(Object p_151232_1_)
+    private String getName(Object objectIn)
     {
-        return p_151232_1_ instanceof Enum ? ((Enum)p_151232_1_).name().toLowerCase(Locale.US) : p_151232_1_.toString().toLowerCase(Locale.US);
+        return objectIn instanceof Enum ? ((Enum)objectIn).name().toLowerCase(Locale.ROOT) : objectIn.toString().toLowerCase(Locale.ROOT);
     }
 }

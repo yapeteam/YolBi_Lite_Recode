@@ -1,11 +1,11 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import net.minecraft.client.model.ModelZombieVillager;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
 
 public class LayerVillagerArmor extends LayerBipedArmor
 {
-    public LayerVillagerArmor(RendererLivingEntity<?> rendererIn)
+    public LayerVillagerArmor(RenderLivingBase<?> rendererIn)
     {
         super(rendererIn);
     }

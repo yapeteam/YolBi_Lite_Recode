@@ -8,19 +8,19 @@ public class VertexFormatElement
     private static final Logger LOGGER = LogManager.getLogger();
     private final VertexFormatElement.EnumType type;
     private final VertexFormatElement.EnumUsage usage;
-    private int index;
-    private int elementCount;
+    private final int index;
+    private final int elementCount;
 
     public VertexFormatElement(int indexIn, VertexFormatElement.EnumType typeIn, VertexFormatElement.EnumUsage usageIn, int count)
     {
-        if (!this.func_177372_a(indexIn, usageIn))
+        if (this.isFirstOrUV(indexIn, usageIn))
         {
-            LOGGER.warn("Multiple vertex elements of the same type other than UVs are not supported. Forcing type to UV.");
-            this.usage = VertexFormatElement.EnumUsage.UV;
+            this.usage = usageIn;
         }
         else
         {
-            this.usage = usageIn;
+            LOGGER.warn("Multiple vertex elements of the same type other than UVs are not supported. Forcing type to UV.");
+            this.usage = VertexFormatElement.EnumUsage.UV;
         }
 
         this.type = typeIn;
@@ -28,7 +28,7 @@ public class VertexFormatElement
         this.elementCount = count;
     }
 
-    private final boolean func_177372_a(int p_177372_1_, VertexFormatElement.EnumUsage p_177372_2_)
+    private final boolean isFirstOrUV(int p_177372_1_, VertexFormatElement.EnumUsage p_177372_2_)
     {
         return p_177372_1_ == 0 || p_177372_2_ == VertexFormatElement.EnumUsage.UV;
     }
@@ -77,7 +77,23 @@ public class VertexFormatElement
         else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass())
         {
             VertexFormatElement vertexformatelement = (VertexFormatElement)p_equals_1_;
-            return this.elementCount != vertexformatelement.elementCount ? false : (this.index != vertexformatelement.index ? false : (this.type != vertexformatelement.type ? false : this.usage == vertexformatelement.usage));
+
+            if (this.elementCount != vertexformatelement.elementCount)
+            {
+                return false;
+            }
+            else if (this.index != vertexformatelement.index)
+            {
+                return false;
+            }
+            else if (this.type != vertexformatelement.type)
+            {
+                return false;
+            }
+            else
+            {
+                return this.usage == vertexformatelement.usage;
+            }
         }
         else
         {

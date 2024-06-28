@@ -2,26 +2,26 @@ package net.minecraft.client.model;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityBat;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class ModelBat extends ModelBase
 {
-    private ModelRenderer batHead;
+    private final ModelRenderer batHead;
 
     /** The body box of the bat model. */
-    private ModelRenderer batBody;
+    private final ModelRenderer batBody;
 
     /** The inner right wing box of the bat model. */
-    private ModelRenderer batRightWing;
+    private final ModelRenderer batRightWing;
 
     /** The inner left wing box of the bat model. */
-    private ModelRenderer batLeftWing;
+    private final ModelRenderer batLeftWing;
 
     /** The outer right wing box of the bat model. */
-    private ModelRenderer batOuterRightWing;
+    private final ModelRenderer batOuterRightWing;
 
     /** The outer left wing box of the bat model. */
-    private ModelRenderer batOuterLeftWing;
+    private final ModelRenderer batOuterLeftWing;
 
     public ModelBat()
     {
@@ -60,9 +60,9 @@ public class ModelBat extends ModelBase
     /**
      * Sets the models various rotation angles then renders the model.
      */
-    public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale, entityIn);
+        this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
         this.batHead.render(scale);
         this.batBody.render(scale);
     }
@@ -76,9 +76,8 @@ public class ModelBat extends ModelBase
     {
         if (((EntityBat)entityIn).getIsBatHanging())
         {
-            float f = (180F / (float)Math.PI);
-            this.batHead.rotateAngleX = headPitch / (180F / (float)Math.PI);
-            this.batHead.rotateAngleY = (float)Math.PI - netHeadYaw / (180F / (float)Math.PI);
+            this.batHead.rotateAngleX = headPitch * 0.017453292F;
+            this.batHead.rotateAngleY = (float)Math.PI - netHeadYaw * 0.017453292F;
             this.batHead.rotateAngleZ = (float)Math.PI;
             this.batHead.setRotationPoint(0.0F, -2.0F, 0.0F);
             this.batRightWing.setRotationPoint(-3.0F, 0.0F, 3.0F);
@@ -93,9 +92,8 @@ public class ModelBat extends ModelBase
         }
         else
         {
-            float f1 = (180F / (float)Math.PI);
-            this.batHead.rotateAngleX = headPitch / (180F / (float)Math.PI);
-            this.batHead.rotateAngleY = netHeadYaw / (180F / (float)Math.PI);
+            this.batHead.rotateAngleX = headPitch * 0.017453292F;
+            this.batHead.rotateAngleY = netHeadYaw * 0.017453292F;
             this.batHead.rotateAngleZ = 0.0F;
             this.batHead.setRotationPoint(0.0F, 0.0F, 0.0F);
             this.batRightWing.setRotationPoint(0.0F, 0.0F, 0.0F);

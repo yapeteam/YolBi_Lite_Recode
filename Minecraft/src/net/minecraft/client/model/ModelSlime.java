@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 
 public class ModelSlime extends ModelBase
@@ -18,9 +19,6 @@ public class ModelSlime extends ModelBase
 
     public ModelSlime(int p_i1157_1_)
     {
-        this.slimeBodies = new ModelRenderer(this, 0, p_i1157_1_);
-        this.slimeBodies.addBox(-4.0F, 16.0F, -4.0F, 8, 8, 8);
-
         if (p_i1157_1_ > 0)
         {
             this.slimeBodies = new ModelRenderer(this, 0, p_i1157_1_);
@@ -32,14 +30,20 @@ public class ModelSlime extends ModelBase
             this.slimeMouth = new ModelRenderer(this, 32, 8);
             this.slimeMouth.addBox(0.0F, 21.0F, -3.5F, 1, 1, 1);
         }
+        else
+        {
+            this.slimeBodies = new ModelRenderer(this, 0, p_i1157_1_);
+            this.slimeBodies.addBox(-4.0F, 16.0F, -4.0F, 8, 8, 8);
+        }
     }
 
     /**
      * Sets the models various rotation angles then renders the model.
      */
-    public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale, entityIn);
+        this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
+        GlStateManager.translate(0.0F, 0.001F, 0.0F);
         this.slimeBodies.render(scale);
 
         if (this.slimeRightEye != null)

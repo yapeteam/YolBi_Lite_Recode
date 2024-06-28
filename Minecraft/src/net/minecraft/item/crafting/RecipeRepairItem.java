@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 public class RecipeRepairItem implements IRecipe
@@ -20,15 +21,15 @@ public class RecipeRepairItem implements IRecipe
         {
             ItemStack itemstack = inv.getStackInSlot(i);
 
-            if (itemstack != null)
+            if (!itemstack.func_190926_b())
             {
                 list.add(itemstack);
 
                 if (list.size() > 1)
                 {
-                    ItemStack itemstack1 = (ItemStack)list.get(0);
+                    ItemStack itemstack1 = list.get(0);
 
-                    if (itemstack.getItem() != itemstack1.getItem() || itemstack1.stackSize != 1 || itemstack.stackSize != 1 || !itemstack1.getItem().isDamageable())
+                    if (itemstack.getItem() != itemstack1.getItem() || itemstack1.func_190916_E() != 1 || itemstack.func_190916_E() != 1 || !itemstack1.getItem().isDamageable())
                     {
                         return false;
                     }
@@ -50,17 +51,17 @@ public class RecipeRepairItem implements IRecipe
         {
             ItemStack itemstack = inv.getStackInSlot(i);
 
-            if (itemstack != null)
+            if (!itemstack.func_190926_b())
             {
                 list.add(itemstack);
 
                 if (list.size() > 1)
                 {
-                    ItemStack itemstack1 = (ItemStack)list.get(0);
+                    ItemStack itemstack1 = list.get(0);
 
-                    if (itemstack.getItem() != itemstack1.getItem() || itemstack1.stackSize != 1 || itemstack.stackSize != 1 || !itemstack1.getItem().isDamageable())
+                    if (itemstack.getItem() != itemstack1.getItem() || itemstack1.func_190916_E() != 1 || itemstack.func_190916_E() != 1 || !itemstack1.getItem().isDamageable())
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
                 }
             }
@@ -68,10 +69,10 @@ public class RecipeRepairItem implements IRecipe
 
         if (list.size() == 2)
         {
-            ItemStack itemstack2 = (ItemStack)list.get(0);
-            ItemStack itemstack3 = (ItemStack)list.get(1);
+            ItemStack itemstack2 = list.get(0);
+            ItemStack itemstack3 = list.get(1);
 
-            if (itemstack2.getItem() == itemstack3.getItem() && itemstack2.stackSize == 1 && itemstack3.stackSize == 1 && itemstack2.getItem().isDamageable())
+            if (itemstack2.getItem() == itemstack3.getItem() && itemstack2.func_190916_E() == 1 && itemstack3.func_190916_E() == 1 && itemstack2.getItem().isDamageable())
             {
                 Item item = itemstack2.getItem();
                 int j = item.getMaxDamage() - itemstack2.getItemDamage();
@@ -88,36 +89,38 @@ public class RecipeRepairItem implements IRecipe
             }
         }
 
-        return null;
-    }
-
-    /**
-     * Returns the size of the recipe area
-     */
-    public int getRecipeSize()
-    {
-        return 4;
+        return ItemStack.field_190927_a;
     }
 
     public ItemStack getRecipeOutput()
     {
-        return null;
+        return ItemStack.field_190927_a;
     }
 
-    public ItemStack[] getRemainingItems(InventoryCrafting inv)
+    public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
     {
-        ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
 
-        for (int i = 0; i < aitemstack.length; ++i)
+        for (int i = 0; i < nonnulllist.size(); ++i)
         {
             ItemStack itemstack = inv.getStackInSlot(i);
 
-            if (itemstack != null && itemstack.getItem().hasContainerItem())
+            if (itemstack.getItem().hasContainerItem())
             {
-                aitemstack[i] = new ItemStack(itemstack.getItem().getContainerItem());
+                nonnulllist.set(i, new ItemStack(itemstack.getItem().getContainerItem()));
             }
         }
 
-        return aitemstack;
+        return nonnulllist;
+    }
+
+    public boolean func_192399_d()
+    {
+        return true;
+    }
+
+    public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+    {
+        return p_194133_1_ * p_194133_2_ >= 2;
     }
 }

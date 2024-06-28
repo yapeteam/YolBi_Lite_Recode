@@ -1,14 +1,16 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandClearInventory extends CommandBase
 {
@@ -37,11 +39,11 @@ public class CommandClearInventory extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        EntityPlayerMP entityplayermp = args.length == 0 ? getCommandSenderAsPlayer(sender) : getPlayer(sender, args[0]);
+        EntityPlayerMP entityplayermp = args.length == 0 ? getCommandSenderAsPlayer(sender) : getPlayer(server, sender, args[0]);
         Item item = args.length >= 2 ? getItemByText(sender, args[1]) : null;
         int i = args.length >= 3 ? parseInt(args[2], -1) : -1;
         int j = args.length >= 4 ? parseInt(args[3], -1) : -1;
@@ -83,24 +85,26 @@ public class CommandClearInventory extends CommandBase
             {
                 if (j == 0)
                 {
-                    sender.addChatMessage(new ChatComponentTranslation("commands.clear.testing", new Object[] {entityplayermp.getName(), Integer.valueOf(k)}));
+                    sender.addChatMessage(new TextComponentTranslation("commands.clear.testing", new Object[] {entityplayermp.getName(), k}));
                 }
                 else
                 {
-                    notifyOperators(sender, this, "commands.clear.success", new Object[] {entityplayermp.getName(), Integer.valueOf(k)});
+                    notifyCommandListener(sender, this, "commands.clear.success", new Object[] {entityplayermp.getName(), k});
                 }
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, this.func_147209_d()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, Item.itemRegistry.getKeys()) : null);
-    }
-
-    protected String[] func_147209_d()
-    {
-        return MinecraftServer.getServer().getAllUsernames();
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        }
+        else
+        {
+            return args.length == 2 ? getListOfStringsMatchingLastWord(args, Item.REGISTRY.getKeys()) : Collections.emptyList();
+        }
     }
 
     /**

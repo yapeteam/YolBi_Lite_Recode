@@ -12,11 +12,11 @@ import java.util.zip.Inflater;
 public class NettyCompressionDecoder extends ByteToMessageDecoder
 {
     private final Inflater inflater;
-    private int treshold;
+    private int threshold;
 
-    public NettyCompressionDecoder(int treshold)
+    public NettyCompressionDecoder(int thresholdIn)
     {
-        this.treshold = treshold;
+        this.threshold = thresholdIn;
         this.inflater = new Inflater();
     }
 
@@ -33,9 +33,9 @@ public class NettyCompressionDecoder extends ByteToMessageDecoder
             }
             else
             {
-                if (i < this.treshold)
+                if (i < this.threshold)
                 {
-                    throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.treshold);
+                    throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.threshold);
                 }
 
                 if (i > 2097152)
@@ -54,8 +54,8 @@ public class NettyCompressionDecoder extends ByteToMessageDecoder
         }
     }
 
-    public void setCompressionTreshold(int treshold)
+    public void setCompressionThreshold(int thresholdIn)
     {
-        this.treshold = treshold;
+        this.threshold = thresholdIn;
     }
 }

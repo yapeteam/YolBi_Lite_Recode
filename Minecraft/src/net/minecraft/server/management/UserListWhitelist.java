@@ -38,13 +38,13 @@ public class UserListWhitelist extends UserList<GameProfile, UserListWhitelistEn
     }
 
     /**
-     * Gets the GameProfile for the UserListBanEntry with the specified username, if present
+     * Get a GameProfile entry by its name
      */
-    public GameProfile getBannedProfile(String name)
+    public GameProfile getByName(String profileName)
     {
         for (UserListWhitelistEntry userlistwhitelistentry : this.getValues().values())
         {
-            if (name.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
+            if (profileName.equalsIgnoreCase(((GameProfile)userlistwhitelistentry.getValue()).getName()))
             {
                 return (GameProfile)userlistwhitelistentry.getValue();
             }

@@ -5,8 +5,8 @@ import net.minecraft.item.ItemStack;
 
 public class ContainerChest extends Container
 {
-    private IInventory lowerChestInventory;
-    private int numRows;
+    private final IInventory lowerChestInventory;
+    private final int numRows;
 
     public ContainerChest(IInventory playerInventory, IInventory chestInventory, EntityPlayer player)
     {
@@ -37,9 +37,12 @@ public class ContainerChest extends Container
         }
     }
 
+    /**
+     * Determines whether supplied player can use this container
+     */
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.lowerChestInventory.isUseableByPlayer(playerIn);
+        return this.lowerChestInventory.isUsableByPlayer(playerIn);
     }
 
     /**
@@ -47,8 +50,8 @@ public class ContainerChest extends Container
      */
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
-        ItemStack itemstack = null;
-        Slot slot = (Slot)this.inventorySlots.get(index);
+        ItemStack itemstack = ItemStack.field_190927_a;
+        Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
         {
@@ -59,17 +62,17 @@ public class ContainerChest extends Container
             {
                 if (!this.mergeItemStack(itemstack1, this.numRows * 9, this.inventorySlots.size(), true))
                 {
-                    return null;
+                    return ItemStack.field_190927_a;
                 }
             }
             else if (!this.mergeItemStack(itemstack1, 0, this.numRows * 9, false))
             {
-                return null;
+                return ItemStack.field_190927_a;
             }
 
-            if (itemstack1.stackSize == 0)
+            if (itemstack1.func_190926_b())
             {
-                slot.putStack((ItemStack)null);
+                slot.putStack(ItemStack.field_190927_a);
             }
             else
             {

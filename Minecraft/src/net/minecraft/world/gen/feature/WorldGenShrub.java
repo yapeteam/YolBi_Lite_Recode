@@ -5,7 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenShrub extends WorldGenTrees
@@ -22,16 +22,14 @@ public class WorldGenShrub extends WorldGenTrees
 
     public boolean generate(World worldIn, Random rand, BlockPos position)
     {
-        Block block;
-
-        while (((block = worldIn.getBlockState(position).getBlock()).getMaterial() == Material.air || block.getMaterial() == Material.leaves) && position.getY() > 0)
+        for (IBlockState iblockstate = worldIn.getBlockState(position); (iblockstate.getMaterial() == Material.AIR || iblockstate.getMaterial() == Material.LEAVES) && position.getY() > 0; iblockstate = worldIn.getBlockState(position))
         {
             position = position.down();
         }
 
-        Block block1 = worldIn.getBlockState(position).getBlock();
+        Block block = worldIn.getBlockState(position).getBlock();
 
-        if (block1 == Blocks.dirt || block1 == Blocks.grass)
+        if (block == Blocks.DIRT || block == Blocks.GRASS)
         {
             position = position.up();
             this.setBlockAndNotifyAdequately(worldIn, position, this.woodMetadata);
@@ -52,8 +50,9 @@ public class WorldGenShrub extends WorldGenTrees
                         if (Math.abs(i1) != k || Math.abs(k1) != k || rand.nextInt(2) != 0)
                         {
                             BlockPos blockpos = new BlockPos(l, i, j1);
+                            Material material = worldIn.getBlockState(blockpos).getMaterial();
 
-                            if (!worldIn.getBlockState(blockpos).getBlock().isFullBlock())
+                            if (material == Material.AIR || material == Material.LEAVES)
                             {
                                 this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
                             }

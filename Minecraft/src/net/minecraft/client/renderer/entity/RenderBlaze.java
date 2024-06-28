@@ -6,7 +6,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderBlaze extends RenderLiving<EntityBlaze>
 {
-    private static final ResourceLocation blazeTextures = new ResourceLocation("textures/entity/blaze.png");
+    private static final ResourceLocation BLAZE_TEXTURES = new ResourceLocation("textures/entity/blaze.png");
 
     public RenderBlaze(RenderManager renderManagerIn)
     {
@@ -18,6 +18,6 @@ public class RenderBlaze extends RenderLiving<EntityBlaze>
      */
     protected ResourceLocation getEntityTexture(EntityBlaze entity)
     {
-        return blazeTextures;
+        return BLAZE_TEXTURES;
     }
 }

@@ -5,7 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
@@ -20,34 +20,40 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
     protected final IBlockState leavesMetadata;
     protected int extraRandomHeight;
 
-    public WorldGenHugeTrees(boolean p_i46447_1_, int p_i46447_2_, int p_i46447_3_, IBlockState p_i46447_4_, IBlockState p_i46447_5_)
+    public WorldGenHugeTrees(boolean notify, int baseHeightIn, int extraRandomHeightIn, IBlockState woodMetadataIn, IBlockState leavesMetadataIn)
     {
-        super(p_i46447_1_);
-        this.baseHeight = p_i46447_2_;
-        this.extraRandomHeight = p_i46447_3_;
-        this.woodMetadata = p_i46447_4_;
-        this.leavesMetadata = p_i46447_5_;
+        super(notify);
+        this.baseHeight = baseHeightIn;
+        this.extraRandomHeight = extraRandomHeightIn;
+        this.woodMetadata = woodMetadataIn;
+        this.leavesMetadata = leavesMetadataIn;
     }
 
-    protected int func_150533_a(Random p_150533_1_)
+    /**
+     * calculates the height based on this trees base height and its extra random height
+     */
+    protected int getHeight(Random rand)
     {
-        int i = p_150533_1_.nextInt(3) + this.baseHeight;
+        int i = rand.nextInt(3) + this.baseHeight;
 
         if (this.extraRandomHeight > 1)
         {
-            i += p_150533_1_.nextInt(this.extraRandomHeight);
+            i += rand.nextInt(this.extraRandomHeight);
         }
 
         return i;
     }
 
-    private boolean func_175926_c(World worldIn, BlockPos p_175926_2_, int p_175926_3_)
+    /**
+     * returns whether or not there is space for a tree to grow at a certain position
+     */
+    private boolean isSpaceAt(World worldIn, BlockPos leavesPos, int height)
     {
         boolean flag = true;
 
-        if (p_175926_2_.getY() >= 1 && p_175926_2_.getY() + p_175926_3_ + 1 <= 256)
+        if (leavesPos.getY() >= 1 && leavesPos.getY() + height + 1 <= 256)
         {
-            for (int i = 0; i <= 1 + p_175926_3_; ++i)
+            for (int i = 0; i <= 1 + height; ++i)
             {
                 int j = 2;
 
@@ -55,7 +61,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
                 {
                     j = 1;
                 }
-                else if (i >= 1 + p_175926_3_ - 2)
+                else if (i >= 1 + height - 2)
                 {
                     j = 2;
                 }
@@ -64,7 +70,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
                 {
                     for (int l = -j; l <= j && flag; ++l)
                     {
-                        if (p_175926_2_.getY() + i < 0 || p_175926_2_.getY() + i >= 256 || !this.func_150523_a(worldIn.getBlockState(p_175926_2_.add(k, i, l)).getBlock()))
+                        if (leavesPos.getY() + i < 0 || leavesPos.getY() + i >= 256 || !this.canGrowInto(worldIn.getBlockState(leavesPos.add(k, i, l)).getBlock()))
                         {
                             flag = false;
                         }
@@ -80,17 +86,21 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    private boolean func_175927_a(BlockPos p_175927_1_, World worldIn)
+    /**
+     * returns whether or not there is dirt underneath the block where the tree will be grown.
+     * It also generates dirt around the block in a 2x2 square if there is dirt underneath the blockpos.
+     */
+    private boolean ensureDirtsUnderneath(BlockPos pos, World worldIn)
     {
-        BlockPos blockpos = p_175927_1_.down();
+        BlockPos blockpos = pos.down();
         Block block = worldIn.getBlockState(blockpos).getBlock();
 
-        if ((block == Blocks.grass || block == Blocks.dirt) && p_175927_1_.getY() >= 2)
+        if ((block == Blocks.GRASS || block == Blocks.DIRT) && pos.getY() >= 2)
         {
-            this.func_175921_a(worldIn, blockpos);
-            this.func_175921_a(worldIn, blockpos.east());
-            this.func_175921_a(worldIn, blockpos.south());
-            this.func_175921_a(worldIn, blockpos.south().east());
+            this.setDirtAt(worldIn, blockpos);
+            this.setDirtAt(worldIn, blockpos.east());
+            this.setDirtAt(worldIn, blockpos.south());
+            this.setDirtAt(worldIn, blockpos.south().east());
             return true;
         }
         else
@@ -99,28 +109,35 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    protected boolean func_175929_a(World worldIn, Random p_175929_2_, BlockPos p_175929_3_, int p_175929_4_)
+    /**
+     * returns whether or not a tree can grow at a specific position.
+     * If it can, it generates surrounding dirt underneath.
+     */
+    protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int p_175929_4_)
     {
-        return this.func_175926_c(worldIn, p_175929_3_, p_175929_4_) && this.func_175927_a(p_175929_3_, worldIn);
+        return this.isSpaceAt(worldIn, treePos, p_175929_4_) && this.ensureDirtsUnderneath(treePos, worldIn);
     }
 
-    protected void func_175925_a(World worldIn, BlockPos p_175925_2_, int p_175925_3_)
+    /**
+     * grow leaves in a circle with the outsides being within the circle
+     */
+    protected void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width)
     {
-        int i = p_175925_3_ * p_175925_3_;
+        int i = width * width;
 
-        for (int j = -p_175925_3_; j <= p_175925_3_ + 1; ++j)
+        for (int j = -width; j <= width + 1; ++j)
         {
-            for (int k = -p_175925_3_; k <= p_175925_3_ + 1; ++k)
+            for (int k = -width; k <= width + 1; ++k)
             {
                 int l = j - 1;
                 int i1 = k - 1;
 
                 if (j * j + k * k <= i || l * l + i1 * i1 <= i || j * j + i1 * i1 <= i || l * l + k * k <= i)
                 {
-                    BlockPos blockpos = p_175925_2_.add(j, 0, k);
-                    Material material = worldIn.getBlockState(blockpos).getBlock().getMaterial();
+                    BlockPos blockpos = layerCenter.add(j, 0, k);
+                    Material material = worldIn.getBlockState(blockpos).getMaterial();
 
-                    if (material == Material.air || material == Material.leaves)
+                    if (material == Material.AIR || material == Material.LEAVES)
                     {
                         this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
                     }
@@ -129,20 +146,23 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree
         }
     }
 
-    protected void func_175928_b(World worldIn, BlockPos p_175928_2_, int p_175928_3_)
+    /**
+     * grow leaves in a circle
+     */
+    protected void growLeavesLayer(World worldIn, BlockPos layerCenter, int width)
     {
-        int i = p_175928_3_ * p_175928_3_;
+        int i = width * width;
 
-        for (int j = -p_175928_3_; j <= p_175928_3_; ++j)
+        for (int j = -width; j <= width; ++j)
         {
-            for (int k = -p_175928_3_; k <= p_175928_3_; ++k)
+            for (int k = -width; k <= width; ++k)
             {
                 if (j * j + k * k <= i)
                 {
-                    BlockPos blockpos = p_175928_2_.add(j, 0, k);
-                    Material material = worldIn.getBlockState(blockpos).getBlock().getMaterial();
+                    BlockPos blockpos = layerCenter.add(j, 0, k);
+                    Material material = worldIn.getBlockState(blockpos).getMaterial();
 
-                    if (material == Material.air || material == Material.leaves)
+                    if (material == Material.AIR || material == Material.LEAVES)
                     {
                         this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
                     }

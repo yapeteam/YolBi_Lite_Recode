@@ -6,9 +6,9 @@ public class RealmsSimpleScrolledSelectionList
 {
     private final GuiSimpleScrolledSelectionListProxy proxy;
 
-    public RealmsSimpleScrolledSelectionList(int p_i45803_1_, int p_i45803_2_, int p_i45803_3_, int p_i45803_4_, int p_i45803_5_)
+    public RealmsSimpleScrolledSelectionList(int width, int height, int top, int bottom, int slotHeight)
     {
-        this.proxy = new GuiSimpleScrolledSelectionListProxy(this, p_i45803_1_, p_i45803_2_, p_i45803_3_, p_i45803_4_, p_i45803_5_);
+        this.proxy = new GuiSimpleScrolledSelectionListProxy(this, width, height, top, bottom, slotHeight);
     }
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_)

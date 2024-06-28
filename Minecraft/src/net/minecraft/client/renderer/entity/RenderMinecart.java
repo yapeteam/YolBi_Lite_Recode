@@ -7,13 +7,14 @@ import net.minecraft.client.model.ModelMinecart;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class RenderMinecart<T extends EntityMinecart> extends Render<T>
 {
-    private static final ResourceLocation minecartTextures = new ResourceLocation("textures/entity/minecart.png");
+    private static final ResourceLocation MINECART_TEXTURES = new ResourceLocation("textures/entity/minecart.png");
 
     /** instance of ModelMinecart for rendering */
     protected ModelBase modelMinecart = new ModelMinecart();
@@ -41,34 +42,34 @@ public class RenderMinecart<T extends EntityMinecart> extends Render<T>
         double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double)partialTicks;
         double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * (double)partialTicks;
         double d3 = 0.30000001192092896D;
-        Vec3 vec3 = entity.func_70489_a(d0, d1, d2);
+        Vec3d vec3d = entity.getPos(d0, d1, d2);
         float f3 = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
 
-        if (vec3 != null)
+        if (vec3d != null)
         {
-            Vec3 vec31 = entity.func_70495_a(d0, d1, d2, d3);
-            Vec3 vec32 = entity.func_70495_a(d0, d1, d2, -d3);
+            Vec3d vec3d1 = entity.getPosOffset(d0, d1, d2, 0.30000001192092896D);
+            Vec3d vec3d2 = entity.getPosOffset(d0, d1, d2, -0.30000001192092896D);
 
-            if (vec31 == null)
+            if (vec3d1 == null)
             {
-                vec31 = vec3;
+                vec3d1 = vec3d;
             }
 
-            if (vec32 == null)
+            if (vec3d2 == null)
             {
-                vec32 = vec3;
+                vec3d2 = vec3d;
             }
 
-            x += vec3.xCoord - d0;
-            y += (vec31.yCoord + vec32.yCoord) / 2.0D - d1;
-            z += vec3.zCoord - d2;
-            Vec3 vec33 = vec32.addVector(-vec31.xCoord, -vec31.yCoord, -vec31.zCoord);
+            x += vec3d.xCoord - d0;
+            y += (vec3d1.yCoord + vec3d2.yCoord) / 2.0D - d1;
+            z += vec3d.zCoord - d2;
+            Vec3d vec3d3 = vec3d2.addVector(-vec3d1.xCoord, -vec3d1.yCoord, -vec3d1.zCoord);
 
-            if (vec33.lengthVector() != 0.0D)
+            if (vec3d3.lengthVector() != 0.0D)
             {
-                vec33 = vec33.normalize();
-                entityYaw = (float)(Math.atan2(vec33.zCoord, vec33.xCoord) * 180.0D / Math.PI);
-                f3 = (float)(Math.atan(vec33.yCoord) * 73.0D);
+                vec3d3 = vec3d3.normalize();
+                entityYaw = (float)(Math.atan2(vec3d3.zCoord, vec3d3.xCoord) * 180.0D / Math.PI);
+                f3 = (float)(Math.atan(vec3d3.yCoord) * 73.0D);
             }
         }
 
@@ -89,16 +90,23 @@ public class RenderMinecart<T extends EntityMinecart> extends Render<T>
         }
 
         int j = entity.getDisplayTileOffset();
+
+        if (this.renderOutlines)
+        {
+            GlStateManager.enableColorMaterial();
+            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
+        }
+
         IBlockState iblockstate = entity.getDisplayTile();
 
-        if (iblockstate.getBlock().getRenderType() != -1)
+        if (iblockstate.getRenderType() != EnumBlockRenderType.INVISIBLE)
         {
             GlStateManager.pushMatrix();
-            this.bindTexture(TextureMap.locationBlocksTexture);
+            this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
             float f4 = 0.75F;
-            GlStateManager.scale(f4, f4, f4);
+            GlStateManager.scale(0.75F, 0.75F, 0.75F);
             GlStateManager.translate(-0.5F, (float)(j - 8) / 16.0F, 0.5F);
-            this.func_180560_a(entity, partialTicks, iblockstate);
+            this.renderCartContents(entity, partialTicks, iblockstate);
             GlStateManager.popMatrix();
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.bindEntityTexture(entity);
@@ -107,6 +115,13 @@ public class RenderMinecart<T extends EntityMinecart> extends Render<T>
         GlStateManager.scale(-1.0F, -1.0F, 1.0F);
         this.modelMinecart.render(entity, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
         GlStateManager.popMatrix();
+
+        if (this.renderOutlines)
+        {
+            GlStateManager.disableOutlineMode();
+            GlStateManager.disableColorMaterial();
+        }
+
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
 
@@ -115,13 +130,13 @@ public class RenderMinecart<T extends EntityMinecart> extends Render<T>
      */
     protected ResourceLocation getEntityTexture(T entity)
     {
-        return minecartTextures;
+        return MINECART_TEXTURES;
     }
 
-    protected void func_180560_a(T minecart, float partialTicks, IBlockState state)
+    protected void renderCartContents(T p_188319_1_, float partialTicks, IBlockState p_188319_3_)
     {
         GlStateManager.pushMatrix();
-        Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlockBrightness(state, minecart.getBrightness(partialTicks));
+        Minecraft.getMinecraft().getBlockRendererDispatcher().renderBlockBrightness(p_188319_3_, p_188319_1_.getBrightness());
         GlStateManager.popMatrix();
     }
 }

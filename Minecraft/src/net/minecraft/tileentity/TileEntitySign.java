@@ -1,27 +1,26 @@
 package net.minecraft.tileentity;
 
-import com.google.gson.JsonParseException;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S33PacketUpdateSign;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentProcessor;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentUtils;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
 
 public class TileEntitySign extends TileEntity
 {
-    public final IChatComponent[] signText = new IChatComponent[] {new ChatComponentText(""), new ChatComponentText(""), new ChatComponentText(""), new ChatComponentText("")};
+    public final ITextComponent[] signText = new ITextComponent[] {new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
 
     /**
      * The index of the line currently being edited. Only used on client side, but defined on both. Note this is only
@@ -32,17 +31,23 @@ public class TileEntitySign extends TileEntity
     private EntityPlayer player;
     private final CommandResultStats stats = new CommandResultStats();
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
 
         for (int i = 0; i < 4; ++i)
         {
-            String s = IChatComponent.Serializer.componentToJson(this.signText[i]);
+            String s = ITextComponent.Serializer.componentToJson(this.signText[i]);
             compound.setString("Text" + (i + 1), s);
         }
 
         this.stats.writeStatsToNBT(compound);
+        return compound;
+    }
+
+    protected void setWorldCreate(World worldIn)
+    {
+        this.setWorldObj(worldIn);
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -55,13 +60,6 @@ public class TileEntitySign extends TileEntity
             {
                 return "Sign";
             }
-            public IChatComponent getDisplayName()
-            {
-                return new ChatComponentText(this.getName());
-            }
-            public void addChatMessage(IChatComponent component)
-            {
-            }
             public boolean canCommandSenderUseCommand(int permLevel, String commandName)
             {
                 return true;
@@ -70,65 +68,50 @@ public class TileEntitySign extends TileEntity
             {
                 return TileEntitySign.this.pos;
             }
-            public Vec3 getPositionVector()
+            public Vec3d getPositionVector()
             {
-                return new Vec3((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
+                return new Vec3d((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
             }
             public World getEntityWorld()
             {
-                return TileEntitySign.this.worldObj;
+                return TileEntitySign.this.world;
             }
-            public Entity getCommandSenderEntity()
+            public MinecraftServer getServer()
             {
-                return null;
-            }
-            public boolean sendCommandFeedback()
-            {
-                return false;
-            }
-            public void setCommandStat(CommandResultStats.Type type, int amount)
-            {
+                return TileEntitySign.this.world.getMinecraftServer();
             }
         };
 
         for (int i = 0; i < 4; ++i)
         {
             String s = compound.getString("Text" + (i + 1));
+            ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
 
             try
             {
-                IChatComponent ichatcomponent = IChatComponent.Serializer.jsonToComponent(s);
-
-                try
-                {
-                    this.signText[i] = ChatComponentProcessor.processComponent(icommandsender, ichatcomponent, (Entity)null);
-                }
-                catch (CommandException var7)
-                {
-                    this.signText[i] = ichatcomponent;
-                }
+                this.signText[i] = TextComponentUtils.processComponent(icommandsender, itextcomponent, (Entity)null);
             }
-            catch (JsonParseException var8)
+            catch (CommandException var7)
             {
-                this.signText[i] = new ChatComponentText(s);
+                this.signText[i] = itextcomponent;
             }
         }
 
         this.stats.readStatsFromNBT(compound);
     }
 
-    /**
-     * Allows for a specialized description packet to be created. This is often used to sync tile entity data from the
-     * server to the client easily. For example this is used by signs to synchronise the text to be displayed.
-     */
-    public Packet getDescriptionPacket()
+    @Nullable
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
-        IChatComponent[] aichatcomponent = new IChatComponent[4];
-        System.arraycopy(this.signText, 0, aichatcomponent, 0, 4);
-        return new S33PacketUpdateSign(this.worldObj, this.pos, aichatcomponent);
+        return new SPacketUpdateTileEntity(this.pos, 9, this.getUpdateTag());
     }
 
-    public boolean func_183000_F()
+    public NBTTagCompound getUpdateTag()
+    {
+        return this.writeToNBT(new NBTTagCompound());
+    }
+
+    public boolean onlyOpsCanSetNbt()
     {
         return true;
     }
@@ -169,11 +152,11 @@ public class TileEntitySign extends TileEntity
             {
                 return playerIn.getName();
             }
-            public IChatComponent getDisplayName()
+            public ITextComponent getDisplayName()
             {
                 return playerIn.getDisplayName();
             }
-            public void addChatMessage(IChatComponent component)
+            public void addChatMessage(ITextComponent component)
             {
             }
             public boolean canCommandSenderUseCommand(int permLevel, String commandName)
@@ -184,9 +167,9 @@ public class TileEntitySign extends TileEntity
             {
                 return TileEntitySign.this.pos;
             }
-            public Vec3 getPositionVector()
+            public Vec3d getPositionVector()
             {
-                return new Vec3((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
+                return new Vec3d((double)TileEntitySign.this.pos.getX() + 0.5D, (double)TileEntitySign.this.pos.getY() + 0.5D, (double)TileEntitySign.this.pos.getZ() + 0.5D);
             }
             public World getEntityWorld()
             {
@@ -202,21 +185,28 @@ public class TileEntitySign extends TileEntity
             }
             public void setCommandStat(CommandResultStats.Type type, int amount)
             {
-                TileEntitySign.this.stats.setCommandStatScore(this, type, amount);
+                if (TileEntitySign.this.world != null && !TileEntitySign.this.world.isRemote)
+                {
+                    TileEntitySign.this.stats.setCommandStatForSender(TileEntitySign.this.world.getMinecraftServer(), this, type, amount);
+                }
+            }
+            public MinecraftServer getServer()
+            {
+                return playerIn.getServer();
             }
         };
 
-        for (int i = 0; i < this.signText.length; ++i)
+        for (ITextComponent itextcomponent : this.signText)
         {
-            ChatStyle chatstyle = this.signText[i] == null ? null : this.signText[i].getChatStyle();
+            Style style = itextcomponent == null ? null : itextcomponent.getStyle();
 
-            if (chatstyle != null && chatstyle.getChatClickEvent() != null)
+            if (style != null && style.getClickEvent() != null)
             {
-                ClickEvent clickevent = chatstyle.getChatClickEvent();
+                ClickEvent clickevent = style.getClickEvent();
 
                 if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND)
                 {
-                    MinecraftServer.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
+                    playerIn.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
                 }
             }
         }

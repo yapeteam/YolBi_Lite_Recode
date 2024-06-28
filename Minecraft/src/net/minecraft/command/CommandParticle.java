@@ -1,9 +1,13 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
-import net.minecraft.util.BlockPos;
+import javax.annotation.Nullable;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
@@ -34,9 +38,9 @@ public class CommandParticle extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 8)
         {
@@ -45,42 +49,23 @@ public class CommandParticle extends CommandBase
         else
         {
             boolean flag = false;
-            EnumParticleTypes enumparticletypes = null;
+            EnumParticleTypes enumparticletypes = EnumParticleTypes.getByName(args[0]);
 
-            for (EnumParticleTypes enumparticletypes1 : EnumParticleTypes.values())
-            {
-                if (enumparticletypes1.hasArguments())
-                {
-                    if (args[0].startsWith(enumparticletypes1.getParticleName()))
-                    {
-                        flag = true;
-                        enumparticletypes = enumparticletypes1;
-                        break;
-                    }
-                }
-                else if (args[0].equals(enumparticletypes1.getParticleName()))
-                {
-                    flag = true;
-                    enumparticletypes = enumparticletypes1;
-                    break;
-                }
-            }
-
-            if (!flag)
+            if (enumparticletypes == null)
             {
                 throw new CommandException("commands.particle.notFound", new Object[] {args[0]});
             }
             else
             {
                 String s = args[0];
-                Vec3 vec3 = sender.getPositionVector();
-                double d6 = (double)((float)parseDouble(vec3.xCoord, args[1], true));
-                double d0 = (double)((float)parseDouble(vec3.yCoord, args[2], true));
-                double d1 = (double)((float)parseDouble(vec3.zCoord, args[3], true));
-                double d2 = (double)((float)parseDouble(args[4]));
-                double d3 = (double)((float)parseDouble(args[5]));
-                double d4 = (double)((float)parseDouble(args[6]));
-                double d5 = (double)((float)parseDouble(args[7]));
+                Vec3d vec3d = sender.getPositionVector();
+                double d0 = (double)((float)parseDouble(vec3d.xCoord, args[1], true));
+                double d1 = (double)((float)parseDouble(vec3d.yCoord, args[2], true));
+                double d2 = (double)((float)parseDouble(vec3d.zCoord, args[3], true));
+                double d3 = (double)((float)parseDouble(args[4]));
+                double d4 = (double)((float)parseDouble(args[5]));
+                double d5 = (double)((float)parseDouble(args[6]));
+                double d6 = (double)((float)parseDouble(args[7]));
                 int i = 0;
 
                 if (args.length > 8)
@@ -95,39 +80,80 @@ public class CommandParticle extends CommandBase
                     flag1 = true;
                 }
 
+                EntityPlayerMP entityplayermp;
+
+                if (args.length > 10)
+                {
+                    entityplayermp = getPlayer(server, sender, args[10]);
+                }
+                else
+                {
+                    entityplayermp = null;
+                }
+
+                int[] aint = new int[enumparticletypes.getArgumentCount()];
+
+                for (int j = 0; j < aint.length; ++j)
+                {
+                    if (args.length > 11 + j)
+                    {
+                        try
+                        {
+                            aint[j] = Integer.parseInt(args[11 + j]);
+                        }
+                        catch (NumberFormatException var28)
+                        {
+                            throw new CommandException("commands.particle.invalidParam", new Object[] {args[11 + j]});
+                        }
+                    }
+                }
+
                 World world = sender.getEntityWorld();
 
                 if (world instanceof WorldServer)
                 {
                     WorldServer worldserver = (WorldServer)world;
-                    int[] aint = new int[enumparticletypes.getArgumentCount()];
 
-                    if (enumparticletypes.hasArguments())
+                    if (entityplayermp == null)
                     {
-                        String[] astring = args[0].split("_", 3);
-
-                        for (int j = 1; j < astring.length; ++j)
-                        {
-                            try
-                            {
-                                aint[j - 1] = Integer.parseInt(astring[j]);
-                            }
-                            catch (NumberFormatException var29)
-                            {
-                                throw new CommandException("commands.particle.notFound", new Object[] {args[0]});
-                            }
-                        }
+                        worldserver.spawnParticle(enumparticletypes, flag1, d0, d1, d2, i, d3, d4, d5, d6, aint);
+                    }
+                    else
+                    {
+                        worldserver.spawnParticle(entityplayermp, enumparticletypes, flag1, d0, d1, d2, i, d3, d4, d5, d6, aint);
                     }
 
-                    worldserver.spawnParticle(enumparticletypes, flag1, d6, d0, d1, i, d2, d3, d4, d5, aint);
-                    notifyOperators(sender, this, "commands.particle.success", new Object[] {s, Integer.valueOf(Math.max(i, 1))});
+                    notifyCommandListener(sender, this, "commands.particle.success", new Object[] {s, Math.max(i, 1)});
                 }
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, EnumParticleTypes.getParticleNames()) : (args.length > 1 && args.length <= 4 ? func_175771_a(args, 1, pos) : (args.length == 10 ? getListOfStringsMatchingLastWord(args, new String[] {"normal", "force"}): null));
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, EnumParticleTypes.getParticleNames());
+        }
+        else if (args.length > 1 && args.length <= 4)
+        {
+            return getTabCompletionCoordinate(args, 1, pos);
+        }
+        else if (args.length == 10)
+        {
+            return getListOfStringsMatchingLastWord(args, new String[] {"normal", "force"});
+        }
+        else
+        {
+            return args.length == 11 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+        }
+    }
+
+    /**
+     * Return whether the specified command parameter index is a username parameter.
+     */
+    public boolean isUsernameIndex(String[] args, int index)
+    {
+        return index == 10;
     }
 }

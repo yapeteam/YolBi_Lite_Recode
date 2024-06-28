@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelZombie;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
@@ -10,15 +9,15 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderGiantZombie extends RenderLiving<EntityGiantZombie>
 {
-    private static final ResourceLocation zombieTextures = new ResourceLocation("textures/entity/zombie/zombie.png");
+    private static final ResourceLocation ZOMBIE_TEXTURES = new ResourceLocation("textures/entity/zombie/zombie.png");
 
     /** Scale of the model to use */
-    private float scale;
+    private final float scale;
 
-    public RenderGiantZombie(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn, float scaleIn)
+    public RenderGiantZombie(RenderManager p_i47206_1_, float p_i47206_2_)
     {
-        super(renderManagerIn, modelBaseIn, shadowSizeIn * scaleIn);
-        this.scale = scaleIn;
+        super(p_i47206_1_, new ModelZombie(), 0.5F * p_i47206_2_);
+        this.scale = p_i47206_2_;
         this.addLayer(new LayerHeldItem(this));
         this.addLayer(new LayerBipedArmor(this)
         {
@@ -36,8 +35,7 @@ public class RenderGiantZombie extends RenderLiving<EntityGiantZombie>
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityGiantZombie entitylivingbaseIn, float partialTickTime)
     {
@@ -49,6 +47,6 @@ public class RenderGiantZombie extends RenderLiving<EntityGiantZombie>
      */
     protected ResourceLocation getEntityTexture(EntityGiantZombie entity)
     {
-        return zombieTextures;
+        return ZOMBIE_TEXTURES;
     }
 }

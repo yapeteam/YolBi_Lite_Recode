@@ -7,9 +7,9 @@ public class RealmsEditBox
 {
     private final GuiTextField editBox;
 
-    public RealmsEditBox(int p_i45743_1_, int p_i45743_2_, int p_i45743_3_, int p_i45743_4_, int p_i45743_5_)
+    public RealmsEditBox(int id, int x, int y, int width, int height)
     {
-        this.editBox = new GuiTextField(p_i45743_1_, Minecraft.getMinecraft().fontRendererObj, p_i45743_2_, p_i45743_3_, p_i45743_4_, p_i45743_5_);
+        this.editBox = new GuiTextField(id, Minecraft.getMinecraft().fontRendererObj, x, y, width, height);
     }
 
     public String getValue()

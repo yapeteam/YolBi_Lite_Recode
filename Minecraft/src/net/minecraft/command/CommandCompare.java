@@ -1,11 +1,14 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 
@@ -36,9 +39,9 @@ public class CommandCompare extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 9)
         {
@@ -51,12 +54,12 @@ public class CommandCompare extends CommandBase
             BlockPos blockpos1 = parseBlockPos(sender, args, 3, false);
             BlockPos blockpos2 = parseBlockPos(sender, args, 6, false);
             StructureBoundingBox structureboundingbox = new StructureBoundingBox(blockpos, blockpos1);
-            StructureBoundingBox structureboundingbox1 = new StructureBoundingBox(blockpos2, blockpos2.add(structureboundingbox.func_175896_b()));
+            StructureBoundingBox structureboundingbox1 = new StructureBoundingBox(blockpos2, blockpos2.add(structureboundingbox.getLength()));
             int i = structureboundingbox.getXSize() * structureboundingbox.getYSize() * structureboundingbox.getZSize();
 
             if (i > 524288)
             {
-                throw new CommandException("commands.compare.tooManyBlocks", new Object[] {Integer.valueOf(i), Integer.valueOf(524288)});
+                throw new CommandException("commands.compare.tooManyBlocks", new Object[] {i, 524288});
             }
             else if (structureboundingbox.minY >= 0 && structureboundingbox.maxY < 256 && structureboundingbox1.minY >= 0 && structureboundingbox1.maxY < 256)
             {
@@ -66,7 +69,7 @@ public class CommandCompare extends CommandBase
                 {
                     boolean flag = false;
 
-                    if (args.length > 9 && args[9].equals("masked"))
+                    if (args.length > 9 && "masked".equals(args[9]))
                     {
                         flag = true;
                     }
@@ -82,12 +85,12 @@ public class CommandCompare extends CommandBase
                         {
                             for (int l = structureboundingbox.minX; l <= structureboundingbox.maxX; ++l)
                             {
-                                blockpos$mutableblockpos.set(l, k, j);
-                                blockpos$mutableblockpos1.set(l + blockpos3.getX(), k + blockpos3.getY(), j + blockpos3.getZ());
+                                blockpos$mutableblockpos.setPos(l, k, j);
+                                blockpos$mutableblockpos1.setPos(l + blockpos3.getX(), k + blockpos3.getY(), j + blockpos3.getZ());
                                 boolean flag1 = false;
                                 IBlockState iblockstate = world.getBlockState(blockpos$mutableblockpos);
 
-                                if (!flag || iblockstate.getBlock() != Blocks.air)
+                                if (!flag || iblockstate.getBlock() != Blocks.AIR)
                                 {
                                     if (iblockstate == world.getBlockState(blockpos$mutableblockpos1))
                                     {
@@ -96,13 +99,11 @@ public class CommandCompare extends CommandBase
 
                                         if (tileentity != null && tileentity1 != null)
                                         {
-                                            NBTTagCompound nbttagcompound = new NBTTagCompound();
-                                            tileentity.writeToNBT(nbttagcompound);
+                                            NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
                                             nbttagcompound.removeTag("x");
                                             nbttagcompound.removeTag("y");
                                             nbttagcompound.removeTag("z");
-                                            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                                            tileentity1.writeToNBT(nbttagcompound1);
+                                            NBTTagCompound nbttagcompound1 = tileentity1.writeToNBT(new NBTTagCompound());
                                             nbttagcompound1.removeTag("x");
                                             nbttagcompound1.removeTag("y");
                                             nbttagcompound1.removeTag("z");
@@ -134,7 +135,7 @@ public class CommandCompare extends CommandBase
                     }
 
                     sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, i);
-                    notifyOperators(sender, this, "commands.compare.success", new Object[] {Integer.valueOf(i)});
+                    notifyCommandListener(sender, this, "commands.compare.success", new Object[] {i});
                 }
                 else
                 {
@@ -148,8 +149,23 @@ public class CommandCompare extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : (args.length > 3 && args.length <= 6 ? func_175771_a(args, 3, pos) : (args.length > 6 && args.length <= 9 ? func_175771_a(args, 6, pos) : (args.length == 10 ? getListOfStringsMatchingLastWord(args, new String[] {"masked", "all"}): null)));
+        if (args.length > 0 && args.length <= 3)
+        {
+            return getTabCompletionCoordinate(args, 0, pos);
+        }
+        else if (args.length > 3 && args.length <= 6)
+        {
+            return getTabCompletionCoordinate(args, 3, pos);
+        }
+        else if (args.length > 6 && args.length <= 9)
+        {
+            return getTabCompletionCoordinate(args, 6, pos);
+        }
+        else
+        {
+            return args.length == 10 ? getListOfStringsMatchingLastWord(args, new String[] {"masked", "all"}) : Collections.emptyList();
+        }
     }
 }

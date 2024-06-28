@@ -8,8 +8,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.tileentity.TileEntityHopper;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockDropper extends BlockDispenser
@@ -40,13 +40,13 @@ public class BlockDropper extends BlockDispenser
 
             if (i < 0)
             {
-                worldIn.playAuxSFX(1001, pos, 0);
+                worldIn.playEvent(1001, pos, 0);
             }
             else
             {
                 ItemStack itemstack = tileentitydispenser.getStackInSlot(i);
 
-                if (itemstack != null)
+                if (!itemstack.func_190926_b())
                 {
                     EnumFacing enumfacing = (EnumFacing)worldIn.getBlockState(pos).getValue(FACING);
                     BlockPos blockpos = pos.offset(enumfacing);
@@ -56,24 +56,15 @@ public class BlockDropper extends BlockDispenser
                     if (iinventory == null)
                     {
                         itemstack1 = this.dropBehavior.dispense(blocksourceimpl, itemstack);
-
-                        if (itemstack1 != null && itemstack1.stackSize <= 0)
-                        {
-                            itemstack1 = null;
-                        }
                     }
                     else
                     {
-                        itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(iinventory, itemstack.copy().splitStack(1), enumfacing.getOpposite());
+                        itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(tileentitydispenser, iinventory, itemstack.copy().splitStack(1), enumfacing.getOpposite());
 
-                        if (itemstack1 == null)
+                        if (itemstack1.func_190926_b())
                         {
                             itemstack1 = itemstack.copy();
-
-                            if (--itemstack1.stackSize <= 0)
-                            {
-                                itemstack1 = null;
-                            }
+                            itemstack1.func_190918_g(1);
                         }
                         else
                         {

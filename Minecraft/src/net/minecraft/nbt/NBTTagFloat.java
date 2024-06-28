@@ -3,9 +3,9 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
-public class NBTTagFloat extends NBTBase.NBTPrimitive
+public class NBTTagFloat extends NBTPrimitive
 {
     /** The float value for the tag. */
     private float data;
@@ -38,33 +38,25 @@ public class NBTTagFloat extends NBTBase.NBTPrimitive
      */
     public byte getId()
     {
-        return (byte)5;
+        return 5;
     }
 
     public String toString()
     {
-        return "" + this.data + "f";
+        return this.data + "f";
     }
 
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagFloat copy()
     {
         return new NBTTagFloat(this.data);
     }
 
     public boolean equals(Object p_equals_1_)
     {
-        if (super.equals(p_equals_1_))
-        {
-            NBTTagFloat nbttagfloat = (NBTTagFloat)p_equals_1_;
-            return this.data == nbttagfloat.data;
-        }
-        else
-        {
-            return false;
-        }
+        return super.equals(p_equals_1_) && this.data == ((NBTTagFloat)p_equals_1_).data;
     }
 
     public int hashCode()
@@ -79,17 +71,17 @@ public class NBTTagFloat extends NBTBase.NBTPrimitive
 
     public int getInt()
     {
-        return MathHelper.floor_float(this.data);
+        return MathHelper.floor(this.data);
     }
 
     public short getShort()
     {
-        return (short)(MathHelper.floor_float(this.data) & 65535);
+        return (short)(MathHelper.floor(this.data) & 65535);
     }
 
     public byte getByte()
     {
-        return (byte)(MathHelper.floor_float(this.data) & 255);
+        return (byte)(MathHelper.floor(this.data) & 255);
     }
 
     public double getDouble()

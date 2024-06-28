@@ -24,7 +24,7 @@ public class InventoryEnderChest extends InventoryBasic
     {
         for (int i = 0; i < this.getSizeInventory(); ++i)
         {
-            this.setInventorySlotContents(i, (ItemStack)null);
+            this.setInventorySlotContents(i, ItemStack.field_190927_a);
         }
 
         for (int k = 0; k < p_70486_1_.tagCount(); ++k)
@@ -34,7 +34,7 @@ public class InventoryEnderChest extends InventoryBasic
 
             if (j >= 0 && j < this.getSizeInventory())
             {
-                this.setInventorySlotContents(j, ItemStack.loadItemStackFromNBT(nbttagcompound));
+                this.setInventorySlotContents(j, new ItemStack(nbttagcompound));
             }
         }
     }
@@ -47,7 +47,7 @@ public class InventoryEnderChest extends InventoryBasic
         {
             ItemStack itemstack = this.getStackInSlot(i);
 
-            if (itemstack != null)
+            if (!itemstack.func_190926_b())
             {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
                 nbttagcompound.setByte("Slot", (byte)i);
@@ -60,11 +60,11 @@ public class InventoryEnderChest extends InventoryBasic
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
-        return this.associatedChest != null && !this.associatedChest.canBeUsed(player) ? false : super.isUseableByPlayer(player);
+        return this.associatedChest != null && !this.associatedChest.canBeUsed(player) ? false : super.isUsableByPlayer(player);
     }
 
     public void openInventory(EntityPlayer player)

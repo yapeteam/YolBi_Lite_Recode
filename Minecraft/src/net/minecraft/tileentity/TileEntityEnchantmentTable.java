@@ -6,11 +6,11 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
 
 public class TileEntityEnchantmentTable extends TileEntity implements ITickable, IInteractionObject
@@ -18,17 +18,17 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
     public int tickCount;
     public float pageFlip;
     public float pageFlipPrev;
-    public float field_145932_k;
-    public float field_145929_l;
+    public float flipT;
+    public float flipA;
     public float bookSpread;
     public float bookSpreadPrev;
     public float bookRotation;
     public float bookRotationPrev;
-    public float field_145924_q;
-    private static Random rand = new Random();
+    public float tRot;
+    private static final Random rand = new Random();
     private String customName;
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
 
@@ -36,6 +36,8 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         {
             compound.setString("CustomName", this.customName);
         }
+
+        return compound;
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -55,24 +57,24 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
     {
         this.bookSpreadPrev = this.bookSpread;
         this.bookRotationPrev = this.bookRotation;
-        EntityPlayer entityplayer = this.worldObj.getClosestPlayer((double)((float)this.pos.getX() + 0.5F), (double)((float)this.pos.getY() + 0.5F), (double)((float)this.pos.getZ() + 0.5F), 3.0D);
+        EntityPlayer entityplayer = this.world.getClosestPlayer((double)((float)this.pos.getX() + 0.5F), (double)((float)this.pos.getY() + 0.5F), (double)((float)this.pos.getZ() + 0.5F), 3.0D, false);
 
         if (entityplayer != null)
         {
             double d0 = entityplayer.posX - (double)((float)this.pos.getX() + 0.5F);
             double d1 = entityplayer.posZ - (double)((float)this.pos.getZ() + 0.5F);
-            this.field_145924_q = (float)MathHelper.atan2(d1, d0);
+            this.tRot = (float)MathHelper.atan2(d1, d0);
             this.bookSpread += 0.1F;
 
             if (this.bookSpread < 0.5F || rand.nextInt(40) == 0)
             {
-                float f1 = this.field_145932_k;
+                float f1 = this.flipT;
 
                 while (true)
                 {
-                    this.field_145932_k += (float)(rand.nextInt(4) - rand.nextInt(4));
+                    this.flipT += (float)(rand.nextInt(4) - rand.nextInt(4));
 
-                    if (f1 != this.field_145932_k)
+                    if (f1 != this.flipT)
                     {
                         break;
                     }
@@ -81,7 +83,7 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         }
         else
         {
-            this.field_145924_q += 0.02F;
+            this.tRot += 0.02F;
             this.bookSpread -= 0.1F;
         }
 
@@ -95,19 +97,19 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
             this.bookRotation += ((float)Math.PI * 2F);
         }
 
-        while (this.field_145924_q >= (float)Math.PI)
+        while (this.tRot >= (float)Math.PI)
         {
-            this.field_145924_q -= ((float)Math.PI * 2F);
+            this.tRot -= ((float)Math.PI * 2F);
         }
 
-        while (this.field_145924_q < -(float)Math.PI)
+        while (this.tRot < -(float)Math.PI)
         {
-            this.field_145924_q += ((float)Math.PI * 2F);
+            this.tRot += ((float)Math.PI * 2F);
         }
 
         float f2;
 
-        for (f2 = this.field_145924_q - this.bookRotation; f2 >= (float)Math.PI; f2 -= ((float)Math.PI * 2F))
+        for (f2 = this.tRot - this.bookRotation; f2 >= (float)Math.PI; f2 -= ((float)Math.PI * 2F))
         {
             ;
         }
@@ -118,14 +120,14 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
         }
 
         this.bookRotation += f2 * 0.4F;
-        this.bookSpread = MathHelper.clamp_float(this.bookSpread, 0.0F, 1.0F);
+        this.bookSpread = MathHelper.clamp(this.bookSpread, 0.0F, 1.0F);
         ++this.tickCount;
         this.pageFlipPrev = this.pageFlip;
-        float f = (this.field_145932_k - this.pageFlip) * 0.4F;
+        float f = (this.flipT - this.pageFlip) * 0.4F;
         float f3 = 0.2F;
-        f = MathHelper.clamp_float(f, -f3, f3);
-        this.field_145929_l += (f - this.field_145929_l) * 0.9F;
-        this.pageFlip += this.field_145929_l;
+        f = MathHelper.clamp(f, -0.2F, 0.2F);
+        this.flipA += (f - this.flipA) * 0.9F;
+        this.pageFlip += this.flipA;
     }
 
     /**
@@ -141,7 +143,7 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
      */
     public boolean hasCustomName()
     {
-        return this.customName != null && this.customName.length() > 0;
+        return this.customName != null && !this.customName.isEmpty();
     }
 
     public void setCustomName(String customNameIn)
@@ -152,14 +154,14 @@ public class TileEntityEnchantmentTable extends TileEntity implements ITickable,
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
     {
-        return new ContainerEnchantment(playerInventory, this.worldObj, this.pos);
+        return new ContainerEnchantment(playerInventory, this.world, this.pos);
     }
 
     public String getGuiID()

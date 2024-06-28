@@ -1,12 +1,18 @@
 package net.minecraft.item;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSnow;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemSnow extends ItemBlock
@@ -15,32 +21,25 @@ public class ItemSnow extends ItemBlock
     {
         super(block);
         this.setMaxDamage(0);
-        this.setHasSubtypes(true);
     }
 
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (stack.stackSize == 0)
-        {
-            return false;
-        }
-        else if (!playerIn.canPlayerEdit(pos, side, stack))
-        {
-            return false;
-        }
-        else
-        {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
-            Block block = iblockstate.getBlock();
-            BlockPos blockpos = pos;
+        ItemStack itemstack = stack.getHeldItem(pos);
 
-            if ((side != EnumFacing.UP || block != this.block) && !block.isReplaceable(worldIn, pos))
+        if (!itemstack.func_190926_b() && stack.canPlayerEdit(worldIn, hand, itemstack))
+        {
+            IBlockState iblockstate = playerIn.getBlockState(worldIn);
+            Block block = iblockstate.getBlock();
+            BlockPos blockpos = worldIn;
+
+            if ((hand != EnumFacing.UP || block != this.block) && !block.isReplaceable(playerIn, worldIn))
             {
-                blockpos = pos.offset(side);
-                iblockstate = worldIn.getBlockState(blockpos);
+                blockpos = worldIn.offset(hand);
+                iblockstate = playerIn.getBlockState(blockpos);
                 block = iblockstate.getBlock();
             }
 
@@ -48,21 +47,32 @@ public class ItemSnow extends ItemBlock
             {
                 int i = ((Integer)iblockstate.getValue(BlockSnow.LAYERS)).intValue();
 
-                if (i <= 7)
+                if (i < 8)
                 {
                     IBlockState iblockstate1 = iblockstate.withProperty(BlockSnow.LAYERS, Integer.valueOf(i + 1));
-                    AxisAlignedBB axisalignedbb = this.block.getCollisionBoundingBox(worldIn, blockpos, iblockstate1);
+                    AxisAlignedBB axisalignedbb = iblockstate1.getCollisionBoundingBox(playerIn, blockpos);
 
-                    if (axisalignedbb != null && worldIn.checkNoEntityCollision(axisalignedbb) && worldIn.setBlockState(blockpos, iblockstate1, 2))
+                    if (axisalignedbb != Block.NULL_AABB && playerIn.checkNoEntityCollision(axisalignedbb.offset(blockpos)) && playerIn.setBlockState(blockpos, iblockstate1, 10))
                     {
-                        worldIn.playSoundEffect((double)((float)blockpos.getX() + 0.5F), (double)((float)blockpos.getY() + 0.5F), (double)((float)blockpos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
-                        --stack.stackSize;
-                        return true;
+                        SoundType soundtype = this.block.getSoundType();
+                        playerIn.playSound(stack, blockpos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+
+                        if (stack instanceof EntityPlayerMP)
+                        {
+                            CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                        }
+
+                        itemstack.func_190918_g(1);
+                        return EnumActionResult.SUCCESS;
                     }
                 }
             }
 
-            return super.onItemUse(stack, playerIn, worldIn, blockpos, side, hitX, hitY, hitZ);
+            return super.onItemUse(stack, playerIn, worldIn, pos, hand, facing, hitX, hitY);
+        }
+        else
+        {
+            return EnumActionResult.FAIL;
         }
     }
 

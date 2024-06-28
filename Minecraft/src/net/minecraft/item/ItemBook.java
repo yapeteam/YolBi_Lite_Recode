@@ -7,7 +7,7 @@ public class ItemBook extends Item
      */
     public boolean isItemTool(ItemStack stack)
     {
-        return stack.stackSize == 1;
+        return stack.func_190916_E() == 1;
     }
 
     /**

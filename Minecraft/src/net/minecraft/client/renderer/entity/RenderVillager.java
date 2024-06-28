@@ -8,12 +8,12 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderVillager extends RenderLiving<EntityVillager>
 {
-    private static final ResourceLocation villagerTextures = new ResourceLocation("textures/entity/villager/villager.png");
-    private static final ResourceLocation farmerVillagerTextures = new ResourceLocation("textures/entity/villager/farmer.png");
-    private static final ResourceLocation librarianVillagerTextures = new ResourceLocation("textures/entity/villager/librarian.png");
-    private static final ResourceLocation priestVillagerTextures = new ResourceLocation("textures/entity/villager/priest.png");
-    private static final ResourceLocation smithVillagerTextures = new ResourceLocation("textures/entity/villager/smith.png");
-    private static final ResourceLocation butcherVillagerTextures = new ResourceLocation("textures/entity/villager/butcher.png");
+    private static final ResourceLocation VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/villager.png");
+    private static final ResourceLocation FARMER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/farmer.png");
+    private static final ResourceLocation LIBRARIAN_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/librarian.png");
+    private static final ResourceLocation PRIEST_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/priest.png");
+    private static final ResourceLocation SMITH_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/smith.png");
+    private static final ResourceLocation BUTCHER_VILLAGER_TEXTURES = new ResourceLocation("textures/entity/villager/butcher.png");
 
     public RenderVillager(RenderManager renderManagerIn)
     {
@@ -34,28 +34,28 @@ public class RenderVillager extends RenderLiving<EntityVillager>
         switch (entity.getProfession())
         {
             case 0:
-                return farmerVillagerTextures;
+                return FARMER_VILLAGER_TEXTURES;
 
             case 1:
-                return librarianVillagerTextures;
+                return LIBRARIAN_VILLAGER_TEXTURES;
 
             case 2:
-                return priestVillagerTextures;
+                return PRIEST_VILLAGER_TEXTURES;
 
             case 3:
-                return smithVillagerTextures;
+                return SMITH_VILLAGER_TEXTURES;
 
             case 4:
-                return butcherVillagerTextures;
+                return BUTCHER_VILLAGER_TEXTURES;
 
+            case 5:
             default:
-                return villagerTextures;
+                return VILLAGER_TEXTURES;
         }
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityVillager entitylivingbaseIn, float partialTickTime)
     {

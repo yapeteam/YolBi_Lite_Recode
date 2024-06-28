@@ -6,7 +6,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderCaveSpider extends RenderSpider<EntityCaveSpider>
 {
-    private static final ResourceLocation caveSpiderTextures = new ResourceLocation("textures/entity/spider/cave_spider.png");
+    private static final ResourceLocation CAVE_SPIDER_TEXTURES = new ResourceLocation("textures/entity/spider/cave_spider.png");
 
     public RenderCaveSpider(RenderManager renderManagerIn)
     {
@@ -15,8 +15,7 @@ public class RenderCaveSpider extends RenderSpider<EntityCaveSpider>
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityCaveSpider entitylivingbaseIn, float partialTickTime)
     {
@@ -28,6 +27,6 @@ public class RenderCaveSpider extends RenderSpider<EntityCaveSpider>
      */
     protected ResourceLocation getEntityTexture(EntityCaveSpider entity)
     {
-        return caveSpiderTextures;
+        return CAVE_SPIDER_TEXTURES;
     }
 }

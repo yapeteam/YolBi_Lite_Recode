@@ -1,7 +1,8 @@
 package net.minecraft.entity.item;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
 public class EntityMinecartEmpty extends EntityMinecart
@@ -16,24 +17,26 @@ public class EntityMinecartEmpty extends EntityMinecart
         super(worldIn, x, y, z);
     }
 
-    /**
-     * First layer of player interaction
-     */
-    public boolean interactFirst(EntityPlayer playerIn)
+    public static void registerFixesMinecartEmpty(DataFixer fixer)
     {
-        if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer && this.riddenByEntity != playerIn)
-        {
-            return true;
-        }
-        else if (this.riddenByEntity != null && this.riddenByEntity != playerIn)
+        EntityMinecart.registerFixesMinecart(fixer, EntityMinecartEmpty.class);
+    }
+
+    public boolean processInitialInteract(EntityPlayer player, EnumHand stack)
+    {
+        if (player.isSneaking())
         {
             return false;
         }
+        else if (this.isBeingRidden())
+        {
+            return true;
+        }
         else
         {
-            if (!this.worldObj.isRemote)
+            if (!this.world.isRemote)
             {
-                playerIn.mountEntity(this);
+                player.startRiding(this);
             }
 
             return true;
@@ -41,15 +44,15 @@ public class EntityMinecartEmpty extends EntityMinecart
     }
 
     /**
-     * Called every tick the minecart is on an activator rail. Args: x, y, z, is the rail receiving power
+     * Called every tick the minecart is on an activator rail.
      */
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower)
     {
         if (receivingPower)
         {
-            if (this.riddenByEntity != null)
+            if (this.isBeingRidden())
             {
-                this.riddenByEntity.mountEntity((Entity)null);
+                this.removePassengers();
             }
 
             if (this.getRollingAmplitude() == 0)
@@ -62,8 +65,8 @@ public class EntityMinecartEmpty extends EntityMinecart
         }
     }
 
-    public EntityMinecart.EnumMinecartType getMinecartType()
+    public EntityMinecart.Type getType()
     {
-        return EntityMinecart.EnumMinecartType.RIDEABLE;
+        return EntityMinecart.Type.RIDEABLE;
     }
 }

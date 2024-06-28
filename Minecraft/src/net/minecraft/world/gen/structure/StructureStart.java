@@ -1,16 +1,17 @@
 package net.minecraft.world.gen.structure;
 
+import com.google.common.collect.Lists;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public abstract class StructureStart
 {
-    protected LinkedList<StructureComponent> components = new LinkedList();
+    protected List<StructureComponent> components = Lists.<StructureComponent>newLinkedList();
     protected StructureBoundingBox boundingBox;
     private int chunkPosX;
     private int chunkPosZ;
@@ -30,7 +31,7 @@ public abstract class StructureStart
         return this.boundingBox;
     }
 
-    public LinkedList<StructureComponent> getComponents()
+    public List<StructureComponent> getComponents()
     {
         return this.components;
     }
@@ -44,7 +45,7 @@ public abstract class StructureStart
 
         while (iterator.hasNext())
         {
-            StructureComponent structurecomponent = (StructureComponent)iterator.next();
+            StructureComponent structurecomponent = iterator.next();
 
             if (structurecomponent.getBoundingBox().intersectsWith(structurebb) && !structurecomponent.addComponentParts(worldIn, rand, structurebb))
             {
@@ -131,14 +132,14 @@ public abstract class StructureStart
 
         for (StructureComponent structurecomponent : this.components)
         {
-            structurecomponent.func_181138_a(0, k, 0);
+            structurecomponent.offset(0, k, 0);
         }
     }
 
     protected void setRandomHeight(World worldIn, Random rand, int p_75070_3_, int p_75070_4_)
     {
         int i = p_75070_4_ - p_75070_3_ + 1 - this.boundingBox.getYSize();
-        int j = 1;
+        int j;
 
         if (i > 1)
         {
@@ -154,7 +155,7 @@ public abstract class StructureStart
 
         for (StructureComponent structurecomponent : this.components)
         {
-            structurecomponent.func_181138_a(0, k, 0);
+            structurecomponent.offset(0, k, 0);
         }
     }
 
@@ -166,12 +167,12 @@ public abstract class StructureStart
         return true;
     }
 
-    public boolean func_175788_a(ChunkCoordIntPair pair)
+    public boolean isValidForPostProcess(ChunkPos pair)
     {
         return true;
     }
 
-    public void func_175787_b(ChunkCoordIntPair pair)
+    public void notifyPostProcessAt(ChunkPos pair)
     {
     }
 

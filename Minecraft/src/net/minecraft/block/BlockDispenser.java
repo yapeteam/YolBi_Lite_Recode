@@ -5,7 +5,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
@@ -23,23 +23,27 @@ import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityDropper;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.RegistryDefaulted;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryDefaulted;
 import net.minecraft.world.World;
 
 public class BlockDispenser extends BlockContainer
 {
-    public static final PropertyDirection FACING = PropertyDirection.create("facing");
+    public static final PropertyDirection FACING = BlockDirectional.FACING;
     public static final PropertyBool TRIGGERED = PropertyBool.create("triggered");
-    public static final RegistryDefaulted<Item, IBehaviorDispenseItem> dispenseBehaviorRegistry = new RegistryDefaulted(new BehaviorDefaultDispenseItem());
+    public static final RegistryDefaulted<Item, IBehaviorDispenseItem> DISPENSE_BEHAVIOR_REGISTRY = new RegistryDefaulted<Item, IBehaviorDispenseItem>(new BehaviorDefaultDispenseItem());
     protected Random rand = new Random();
 
     protected BlockDispenser()
     {
-        super(Material.rock);
+        super(Material.ROCK);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(TRIGGERED, Boolean.valueOf(false)));
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        this.setCreativeTab(CreativeTabs.REDSTONE);
     }
 
     /**
@@ -50,6 +54,9 @@ public class BlockDispenser extends BlockContainer
         return 4;
     }
 
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
         super.onBlockAdded(worldIn, pos, state);
@@ -61,8 +68,8 @@ public class BlockDispenser extends BlockContainer
         if (!worldIn.isRemote)
         {
             EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
-            boolean flag = worldIn.getBlockState(pos.north()).getBlock().isFullBlock();
-            boolean flag1 = worldIn.getBlockState(pos.south()).getBlock().isFullBlock();
+            boolean flag = worldIn.getBlockState(pos.north()).isFullBlock();
+            boolean flag1 = worldIn.getBlockState(pos.south()).isFullBlock();
 
             if (enumfacing == EnumFacing.NORTH && flag && !flag1)
             {
@@ -74,8 +81,8 @@ public class BlockDispenser extends BlockContainer
             }
             else
             {
-                boolean flag2 = worldIn.getBlockState(pos.west()).getBlock().isFullBlock();
-                boolean flag3 = worldIn.getBlockState(pos.east()).getBlock().isFullBlock();
+                boolean flag2 = worldIn.getBlockState(pos.west()).isFullBlock();
+                boolean flag3 = worldIn.getBlockState(pos.east()).isFullBlock();
 
                 if (enumfacing == EnumFacing.WEST && flag2 && !flag3)
                 {
@@ -91,7 +98,7 @@ public class BlockDispenser extends BlockContainer
         }
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -107,11 +114,11 @@ public class BlockDispenser extends BlockContainer
 
                 if (tileentity instanceof TileEntityDropper)
                 {
-                    playerIn.triggerAchievement(StatList.field_181731_O);
+                    playerIn.addStat(StatList.DROPPER_INSPECTED);
                 }
                 else
                 {
-                    playerIn.triggerAchievement(StatList.field_181733_Q);
+                    playerIn.addStat(StatList.DISPENSER_INSPECTED);
                 }
             }
 
@@ -130,17 +137,16 @@ public class BlockDispenser extends BlockContainer
 
             if (i < 0)
             {
-                worldIn.playAuxSFX(1001, pos, 0);
+                worldIn.playEvent(1001, pos, 0);
             }
             else
             {
                 ItemStack itemstack = tileentitydispenser.getStackInSlot(i);
                 IBehaviorDispenseItem ibehaviordispenseitem = this.getBehavior(itemstack);
 
-                if (ibehaviordispenseitem != IBehaviorDispenseItem.itemDispenseBehaviorProvider)
+                if (ibehaviordispenseitem != IBehaviorDispenseItem.DEFAULT_BEHAVIOR)
                 {
-                    ItemStack itemstack1 = ibehaviordispenseitem.dispense(blocksourceimpl, itemstack);
-                    tileentitydispenser.setInventorySlotContents(i, itemstack1.stackSize <= 0 ? null : itemstack1);
+                    tileentitydispenser.setInventorySlotContents(i, ibehaviordispenseitem.dispense(blocksourceimpl, itemstack));
                 }
             }
         }
@@ -148,13 +154,15 @@ public class BlockDispenser extends BlockContainer
 
     protected IBehaviorDispenseItem getBehavior(ItemStack stack)
     {
-        return (IBehaviorDispenseItem)dispenseBehaviorRegistry.getObject(stack == null ? null : stack.getItem());
+        return DISPENSE_BEHAVIOR_REGISTRY.getObject(stack.getItem());
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         boolean flag = worldIn.isBlockPowered(pos) || worldIn.isBlockPowered(pos.up());
         boolean flag1 = ((Boolean)state.getValue(TRIGGERED)).booleanValue();
@@ -192,7 +200,7 @@ public class BlockDispenser extends BlockContainer
      */
     public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return this.getDefaultState().withProperty(FACING, BlockPistonBase.getFacingFromEntity(worldIn, pos, placer)).withProperty(TRIGGERED, Boolean.valueOf(false));
+        return this.getDefaultState().withProperty(FACING, EnumFacing.func_190914_a(pos, placer)).withProperty(TRIGGERED, Boolean.valueOf(false));
     }
 
     /**
@@ -200,7 +208,7 @@ public class BlockDispenser extends BlockContainer
      */
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        worldIn.setBlockState(pos, state.withProperty(FACING, BlockPistonBase.getFacingFromEntity(worldIn, pos, placer)), 2);
+        worldIn.setBlockState(pos, state.withProperty(FACING, EnumFacing.func_190914_a(pos, placer)), 2);
 
         if (stack.hasDisplayName())
         {
@@ -208,11 +216,14 @@ public class BlockDispenser extends BlockContainer
 
             if (tileentity instanceof TileEntityDispenser)
             {
-                ((TileEntityDispenser)tileentity).setCustomName(stack.getDisplayName());
+                ((TileEntityDispenser)tileentity).func_190575_a(stack.getDisplayName());
             }
         }
     }
 
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
@@ -231,45 +242,30 @@ public class BlockDispenser extends BlockContainer
      */
     public static IPosition getDispensePosition(IBlockSource coords)
     {
-        EnumFacing enumfacing = getFacing(coords.getBlockMetadata());
+        EnumFacing enumfacing = (EnumFacing)coords.getBlockState().getValue(FACING);
         double d0 = coords.getX() + 0.7D * (double)enumfacing.getFrontOffsetX();
         double d1 = coords.getY() + 0.7D * (double)enumfacing.getFrontOffsetY();
         double d2 = coords.getZ() + 0.7D * (double)enumfacing.getFrontOffsetZ();
         return new PositionImpl(d0, d1, d2);
     }
 
-    /**
-     * Get the facing of a dispenser with the given metadata
-     */
-    public static EnumFacing getFacing(int meta)
-    {
-        return EnumFacing.getFront(meta & 7);
-    }
-
-    public boolean hasComparatorInputOverride()
+    public boolean hasComparatorInputOverride(IBlockState state)
     {
         return true;
     }
 
-    public int getComparatorInputOverride(World worldIn, BlockPos pos)
+    public int getComparatorInputOverride(IBlockState blockState, World worldIn, BlockPos pos)
     {
         return Container.calcRedstone(worldIn.getTileEntity(pos));
     }
 
     /**
-     * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
      */
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return 3;
-    }
-
-    /**
-     * Possibly modify the given BlockState before rendering it on an Entity (Minecarts, Endermen, ...)
-     */
-    public IBlockState getStateForEntityRender(IBlockState state)
-    {
-        return this.getDefaultState().withProperty(FACING, EnumFacing.SOUTH);
+        return EnumBlockRenderType.MODEL;
     }
 
     /**
@@ -277,7 +273,7 @@ public class BlockDispenser extends BlockContainer
      */
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(FACING, getFacing(meta)).withProperty(TRIGGERED, Boolean.valueOf((meta & 8) > 0));
+        return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(meta & 7)).withProperty(TRIGGERED, Boolean.valueOf((meta & 8) > 0));
     }
 
     /**
@@ -296,8 +292,26 @@ public class BlockDispenser extends BlockContainer
         return i;
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {FACING, TRIGGERED});
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING, TRIGGERED});
     }
 }

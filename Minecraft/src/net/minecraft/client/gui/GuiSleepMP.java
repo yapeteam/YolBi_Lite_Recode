@@ -3,7 +3,7 @@ package net.minecraft.client.gui;
 import java.io.IOException;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.client.CPacketEntityAction;
 
 public class GuiSleepMP extends GuiChat
 {
@@ -14,7 +14,7 @@ public class GuiSleepMP extends GuiChat
     public void initGui()
     {
         super.initGui();
-        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping", new Object[0])));
+        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping")));
     }
 
     /**
@@ -37,7 +37,7 @@ public class GuiSleepMP extends GuiChat
 
             if (!s.isEmpty())
             {
-                this.mc.thePlayer.sendChatMessage(s);
+                this.mc.player.sendChatMessage(s);
             }
 
             this.inputField.setText("");
@@ -62,7 +62,7 @@ public class GuiSleepMP extends GuiChat
 
     private void wakeFromSleep()
     {
-        NetHandlerPlayClient nethandlerplayclient = this.mc.thePlayer.sendQueue;
-        nethandlerplayclient.addToSendQueue(new C0BPacketEntityAction(this.mc.thePlayer, C0BPacketEntityAction.Action.STOP_SLEEPING));
+        NetHandlerPlayClient nethandlerplayclient = this.mc.player.connection;
+        nethandlerplayclient.sendPacket(new CPacketEntityAction(this.mc.player, CPacketEntityAction.Action.STOP_SLEEPING));
     }
 }

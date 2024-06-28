@@ -5,36 +5,33 @@ import net.minecraft.client.renderer.GlStateManager;
 
 public class GuiLockIconButton extends GuiButton
 {
-    private boolean field_175231_o = false;
+    private boolean locked;
 
     public GuiLockIconButton(int p_i45538_1_, int p_i45538_2_, int p_i45538_3_)
     {
         super(p_i45538_1_, p_i45538_2_, p_i45538_3_, 20, 20, "");
     }
 
-    public boolean func_175230_c()
+    public boolean isLocked()
     {
-        return this.field_175231_o;
+        return this.locked;
     }
 
-    public void func_175229_b(boolean p_175229_1_)
+    public void setLocked(boolean lockedIn)
     {
-        this.field_175231_o = p_175229_1_;
+        this.locked = lockedIn;
     }
 
-    /**
-     * Draws this button to the screen.
-     */
-    public void drawButton(Minecraft mc, int mouseX, int mouseY)
+    public void func_191745_a(Minecraft p_191745_1_, int p_191745_2_, int p_191745_3_, float p_191745_4_)
     {
         if (this.visible)
         {
-            mc.getTextureManager().bindTexture(GuiButton.buttonTextures);
+            p_191745_1_.getTextureManager().bindTexture(GuiButton.BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean flag = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+            boolean flag = p_191745_2_ >= this.xPosition && p_191745_3_ >= this.yPosition && p_191745_2_ < this.xPosition + this.width && p_191745_3_ < this.yPosition + this.height;
             GuiLockIconButton.Icon guilockiconbutton$icon;
 
-            if (this.field_175231_o)
+            if (this.locked)
             {
                 if (!this.enabled)
                 {
@@ -62,7 +59,7 @@ public class GuiLockIconButton extends GuiButton
                 guilockiconbutton$icon = GuiLockIconButton.Icon.UNLOCKED;
             }
 
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, guilockiconbutton$icon.func_178910_a(), guilockiconbutton$icon.func_178912_b(), this.width, this.height);
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, guilockiconbutton$icon.getX(), guilockiconbutton$icon.getY(), this.width, this.height);
         }
     }
 
@@ -75,23 +72,23 @@ public class GuiLockIconButton extends GuiButton
         UNLOCKED_HOVER(20, 166),
         UNLOCKED_DISABLED(20, 186);
 
-        private final int field_178914_g;
-        private final int field_178920_h;
+        private final int x;
+        private final int y;
 
         private Icon(int p_i45537_3_, int p_i45537_4_)
         {
-            this.field_178914_g = p_i45537_3_;
-            this.field_178920_h = p_i45537_4_;
+            this.x = p_i45537_3_;
+            this.y = p_i45537_4_;
         }
 
-        public int func_178910_a()
+        public int getX()
         {
-            return this.field_178914_g;
+            return this.x;
         }
 
-        public int func_178912_b()
+        public int getY()
         {
-            return this.field_178920_h;
+            return this.y;
         }
     }
 }

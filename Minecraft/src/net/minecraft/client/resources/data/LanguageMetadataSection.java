@@ -7,9 +7,9 @@ public class LanguageMetadataSection implements IMetadataSection
 {
     private final Collection<Language> languages;
 
-    public LanguageMetadataSection(Collection<Language> p_i1311_1_)
+    public LanguageMetadataSection(Collection<Language> languagesIn)
     {
-        this.languages = p_i1311_1_;
+        this.languages = languagesIn;
     }
 
     public Collection<Language> getLanguages()

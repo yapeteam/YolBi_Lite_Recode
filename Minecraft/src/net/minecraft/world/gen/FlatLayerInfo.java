@@ -6,30 +6,30 @@ import net.minecraft.util.ResourceLocation;
 
 public class FlatLayerInfo
 {
-    private final int field_175902_a;
+    private final int version;
     private IBlockState layerMaterial;
 
     /** Amount of layers for this set of layers. */
     private int layerCount;
     private int layerMinimumY;
 
-    public FlatLayerInfo(int p_i45467_1_, Block p_i45467_2_)
+    public FlatLayerInfo(int p_i45467_1_, Block layerMaterialIn)
     {
-        this(3, p_i45467_1_, p_i45467_2_);
+        this(3, p_i45467_1_, layerMaterialIn);
     }
 
     public FlatLayerInfo(int p_i45627_1_, int height, Block layerMaterialIn)
     {
         this.layerCount = 1;
-        this.field_175902_a = p_i45627_1_;
+        this.version = p_i45627_1_;
         this.layerCount = height;
         this.layerMaterial = layerMaterialIn.getDefaultState();
     }
 
-    public FlatLayerInfo(int p_i45628_1_, int p_i45628_2_, Block p_i45628_3_, int p_i45628_4_)
+    public FlatLayerInfo(int p_i45628_1_, int p_i45628_2_, Block layerMaterialIn, int p_i45628_4_)
     {
-        this(p_i45628_1_, p_i45628_2_, p_i45628_3_);
-        this.layerMaterial = p_i45628_3_.getStateFromMeta(p_i45628_4_);
+        this(p_i45628_1_, p_i45628_2_, layerMaterialIn);
+        this.layerMaterial = layerMaterialIn.getStateFromMeta(p_i45628_4_);
     }
 
     /**
@@ -78,9 +78,9 @@ public class FlatLayerInfo
     {
         String s;
 
-        if (this.field_175902_a >= 3)
+        if (this.version >= 3)
         {
-            ResourceLocation resourcelocation = (ResourceLocation)Block.blockRegistry.getNameForObject(this.getLayerMaterialBlock());
+            ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(this.getLayerMaterialBlock());
             s = resourcelocation == null ? "null" : resourcelocation.toString();
 
             if (this.layerCount > 1)

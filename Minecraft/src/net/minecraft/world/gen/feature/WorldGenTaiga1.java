@@ -9,13 +9,13 @@ import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenTaiga1 extends WorldGenAbstractTree
 {
-    private static final IBlockState field_181636_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
-    private static final IBlockState field_181637_b = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
+    private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
 
     public WorldGenTaiga1()
     {
@@ -28,10 +28,11 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree
         int j = i - rand.nextInt(2) - 3;
         int k = i - j;
         int l = 1 + rand.nextInt(k + 1);
-        boolean flag = true;
 
         if (position.getY() >= 1 && position.getY() + i + 1 <= 256)
         {
+            boolean flag = true;
+
             for (int i1 = position.getY(); i1 <= position.getY() + 1 + i && flag; ++i1)
             {
                 int j1 = 1;
@@ -53,7 +54,7 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree
                     {
                         if (i1 >= 0 && i1 < 256)
                         {
-                            if (!this.func_150523_a(worldIn.getBlockState(blockpos$mutableblockpos.set(k1, i1, l1)).getBlock()))
+                            if (!this.canGrowInto(worldIn.getBlockState(blockpos$mutableblockpos.setPos(k1, i1, l1)).getBlock()))
                             {
                                 flag = false;
                             }
@@ -74,9 +75,9 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree
             {
                 Block block = worldIn.getBlockState(position.down()).getBlock();
 
-                if ((block == Blocks.grass || block == Blocks.dirt) && position.getY() < 256 - i - 1)
+                if ((block == Blocks.GRASS || block == Blocks.DIRT) && position.getY() < 256 - i - 1)
                 {
-                    this.func_175921_a(worldIn, position.down());
+                    this.setDirtAt(worldIn, position.down());
                     int k2 = 0;
 
                     for (int l2 = position.getY() + i; l2 >= position.getY() + j; --l2)
@@ -93,9 +94,9 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree
                                 {
                                     BlockPos blockpos = new BlockPos(j3, l2, i2);
 
-                                    if (!worldIn.getBlockState(blockpos).getBlock().isFullBlock())
+                                    if (!worldIn.getBlockState(blockpos).isFullBlock())
                                     {
-                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, field_181637_b);
+                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, LEAF);
                                     }
                                 }
                             }
@@ -113,11 +114,11 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree
 
                     for (int i3 = 0; i3 < i - 1; ++i3)
                     {
-                        Block block1 = worldIn.getBlockState(position.up(i3)).getBlock();
+                        Material material = worldIn.getBlockState(position.up(i3)).getMaterial();
 
-                        if (block1.getMaterial() == Material.air || block1.getMaterial() == Material.leaves)
+                        if (material == Material.AIR || material == Material.LEAVES)
                         {
-                            this.setBlockAndNotifyAdequately(worldIn, position.up(i3), field_181636_a);
+                            this.setBlockAndNotifyAdequately(worldIn, position.up(i3), TRUNK);
                         }
                     }
 

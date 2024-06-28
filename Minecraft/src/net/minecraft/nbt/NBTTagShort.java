@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagShort extends NBTBase.NBTPrimitive
+public class NBTTagShort extends NBTPrimitive
 {
     /** The short value for the tag. */
     private short data;
@@ -37,33 +37,25 @@ public class NBTTagShort extends NBTBase.NBTPrimitive
      */
     public byte getId()
     {
-        return (byte)2;
+        return 2;
     }
 
     public String toString()
     {
-        return "" + this.data + "s";
+        return this.data + "s";
     }
 
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagShort copy()
     {
         return new NBTTagShort(this.data);
     }
 
     public boolean equals(Object p_equals_1_)
     {
-        if (super.equals(p_equals_1_))
-        {
-            NBTTagShort nbttagshort = (NBTTagShort)p_equals_1_;
-            return this.data == nbttagshort.data;
-        }
-        else
-        {
-            return false;
-        }
+        return super.equals(p_equals_1_) && this.data == ((NBTTagShort)p_equals_1_).data;
     }
 
     public int hashCode()

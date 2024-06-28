@@ -1,11 +1,15 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class CommandBlockData extends CommandBase
@@ -35,9 +39,9 @@ public class CommandBlockData extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 4)
         {
@@ -55,6 +59,7 @@ public class CommandBlockData extends CommandBase
             }
             else
             {
+                IBlockState iblockstate = world.getBlockState(blockpos);
                 TileEntity tileentity = world.getTileEntity(blockpos);
 
                 if (tileentity == null)
@@ -63,14 +68,13 @@ public class CommandBlockData extends CommandBase
                 }
                 else
                 {
-                    NBTTagCompound nbttagcompound = new NBTTagCompound();
-                    tileentity.writeToNBT(nbttagcompound);
-                    NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttagcompound.copy();
+                    NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
+                    NBTTagCompound nbttagcompound1 = nbttagcompound.copy();
                     NBTTagCompound nbttagcompound2;
 
                     try
                     {
-                        nbttagcompound2 = JsonToNBT.getTagFromJson(getChatComponentFromNthArg(sender, args, 3).getUnformattedText());
+                        nbttagcompound2 = JsonToNBT.getTagFromJson(buildString(args, 3));
                     }
                     catch (NBTException nbtexception)
                     {
@@ -90,17 +94,17 @@ public class CommandBlockData extends CommandBase
                     {
                         tileentity.readFromNBT(nbttagcompound);
                         tileentity.markDirty();
-                        world.markBlockForUpdate(blockpos);
+                        world.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 3);
                         sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, 1);
-                        notifyOperators(sender, this, "commands.blockdata.success", new Object[] {nbttagcompound.toString()});
+                        notifyCommandListener(sender, this, "commands.blockdata.success", new Object[] {nbttagcompound.toString()});
                     }
                 }
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : null;
+        return args.length > 0 && args.length <= 3 ? getTabCompletionCoordinate(args, 0, pos) : Collections.emptyList();
     }
 }

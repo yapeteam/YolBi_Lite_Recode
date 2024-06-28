@@ -11,12 +11,12 @@ public enum EnumFaceDirection
     WEST(new EnumFaceDirection.VertexInformation[]{new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.WEST_INDEX, EnumFaceDirection.Constants.UP_INDEX, EnumFaceDirection.Constants.NORTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.WEST_INDEX, EnumFaceDirection.Constants.DOWN_INDEX, EnumFaceDirection.Constants.NORTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.WEST_INDEX, EnumFaceDirection.Constants.DOWN_INDEX, EnumFaceDirection.Constants.SOUTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.WEST_INDEX, EnumFaceDirection.Constants.UP_INDEX, EnumFaceDirection.Constants.SOUTH_INDEX)}),
     EAST(new EnumFaceDirection.VertexInformation[]{new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.EAST_INDEX, EnumFaceDirection.Constants.UP_INDEX, EnumFaceDirection.Constants.SOUTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.EAST_INDEX, EnumFaceDirection.Constants.DOWN_INDEX, EnumFaceDirection.Constants.SOUTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.EAST_INDEX, EnumFaceDirection.Constants.DOWN_INDEX, EnumFaceDirection.Constants.NORTH_INDEX), new EnumFaceDirection.VertexInformation(EnumFaceDirection.Constants.EAST_INDEX, EnumFaceDirection.Constants.UP_INDEX, EnumFaceDirection.Constants.NORTH_INDEX)});
 
-    private static final EnumFaceDirection[] facings = new EnumFaceDirection[6];
+    private static final EnumFaceDirection[] FACINGS = new EnumFaceDirection[6];
     private final EnumFaceDirection.VertexInformation[] vertexInfos;
 
     public static EnumFaceDirection getFacing(EnumFacing facing)
     {
-        return facings[facing.getIndex()];
+        return FACINGS[facing.getIndex()];
     }
 
     private EnumFaceDirection(EnumFaceDirection.VertexInformation[] vertexInfosIn)
@@ -30,12 +30,12 @@ public enum EnumFaceDirection
     }
 
     static {
-        facings[EnumFaceDirection.Constants.DOWN_INDEX] = DOWN;
-        facings[EnumFaceDirection.Constants.UP_INDEX] = UP;
-        facings[EnumFaceDirection.Constants.NORTH_INDEX] = NORTH;
-        facings[EnumFaceDirection.Constants.SOUTH_INDEX] = SOUTH;
-        facings[EnumFaceDirection.Constants.WEST_INDEX] = WEST;
-        facings[EnumFaceDirection.Constants.EAST_INDEX] = EAST;
+        FACINGS[EnumFaceDirection.Constants.DOWN_INDEX] = DOWN;
+        FACINGS[EnumFaceDirection.Constants.UP_INDEX] = UP;
+        FACINGS[EnumFaceDirection.Constants.NORTH_INDEX] = NORTH;
+        FACINGS[EnumFaceDirection.Constants.SOUTH_INDEX] = SOUTH;
+        FACINGS[EnumFaceDirection.Constants.WEST_INDEX] = WEST;
+        FACINGS[EnumFaceDirection.Constants.EAST_INDEX] = EAST;
     }
 
     public static final class Constants {

@@ -1,22 +1,21 @@
 package net.minecraft.client.renderer.chunk;
 
 import com.google.common.collect.Lists;
-import java.util.BitSet;
 import java.util.List;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 
 public class CompiledChunk
 {
     public static final CompiledChunk DUMMY = new CompiledChunk()
     {
-        protected void setLayerUsed(EnumWorldBlockLayer layer)
+        protected void setLayerUsed(BlockRenderLayer layer)
         {
             throw new UnsupportedOperationException();
         }
-        public void setLayerStarted(EnumWorldBlockLayer layer)
+        public void setLayerStarted(BlockRenderLayer layer)
         {
             throw new UnsupportedOperationException();
         }
@@ -24,41 +23,36 @@ public class CompiledChunk
         {
             return false;
         }
-        public void setAnimatedSprites(EnumWorldBlockLayer p_setAnimatedSprites_1_, BitSet p_setAnimatedSprites_2_)
-        {
-            throw new UnsupportedOperationException();
-        }
     };
-    private final boolean[] layersUsed = new boolean[RenderChunk.ENUM_WORLD_BLOCK_LAYERS.length];
-    private final boolean[] layersStarted = new boolean[RenderChunk.ENUM_WORLD_BLOCK_LAYERS.length];
+    private final boolean[] layersUsed = new boolean[BlockRenderLayer.values().length];
+    private final boolean[] layersStarted = new boolean[BlockRenderLayer.values().length];
     private boolean empty = true;
     private final List<TileEntity> tileEntities = Lists.<TileEntity>newArrayList();
     private SetVisibility setVisibility = new SetVisibility();
-    private WorldRenderer.State state;
-    private BitSet[] animatedSprites = new BitSet[RenderChunk.ENUM_WORLD_BLOCK_LAYERS.length];
+    private BufferBuilder.State state;
 
     public boolean isEmpty()
     {
         return this.empty;
     }
 
-    protected void setLayerUsed(EnumWorldBlockLayer layer)
+    protected void setLayerUsed(BlockRenderLayer layer)
     {
         this.empty = false;
         this.layersUsed[layer.ordinal()] = true;
     }
 
-    public boolean isLayerEmpty(EnumWorldBlockLayer layer)
+    public boolean isLayerEmpty(BlockRenderLayer layer)
     {
         return !this.layersUsed[layer.ordinal()];
     }
 
-    public void setLayerStarted(EnumWorldBlockLayer layer)
+    public void setLayerStarted(BlockRenderLayer layer)
     {
         this.layersStarted[layer.ordinal()] = true;
     }
 
-    public boolean isLayerStarted(EnumWorldBlockLayer layer)
+    public boolean isLayerStarted(BlockRenderLayer layer)
     {
         return this.layersStarted[layer.ordinal()];
     }
@@ -83,23 +77,13 @@ public class CompiledChunk
         this.setVisibility = visibility;
     }
 
-    public WorldRenderer.State getState()
+    public BufferBuilder.State getState()
     {
         return this.state;
     }
 
-    public void setState(WorldRenderer.State stateIn)
+    public void setState(BufferBuilder.State stateIn)
     {
         this.state = stateIn;
-    }
-
-    public BitSet getAnimatedSprites(EnumWorldBlockLayer p_getAnimatedSprites_1_)
-    {
-        return this.animatedSprites[p_getAnimatedSprites_1_.ordinal()];
-    }
-
-    public void setAnimatedSprites(EnumWorldBlockLayer p_setAnimatedSprites_1_, BitSet p_setAnimatedSprites_2_)
-    {
-        this.animatedSprites[p_setAnimatedSprites_1_.ordinal()] = p_setAnimatedSprites_2_;
     }
 }

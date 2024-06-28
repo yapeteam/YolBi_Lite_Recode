@@ -1,13 +1,14 @@
 package net.minecraft.block.state.pattern;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import javax.annotation.Nullable;
 import net.minecraft.block.state.BlockWorldState;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 public class BlockPattern
@@ -42,6 +43,11 @@ public class BlockPattern
         }
     }
 
+    public int getFingerLength()
+    {
+        return this.fingerLength;
+    }
+
     public int getThumbLength()
     {
         return this.thumbLength;
@@ -51,6 +57,8 @@ public class BlockPattern
     {
         return this.palmLength;
     }
+
+    @Nullable
 
     /**
      * checks that the given pattern & rotation is at the block co-ordinates.
@@ -74,13 +82,15 @@ public class BlockPattern
         return new BlockPattern.PatternHelper(pos, finger, thumb, lcache, this.palmLength, this.thumbLength, this.fingerLength);
     }
 
+    @Nullable
+
     /**
      * Calculates whether the given world position matches the pattern. Warning, fairly heavy function. @return a
      * BlockPattern.PatternHelper if found, null otherwise.
      */
     public BlockPattern.PatternHelper match(World worldIn, BlockPos pos)
     {
-        LoadingCache<BlockPos, BlockWorldState> loadingcache = func_181627_a(worldIn, false);
+        LoadingCache<BlockPos, BlockWorldState> loadingcache = createLoadingCache(worldIn, false);
         int i = Math.max(Math.max(this.palmLength, this.thumbLength), this.fingerLength);
 
         for (BlockPos blockpos : BlockPos.getAllInBox(pos, pos.add(i - 1, i - 1, i - 1)))
@@ -105,9 +115,9 @@ public class BlockPattern
         return null;
     }
 
-    public static LoadingCache<BlockPos, BlockWorldState> func_181627_a(World p_181627_0_, boolean p_181627_1_)
+    public static LoadingCache<BlockPos, BlockWorldState> createLoadingCache(World worldIn, boolean forceLoadIn)
     {
-        return CacheBuilder.newBuilder().<BlockPos, BlockWorldState>build(new BlockPattern.CacheLoader(p_181627_0_, p_181627_1_));
+        return CacheBuilder.newBuilder().<BlockPos, BlockWorldState>build(new BlockPattern.CacheLoader(worldIn, forceLoadIn));
     }
 
     /**
@@ -132,74 +142,74 @@ public class BlockPattern
     static class CacheLoader extends com.google.common.cache.CacheLoader<BlockPos, BlockWorldState>
     {
         private final World world;
-        private final boolean field_181626_b;
+        private final boolean forceLoad;
 
-        public CacheLoader(World worldIn, boolean p_i46460_2_)
+        public CacheLoader(World worldIn, boolean forceLoadIn)
         {
             this.world = worldIn;
-            this.field_181626_b = p_i46460_2_;
+            this.forceLoad = forceLoadIn;
         }
 
         public BlockWorldState load(BlockPos p_load_1_) throws Exception
         {
-            return new BlockWorldState(this.world, p_load_1_, this.field_181626_b);
+            return new BlockWorldState(this.world, p_load_1_, this.forceLoad);
         }
     }
 
     public static class PatternHelper
     {
-        private final BlockPos pos;
-        private final EnumFacing finger;
-        private final EnumFacing thumb;
+        private final BlockPos frontTopLeft;
+        private final EnumFacing forwards;
+        private final EnumFacing up;
         private final LoadingCache<BlockPos, BlockWorldState> lcache;
-        private final int field_181120_e;
-        private final int field_181121_f;
-        private final int field_181122_g;
+        private final int width;
+        private final int height;
+        private final int depth;
 
         public PatternHelper(BlockPos posIn, EnumFacing fingerIn, EnumFacing thumbIn, LoadingCache<BlockPos, BlockWorldState> lcacheIn, int p_i46378_5_, int p_i46378_6_, int p_i46378_7_)
         {
-            this.pos = posIn;
-            this.finger = fingerIn;
-            this.thumb = thumbIn;
+            this.frontTopLeft = posIn;
+            this.forwards = fingerIn;
+            this.up = thumbIn;
             this.lcache = lcacheIn;
-            this.field_181120_e = p_i46378_5_;
-            this.field_181121_f = p_i46378_6_;
-            this.field_181122_g = p_i46378_7_;
+            this.width = p_i46378_5_;
+            this.height = p_i46378_6_;
+            this.depth = p_i46378_7_;
         }
 
-        public BlockPos getPos()
+        public BlockPos getFrontTopLeft()
         {
-            return this.pos;
+            return this.frontTopLeft;
         }
 
-        public EnumFacing getFinger()
+        public EnumFacing getForwards()
         {
-            return this.finger;
+            return this.forwards;
         }
 
-        public EnumFacing getThumb()
+        public EnumFacing getUp()
         {
-            return this.thumb;
+            return this.up;
         }
 
-        public int func_181118_d()
+        public int getWidth()
         {
-            return this.field_181120_e;
+            return this.width;
         }
 
-        public int func_181119_e()
+        public int getHeight()
         {
-            return this.field_181121_f;
+            return this.height;
         }
 
         public BlockWorldState translateOffset(int palmOffset, int thumbOffset, int fingerOffset)
         {
-            return (BlockWorldState)this.lcache.getUnchecked(BlockPattern.translateOffset(this.pos, this.getFinger(), this.getThumb(), palmOffset, thumbOffset, fingerOffset));
+            return this.lcache.getUnchecked(BlockPattern.translateOffset(this.frontTopLeft, this.getForwards(), this.getUp(), palmOffset, thumbOffset, fingerOffset));
         }
 
         public String toString()
         {
-            return Objects.toStringHelper(this).add("up", this.thumb).add("forwards", this.finger).add("frontTopLeft", this.pos).toString();
+            return MoreObjects.toStringHelper(this).add("up", this.up).add("forwards", this.forwards).add("frontTopLeft", this.frontTopLeft).toString();
         }
     }
 }

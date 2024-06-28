@@ -1,13 +1,15 @@
 package net.minecraft.command.server;
 
 import com.mojang.authlib.GameProfile;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 public class CommandDeOp extends CommandBase
 {
@@ -36,14 +38,13 @@ public class CommandDeOp extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length == 1 && args[0].length() > 0)
         {
-            MinecraftServer minecraftserver = MinecraftServer.getServer();
-            GameProfile gameprofile = minecraftserver.getConfigurationManager().getOppedPlayers().getGameProfileFromName(args[0]);
+            GameProfile gameprofile = server.getPlayerList().getOppedPlayers().getGameProfileFromName(args[0]);
 
             if (gameprofile == null)
             {
@@ -51,8 +52,8 @@ public class CommandDeOp extends CommandBase
             }
             else
             {
-                minecraftserver.getConfigurationManager().removeOp(gameprofile);
-                notifyOperators(sender, this, "commands.deop.success", new Object[] {args[0]});
+                server.getPlayerList().removeOp(gameprofile);
+                notifyCommandListener(sender, this, "commands.deop.success", new Object[] {args[0]});
             }
         }
         else
@@ -61,8 +62,8 @@ public class CommandDeOp extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getConfigurationManager().getOppedPlayerNames()) : null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getPlayerList().getOppedPlayerNames()) : Collections.emptyList();
     }
 }

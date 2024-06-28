@@ -11,8 +11,8 @@ public class BlockClay extends Block
 {
     public BlockClay()
     {
-        super(Material.clay);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.CLAY);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -20,7 +20,7 @@ public class BlockClay extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.clay_ball;
+        return Items.CLAY_BALL;
     }
 
     /**

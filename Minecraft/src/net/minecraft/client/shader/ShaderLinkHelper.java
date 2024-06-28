@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ShaderLinkHelper
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private static ShaderLinkHelper staticShaderLinkHelper;
 
     public static void setNewStaticShaderLinkHelper()
@@ -21,11 +21,11 @@ public class ShaderLinkHelper
         return staticShaderLinkHelper;
     }
 
-    public void deleteShader(ShaderManager p_148077_1_)
+    public void deleteShader(ShaderManager manager)
     {
-        p_148077_1_.getFragmentShaderLoader().deleteShader(p_148077_1_);
-        p_148077_1_.getVertexShaderLoader().deleteShader(p_148077_1_);
-        OpenGlHelper.glDeleteProgram(p_148077_1_.getProgram());
+        manager.getFragmentShaderLoader().deleteShader(manager);
+        manager.getVertexShaderLoader().deleteShader(manager);
+        OpenGlHelper.glDeleteProgram(manager.getProgram());
     }
 
     public int createProgram() throws JsonException
@@ -51,8 +51,8 @@ public class ShaderLinkHelper
 
         if (i == 0)
         {
-            logger.warn("Error encountered when linking program containing VS " + manager.getVertexShaderLoader().getShaderFilename() + " and FS " + manager.getFragmentShaderLoader().getShaderFilename() + ". Log output:");
-            logger.warn(OpenGlHelper.glGetProgramInfoLog(manager.getProgram(), 32768));
+            LOGGER.warn("Error encountered when linking program containing VS {} and FS {}. Log output:", manager.getVertexShaderLoader().getShaderFilename(), manager.getFragmentShaderLoader().getShaderFilename());
+            LOGGER.warn(OpenGlHelper.glGetProgramInfoLog(manager.getProgram(), 32768));
         }
     }
 }

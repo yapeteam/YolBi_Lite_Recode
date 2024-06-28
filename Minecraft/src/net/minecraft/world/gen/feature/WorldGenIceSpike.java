@@ -3,9 +3,10 @@ package net.minecraft.world.gen.feature;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class WorldGenIceSpike extends WorldGenerator
@@ -17,7 +18,7 @@ public class WorldGenIceSpike extends WorldGenerator
             position = position.down();
         }
 
-        if (worldIn.getBlockState(position).getBlock() != Blocks.snow)
+        if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW)
         {
             return false;
         }
@@ -35,32 +36,34 @@ public class WorldGenIceSpike extends WorldGenerator
             for (int k = 0; k < i; ++k)
             {
                 float f = (1.0F - (float)k / (float)i) * (float)j;
-                int l = MathHelper.ceiling_float_int(f);
+                int l = MathHelper.ceil(f);
 
                 for (int i1 = -l; i1 <= l; ++i1)
                 {
-                    float f1 = (float)MathHelper.abs_int(i1) - 0.25F;
+                    float f1 = (float)MathHelper.abs(i1) - 0.25F;
 
                     for (int j1 = -l; j1 <= l; ++j1)
                     {
-                        float f2 = (float)MathHelper.abs_int(j1) - 0.25F;
+                        float f2 = (float)MathHelper.abs(j1) - 0.25F;
 
                         if ((i1 == 0 && j1 == 0 || f1 * f1 + f2 * f2 <= f * f) && (i1 != -l && i1 != l && j1 != -l && j1 != l || rand.nextFloat() <= 0.75F))
                         {
-                            Block block = worldIn.getBlockState(position.add(i1, k, j1)).getBlock();
+                            IBlockState iblockstate = worldIn.getBlockState(position.add(i1, k, j1));
+                            Block block = iblockstate.getBlock();
 
-                            if (block.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice)
+                            if (iblockstate.getMaterial() == Material.AIR || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE)
                             {
-                                this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.packed_ice.getDefaultState());
+                                this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.PACKED_ICE.getDefaultState());
                             }
 
                             if (k != 0 && l > 1)
                             {
-                                block = worldIn.getBlockState(position.add(i1, -k, j1)).getBlock();
+                                iblockstate = worldIn.getBlockState(position.add(i1, -k, j1));
+                                block = iblockstate.getBlock();
 
-                                if (block.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice)
+                                if (iblockstate.getMaterial() == Material.AIR || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE)
                                 {
-                                    this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.packed_ice.getDefaultState());
+                                    this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.PACKED_ICE.getDefaultState());
                                 }
                             }
                         }
@@ -93,14 +96,15 @@ public class WorldGenIceSpike extends WorldGenerator
 
                     while (blockpos.getY() > 50)
                     {
-                        Block block1 = worldIn.getBlockState(blockpos).getBlock();
+                        IBlockState iblockstate1 = worldIn.getBlockState(blockpos);
+                        Block block1 = iblockstate1.getBlock();
 
-                        if (block1.getMaterial() != Material.air && block1 != Blocks.dirt && block1 != Blocks.snow && block1 != Blocks.ice && block1 != Blocks.packed_ice)
+                        if (iblockstate1.getMaterial() != Material.AIR && block1 != Blocks.DIRT && block1 != Blocks.SNOW && block1 != Blocks.ICE && block1 != Blocks.PACKED_ICE)
                         {
                             break;
                         }
 
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos, Blocks.packed_ice.getDefaultState());
+                        this.setBlockAndNotifyAdequately(worldIn, blockpos, Blocks.PACKED_ICE.getDefaultState());
                         blockpos = blockpos.down();
                         --j2;
 

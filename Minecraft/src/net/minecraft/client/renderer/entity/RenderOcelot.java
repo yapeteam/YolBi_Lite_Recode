@@ -1,20 +1,20 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelOcelot;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.util.ResourceLocation;
 
 public class RenderOcelot extends RenderLiving<EntityOcelot>
 {
-    private static final ResourceLocation blackOcelotTextures = new ResourceLocation("textures/entity/cat/black.png");
-    private static final ResourceLocation ocelotTextures = new ResourceLocation("textures/entity/cat/ocelot.png");
-    private static final ResourceLocation redOcelotTextures = new ResourceLocation("textures/entity/cat/red.png");
-    private static final ResourceLocation siameseOcelotTextures = new ResourceLocation("textures/entity/cat/siamese.png");
+    private static final ResourceLocation BLACK_OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/black.png");
+    private static final ResourceLocation OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/ocelot.png");
+    private static final ResourceLocation RED_OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/red.png");
+    private static final ResourceLocation SIAMESE_OCELOT_TEXTURES = new ResourceLocation("textures/entity/cat/siamese.png");
 
-    public RenderOcelot(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
+    public RenderOcelot(RenderManager p_i47199_1_)
     {
-        super(renderManagerIn, modelBaseIn, shadowSizeIn);
+        super(p_i47199_1_, new ModelOcelot(), 0.4F);
     }
 
     /**
@@ -26,22 +26,21 @@ public class RenderOcelot extends RenderLiving<EntityOcelot>
         {
             case 0:
             default:
-                return ocelotTextures;
+                return OCELOT_TEXTURES;
 
             case 1:
-                return blackOcelotTextures;
+                return BLACK_OCELOT_TEXTURES;
 
             case 2:
-                return redOcelotTextures;
+                return RED_OCELOT_TEXTURES;
 
             case 3:
-                return siameseOcelotTextures;
+                return SIAMESE_OCELOT_TEXTURES;
         }
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityOcelot entitylivingbaseIn, float partialTickTime)
     {

@@ -1,18 +1,18 @@
 package net.minecraft.command.server;
 
 import com.google.gson.JsonParseException;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentProcessor;
-import net.minecraft.util.IChatComponent;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentUtils;
 
 public class CommandMessageRaw extends CommandBase
 {
@@ -41,9 +41,9 @@ public class CommandMessageRaw extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 2)
         {
@@ -51,25 +51,24 @@ public class CommandMessageRaw extends CommandBase
         }
         else
         {
-            EntityPlayer entityplayer = getPlayer(sender, args[0]);
+            EntityPlayer entityplayer = getPlayer(server, sender, args[0]);
             String s = buildString(args, 1);
 
             try
             {
-                IChatComponent ichatcomponent = IChatComponent.Serializer.jsonToComponent(s);
-                entityplayer.addChatMessage(ChatComponentProcessor.processComponent(sender, ichatcomponent, entityplayer));
+                ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
+                entityplayer.addChatMessage(TextComponentUtils.processComponent(sender, itextcomponent, entityplayer));
             }
             catch (JsonParseException jsonparseexception)
             {
-                Throwable throwable = ExceptionUtils.getRootCause(jsonparseexception);
-                throw new SyntaxErrorException("commands.tellraw.jsonException", new Object[] {throwable == null ? "" : throwable.getMessage()});
+                throw toSyntaxException(jsonparseexception);
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
     }
 
     /**

@@ -2,15 +2,14 @@ package net.minecraft.client.renderer.entity.layers;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelWitch;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.RenderWitch;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumBlockRenderType;
 
 public class LayerHeldItemWitch implements LayerRenderer<EntityWitch>
 {
@@ -21,11 +20,11 @@ public class LayerHeldItemWitch implements LayerRenderer<EntityWitch>
         this.witchRenderer = witchRendererIn;
     }
 
-    public void doRenderLayer(EntityWitch entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
+    public void doRenderLayer(EntityWitch entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        ItemStack itemstack = entitylivingbaseIn.getHeldItem();
+        ItemStack itemstack = entitylivingbaseIn.getHeldItemMainhand();
 
-        if (itemstack != null)
+        if (!itemstack.func_190926_b())
         {
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             GlStateManager.pushMatrix();
@@ -35,28 +34,28 @@ public class LayerHeldItemWitch implements LayerRenderer<EntityWitch>
                 GlStateManager.translate(0.0F, 0.625F, 0.0F);
                 GlStateManager.rotate(-20.0F, -1.0F, 0.0F, 0.0F);
                 float f = 0.5F;
-                GlStateManager.scale(f, f, f);
+                GlStateManager.scale(0.5F, 0.5F, 0.5F);
             }
 
-            ((ModelWitch)this.witchRenderer.getMainModel()).villagerNose.postRender(0.0625F);
+            this.witchRenderer.getMainModel().villagerNose.postRender(0.0625F);
             GlStateManager.translate(-0.0625F, 0.53125F, 0.21875F);
             Item item = itemstack.getItem();
             Minecraft minecraft = Minecraft.getMinecraft();
 
-            if (item instanceof ItemBlock && minecraft.getBlockRendererDispatcher().isRenderTypeChest(Block.getBlockFromItem(item), itemstack.getMetadata()))
+            if (Block.getBlockFromItem(item).getDefaultState().getRenderType() == EnumBlockRenderType.ENTITYBLOCK_ANIMATED)
             {
                 GlStateManager.translate(0.0F, 0.0625F, -0.25F);
                 GlStateManager.rotate(30.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(-5.0F, 0.0F, 1.0F, 0.0F);
-                float f4 = 0.375F;
-                GlStateManager.scale(f4, -f4, f4);
+                float f1 = 0.375F;
+                GlStateManager.scale(0.375F, -0.375F, 0.375F);
             }
-            else if (item == Items.bow)
+            else if (item == Items.BOW)
             {
                 GlStateManager.translate(0.0F, 0.125F, -0.125F);
                 GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
-                float f1 = 0.625F;
-                GlStateManager.scale(f1, -f1, f1);
+                float f2 = 0.625F;
+                GlStateManager.scale(0.625F, -0.625F, 0.625F);
                 GlStateManager.rotate(-100.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(-20.0F, 0.0F, 1.0F, 0.0F);
             }
@@ -70,16 +69,16 @@ public class LayerHeldItemWitch implements LayerRenderer<EntityWitch>
 
                 this.witchRenderer.transformHeldFull3DItemLayer();
                 GlStateManager.translate(0.0625F, -0.125F, 0.0F);
-                float f2 = 0.625F;
-                GlStateManager.scale(f2, -f2, f2);
+                float f3 = 0.625F;
+                GlStateManager.scale(0.625F, -0.625F, 0.625F);
                 GlStateManager.rotate(0.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(0.0F, 0.0F, 1.0F, 0.0F);
             }
             else
             {
                 GlStateManager.translate(0.1875F, 0.1875F, 0.0F);
-                float f3 = 0.875F;
-                GlStateManager.scale(f3, f3, f3);
+                float f4 = 0.875F;
+                GlStateManager.scale(0.875F, 0.875F, 0.875F);
                 GlStateManager.rotate(-20.0F, 0.0F, 0.0F, 1.0F);
                 GlStateManager.rotate(-60.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(-30.0F, 0.0F, 0.0F, 1.0F);
@@ -87,7 +86,7 @@ public class LayerHeldItemWitch implements LayerRenderer<EntityWitch>
 
             GlStateManager.rotate(-15.0F, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(40.0F, 0.0F, 0.0F, 1.0F);
-            minecraft.getItemRenderer().renderItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.THIRD_PERSON);
+            minecraft.getItemRenderer().renderItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
             GlStateManager.popMatrix();
         }
     }

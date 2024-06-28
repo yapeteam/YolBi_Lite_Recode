@@ -3,13 +3,13 @@ package net.minecraft.entity.ai;
 import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 public class EntityAIPlay extends EntityAIBase
 {
-    private EntityVillager villagerObj;
+    private final EntityVillager villagerObj;
     private EntityLivingBase targetVillager;
-    private double speed;
+    private final double speed;
     private int playTime;
 
     public EntityAIPlay(EntityVillager villagerObjIn, double speedIn)
@@ -34,7 +34,7 @@ public class EntityAIPlay extends EntityAIBase
         }
         else
         {
-            List<EntityVillager> list = this.villagerObj.worldObj.<EntityVillager>getEntitiesWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(6.0D, 3.0D, 6.0D));
+            List<EntityVillager> list = this.villagerObj.world.<EntityVillager>getEntitiesWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(6.0D, 3.0D, 6.0D));
             double d0 = Double.MAX_VALUE;
 
             for (EntityVillager entityvillager : list)
@@ -53,9 +53,9 @@ public class EntityAIPlay extends EntityAIBase
 
             if (this.targetVillager == null)
             {
-                Vec3 vec3 = RandomPositionGenerator.findRandomTarget(this.villagerObj, 16, 3);
+                Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.villagerObj, 16, 3);
 
-                if (vec3 == null)
+                if (vec3d == null)
                 {
                     return false;
                 }
@@ -111,14 +111,14 @@ public class EntityAIPlay extends EntityAIBase
         }
         else if (this.villagerObj.getNavigator().noPath())
         {
-            Vec3 vec3 = RandomPositionGenerator.findRandomTarget(this.villagerObj, 16, 3);
+            Vec3d vec3d = RandomPositionGenerator.findRandomTarget(this.villagerObj, 16, 3);
 
-            if (vec3 == null)
+            if (vec3d == null)
             {
                 return;
             }
 
-            this.villagerObj.getNavigator().tryMoveToXYZ(vec3.xCoord, vec3.yCoord, vec3.zCoord, this.speed);
+            this.villagerObj.getNavigator().tryMoveToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord, this.speed);
         }
     }
 }

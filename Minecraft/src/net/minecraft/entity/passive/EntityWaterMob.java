@@ -30,7 +30,7 @@ public abstract class EntityWaterMob extends EntityLiving implements IAnimals
      */
     public boolean isNotColliding()
     {
-        return this.worldObj.checkNoEntityCollision(this.getEntityBoundingBox(), this);
+        return this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class EntityWaterMob extends EntityLiving implements IAnimals
      */
     protected int getExperiencePoints(EntityPlayer player)
     {
-        return 1 + this.worldObj.rand.nextInt(3);
+        return 1 + this.world.rand.nextInt(3);
     }
 
     /**

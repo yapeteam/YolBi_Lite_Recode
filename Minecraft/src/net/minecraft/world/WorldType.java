@@ -3,7 +3,7 @@ package net.minecraft.world;
 public class WorldType
 {
     /** List of world types. */
-    public static final WorldType[] worldTypes = new WorldType[16];
+    public static final WorldType[] WORLD_TYPES = new WorldType[16];
 
     /** Default world type. */
     public static final WorldType DEFAULT = (new WorldType(0, "default", 1)).setVersioned();
@@ -49,7 +49,7 @@ public class WorldType
         this.generatorVersion = version;
         this.canBeCreated = true;
         this.worldTypeId = id;
-        worldTypes[id] = this;
+        WORLD_TYPES[id] = this;
     }
 
     public String getWorldTypeName()
@@ -122,11 +122,11 @@ public class WorldType
 
     public static WorldType parseWorldType(String type)
     {
-        for (int i = 0; i < worldTypes.length; ++i)
+        for (WorldType worldtype : WORLD_TYPES)
         {
-            if (worldTypes[i] != null && worldTypes[i].worldType.equalsIgnoreCase(type))
+            if (worldtype != null && worldtype.worldType.equalsIgnoreCase(type))
             {
-                return worldTypes[i];
+                return worldtype;
             }
         }
 

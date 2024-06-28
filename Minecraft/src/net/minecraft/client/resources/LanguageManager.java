@@ -7,25 +7,25 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import net.minecraft.client.resources.data.IMetadataSerializer;
 import net.minecraft.client.resources.data.LanguageMetadataSection;
-import net.minecraft.util.StringTranslate;
+import net.minecraft.client.resources.data.MetadataSerializer;
+import net.minecraft.util.text.translation.LanguageMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LanguageManager implements IResourceManagerReloadListener
 {
-    private static final Logger logger = LogManager.getLogger();
-    private final IMetadataSerializer theMetadataSerializer;
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final MetadataSerializer theMetadataSerializer;
     private String currentLanguage;
-    protected static final Locale currentLocale = new Locale();
-    private Map<String, Language> languageMap = Maps.<String, Language>newHashMap();
+    protected static final Locale CURRENT_LOCALE = new Locale();
+    private final Map<String, Language> languageMap = Maps.<String, Language>newHashMap();
 
-    public LanguageManager(IMetadataSerializer theMetadataSerializerIn, String currentLanguageIn)
+    public LanguageManager(MetadataSerializer theMetadataSerializerIn, String currentLanguageIn)
     {
         this.theMetadataSerializer = theMetadataSerializerIn;
         this.currentLanguage = currentLanguageIn;
-        I18n.setLocale(currentLocale);
+        I18n.setLocale(CURRENT_LOCALE);
     }
 
     public void parseLanguageMetadata(List<IResourcePack> resourcesPacks)
@@ -51,31 +51,31 @@ public class LanguageManager implements IResourceManagerReloadListener
             }
             catch (RuntimeException runtimeexception)
             {
-                logger.warn((String)("Unable to parse metadata section of resourcepack: " + iresourcepack.getPackName()), (Throwable)runtimeexception);
+                LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", iresourcepack.getPackName(), runtimeexception);
             }
             catch (IOException ioexception)
             {
-                logger.warn((String)("Unable to parse metadata section of resourcepack: " + iresourcepack.getPackName()), (Throwable)ioexception);
+                LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", iresourcepack.getPackName(), ioexception);
             }
         }
     }
 
     public void onResourceManagerReload(IResourceManager resourceManager)
     {
-        List<String> list = Lists.newArrayList(new String[] {"en_US"});
+        List<String> list = Lists.newArrayList("en_us");
 
-        if (!"en_US".equals(this.currentLanguage))
+        if (!"en_us".equals(this.currentLanguage))
         {
             list.add(this.currentLanguage);
         }
 
-        currentLocale.loadLocaleDataFiles(resourceManager, list);
-        StringTranslate.replaceWith(currentLocale.properties);
+        CURRENT_LOCALE.loadLocaleDataFiles(resourceManager, list);
+        LanguageMap.replaceWith(CURRENT_LOCALE.properties);
     }
 
     public boolean isCurrentLocaleUnicode()
     {
-        return currentLocale.isUnicode();
+        return CURRENT_LOCALE.isUnicode();
     }
 
     public boolean isCurrentLanguageBidirectional()
@@ -90,11 +90,17 @@ public class LanguageManager implements IResourceManagerReloadListener
 
     public Language getCurrentLanguage()
     {
-        return this.languageMap.containsKey(this.currentLanguage) ? (Language)this.languageMap.get(this.currentLanguage) : (Language)this.languageMap.get("en_US");
+        String s = this.languageMap.containsKey(this.currentLanguage) ? this.currentLanguage : "en_us";
+        return this.languageMap.get(s);
     }
 
     public SortedSet<Language> getLanguages()
     {
         return Sets.newTreeSet(this.languageMap.values());
+    }
+
+    public Language func_191960_a(String p_191960_1_)
+    {
+        return this.languageMap.get(p_191960_1_);
     }
 }

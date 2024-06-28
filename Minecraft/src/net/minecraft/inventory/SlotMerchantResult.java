@@ -12,8 +12,8 @@ public class SlotMerchantResult extends Slot
     private final InventoryMerchant theMerchantInventory;
 
     /** The Player whos trying to buy/sell stuff. */
-    private EntityPlayer thePlayer;
-    private int field_75231_g;
+    private final EntityPlayer thePlayer;
+    private int removeCount;
 
     /** "Instance" of the Merchant. */
     private final IMerchant theMerchant;
@@ -27,7 +27,7 @@ public class SlotMerchantResult extends Slot
     }
 
     /**
-     * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
+     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
      */
     public boolean isItemValid(ItemStack stack)
     {
@@ -42,7 +42,7 @@ public class SlotMerchantResult extends Slot
     {
         if (this.getHasStack())
         {
-            this.field_75231_g += Math.min(amount, this.getStack().stackSize);
+            this.removeCount += Math.min(amount, this.getStack().func_190916_E());
         }
 
         return super.decrStackSize(amount);
@@ -54,7 +54,7 @@ public class SlotMerchantResult extends Slot
      */
     protected void onCrafting(ItemStack stack, int amount)
     {
-        this.field_75231_g += amount;
+        this.removeCount += amount;
         this.onCrafting(stack);
     }
 
@@ -63,13 +63,13 @@ public class SlotMerchantResult extends Slot
      */
     protected void onCrafting(ItemStack stack)
     {
-        stack.onCrafting(this.thePlayer.worldObj, this.thePlayer, this.field_75231_g);
-        this.field_75231_g = 0;
+        stack.onCrafting(this.thePlayer.world, this.thePlayer, this.removeCount);
+        this.removeCount = 0;
     }
 
-    public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack)
+    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
     {
-        this.onCrafting(stack);
+        this.onCrafting(p_190901_2_);
         MerchantRecipe merchantrecipe = this.theMerchantInventory.getCurrentRecipe();
 
         if (merchantrecipe != null)
@@ -80,22 +80,13 @@ public class SlotMerchantResult extends Slot
             if (this.doTrade(merchantrecipe, itemstack, itemstack1) || this.doTrade(merchantrecipe, itemstack1, itemstack))
             {
                 this.theMerchant.useRecipe(merchantrecipe);
-                playerIn.triggerAchievement(StatList.timesTradedWithVillagerStat);
-
-                if (itemstack != null && itemstack.stackSize <= 0)
-                {
-                    itemstack = null;
-                }
-
-                if (itemstack1 != null && itemstack1.stackSize <= 0)
-                {
-                    itemstack1 = null;
-                }
-
+                p_190901_1_.addStat(StatList.TRADED_WITH_VILLAGER);
                 this.theMerchantInventory.setInventorySlotContents(0, itemstack);
                 this.theMerchantInventory.setInventorySlotContents(1, itemstack1);
             }
         }
+
+        return p_190901_2_;
     }
 
     private boolean doTrade(MerchantRecipe trade, ItemStack firstItem, ItemStack secondItem)
@@ -103,18 +94,18 @@ public class SlotMerchantResult extends Slot
         ItemStack itemstack = trade.getItemToBuy();
         ItemStack itemstack1 = trade.getSecondItemToBuy();
 
-        if (firstItem != null && firstItem.getItem() == itemstack.getItem())
+        if (firstItem.getItem() == itemstack.getItem() && firstItem.func_190916_E() >= itemstack.func_190916_E())
         {
-            if (itemstack1 != null && secondItem != null && itemstack1.getItem() == secondItem.getItem())
+            if (!itemstack1.func_190926_b() && !secondItem.func_190926_b() && itemstack1.getItem() == secondItem.getItem() && secondItem.func_190916_E() >= itemstack1.func_190916_E())
             {
-                firstItem.stackSize -= itemstack.stackSize;
-                secondItem.stackSize -= itemstack1.stackSize;
+                firstItem.func_190918_g(itemstack.func_190916_E());
+                secondItem.func_190918_g(itemstack1.func_190916_E());
                 return true;
             }
 
-            if (itemstack1 == null && secondItem == null)
+            if (itemstack1.func_190926_b() && secondItem.func_190926_b())
             {
-                firstItem.stackSize -= itemstack.stackSize;
+                firstItem.func_190918_g(itemstack.func_190916_E());
                 return true;
             }
         }

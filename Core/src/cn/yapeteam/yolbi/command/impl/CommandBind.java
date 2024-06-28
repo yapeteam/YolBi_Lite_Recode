@@ -4,8 +4,6 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.command.AbstractCommand;
 import cn.yapeteam.yolbi.module.Module;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
 import org.lwjgl.input.Keyboard;
 
 import java.lang.reflect.Field;
@@ -20,7 +18,7 @@ public class CommandBind extends AbstractCommand {
         if (args.length == 2) {
             Module module = YolBi.instance.getModuleManager().getModuleByName(args[0]);
             if (module == null) {
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText("Module not found " + args[0]));
+                sendMessage("Module not found " + args[0]);
                 return;
             }
             int code = 0;
@@ -35,9 +33,9 @@ public class CommandBind extends AbstractCommand {
                 Logger.exception(e);
             }
             if (code == 0)
-                Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText("Key not found " + args[1]));
+                sendMessage("Key not found " + args[1]);
             module.setKey(code);
-            Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText("Bind " + module.getName() + " to Key " + code));
+            sendMessage("Bind " + module.getName() + " to Key " + code);
         }
     }
 }

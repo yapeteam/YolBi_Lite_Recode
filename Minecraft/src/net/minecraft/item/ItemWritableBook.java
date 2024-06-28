@@ -4,6 +4,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public class ItemWritableBook extends Item
@@ -13,14 +16,12 @@ public class ItemWritableBook extends Item
         this.setMaxStackSize(1);
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
     {
-        playerIn.displayGUIBook(itemStackIn);
-        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-        return itemStackIn;
+        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        worldIn.openBook(itemstack, playerIn);
+        worldIn.addStat(StatList.getObjectUseStats(this));
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
     }
 
     /**
@@ -43,11 +44,6 @@ public class ItemWritableBook extends Item
             for (int i = 0; i < nbttaglist.tagCount(); ++i)
             {
                 String s = nbttaglist.getStringTagAt(i);
-
-                if (s == null)
-                {
-                    return false;
-                }
 
                 if (s.length() > 32767)
                 {

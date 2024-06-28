@@ -1,5 +1,6 @@
 package net.minecraft.block.properties;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -45,17 +46,10 @@ public class PropertyInteger extends PropertyHelper<Integer>
         {
             return true;
         }
-        else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass())
+        else if (p_equals_1_ instanceof PropertyInteger && super.equals(p_equals_1_))
         {
-            if (!super.equals(p_equals_1_))
-            {
-                return false;
-            }
-            else
-            {
-                PropertyInteger propertyinteger = (PropertyInteger)p_equals_1_;
-                return this.allowedValues.equals(propertyinteger.allowedValues);
-            }
+            PropertyInteger propertyinteger = (PropertyInteger)p_equals_1_;
+            return this.allowedValues.equals(propertyinteger.allowedValues);
         }
         else
         {
@@ -65,14 +59,25 @@ public class PropertyInteger extends PropertyHelper<Integer>
 
     public int hashCode()
     {
-        int i = super.hashCode();
-        i = 31 * i + this.allowedValues.hashCode();
-        return i;
+        return 31 * super.hashCode() + this.allowedValues.hashCode();
     }
 
     public static PropertyInteger create(String name, int min, int max)
     {
         return new PropertyInteger(name, min, max);
+    }
+
+    public Optional<Integer> parseValue(String value)
+    {
+        try
+        {
+            Integer integer = Integer.valueOf(value);
+            return this.allowedValues.contains(integer) ? Optional.of(integer) : Optional.absent();
+        }
+        catch (NumberFormatException var3)
+        {
+            return Optional.<Integer>absent();
+        }
     }
 
     /**

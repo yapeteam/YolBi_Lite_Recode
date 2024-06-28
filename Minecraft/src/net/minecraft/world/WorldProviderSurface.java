@@ -2,16 +2,17 @@ package net.minecraft.world;
 
 public class WorldProviderSurface extends WorldProvider
 {
-    /**
-     * Returns the dimension's name, e.g. "The End", "Nether", or "Overworld".
-     */
-    public String getDimensionName()
+    public DimensionType getDimensionType()
     {
-        return "Overworld";
+        return DimensionType.OVERWORLD;
     }
 
-    public String getInternalNameSuffix()
+    /**
+     * Called to determine if the chunk at the given chunk coordinates within the provider's world can be dropped. Used
+     * in WorldProviderSurface to prevent spawn chunks from being unloaded.
+     */
+    public boolean canDropChunk(int x, int z)
     {
-        return "";
+        return !this.worldObj.isSpawnChunk(x, z);
     }
 }

@@ -1,6 +1,6 @@
 package net.minecraft.world;
 
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public interface IWorldNameable
 {
@@ -17,5 +17,5 @@ public interface IWorldNameable
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    IChatComponent getDisplayName();
+    ITextComponent getDisplayName();
 }

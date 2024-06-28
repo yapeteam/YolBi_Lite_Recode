@@ -6,121 +6,137 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class StatList
 {
-    protected static Map<String, StatBase> oneShotStats = Maps.<String, StatBase>newHashMap();
-    public static List<StatBase> allStats = Lists.<StatBase>newArrayList();
-    public static List<StatBase> generalStats = Lists.<StatBase>newArrayList();
-    public static List<StatCrafting> itemStats = Lists.<StatCrafting>newArrayList();
-    public static List<StatCrafting> objectMineStats = Lists.<StatCrafting>newArrayList();
+    protected static final Map<String, StatBase> ID_TO_STAT_MAP = Maps.<String, StatBase>newHashMap();
+    public static final List<StatBase> ALL_STATS = Lists.<StatBase>newArrayList();
+    public static final List<StatBase> BASIC_STATS = Lists.<StatBase>newArrayList();
+    public static final List<StatCrafting> USE_ITEM_STATS = Lists.<StatCrafting>newArrayList();
+    public static final List<StatCrafting> MINE_BLOCK_STATS = Lists.<StatCrafting>newArrayList();
 
     /** number of times you've left a game */
-    public static StatBase leaveGameStat = (new StatBasic("stat.leaveGame", new ChatComponentTranslation("stat.leaveGame", new Object[0]))).initIndependentStat().registerStat();
-
-    /** number of minutes you have played */
-    public static StatBase minutesPlayedStat = (new StatBasic("stat.playOneMinute", new ChatComponentTranslation("stat.playOneMinute", new Object[0]), StatBase.timeStatType)).initIndependentStat().registerStat();
-    public static StatBase timeSinceDeathStat = (new StatBasic("stat.timeSinceDeath", new ChatComponentTranslation("stat.timeSinceDeath", new Object[0]), StatBase.timeStatType)).initIndependentStat().registerStat();
-
-    /** distance you've walked */
-    public static StatBase distanceWalkedStat = (new StatBasic("stat.walkOneCm", new ChatComponentTranslation("stat.walkOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-    public static StatBase distanceCrouchedStat = (new StatBasic("stat.crouchOneCm", new ChatComponentTranslation("stat.crouchOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-    public static StatBase distanceSprintedStat = (new StatBasic("stat.sprintOneCm", new ChatComponentTranslation("stat.sprintOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase LEAVE_GAME = (new StatBasic("stat.leaveGame", new TextComponentTranslation("stat.leaveGame", new Object[0]))).initIndependentStat().registerStat();
+    public static final StatBase PLAY_ONE_MINUTE = (new StatBasic("stat.playOneMinute", new TextComponentTranslation("stat.playOneMinute", new Object[0]), StatBase.timeStatType)).initIndependentStat().registerStat();
+    public static final StatBase TIME_SINCE_DEATH = (new StatBasic("stat.timeSinceDeath", new TextComponentTranslation("stat.timeSinceDeath", new Object[0]), StatBase.timeStatType)).initIndependentStat().registerStat();
+    public static final StatBase SNEAK_TIME = (new StatBasic("stat.sneakTime", new TextComponentTranslation("stat.sneakTime", new Object[0]), StatBase.timeStatType)).initIndependentStat().registerStat();
+    public static final StatBase WALK_ONE_CM = (new StatBasic("stat.walkOneCm", new TextComponentTranslation("stat.walkOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase CROUCH_ONE_CM = (new StatBasic("stat.crouchOneCm", new TextComponentTranslation("stat.crouchOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase SPRINT_ONE_CM = (new StatBasic("stat.sprintOneCm", new TextComponentTranslation("stat.sprintOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
 
     /** distance you have swam */
-    public static StatBase distanceSwumStat = (new StatBasic("stat.swimOneCm", new ChatComponentTranslation("stat.swimOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase SWIM_ONE_CM = (new StatBasic("stat.swimOneCm", new TextComponentTranslation("stat.swimOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
 
     /** the distance you have fallen */
-    public static StatBase distanceFallenStat = (new StatBasic("stat.fallOneCm", new ChatComponentTranslation("stat.fallOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've climbed */
-    public static StatBase distanceClimbedStat = (new StatBasic("stat.climbOneCm", new ChatComponentTranslation("stat.climbOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've flown */
-    public static StatBase distanceFlownStat = (new StatBasic("stat.flyOneCm", new ChatComponentTranslation("stat.flyOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've dived */
-    public static StatBase distanceDoveStat = (new StatBasic("stat.diveOneCm", new ChatComponentTranslation("stat.diveOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've traveled by minecart */
-    public static StatBase distanceByMinecartStat = (new StatBasic("stat.minecartOneCm", new ChatComponentTranslation("stat.minecartOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've traveled by boat */
-    public static StatBase distanceByBoatStat = (new StatBasic("stat.boatOneCm", new ChatComponentTranslation("stat.boatOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-
-    /** the distance you've traveled by pig */
-    public static StatBase distanceByPigStat = (new StatBasic("stat.pigOneCm", new ChatComponentTranslation("stat.pigOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
-    public static StatBase distanceByHorseStat = (new StatBasic("stat.horseOneCm", new ChatComponentTranslation("stat.horseOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase FALL_ONE_CM = (new StatBasic("stat.fallOneCm", new TextComponentTranslation("stat.fallOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase CLIMB_ONE_CM = (new StatBasic("stat.climbOneCm", new TextComponentTranslation("stat.climbOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase FLY_ONE_CM = (new StatBasic("stat.flyOneCm", new TextComponentTranslation("stat.flyOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase DIVE_ONE_CM = (new StatBasic("stat.diveOneCm", new TextComponentTranslation("stat.diveOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase MINECART_ONE_CM = (new StatBasic("stat.minecartOneCm", new TextComponentTranslation("stat.minecartOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase BOAT_ONE_CM = (new StatBasic("stat.boatOneCm", new TextComponentTranslation("stat.boatOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase PIG_ONE_CM = (new StatBasic("stat.pigOneCm", new TextComponentTranslation("stat.pigOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase HORSE_ONE_CM = (new StatBasic("stat.horseOneCm", new TextComponentTranslation("stat.horseOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
+    public static final StatBase AVIATE_ONE_CM = (new StatBasic("stat.aviateOneCm", new TextComponentTranslation("stat.aviateOneCm", new Object[0]), StatBase.distanceStatType)).initIndependentStat().registerStat();
 
     /** the times you've jumped */
-    public static StatBase jumpStat = (new StatBasic("stat.jump", new ChatComponentTranslation("stat.jump", new Object[0]))).initIndependentStat().registerStat();
+    public static final StatBase JUMP = (new StatBasic("stat.jump", new TextComponentTranslation("stat.jump", new Object[0]))).initIndependentStat().registerStat();
 
     /** the distance you've dropped (or times you've fallen?) */
-    public static StatBase dropStat = (new StatBasic("stat.drop", new ChatComponentTranslation("stat.drop", new Object[0]))).initIndependentStat().registerStat();
-
-    /** the amount of damage you've dealt */
-    public static StatBase damageDealtStat = (new StatBasic("stat.damageDealt", new ChatComponentTranslation("stat.damageDealt", new Object[0]), StatBase.field_111202_k)).registerStat();
-
-    /** the amount of damage you have taken */
-    public static StatBase damageTakenStat = (new StatBasic("stat.damageTaken", new ChatComponentTranslation("stat.damageTaken", new Object[0]), StatBase.field_111202_k)).registerStat();
-
-    /** the number of times you have died */
-    public static StatBase deathsStat = (new StatBasic("stat.deaths", new ChatComponentTranslation("stat.deaths", new Object[0]))).registerStat();
-
-    /** the number of mobs you have killed */
-    public static StatBase mobKillsStat = (new StatBasic("stat.mobKills", new ChatComponentTranslation("stat.mobKills", new Object[0]))).registerStat();
+    public static final StatBase DROP = (new StatBasic("stat.drop", new TextComponentTranslation("stat.drop", new Object[0]))).initIndependentStat().registerStat();
+    public static final StatBase DAMAGE_DEALT = (new StatBasic("stat.damageDealt", new TextComponentTranslation("stat.damageDealt", new Object[0]), StatBase.divideByTen)).registerStat();
+    public static final StatBase DAMAGE_TAKEN = (new StatBasic("stat.damageTaken", new TextComponentTranslation("stat.damageTaken", new Object[0]), StatBase.divideByTen)).registerStat();
+    public static final StatBase DEATHS = (new StatBasic("stat.deaths", new TextComponentTranslation("stat.deaths", new Object[0]))).registerStat();
+    public static final StatBase MOB_KILLS = (new StatBasic("stat.mobKills", new TextComponentTranslation("stat.mobKills", new Object[0]))).registerStat();
 
     /** the number of animals you have bred */
-    public static StatBase animalsBredStat = (new StatBasic("stat.animalsBred", new ChatComponentTranslation("stat.animalsBred", new Object[0]))).registerStat();
+    public static final StatBase ANIMALS_BRED = (new StatBasic("stat.animalsBred", new TextComponentTranslation("stat.animalsBred", new Object[0]))).registerStat();
 
     /** counts the number of times you've killed a player */
-    public static StatBase playerKillsStat = (new StatBasic("stat.playerKills", new ChatComponentTranslation("stat.playerKills", new Object[0]))).registerStat();
-    public static StatBase fishCaughtStat = (new StatBasic("stat.fishCaught", new ChatComponentTranslation("stat.fishCaught", new Object[0]))).registerStat();
-    public static StatBase junkFishedStat = (new StatBasic("stat.junkFished", new ChatComponentTranslation("stat.junkFished", new Object[0]))).registerStat();
-    public static StatBase treasureFishedStat = (new StatBasic("stat.treasureFished", new ChatComponentTranslation("stat.treasureFished", new Object[0]))).registerStat();
-    public static StatBase timesTalkedToVillagerStat = (new StatBasic("stat.talkedToVillager", new ChatComponentTranslation("stat.talkedToVillager", new Object[0]))).registerStat();
-    public static StatBase timesTradedWithVillagerStat = (new StatBasic("stat.tradedWithVillager", new ChatComponentTranslation("stat.tradedWithVillager", new Object[0]))).registerStat();
-    public static StatBase field_181724_H = (new StatBasic("stat.cakeSlicesEaten", new ChatComponentTranslation("stat.cakeSlicesEaten", new Object[0]))).registerStat();
-    public static StatBase field_181725_I = (new StatBasic("stat.cauldronFilled", new ChatComponentTranslation("stat.cauldronFilled", new Object[0]))).registerStat();
-    public static StatBase field_181726_J = (new StatBasic("stat.cauldronUsed", new ChatComponentTranslation("stat.cauldronUsed", new Object[0]))).registerStat();
-    public static StatBase field_181727_K = (new StatBasic("stat.armorCleaned", new ChatComponentTranslation("stat.armorCleaned", new Object[0]))).registerStat();
-    public static StatBase field_181728_L = (new StatBasic("stat.bannerCleaned", new ChatComponentTranslation("stat.bannerCleaned", new Object[0]))).registerStat();
-    public static StatBase field_181729_M = (new StatBasic("stat.brewingstandInteraction", new ChatComponentTranslation("stat.brewingstandInteraction", new Object[0]))).registerStat();
-    public static StatBase field_181730_N = (new StatBasic("stat.beaconInteraction", new ChatComponentTranslation("stat.beaconInteraction", new Object[0]))).registerStat();
-    public static StatBase field_181731_O = (new StatBasic("stat.dropperInspected", new ChatComponentTranslation("stat.dropperInspected", new Object[0]))).registerStat();
-    public static StatBase field_181732_P = (new StatBasic("stat.hopperInspected", new ChatComponentTranslation("stat.hopperInspected", new Object[0]))).registerStat();
-    public static StatBase field_181733_Q = (new StatBasic("stat.dispenserInspected", new ChatComponentTranslation("stat.dispenserInspected", new Object[0]))).registerStat();
-    public static StatBase field_181734_R = (new StatBasic("stat.noteblockPlayed", new ChatComponentTranslation("stat.noteblockPlayed", new Object[0]))).registerStat();
-    public static StatBase field_181735_S = (new StatBasic("stat.noteblockTuned", new ChatComponentTranslation("stat.noteblockTuned", new Object[0]))).registerStat();
-    public static StatBase field_181736_T = (new StatBasic("stat.flowerPotted", new ChatComponentTranslation("stat.flowerPotted", new Object[0]))).registerStat();
-    public static StatBase field_181737_U = (new StatBasic("stat.trappedChestTriggered", new ChatComponentTranslation("stat.trappedChestTriggered", new Object[0]))).registerStat();
-    public static StatBase field_181738_V = (new StatBasic("stat.enderchestOpened", new ChatComponentTranslation("stat.enderchestOpened", new Object[0]))).registerStat();
-    public static StatBase field_181739_W = (new StatBasic("stat.itemEnchanted", new ChatComponentTranslation("stat.itemEnchanted", new Object[0]))).registerStat();
-    public static StatBase field_181740_X = (new StatBasic("stat.recordPlayed", new ChatComponentTranslation("stat.recordPlayed", new Object[0]))).registerStat();
-    public static StatBase field_181741_Y = (new StatBasic("stat.furnaceInteraction", new ChatComponentTranslation("stat.furnaceInteraction", new Object[0]))).registerStat();
-    public static StatBase field_181742_Z = (new StatBasic("stat.craftingTableInteraction", new ChatComponentTranslation("stat.workbenchInteraction", new Object[0]))).registerStat();
-    public static StatBase field_181723_aa = (new StatBasic("stat.chestOpened", new ChatComponentTranslation("stat.chestOpened", new Object[0]))).registerStat();
-    public static final StatBase[] mineBlockStatArray = new StatBase[4096];
-
-    /** Tracks the number of items a given block or item has been crafted. */
-    public static final StatBase[] objectCraftStats = new StatBase[32000];
+    public static final StatBase PLAYER_KILLS = (new StatBasic("stat.playerKills", new TextComponentTranslation("stat.playerKills", new Object[0]))).registerStat();
+    public static final StatBase FISH_CAUGHT = (new StatBasic("stat.fishCaught", new TextComponentTranslation("stat.fishCaught", new Object[0]))).registerStat();
+    public static final StatBase TALKED_TO_VILLAGER = (new StatBasic("stat.talkedToVillager", new TextComponentTranslation("stat.talkedToVillager", new Object[0]))).registerStat();
+    public static final StatBase TRADED_WITH_VILLAGER = (new StatBasic("stat.tradedWithVillager", new TextComponentTranslation("stat.tradedWithVillager", new Object[0]))).registerStat();
+    public static final StatBase CAKE_SLICES_EATEN = (new StatBasic("stat.cakeSlicesEaten", new TextComponentTranslation("stat.cakeSlicesEaten", new Object[0]))).registerStat();
+    public static final StatBase CAULDRON_FILLED = (new StatBasic("stat.cauldronFilled", new TextComponentTranslation("stat.cauldronFilled", new Object[0]))).registerStat();
+    public static final StatBase CAULDRON_USED = (new StatBasic("stat.cauldronUsed", new TextComponentTranslation("stat.cauldronUsed", new Object[0]))).registerStat();
+    public static final StatBase ARMOR_CLEANED = (new StatBasic("stat.armorCleaned", new TextComponentTranslation("stat.armorCleaned", new Object[0]))).registerStat();
+    public static final StatBase BANNER_CLEANED = (new StatBasic("stat.bannerCleaned", new TextComponentTranslation("stat.bannerCleaned", new Object[0]))).registerStat();
+    public static final StatBase BREWINGSTAND_INTERACTION = (new StatBasic("stat.brewingstandInteraction", new TextComponentTranslation("stat.brewingstandInteraction", new Object[0]))).registerStat();
+    public static final StatBase BEACON_INTERACTION = (new StatBasic("stat.beaconInteraction", new TextComponentTranslation("stat.beaconInteraction", new Object[0]))).registerStat();
+    public static final StatBase DROPPER_INSPECTED = (new StatBasic("stat.dropperInspected", new TextComponentTranslation("stat.dropperInspected", new Object[0]))).registerStat();
+    public static final StatBase HOPPER_INSPECTED = (new StatBasic("stat.hopperInspected", new TextComponentTranslation("stat.hopperInspected", new Object[0]))).registerStat();
+    public static final StatBase DISPENSER_INSPECTED = (new StatBasic("stat.dispenserInspected", new TextComponentTranslation("stat.dispenserInspected", new Object[0]))).registerStat();
+    public static final StatBase NOTEBLOCK_PLAYED = (new StatBasic("stat.noteblockPlayed", new TextComponentTranslation("stat.noteblockPlayed", new Object[0]))).registerStat();
+    public static final StatBase NOTEBLOCK_TUNED = (new StatBasic("stat.noteblockTuned", new TextComponentTranslation("stat.noteblockTuned", new Object[0]))).registerStat();
+    public static final StatBase FLOWER_POTTED = (new StatBasic("stat.flowerPotted", new TextComponentTranslation("stat.flowerPotted", new Object[0]))).registerStat();
+    public static final StatBase TRAPPED_CHEST_TRIGGERED = (new StatBasic("stat.trappedChestTriggered", new TextComponentTranslation("stat.trappedChestTriggered", new Object[0]))).registerStat();
+    public static final StatBase ENDERCHEST_OPENED = (new StatBasic("stat.enderchestOpened", new TextComponentTranslation("stat.enderchestOpened", new Object[0]))).registerStat();
+    public static final StatBase ITEM_ENCHANTED = (new StatBasic("stat.itemEnchanted", new TextComponentTranslation("stat.itemEnchanted", new Object[0]))).registerStat();
+    public static final StatBase RECORD_PLAYED = (new StatBasic("stat.recordPlayed", new TextComponentTranslation("stat.recordPlayed", new Object[0]))).registerStat();
+    public static final StatBase FURNACE_INTERACTION = (new StatBasic("stat.furnaceInteraction", new TextComponentTranslation("stat.furnaceInteraction", new Object[0]))).registerStat();
+    public static final StatBase CRAFTING_TABLE_INTERACTION = (new StatBasic("stat.craftingTableInteraction", new TextComponentTranslation("stat.workbenchInteraction", new Object[0]))).registerStat();
+    public static final StatBase CHEST_OPENED = (new StatBasic("stat.chestOpened", new TextComponentTranslation("stat.chestOpened", new Object[0]))).registerStat();
+    public static final StatBase SLEEP_IN_BED = (new StatBasic("stat.sleepInBed", new TextComponentTranslation("stat.sleepInBed", new Object[0]))).registerStat();
+    public static final StatBase field_191272_ae = (new StatBasic("stat.shulkerBoxOpened", new TextComponentTranslation("stat.shulkerBoxOpened", new Object[0]))).registerStat();
+    private static final StatBase[] BLOCKS_STATS = new StatBase[4096];
+    private static final StatBase[] CRAFTS_STATS = new StatBase[32000];
 
     /** Tracks the number of times a given block or item has been used. */
-    public static final StatBase[] objectUseStats = new StatBase[32000];
+    private static final StatBase[] OBJECT_USE_STATS = new StatBase[32000];
 
     /** Tracks the number of times a given block or item has been broken. */
-    public static final StatBase[] objectBreakStats = new StatBase[32000];
+    private static final StatBase[] OBJECT_BREAK_STATS = new StatBase[32000];
+    private static final StatBase[] OBJECTS_PICKED_UP_STATS = new StatBase[32000];
+    private static final StatBase[] OBJECTS_DROPPED_STATS = new StatBase[32000];
+
+    @Nullable
+    public static StatBase getBlockStats(Block blockIn)
+    {
+        return BLOCKS_STATS[Block.getIdFromBlock(blockIn)];
+    }
+
+    @Nullable
+    public static StatBase getCraftStats(Item itemIn)
+    {
+        return CRAFTS_STATS[Item.getIdFromItem(itemIn)];
+    }
+
+    @Nullable
+    public static StatBase getObjectUseStats(Item itemIn)
+    {
+        return OBJECT_USE_STATS[Item.getIdFromItem(itemIn)];
+    }
+
+    @Nullable
+    public static StatBase getObjectBreakStats(Item itemIn)
+    {
+        return OBJECT_BREAK_STATS[Item.getIdFromItem(itemIn)];
+    }
+
+    @Nullable
+    public static StatBase getObjectsPickedUpStats(Item itemIn)
+    {
+        return OBJECTS_PICKED_UP_STATS[Item.getIdFromItem(itemIn)];
+    }
+
+    @Nullable
+    public static StatBase getDroppedObjectStats(Item itemIn)
+    {
+        return OBJECTS_DROPPED_STATS[Item.getIdFromItem(itemIn)];
+    }
 
     public static void init()
     {
@@ -128,8 +144,7 @@ public class StatList
         initStats();
         initItemDepleteStats();
         initCraftableStats();
-        AchievementList.init();
-        EntityList.func_151514_a();
+        initPickedUpAndDroppedStats();
     }
 
     /**
@@ -140,17 +155,19 @@ public class StatList
     {
         Set<Item> set = Sets.<Item>newHashSet();
 
-        for (IRecipe irecipe : CraftingManager.getInstance().getRecipeList())
+        for (IRecipe irecipe : CraftingManager.field_193380_a)
         {
-            if (irecipe.getRecipeOutput() != null)
+            ItemStack itemstack = irecipe.getRecipeOutput();
+
+            if (!itemstack.func_190926_b())
             {
                 set.add(irecipe.getRecipeOutput().getItem());
             }
         }
 
-        for (ItemStack itemstack : FurnaceRecipes.instance().getSmeltingList().values())
+        for (ItemStack itemstack1 : FurnaceRecipes.instance().getSmeltingList().values())
         {
-            set.add(itemstack.getItem());
+            set.add(itemstack1.getItem());
         }
 
         for (Item item : set)
@@ -158,117 +175,137 @@ public class StatList
             if (item != null)
             {
                 int i = Item.getIdFromItem(item);
-                String s = func_180204_a(item);
+                String s = getItemName(item);
 
                 if (s != null)
                 {
-                    objectCraftStats[i] = (new StatCrafting("stat.craftItem.", s, new ChatComponentTranslation("stat.craftItem", new Object[] {(new ItemStack(item)).getChatComponent()}), item)).registerStat();
+                    CRAFTS_STATS[i] = (new StatCrafting("stat.craftItem.", s, new TextComponentTranslation("stat.craftItem", new Object[] {(new ItemStack(item)).getTextComponent()}), item)).registerStat();
                 }
             }
         }
 
-        replaceAllSimilarBlocks(objectCraftStats);
+        replaceAllSimilarBlocks(CRAFTS_STATS);
     }
 
     private static void initMiningStats()
     {
-        for (Block block : Block.blockRegistry)
+        for (Block block : Block.REGISTRY)
         {
             Item item = Item.getItemFromBlock(block);
 
-            if (item != null)
+            if (item != Items.field_190931_a)
             {
                 int i = Block.getIdFromBlock(block);
-                String s = func_180204_a(item);
+                String s = getItemName(item);
 
                 if (s != null && block.getEnableStats())
                 {
-                    mineBlockStatArray[i] = (new StatCrafting("stat.mineBlock.", s, new ChatComponentTranslation("stat.mineBlock", new Object[] {(new ItemStack(block)).getChatComponent()}), item)).registerStat();
-                    objectMineStats.add((StatCrafting)mineBlockStatArray[i]);
+                    BLOCKS_STATS[i] = (new StatCrafting("stat.mineBlock.", s, new TextComponentTranslation("stat.mineBlock", new Object[] {(new ItemStack(block)).getTextComponent()}), item)).registerStat();
+                    MINE_BLOCK_STATS.add((StatCrafting)BLOCKS_STATS[i]);
                 }
             }
         }
 
-        replaceAllSimilarBlocks(mineBlockStatArray);
+        replaceAllSimilarBlocks(BLOCKS_STATS);
     }
 
     private static void initStats()
     {
-        for (Item item : Item.itemRegistry)
+        for (Item item : Item.REGISTRY)
         {
             if (item != null)
             {
                 int i = Item.getIdFromItem(item);
-                String s = func_180204_a(item);
+                String s = getItemName(item);
 
                 if (s != null)
                 {
-                    objectUseStats[i] = (new StatCrafting("stat.useItem.", s, new ChatComponentTranslation("stat.useItem", new Object[] {(new ItemStack(item)).getChatComponent()}), item)).registerStat();
+                    OBJECT_USE_STATS[i] = (new StatCrafting("stat.useItem.", s, new TextComponentTranslation("stat.useItem", new Object[] {(new ItemStack(item)).getTextComponent()}), item)).registerStat();
 
                     if (!(item instanceof ItemBlock))
                     {
-                        itemStats.add((StatCrafting)objectUseStats[i]);
+                        USE_ITEM_STATS.add((StatCrafting)OBJECT_USE_STATS[i]);
                     }
                 }
             }
         }
 
-        replaceAllSimilarBlocks(objectUseStats);
+        replaceAllSimilarBlocks(OBJECT_USE_STATS);
     }
 
     private static void initItemDepleteStats()
     {
-        for (Item item : Item.itemRegistry)
+        for (Item item : Item.REGISTRY)
         {
             if (item != null)
             {
                 int i = Item.getIdFromItem(item);
-                String s = func_180204_a(item);
+                String s = getItemName(item);
 
                 if (s != null && item.isDamageable())
                 {
-                    objectBreakStats[i] = (new StatCrafting("stat.breakItem.", s, new ChatComponentTranslation("stat.breakItem", new Object[] {(new ItemStack(item)).getChatComponent()}), item)).registerStat();
+                    OBJECT_BREAK_STATS[i] = (new StatCrafting("stat.breakItem.", s, new TextComponentTranslation("stat.breakItem", new Object[] {(new ItemStack(item)).getTextComponent()}), item)).registerStat();
                 }
             }
         }
 
-        replaceAllSimilarBlocks(objectBreakStats);
+        replaceAllSimilarBlocks(OBJECT_BREAK_STATS);
     }
 
-    private static String func_180204_a(Item p_180204_0_)
+    private static void initPickedUpAndDroppedStats()
     {
-        ResourceLocation resourcelocation = (ResourceLocation)Item.itemRegistry.getNameForObject(p_180204_0_);
+        for (Item item : Item.REGISTRY)
+        {
+            if (item != null)
+            {
+                int i = Item.getIdFromItem(item);
+                String s = getItemName(item);
+
+                if (s != null)
+                {
+                    OBJECTS_PICKED_UP_STATS[i] = (new StatCrafting("stat.pickup.", s, new TextComponentTranslation("stat.pickup", new Object[] {(new ItemStack(item)).getTextComponent()}), item)).registerStat();
+                    OBJECTS_DROPPED_STATS[i] = (new StatCrafting("stat.drop.", s, new TextComponentTranslation("stat.drop", new Object[] {(new ItemStack(item)).getTextComponent()}), item)).registerStat();
+                }
+            }
+        }
+
+        replaceAllSimilarBlocks(OBJECT_BREAK_STATS);
+    }
+
+    private static String getItemName(Item itemIn)
+    {
+        ResourceLocation resourcelocation = Item.REGISTRY.getNameForObject(itemIn);
         return resourcelocation != null ? resourcelocation.toString().replace(':', '.') : null;
     }
 
     /**
      * Forces all dual blocks to count for each other on the stats list
      */
-    private static void replaceAllSimilarBlocks(StatBase[] p_75924_0_)
+    private static void replaceAllSimilarBlocks(StatBase[] stat)
     {
-        mergeStatBases(p_75924_0_, Blocks.water, Blocks.flowing_water);
-        mergeStatBases(p_75924_0_, Blocks.lava, Blocks.flowing_lava);
-        mergeStatBases(p_75924_0_, Blocks.lit_pumpkin, Blocks.pumpkin);
-        mergeStatBases(p_75924_0_, Blocks.lit_furnace, Blocks.furnace);
-        mergeStatBases(p_75924_0_, Blocks.lit_redstone_ore, Blocks.redstone_ore);
-        mergeStatBases(p_75924_0_, Blocks.powered_repeater, Blocks.unpowered_repeater);
-        mergeStatBases(p_75924_0_, Blocks.powered_comparator, Blocks.unpowered_comparator);
-        mergeStatBases(p_75924_0_, Blocks.redstone_torch, Blocks.unlit_redstone_torch);
-        mergeStatBases(p_75924_0_, Blocks.lit_redstone_lamp, Blocks.redstone_lamp);
-        mergeStatBases(p_75924_0_, Blocks.double_stone_slab, Blocks.stone_slab);
-        mergeStatBases(p_75924_0_, Blocks.double_wooden_slab, Blocks.wooden_slab);
-        mergeStatBases(p_75924_0_, Blocks.double_stone_slab2, Blocks.stone_slab2);
-        mergeStatBases(p_75924_0_, Blocks.grass, Blocks.dirt);
-        mergeStatBases(p_75924_0_, Blocks.farmland, Blocks.dirt);
+        mergeStatBases(stat, Blocks.WATER, Blocks.FLOWING_WATER);
+        mergeStatBases(stat, Blocks.LAVA, Blocks.FLOWING_LAVA);
+        mergeStatBases(stat, Blocks.LIT_PUMPKIN, Blocks.PUMPKIN);
+        mergeStatBases(stat, Blocks.LIT_FURNACE, Blocks.FURNACE);
+        mergeStatBases(stat, Blocks.LIT_REDSTONE_ORE, Blocks.REDSTONE_ORE);
+        mergeStatBases(stat, Blocks.POWERED_REPEATER, Blocks.UNPOWERED_REPEATER);
+        mergeStatBases(stat, Blocks.POWERED_COMPARATOR, Blocks.UNPOWERED_COMPARATOR);
+        mergeStatBases(stat, Blocks.REDSTONE_TORCH, Blocks.UNLIT_REDSTONE_TORCH);
+        mergeStatBases(stat, Blocks.LIT_REDSTONE_LAMP, Blocks.REDSTONE_LAMP);
+        mergeStatBases(stat, Blocks.DOUBLE_STONE_SLAB, Blocks.STONE_SLAB);
+        mergeStatBases(stat, Blocks.DOUBLE_WOODEN_SLAB, Blocks.WOODEN_SLAB);
+        mergeStatBases(stat, Blocks.DOUBLE_STONE_SLAB2, Blocks.STONE_SLAB2);
+        mergeStatBases(stat, Blocks.GRASS, Blocks.DIRT);
+        mergeStatBases(stat, Blocks.FARMLAND, Blocks.DIRT);
     }
 
     /**
      * Merge {@link StatBase} object references for similar blocks
      */
-    private static void mergeStatBases(StatBase[] statBaseIn, Block p_151180_1_, Block p_151180_2_)
+    private static void mergeStatBases(StatBase[] statBaseIn, Block block1, Block block2)
     {
-        int i = Block.getIdFromBlock(p_151180_1_);
-        int j = Block.getIdFromBlock(p_151180_2_);
+        int i = Block.getIdFromBlock(block1);
+        int j = Block.getIdFromBlock(block2);
 
         if (statBaseIn[i] != null && statBaseIn[j] == null)
         {
@@ -276,27 +313,28 @@ public class StatList
         }
         else
         {
-            allStats.remove(statBaseIn[i]);
-            objectMineStats.remove(statBaseIn[i]);
-            generalStats.remove(statBaseIn[i]);
+            ALL_STATS.remove(statBaseIn[i]);
+            MINE_BLOCK_STATS.remove(statBaseIn[i]);
+            BASIC_STATS.remove(statBaseIn[i]);
             statBaseIn[i] = statBaseIn[j];
         }
     }
 
     public static StatBase getStatKillEntity(EntityList.EntityEggInfo eggInfo)
     {
-        String s = EntityList.getStringFromID(eggInfo.spawnedID);
-        return s == null ? null : (new StatBase("stat.killEntity." + s, new ChatComponentTranslation("stat.entityKill", new Object[] {new ChatComponentTranslation("entity." + s + ".name", new Object[0])}))).registerStat();
+        String s = EntityList.func_191302_a(eggInfo.spawnedID);
+        return s == null ? null : (new StatBase("stat.killEntity." + s, new TextComponentTranslation("stat.entityKill", new Object[] {new TextComponentTranslation("entity." + s + ".name", new Object[0])}))).registerStat();
     }
 
     public static StatBase getStatEntityKilledBy(EntityList.EntityEggInfo eggInfo)
     {
-        String s = EntityList.getStringFromID(eggInfo.spawnedID);
-        return s == null ? null : (new StatBase("stat.entityKilledBy." + s, new ChatComponentTranslation("stat.entityKilledBy", new Object[] {new ChatComponentTranslation("entity." + s + ".name", new Object[0])}))).registerStat();
+        String s = EntityList.func_191302_a(eggInfo.spawnedID);
+        return s == null ? null : (new StatBase("stat.entityKilledBy." + s, new TextComponentTranslation("stat.entityKilledBy", new Object[] {new TextComponentTranslation("entity." + s + ".name", new Object[0])}))).registerStat();
     }
 
-    public static StatBase getOneShotStat(String p_151177_0_)
+    @Nullable
+    public static StatBase getOneShotStat(String statName)
     {
-        return (StatBase)oneShotStats.get(p_151177_0_);
+        return ID_TO_STAT_MAP.get(statName);
     }
 }

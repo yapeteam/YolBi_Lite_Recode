@@ -2,16 +2,18 @@ package net.minecraft.item;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemSeedFood extends ItemFood
 {
-    private Block crops;
+    private final Block crops;
 
     /** Block ID of the soil this seed food should be planted on. */
-    private Block soilId;
+    private final Block soilId;
 
     public ItemSeedFood(int healAmount, float saturation, Block crops, Block soil)
     {
@@ -23,25 +25,19 @@ public class ItemSeedFood extends ItemFood
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (side != EnumFacing.UP)
+        ItemStack itemstack = stack.getHeldItem(pos);
+
+        if (hand == EnumFacing.UP && stack.canPlayerEdit(worldIn.offset(hand), hand, itemstack) && playerIn.getBlockState(worldIn).getBlock() == this.soilId && playerIn.isAirBlock(worldIn.up()))
         {
-            return false;
-        }
-        else if (!playerIn.canPlayerEdit(pos.offset(side), side, stack))
-        {
-            return false;
-        }
-        else if (worldIn.getBlockState(pos).getBlock() == this.soilId && worldIn.isAirBlock(pos.up()))
-        {
-            worldIn.setBlockState(pos.up(), this.crops.getDefaultState());
-            --stack.stackSize;
-            return true;
+            playerIn.setBlockState(worldIn.up(), this.crops.getDefaultState(), 11);
+            itemstack.func_190918_g(1);
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
     }
 }

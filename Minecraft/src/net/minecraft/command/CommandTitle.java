@@ -1,14 +1,15 @@
 package net.minecraft.command;
 
 import com.google.gson.JsonParseException;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S45PacketTitle;
+import net.minecraft.network.play.server.SPacketTitle;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentProcessor;
-import net.minecraft.util.IChatComponent;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,9 +42,9 @@ public class CommandTitle extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 2)
         {
@@ -53,7 +54,7 @@ public class CommandTitle extends CommandBase
         {
             if (args.length < 3)
             {
-                if ("title".equals(args[1]) || "subtitle".equals(args[1]))
+                if ("title".equals(args[1]) || "subtitle".equals(args[1]) || "actionbar".equals(args[1]))
                 {
                     throw new WrongUsageException("commands.title.usage.title", new Object[0]);
                 }
@@ -64,12 +65,12 @@ public class CommandTitle extends CommandBase
                 }
             }
 
-            EntityPlayerMP entityplayermp = getPlayer(sender, args[0]);
-            S45PacketTitle.Type s45packettitle$type = S45PacketTitle.Type.byName(args[1]);
+            EntityPlayerMP entityplayermp = getPlayer(server, sender, args[0]);
+            SPacketTitle.Type spackettitle$type = SPacketTitle.Type.byName(args[1]);
 
-            if (s45packettitle$type != S45PacketTitle.Type.CLEAR && s45packettitle$type != S45PacketTitle.Type.RESET)
+            if (spackettitle$type != SPacketTitle.Type.CLEAR && spackettitle$type != SPacketTitle.Type.RESET)
             {
-                if (s45packettitle$type == S45PacketTitle.Type.TIMES)
+                if (spackettitle$type == SPacketTitle.Type.TIMES)
                 {
                     if (args.length != 5)
                     {
@@ -80,9 +81,9 @@ public class CommandTitle extends CommandBase
                         int i = parseInt(args[2]);
                         int j = parseInt(args[3]);
                         int k = parseInt(args[4]);
-                        S45PacketTitle s45packettitle2 = new S45PacketTitle(i, j, k);
-                        entityplayermp.playerNetServerHandler.sendPacket(s45packettitle2);
-                        notifyOperators(sender, this, "commands.title.success", new Object[0]);
+                        SPacketTitle spackettitle2 = new SPacketTitle(i, j, k);
+                        entityplayermp.connection.sendPacket(spackettitle2);
+                        notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
                     }
                 }
                 else if (args.length < 3)
@@ -92,21 +93,20 @@ public class CommandTitle extends CommandBase
                 else
                 {
                     String s = buildString(args, 2);
-                    IChatComponent ichatcomponent;
+                    ITextComponent itextcomponent;
 
                     try
                     {
-                        ichatcomponent = IChatComponent.Serializer.jsonToComponent(s);
+                        itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
                     }
                     catch (JsonParseException jsonparseexception)
                     {
-                        Throwable throwable = ExceptionUtils.getRootCause(jsonparseexception);
-                        throw new SyntaxErrorException("commands.tellraw.jsonException", new Object[] {throwable == null ? "" : throwable.getMessage()});
+                        throw toSyntaxException(jsonparseexception);
                     }
 
-                    S45PacketTitle s45packettitle1 = new S45PacketTitle(s45packettitle$type, ChatComponentProcessor.processComponent(sender, ichatcomponent, entityplayermp));
-                    entityplayermp.playerNetServerHandler.sendPacket(s45packettitle1);
-                    notifyOperators(sender, this, "commands.title.success", new Object[0]);
+                    SPacketTitle spackettitle1 = new SPacketTitle(spackettitle$type, TextComponentUtils.processComponent(sender, itextcomponent, entityplayermp));
+                    entityplayermp.connection.sendPacket(spackettitle1);
+                    notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
                 }
             }
             else if (args.length != 2)
@@ -115,16 +115,23 @@ public class CommandTitle extends CommandBase
             }
             else
             {
-                S45PacketTitle s45packettitle = new S45PacketTitle(s45packettitle$type, (IChatComponent)null);
-                entityplayermp.playerNetServerHandler.sendPacket(s45packettitle);
-                notifyOperators(sender, this, "commands.title.success", new Object[0]);
+                SPacketTitle spackettitle = new SPacketTitle(spackettitle$type, (ITextComponent)null);
+                entityplayermp.connection.sendPacket(spackettitle);
+                notifyCommandListener(sender, this, "commands.title.success", new Object[0]);
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : (args.length == 2 ? getListOfStringsMatchingLastWord(args, S45PacketTitle.Type.getNames()) : null);
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, server.getAllUsernames());
+        }
+        else
+        {
+            return args.length == 2 ? getListOfStringsMatchingLastWord(args, SPacketTitle.Type.getNames()) : Collections.emptyList();
+        }
     }
 
     /**

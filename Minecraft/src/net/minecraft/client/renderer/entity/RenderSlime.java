@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelSlime;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.layers.LayerSlimeGel;
 import net.minecraft.entity.monster.EntitySlime;
@@ -8,11 +8,11 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderSlime extends RenderLiving<EntitySlime>
 {
-    private static final ResourceLocation slimeTextures = new ResourceLocation("textures/entity/slime/slime.png");
+    private static final ResourceLocation SLIME_TEXTURES = new ResourceLocation("textures/entity/slime/slime.png");
 
-    public RenderSlime(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
+    public RenderSlime(RenderManager p_i47193_1_)
     {
-        super(renderManagerIn, modelBaseIn, shadowSizeIn);
+        super(p_i47193_1_, new ModelSlime(16), 0.25F);
         this.addLayer(new LayerSlimeGel(this));
     }
 
@@ -26,15 +26,16 @@ public class RenderSlime extends RenderLiving<EntitySlime>
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntitySlime entitylivingbaseIn, float partialTickTime)
     {
-        float f = (float)entitylivingbaseIn.getSlimeSize();
-        float f1 = (entitylivingbaseIn.prevSquishFactor + (entitylivingbaseIn.squishFactor - entitylivingbaseIn.prevSquishFactor) * partialTickTime) / (f * 0.5F + 1.0F);
-        float f2 = 1.0F / (f1 + 1.0F);
-        GlStateManager.scale(f2 * f, 1.0F / f2 * f, f2 * f);
+        float f = 0.999F;
+        GlStateManager.scale(0.999F, 0.999F, 0.999F);
+        float f1 = (float)entitylivingbaseIn.getSlimeSize();
+        float f2 = (entitylivingbaseIn.prevSquishFactor + (entitylivingbaseIn.squishFactor - entitylivingbaseIn.prevSquishFactor) * partialTickTime) / (f1 * 0.5F + 1.0F);
+        float f3 = 1.0F / (f2 + 1.0F);
+        GlStateManager.scale(f3 * f1, 1.0F / f3 * f1, f3 * f1);
     }
 
     /**
@@ -42,6 +43,6 @@ public class RenderSlime extends RenderLiving<EntitySlime>
      */
     protected ResourceLocation getEntityTexture(EntitySlime entity)
     {
-        return slimeTextures;
+        return SLIME_TEXTURES;
     }
 }

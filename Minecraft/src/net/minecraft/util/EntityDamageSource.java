@@ -1,20 +1,26 @@
 package net.minecraft.util;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.translation.I18n;
 
 public class EntityDamageSource extends DamageSource
 {
+    @Nullable
     protected Entity damageSourceEntity;
 
     /**
      * Whether this EntityDamageSource is from an entity wearing Thorns-enchanted armor.
      */
-    private boolean isThornsDamage = false;
+    private boolean isThornsDamage;
 
-    public EntityDamageSource(String damageTypeIn, Entity damageSourceEntityIn)
+    public EntityDamageSource(String damageTypeIn, @Nullable Entity damageSourceEntityIn)
     {
         super(damageTypeIn);
         this.damageSourceEntity = damageSourceEntityIn;
@@ -34,6 +40,7 @@ public class EntityDamageSource extends DamageSource
         return this.isThornsDamage;
     }
 
+    @Nullable
     public Entity getEntity()
     {
         return this.damageSourceEntity;
@@ -41,15 +48,13 @@ public class EntityDamageSource extends DamageSource
 
     /**
      * Gets the death message that is displayed when the player dies
-     *  
-     * @param entityLivingBaseIn The EntityLivingBase that died
      */
-    public IChatComponent getDeathMessage(EntityLivingBase entityLivingBaseIn)
+    public ITextComponent getDeathMessage(EntityLivingBase entityLivingBaseIn)
     {
-        ItemStack itemstack = this.damageSourceEntity instanceof EntityLivingBase ? ((EntityLivingBase)this.damageSourceEntity).getHeldItem() : null;
+        ItemStack itemstack = this.damageSourceEntity instanceof EntityLivingBase ? ((EntityLivingBase)this.damageSourceEntity).getHeldItemMainhand() : ItemStack.field_190927_a;
         String s = "death.attack." + this.damageType;
         String s1 = s + ".item";
-        return itemstack != null && itemstack.hasDisplayName() && StatCollector.canTranslate(s1) ? new ChatComponentTranslation(s1, new Object[] {entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName(), itemstack.getChatComponent()}): new ChatComponentTranslation(s, new Object[] {entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName()});
+        return !itemstack.func_190926_b() && itemstack.hasDisplayName() && I18n.canTranslate(s1) ? new TextComponentTranslation(s1, new Object[] {entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName(), itemstack.getTextComponent()}) : new TextComponentTranslation(s, new Object[] {entityLivingBaseIn.getDisplayName(), this.damageSourceEntity.getDisplayName()});
     }
 
     /**
@@ -58,5 +63,15 @@ public class EntityDamageSource extends DamageSource
     public boolean isDifficultyScaled()
     {
         return this.damageSourceEntity != null && this.damageSourceEntity instanceof EntityLivingBase && !(this.damageSourceEntity instanceof EntityPlayer);
+    }
+
+    @Nullable
+
+    /**
+     * Gets the location from which the damage originates.
+     */
+    public Vec3d getDamageLocation()
+    {
+        return new Vec3d(this.damageSourceEntity.posX, this.damageSourceEntity.posY, this.damageSourceEntity.posZ);
     }
 }

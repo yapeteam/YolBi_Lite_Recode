@@ -6,7 +6,7 @@ import net.minecraft.entity.passive.EntityVillager;
 
 public class EntityAIFollowGolem extends EntityAIBase
 {
-    private EntityVillager theVillager;
+    private final EntityVillager theVillager;
     private EntityIronGolem theGolem;
     private int takeGolemRoseTick;
     private boolean tookGolemRose;
@@ -26,13 +26,13 @@ public class EntityAIFollowGolem extends EntityAIBase
         {
             return false;
         }
-        else if (!this.theVillager.worldObj.isDaytime())
+        else if (!this.theVillager.world.isDaytime())
         {
             return false;
         }
         else
         {
-            List<EntityIronGolem> list = this.theVillager.worldObj.<EntityIronGolem>getEntitiesWithinAABB(EntityIronGolem.class, this.theVillager.getEntityBoundingBox().expand(6.0D, 2.0D, 6.0D));
+            List<EntityIronGolem> list = this.theVillager.world.<EntityIronGolem>getEntitiesWithinAABB(EntityIronGolem.class, this.theVillager.getEntityBoundingBox().expand(6.0D, 2.0D, 6.0D));
 
             if (list.isEmpty())
             {

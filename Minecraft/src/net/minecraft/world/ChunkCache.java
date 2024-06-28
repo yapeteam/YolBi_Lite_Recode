@@ -1,12 +1,13 @@
 package net.minecraft.world;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 public class ChunkCache implements IBlockAccess
@@ -61,11 +62,18 @@ public class ChunkCache implements IBlockAccess
         return this.hasExtendedLevels;
     }
 
+    @Nullable
     public TileEntity getTileEntity(BlockPos pos)
     {
-        int i = (pos.getX() >> 4) - this.chunkX;
-        int j = (pos.getZ() >> 4) - this.chunkZ;
-        return this.chunkArray[i][j].getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+        return this.getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+    }
+
+    @Nullable
+    public TileEntity getTileEntity(BlockPos p_190300_1_, Chunk.EnumCreateEntityType p_190300_2_)
+    {
+        int i = (p_190300_1_.getX() >> 4) - this.chunkX;
+        int j = (p_190300_1_.getZ() >> 4) - this.chunkZ;
+        return this.chunkArray[i][j].getTileEntity(p_190300_1_, p_190300_2_);
     }
 
     public int getCombinedLight(BlockPos pos, int lightValue)
@@ -99,29 +107,31 @@ public class ChunkCache implements IBlockAccess
             }
         }
 
-        return Blocks.air.getDefaultState();
+        return Blocks.AIR.getDefaultState();
     }
 
-    public BiomeGenBase getBiomeGenForCoords(BlockPos pos)
+    public Biome getBiome(BlockPos pos)
     {
-        return this.worldObj.getBiomeGenForCoords(pos);
+        int i = (pos.getX() >> 4) - this.chunkX;
+        int j = (pos.getZ() >> 4) - this.chunkZ;
+        return this.chunkArray[i][j].getBiome(pos, this.worldObj.getBiomeProvider());
     }
 
-    private int getLightForExt(EnumSkyBlock p_175629_1_, BlockPos pos)
+    private int getLightForExt(EnumSkyBlock type, BlockPos pos)
     {
-        if (p_175629_1_ == EnumSkyBlock.SKY && this.worldObj.provider.getHasNoSky())
+        if (type == EnumSkyBlock.SKY && !this.worldObj.provider.func_191066_m())
         {
             return 0;
         }
         else if (pos.getY() >= 0 && pos.getY() < 256)
         {
-            if (this.getBlockState(pos).getBlock().getUseNeighborBrightness())
+            if (this.getBlockState(pos).useNeighborBrightness())
             {
                 int l = 0;
 
                 for (EnumFacing enumfacing : EnumFacing.values())
                 {
-                    int k = this.getLightFor(p_175629_1_, pos.offset(enumfacing));
+                    int k = this.getLightFor(type, pos.offset(enumfacing));
 
                     if (k > l)
                     {
@@ -140,12 +150,12 @@ public class ChunkCache implements IBlockAccess
             {
                 int i = (pos.getX() >> 4) - this.chunkX;
                 int j = (pos.getZ() >> 4) - this.chunkZ;
-                return this.chunkArray[i][j].getLightFor(p_175629_1_, pos);
+                return this.chunkArray[i][j].getLightFor(type, pos);
             }
         }
         else
         {
-            return p_175629_1_.defaultLightValue;
+            return type.defaultLightValue;
         }
     }
 
@@ -155,7 +165,7 @@ public class ChunkCache implements IBlockAccess
      */
     public boolean isAirBlock(BlockPos pos)
     {
-        return this.getBlockState(pos).getBlock().getMaterial() == Material.air;
+        return this.getBlockState(pos).getMaterial() == Material.AIR;
     }
 
     public int getLightFor(EnumSkyBlock p_175628_1_, BlockPos pos)
@@ -174,8 +184,7 @@ public class ChunkCache implements IBlockAccess
 
     public int getStrongPower(BlockPos pos, EnumFacing direction)
     {
-        IBlockState iblockstate = this.getBlockState(pos);
-        return iblockstate.getBlock().getStrongPower(this, pos, iblockstate, direction);
+        return this.getBlockState(pos).getStrongPower(this, pos, direction);
     }
 
     public WorldType getWorldType()

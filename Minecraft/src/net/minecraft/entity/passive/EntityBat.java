@@ -1,18 +1,30 @@
 package net.minecraft.entity.passive;
 
 import java.util.Calendar;
-import net.minecraft.block.Block;
+import javax.annotation.Nullable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityBat extends EntityAmbientCreature
 {
+    private static final DataParameter<Byte> HANGING = EntityDataManager.<Byte>createKey(EntityBat.class, DataSerializers.BYTE);
+
     /** Coordinates of where the bat spawned. */
     private BlockPos spawnPosition;
 
@@ -26,7 +38,7 @@ public class EntityBat extends EntityAmbientCreature
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(16, new Byte((byte)0));
+        this.dataManager.register(HANGING, Byte.valueOf((byte)0));
     }
 
     /**
@@ -45,28 +57,20 @@ public class EntityBat extends EntityAmbientCreature
         return super.getSoundPitch() * 0.95F;
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    @Nullable
+    public SoundEvent getAmbientSound()
     {
-        return this.getIsBatHanging() && this.rand.nextInt(4) != 0 ? null : "mob.bat.idle";
+        return this.getIsBatHanging() && this.rand.nextInt(4) != 0 ? null : SoundEvents.ENTITY_BAT_AMBIENT;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
     {
-        return "mob.bat.hurt";
+        return SoundEvents.ENTITY_BAT_HURT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getDeathSound()
     {
-        return "mob.bat.death";
+        return SoundEvents.ENTITY_BAT_DEATH;
     }
 
     /**
@@ -88,25 +92,25 @@ public class EntityBat extends EntityAmbientCreature
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(6.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(6.0D);
     }
 
     public boolean getIsBatHanging()
     {
-        return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
+        return (((Byte)this.dataManager.get(HANGING)).byteValue() & 1) != 0;
     }
 
     public void setIsBatHanging(boolean isHanging)
     {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
+        byte b0 = ((Byte)this.dataManager.get(HANGING)).byteValue();
 
         if (isHanging)
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 | 1)));
+            this.dataManager.set(HANGING, Byte.valueOf((byte)(b0 | 1)));
         }
         else
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 & -2)));
+            this.dataManager.set(HANGING, Byte.valueOf((byte)(b0 & -2)));
         }
     }
 
@@ -119,8 +123,10 @@ public class EntityBat extends EntityAmbientCreature
 
         if (this.getIsBatHanging())
         {
-            this.motionX = this.motionY = this.motionZ = 0.0D;
-            this.posY = (double)MathHelper.floor_double(this.posY) + 1.0D - (double)this.height;
+            this.motionX = 0.0D;
+            this.motionY = 0.0D;
+            this.motionZ = 0.0D;
+            this.posY = (double)MathHelper.floor(this.posY) + 1.0D - (double)this.height;
         }
         else
         {
@@ -136,28 +142,28 @@ public class EntityBat extends EntityAmbientCreature
 
         if (this.getIsBatHanging())
         {
-            if (!this.worldObj.getBlockState(blockpos1).getBlock().isNormalCube())
-            {
-                this.setIsBatHanging(false);
-                this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1015, blockpos, 0);
-            }
-            else
+            if (this.world.getBlockState(blockpos1).isNormalCube())
             {
                 if (this.rand.nextInt(200) == 0)
                 {
                     this.rotationYawHead = (float)this.rand.nextInt(360);
                 }
 
-                if (this.worldObj.getClosestPlayerToEntity(this, 4.0D) != null)
+                if (this.world.getNearestPlayerNotCreative(this, 4.0D) != null)
                 {
                     this.setIsBatHanging(false);
-                    this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1015, blockpos, 0);
+                    this.world.playEvent((EntityPlayer)null, 1025, blockpos, 0);
                 }
+            }
+            else
+            {
+                this.setIsBatHanging(false);
+                this.world.playEvent((EntityPlayer)null, 1025, blockpos, 0);
             }
         }
         else
         {
-            if (this.spawnPosition != null && (!this.worldObj.isAirBlock(this.spawnPosition) || this.spawnPosition.getY() < 1))
+            if (this.spawnPosition != null && (!this.world.isAirBlock(this.spawnPosition) || this.spawnPosition.getY() < 1))
             {
                 this.spawnPosition = null;
             }
@@ -173,12 +179,12 @@ public class EntityBat extends EntityAmbientCreature
             this.motionX += (Math.signum(d0) * 0.5D - this.motionX) * 0.10000000149011612D;
             this.motionY += (Math.signum(d1) * 0.699999988079071D - this.motionY) * 0.10000000149011612D;
             this.motionZ += (Math.signum(d2) * 0.5D - this.motionZ) * 0.10000000149011612D;
-            float f = (float)(MathHelper.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
-            float f1 = MathHelper.wrapAngleTo180_float(f - this.rotationYaw);
-            this.moveForward = 0.5F;
+            float f = (float)(MathHelper.atan2(this.motionZ, this.motionX) * (180D / Math.PI)) - 90.0F;
+            float f1 = MathHelper.wrapDegrees(f - this.rotationYaw);
+            this.field_191988_bg = 0.5F;
             this.rotationYaw += f1;
 
-            if (this.rand.nextInt(100) == 0 && this.worldObj.getBlockState(blockpos1).getBlock().isNormalCube())
+            if (this.rand.nextInt(100) == 0 && this.world.getBlockState(blockpos1).isNormalCube())
             {
                 this.setIsBatHanging(true);
             }
@@ -198,7 +204,7 @@ public class EntityBat extends EntityAmbientCreature
     {
     }
 
-    protected void updateFallState(double y, boolean onGroundIn, Block blockIn, BlockPos pos)
+    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos)
     {
     }
 
@@ -221,7 +227,7 @@ public class EntityBat extends EntityAmbientCreature
         }
         else
         {
-            if (!this.worldObj.isRemote && this.getIsBatHanging())
+            if (!this.world.isRemote && this.getIsBatHanging())
             {
                 this.setIsBatHanging(false);
             }
@@ -230,22 +236,27 @@ public class EntityBat extends EntityAmbientCreature
         }
     }
 
+    public static void registerFixesBat(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityBat.class);
+    }
+
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        this.dataWatcher.updateObject(16, Byte.valueOf(tagCompund.getByte("BatFlags")));
+        super.readEntityFromNBT(compound);
+        this.dataManager.set(HANGING, Byte.valueOf(compound.getByte("BatFlags")));
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setByte("BatFlags", this.dataWatcher.getWatchableObjectByte(16));
+        super.writeEntityToNBT(compound);
+        compound.setByte("BatFlags", ((Byte)this.dataManager.get(HANGING)).byteValue());
     }
 
     /**
@@ -255,16 +266,16 @@ public class EntityBat extends EntityAmbientCreature
     {
         BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
 
-        if (blockpos.getY() >= this.worldObj.getSeaLevel())
+        if (blockpos.getY() >= this.world.getSeaLevel())
         {
             return false;
         }
         else
         {
-            int i = this.worldObj.getLightFromNeighbors(blockpos);
+            int i = this.world.getLightFromNeighbors(blockpos);
             int j = 4;
 
-            if (this.isDateAroundHalloween(this.worldObj.getCurrentDate()))
+            if (this.isDateAroundHalloween(this.world.getCurrentDate()))
             {
                 j = 7;
             }
@@ -285,5 +296,11 @@ public class EntityBat extends EntityAmbientCreature
     public float getEyeHeight()
     {
         return this.height / 2.0F;
+    }
+
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_BAT;
     }
 }

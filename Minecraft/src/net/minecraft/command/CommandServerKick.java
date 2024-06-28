@@ -1,9 +1,13 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandServerKick extends CommandBase
 {
@@ -32,37 +36,30 @@ public class CommandServerKick extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length > 0 && args[0].length() > 1)
         {
-            EntityPlayerMP entityplayermp = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(args[0]);
-            String s = "Kicked by an operator.";
-            boolean flag = false;
+            EntityPlayerMP entityplayermp = server.getPlayerList().getPlayerByUsername(args[0]);
 
             if (entityplayermp == null)
             {
-                throw new PlayerNotFoundException();
+                throw new PlayerNotFoundException("commands.generic.player.notFound", new Object[] {args[0]});
             }
             else
             {
                 if (args.length >= 2)
                 {
-                    s = getChatComponentFromNthArg(sender, args, 1).getUnformattedText();
-                    flag = true;
-                }
-
-                entityplayermp.playerNetServerHandler.kickPlayerFromServer(s);
-
-                if (flag)
-                {
-                    notifyOperators(sender, this, "commands.kick.success.reason", new Object[] {entityplayermp.getName(), s});
+                    ITextComponent itextcomponent = getChatComponentFromNthArg(sender, args, 1);
+                    entityplayermp.connection.func_194028_b(itextcomponent);
+                    notifyCommandListener(sender, this, "commands.kick.success.reason", new Object[] {entityplayermp.getName(), itextcomponent.getUnformattedText()});
                 }
                 else
                 {
-                    notifyOperators(sender, this, "commands.kick.success", new Object[] {entityplayermp.getName()});
+                    entityplayermp.connection.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.kicked", new Object[0]));
+                    notifyCommandListener(sender, this, "commands.kick.success", new Object[] {entityplayermp.getName()});
                 }
             }
         }
@@ -72,8 +69,8 @@ public class CommandServerKick extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
     }
 }

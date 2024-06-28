@@ -5,10 +5,10 @@ import net.minecraft.client.resources.I18n;
 
 public class GuiListButton extends GuiButton
 {
-    private boolean field_175216_o;
+    private boolean value;
 
     /** The localization string used by this control. */
-    private String localizationStr;
+    private final String localizationStr;
 
     /** The GuiResponder Object reference. */
     private final GuiPageButtonList.GuiResponder guiResponder;
@@ -17,7 +17,7 @@ public class GuiListButton extends GuiButton
     {
         super(p_i45539_2_, p_i45539_3_, p_i45539_4_, 150, 20, "");
         this.localizationStr = p_i45539_5_;
-        this.field_175216_o = p_i45539_6_;
+        this.value = p_i45539_6_;
         this.displayString = this.buildDisplayString();
         this.guiResponder = responder;
     }
@@ -27,14 +27,14 @@ public class GuiListButton extends GuiButton
      */
     private String buildDisplayString()
     {
-        return I18n.format(this.localizationStr, new Object[0]) + ": " + (this.field_175216_o ? I18n.format("gui.yes", new Object[0]) : I18n.format("gui.no", new Object[0]));
+        return I18n.format(this.localizationStr) + ": " + I18n.format(this.value ? "gui.yes" : "gui.no");
     }
 
-    public void func_175212_b(boolean p_175212_1_)
+    public void setValue(boolean p_175212_1_)
     {
-        this.field_175216_o = p_175212_1_;
+        this.value = p_175212_1_;
         this.displayString = this.buildDisplayString();
-        this.guiResponder.func_175321_a(this.id, p_175212_1_);
+        this.guiResponder.setEntryValue(this.id, p_175212_1_);
     }
 
     /**
@@ -45,9 +45,9 @@ public class GuiListButton extends GuiButton
     {
         if (super.mousePressed(mc, mouseX, mouseY))
         {
-            this.field_175216_o = !this.field_175216_o;
+            this.value = !this.value;
             this.displayString = this.buildDisplayString();
-            this.guiResponder.func_175321_a(this.id, this.field_175216_o);
+            this.guiResponder.setEntryValue(this.id, this.value);
             return true;
         }
         else

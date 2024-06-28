@@ -7,8 +7,8 @@ public enum EnumSkyBlock
 
     public final int defaultLightValue;
 
-    private EnumSkyBlock(int p_i1961_3_)
+    private EnumSkyBlock(int defaultLightValueIn)
     {
-        this.defaultLightValue = p_i1961_3_;
+        this.defaultLightValue = defaultLightValueIn;
     }
 }

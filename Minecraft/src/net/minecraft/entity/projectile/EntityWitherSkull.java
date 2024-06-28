@@ -4,17 +4,23 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.potion.Potion;
+import net.minecraft.init.MobEffects;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 public class EntityWitherSkull extends EntityFireball
 {
+    private static final DataParameter<Boolean> INVULNERABLE = EntityDataManager.<Boolean>createKey(EntityWitherSkull.class, DataSerializers.BOOLEAN);
+
     public EntityWitherSkull(World worldIn)
     {
         super(worldIn);
@@ -25,6 +31,11 @@ public class EntityWitherSkull extends EntityFireball
     {
         super(worldIn, shooter, accelX, accelY, accelZ);
         this.setSize(0.3125F, 0.3125F);
+    }
+
+    public static void registerFixesWitherSkull(DataFixer fixer)
+    {
+        EntityFireball.registerFixesFireball(fixer, "WitherSkull");
     }
 
     /**
@@ -68,52 +79,52 @@ public class EntityWitherSkull extends EntityFireball
     /**
      * Called when this EntityFireball hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition movingObject)
+    protected void onImpact(RayTraceResult result)
     {
-        if (!this.worldObj.isRemote)
+        if (!this.world.isRemote)
         {
-            if (movingObject.entityHit != null)
+            if (result.entityHit != null)
             {
                 if (this.shootingEntity != null)
                 {
-                    if (movingObject.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F))
+                    if (result.entityHit.attackEntityFrom(DamageSource.causeMobDamage(this.shootingEntity), 8.0F))
                     {
-                        if (!movingObject.entityHit.isEntityAlive())
+                        if (result.entityHit.isEntityAlive())
                         {
-                            this.shootingEntity.heal(5.0F);
+                            this.applyEnchantments(this.shootingEntity, result.entityHit);
                         }
                         else
                         {
-                            this.applyEnchantments(this.shootingEntity, movingObject.entityHit);
+                            this.shootingEntity.heal(5.0F);
                         }
                     }
                 }
                 else
                 {
-                    movingObject.entityHit.attackEntityFrom(DamageSource.magic, 5.0F);
+                    result.entityHit.attackEntityFrom(DamageSource.magic, 5.0F);
                 }
 
-                if (movingObject.entityHit instanceof EntityLivingBase)
+                if (result.entityHit instanceof EntityLivingBase)
                 {
                     int i = 0;
 
-                    if (this.worldObj.getDifficulty() == EnumDifficulty.NORMAL)
+                    if (this.world.getDifficulty() == EnumDifficulty.NORMAL)
                     {
                         i = 10;
                     }
-                    else if (this.worldObj.getDifficulty() == EnumDifficulty.HARD)
+                    else if (this.world.getDifficulty() == EnumDifficulty.HARD)
                     {
                         i = 40;
                     }
 
                     if (i > 0)
                     {
-                        ((EntityLivingBase)movingObject.entityHit).addPotionEffect(new PotionEffect(Potion.wither.id, 20 * i, 1));
+                        ((EntityLivingBase)result.entityHit).addPotionEffect(new PotionEffect(MobEffects.WITHER, 20 * i, 1));
                     }
                 }
             }
 
-            this.worldObj.newExplosion(this, this.posX, this.posY, this.posZ, 1.0F, false, this.worldObj.getGameRules().getBoolean("mobGriefing"));
+            this.world.newExplosion(this, this.posX, this.posY, this.posZ, 1.0F, false, this.world.getGameRules().getBoolean("mobGriefing"));
             this.setDead();
         }
     }
@@ -136,7 +147,7 @@ public class EntityWitherSkull extends EntityFireball
 
     protected void entityInit()
     {
-        this.dataWatcher.addObject(10, Byte.valueOf((byte)0));
+        this.dataManager.register(INVULNERABLE, Boolean.valueOf(false));
     }
 
     /**
@@ -144,7 +155,7 @@ public class EntityWitherSkull extends EntityFireball
      */
     public boolean isInvulnerable()
     {
-        return this.dataWatcher.getWatchableObjectByte(10) == 1;
+        return ((Boolean)this.dataManager.get(INVULNERABLE)).booleanValue();
     }
 
     /**
@@ -152,6 +163,11 @@ public class EntityWitherSkull extends EntityFireball
      */
     public void setInvulnerable(boolean invulnerable)
     {
-        this.dataWatcher.updateObject(10, Byte.valueOf((byte)(invulnerable ? 1 : 0)));
+        this.dataManager.set(INVULNERABLE, Boolean.valueOf(invulnerable));
+    }
+
+    protected boolean isFireballFiery()
+    {
+        return false;
     }
 }

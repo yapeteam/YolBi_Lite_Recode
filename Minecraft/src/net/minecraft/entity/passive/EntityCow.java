@@ -1,7 +1,9 @@
 package net.minecraft.entity.passive;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIFollowParent;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -9,29 +11,42 @@ import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITempt;
-import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityCow extends EntityAnimal
 {
     public EntityCow(World worldIn)
     {
         super(worldIn);
-        this.setSize(0.9F, 1.3F);
-        ((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
+        this.setSize(0.9F, 1.4F);
+    }
+
+    public static void registerFixesCow(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityCow.class);
+    }
+
+    protected void initEntityAI()
+    {
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 2.0D));
         this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
-        this.tasks.addTask(3, new EntityAITempt(this, 1.25D, Items.wheat, false));
+        this.tasks.addTask(3, new EntityAITempt(this, 1.25D, Items.WHEAT, false));
         this.tasks.addTask(4, new EntityAIFollowParent(this, 1.25D));
-        this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(5, new EntityAIWanderAvoidWater(this, 1.0D));
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(7, new EntityAILookIdle(this));
     }
@@ -39,37 +54,28 @@ public class EntityCow extends EntityAnimal
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.20000000298023224D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.20000000298023224D);
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    protected SoundEvent getAmbientSound()
     {
-        return "mob.cow.say";
+        return SoundEvents.ENTITY_COW_AMBIENT;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
     {
-        return "mob.cow.hurt";
+        return SoundEvents.ENTITY_COW_HURT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getDeathSound()
     {
-        return "mob.cow.hurt";
+        return SoundEvents.ENTITY_COW_DEATH;
     }
 
     protected void playStepSound(BlockPos pos, Block blockIn)
     {
-        this.playSound("mob.cow.step", 0.15F, 1.0F);
+        this.playSound(SoundEvents.ENTITY_COW_STEP, 0.15F, 1.0F);
     }
 
     /**
@@ -80,75 +86,45 @@ public class EntityCow extends EntityAnimal
         return 0.4F;
     }
 
-    protected Item getDropItem()
+    @Nullable
+    protected ResourceLocation getLootTable()
     {
-        return Items.leather;
+        return LootTableList.ENTITIES_COW;
     }
 
-    /**
-     * Drop 0-2 items of this living's type
-     *  
-     * @param wasRecentlyHit true if this this entity was recently hit by appropriate entity (generally only if player
-     * or tameable)
-     * @param lootingModifier level of enchanment to be applied to this drop
-     */
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
-        int i = this.rand.nextInt(3) + this.rand.nextInt(1 + lootingModifier);
+        ItemStack itemstack = player.getHeldItem(hand);
 
-        for (int j = 0; j < i; ++j)
+        if (itemstack.getItem() == Items.BUCKET && !player.capabilities.isCreativeMode && !this.isChild())
         {
-            this.dropItem(Items.leather, 1);
-        }
+            player.playSound(SoundEvents.ENTITY_COW_MILK, 1.0F, 1.0F);
+            itemstack.func_190918_g(1);
 
-        i = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + lootingModifier);
-
-        for (int k = 0; k < i; ++k)
-        {
-            if (this.isBurning())
+            if (itemstack.func_190926_b())
             {
-                this.dropItem(Items.cooked_beef, 1);
+                player.setHeldItem(hand, new ItemStack(Items.MILK_BUCKET));
             }
-            else
+            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MILK_BUCKET)))
             {
-                this.dropItem(Items.beef, 1);
-            }
-        }
-    }
-
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    public boolean interact(EntityPlayer player)
-    {
-        ItemStack itemstack = player.inventory.getCurrentItem();
-
-        if (itemstack != null && itemstack.getItem() == Items.bucket && !player.capabilities.isCreativeMode && !this.isChild())
-        {
-            if (itemstack.stackSize-- == 1)
-            {
-                player.inventory.setInventorySlotContents(player.inventory.currentItem, new ItemStack(Items.milk_bucket));
-            }
-            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.milk_bucket)))
-            {
-                player.dropPlayerItemWithRandomChoice(new ItemStack(Items.milk_bucket, 1, 0), false);
+                player.dropItem(new ItemStack(Items.MILK_BUCKET), false);
             }
 
             return true;
         }
         else
         {
-            return super.interact(player);
+            return super.processInteract(player, hand);
         }
     }
 
     public EntityCow createChild(EntityAgeable ageable)
     {
-        return new EntityCow(this.worldObj);
+        return new EntityCow(this.world);
     }
 
     public float getEyeHeight()
     {
-        return this.height;
+        return this.isChild() ? this.height : 1.3F;
     }
 }

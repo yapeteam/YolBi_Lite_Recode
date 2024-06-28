@@ -1,25 +1,28 @@
 package net.minecraft.client.renderer.chunk;
 
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Doubles;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.client.renderer.RegionRenderCacheBuilder;
 
-public class ChunkCompileTaskGenerator
+public class ChunkCompileTaskGenerator implements Comparable<ChunkCompileTaskGenerator>
 {
     private final RenderChunk renderChunk;
     private final ReentrantLock lock = new ReentrantLock();
     private final List<Runnable> listFinishRunnables = Lists.<Runnable>newArrayList();
     private final ChunkCompileTaskGenerator.Type type;
+    private final double distanceSq;
     private RegionRenderCacheBuilder regionRenderCacheBuilder;
     private CompiledChunk compiledChunk;
     private ChunkCompileTaskGenerator.Status status = ChunkCompileTaskGenerator.Status.PENDING;
     private boolean finished;
 
-    public ChunkCompileTaskGenerator(RenderChunk renderChunkIn, ChunkCompileTaskGenerator.Type typeIn)
+    public ChunkCompileTaskGenerator(RenderChunk p_i46560_1_, ChunkCompileTaskGenerator.Type p_i46560_2_, double p_i46560_3_)
     {
-        this.renderChunk = renderChunkIn;
-        this.type = typeIn;
+        this.renderChunk = p_i46560_1_;
+        this.type = p_i46560_2_;
+        this.distanceSq = p_i46560_3_;
     }
 
     public ChunkCompileTaskGenerator.Status getStatus()
@@ -74,7 +77,7 @@ public class ChunkCompileTaskGenerator
         {
             if (this.type == ChunkCompileTaskGenerator.Type.REBUILD_CHUNK && this.status != ChunkCompileTaskGenerator.Status.DONE)
             {
-                this.renderChunk.setNeedsUpdate(true);
+                this.renderChunk.setNeedsUpdate(false);
             }
 
             this.finished = true;
@@ -91,17 +94,17 @@ public class ChunkCompileTaskGenerator
         }
     }
 
-    public void addFinishRunnable(Runnable p_178539_1_)
+    public void addFinishRunnable(Runnable runnable)
     {
         this.lock.lock();
 
         try
         {
-            this.listFinishRunnables.add(p_178539_1_);
+            this.listFinishRunnables.add(runnable);
 
             if (this.finished)
             {
-                p_178539_1_.run();
+                runnable.run();
             }
         }
         finally
@@ -123,6 +126,16 @@ public class ChunkCompileTaskGenerator
     public boolean isFinished()
     {
         return this.finished;
+    }
+
+    public int compareTo(ChunkCompileTaskGenerator p_compareTo_1_)
+    {
+        return Doubles.compare(this.distanceSq, p_compareTo_1_.distanceSq);
+    }
+
+    public double getDistanceSq()
+    {
+        return this.distanceSq;
     }
 
     public static enum Status

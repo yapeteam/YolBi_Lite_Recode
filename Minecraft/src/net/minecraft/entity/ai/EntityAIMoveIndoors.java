@@ -1,14 +1,14 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 
 public class EntityAIMoveIndoors extends EntityAIBase
 {
-    private EntityCreature entityObj;
+    private final EntityCreature entityObj;
     private VillageDoorInfo doorInfo;
     private int insidePosX = -1;
     private int insidePosZ = -1;
@@ -26,7 +26,7 @@ public class EntityAIMoveIndoors extends EntityAIBase
     {
         BlockPos blockpos = new BlockPos(this.entityObj);
 
-        if ((!this.entityObj.worldObj.isDaytime() || this.entityObj.worldObj.isRaining() && !this.entityObj.worldObj.getBiomeGenForCoords(blockpos).canRain()) && !this.entityObj.worldObj.provider.getHasNoSky())
+        if ((!this.entityObj.world.isDaytime() || this.entityObj.world.isRaining() && !this.entityObj.world.getBiome(blockpos).canRain()) && this.entityObj.world.provider.func_191066_m())
         {
             if (this.entityObj.getRNG().nextInt(50) != 0)
             {
@@ -38,7 +38,7 @@ public class EntityAIMoveIndoors extends EntityAIBase
             }
             else
             {
-                Village village = this.entityObj.worldObj.getVillageCollection().getNearestVillage(blockpos, 14);
+                Village village = this.entityObj.world.getVillageCollection().getNearestVillage(blockpos, 14);
 
                 if (village == null)
                 {
@@ -78,11 +78,11 @@ public class EntityAIMoveIndoors extends EntityAIBase
 
         if (this.entityObj.getDistanceSq(blockpos) > 256.0D)
         {
-            Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(this.entityObj, 14, 3, new Vec3((double)i + 0.5D, (double)j, (double)k + 0.5D));
+            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.entityObj, 14, 3, new Vec3d((double)i + 0.5D, (double)j, (double)k + 0.5D));
 
-            if (vec3 != null)
+            if (vec3d != null)
             {
-                this.entityObj.getNavigator().tryMoveToXYZ(vec3.xCoord, vec3.yCoord, vec3.zCoord, 1.0D);
+                this.entityObj.getNavigator().tryMoveToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord, 1.0D);
             }
         }
         else

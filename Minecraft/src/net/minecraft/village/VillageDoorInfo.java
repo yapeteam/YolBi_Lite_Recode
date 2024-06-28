@@ -1,7 +1,7 @@
 package net.minecraft.village;
 
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public class VillageDoorInfo
 {
@@ -15,14 +15,25 @@ public class VillageDoorInfo
     private boolean isDetachedFromVillageFlag;
     private int doorOpeningRestrictionCounter;
 
-    public VillageDoorInfo(BlockPos pos, int p_i45871_2_, int p_i45871_3_, int p_i45871_4_)
+    public VillageDoorInfo(BlockPos pos, int deltaX, int deltaZ, int timestamp)
     {
-        this(pos, getFaceDirection(p_i45871_2_, p_i45871_3_), p_i45871_4_);
+        this(pos, getFaceDirection(deltaX, deltaZ), timestamp);
     }
 
     private static EnumFacing getFaceDirection(int deltaX, int deltaZ)
     {
-        return deltaX < 0 ? EnumFacing.WEST : (deltaX > 0 ? EnumFacing.EAST : (deltaZ < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH));
+        if (deltaX < 0)
+        {
+            return EnumFacing.WEST;
+        }
+        else if (deltaX > 0)
+        {
+            return EnumFacing.EAST;
+        }
+        else
+        {
+            return deltaZ < 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
+        }
     }
 
     public VillageDoorInfo(BlockPos pos, EnumFacing facing, int timestamp)
@@ -51,7 +62,7 @@ public class VillageDoorInfo
         return (int)this.insideBlock.distanceSq(pos);
     }
 
-    public boolean func_179850_c(BlockPos pos)
+    public boolean isInsideSide(BlockPos pos)
     {
         int i = pos.getX() - this.doorBlockPos.getX();
         int j = pos.getZ() - this.doorBlockPos.getY();
@@ -98,7 +109,7 @@ public class VillageDoorInfo
         return this.lastActivityTimestamp;
     }
 
-    public void func_179849_a(int timestamp)
+    public void setLastActivityTimestamp(int timestamp)
     {
         this.lastActivityTimestamp = timestamp;
     }
@@ -111,5 +122,10 @@ public class VillageDoorInfo
     public void setIsDetachedFromVillageFlag(boolean detached)
     {
         this.isDetachedFromVillageFlag = detached;
+    }
+
+    public EnumFacing getInsideDirection()
+    {
+        return this.insideDirection;
     }
 }

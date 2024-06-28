@@ -4,34 +4,35 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumHand;
 
 public class ItemNameTag extends Item
 {
     public ItemNameTag()
     {
-        this.setCreativeTab(CreativeTabs.tabTools);
+        this.setCreativeTab(CreativeTabs.TOOLS);
     }
 
     /**
      * Returns true if the item can be used on the given entity, e.g. shears on sheep.
      */
-    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target)
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand)
     {
-        if (!stack.hasDisplayName())
+        if (stack.hasDisplayName() && !(target instanceof EntityPlayer))
         {
-            return false;
-        }
-        else if (target instanceof EntityLiving)
-        {
-            EntityLiving entityliving = (EntityLiving)target;
-            entityliving.setCustomNameTag(stack.getDisplayName());
-            entityliving.enablePersistence();
-            --stack.stackSize;
+            target.setCustomNameTag(stack.getDisplayName());
+
+            if (target instanceof EntityLiving)
+            {
+                ((EntityLiving)target).enablePersistence();
+            }
+
+            stack.func_190918_g(1);
             return true;
         }
         else
         {
-            return super.itemInteractionForEntity(stack, playerIn, target);
+            return false;
         }
     }
 }

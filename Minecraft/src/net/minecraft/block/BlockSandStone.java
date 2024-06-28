@@ -1,16 +1,17 @@
 package net.minecraft.block;
 
-import java.util.List;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public class BlockSandStone extends Block
 {
@@ -18,9 +19,9 @@ public class BlockSandStone extends Block
 
     public BlockSandStone()
     {
-        super(Material.rock);
+        super(Material.ROCK);
         this.setDefaultState(this.blockState.getBaseState().withProperty(TYPE, BlockSandStone.EnumType.DEFAULT));
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -35,20 +36,20 @@ public class BlockSandStone extends Block
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockSandStone.EnumType blocksandstone$enumtype : BlockSandStone.EnumType.values())
         {
-            list.add(new ItemStack(itemIn, 1, blocksandstone$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blocksandstone$enumtype.getMetadata()));
         }
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
-        return MapColor.sandColor;
+        return MapColor.SAND;
     }
 
     /**
@@ -67,9 +68,9 @@ public class BlockSandStone extends Block
         return ((BlockSandStone.EnumType)state.getValue(TYPE)).getMetadata();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {TYPE});
+        return new BlockStateContainer(this, new IProperty[] {TYPE});
     }
 
     public static enum EnumType implements IStringSerializable

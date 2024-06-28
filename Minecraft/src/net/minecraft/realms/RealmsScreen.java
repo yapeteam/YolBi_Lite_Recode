@@ -26,7 +26,7 @@ public class RealmsScreen
     protected Minecraft minecraft;
     public int width;
     public int height;
-    private GuiScreenRealmsProxy proxy = new GuiScreenRealmsProxy(this);
+    private final GuiScreenRealmsProxy proxy = new GuiScreenRealmsProxy(this);
 
     public GuiScreenRealmsProxy getProxy()
     {
@@ -43,7 +43,7 @@ public class RealmsScreen
 
     public void drawCenteredString(String p_drawCenteredString_1_, int p_drawCenteredString_2_, int p_drawCenteredString_3_, int p_drawCenteredString_4_)
     {
-        this.proxy.func_154325_a(p_drawCenteredString_1_, p_drawCenteredString_2_, p_drawCenteredString_3_, p_drawCenteredString_4_);
+        this.proxy.drawCenteredString(p_drawCenteredString_1_, p_drawCenteredString_2_, p_drawCenteredString_3_, p_drawCenteredString_4_);
     }
 
     public void drawString(String p_drawString_1_, int p_drawString_2_, int p_drawString_3_, int p_drawString_4_)
@@ -53,7 +53,7 @@ public class RealmsScreen
 
     public void drawString(String p_drawString_1_, int p_drawString_2_, int p_drawString_3_, int p_drawString_4_, boolean p_drawString_5_)
     {
-        this.proxy.func_154322_b(p_drawString_1_, p_drawString_2_, p_drawString_3_, p_drawString_4_, false);
+        this.proxy.drawString(p_drawString_1_, p_drawString_2_, p_drawString_3_, p_drawString_4_, false);
     }
 
     public void blit(int p_blit_1_, int p_blit_2_, int p_blit_3_, int p_blit_4_, int p_blit_5_, int p_blit_6_)
@@ -93,9 +93,9 @@ public class RealmsScreen
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_)
     {
-        for (int i = 0; i < this.proxy.func_154320_j().size(); ++i)
+        for (int i = 0; i < this.proxy.buttons().size(); ++i)
         {
-            ((RealmsButton)this.proxy.func_154320_j().get(i)).render(p_render_1_, p_render_2_);
+            ((RealmsButton)this.proxy.buttons().get(i)).render(p_render_1_, p_render_2_, p_render_3_);
         }
     }
 
@@ -149,22 +149,22 @@ public class RealmsScreen
 
     public int fontLineHeight()
     {
-        return this.proxy.func_154329_h();
+        return this.proxy.getFontHeight();
     }
 
     public int fontWidth(String p_fontWidth_1_)
     {
-        return this.proxy.func_154326_c(p_fontWidth_1_);
+        return this.proxy.getStringWidth(p_fontWidth_1_);
     }
 
     public void fontDrawShadow(String p_fontDrawShadow_1_, int p_fontDrawShadow_2_, int p_fontDrawShadow_3_, int p_fontDrawShadow_4_)
     {
-        this.proxy.func_154319_c(p_fontDrawShadow_1_, p_fontDrawShadow_2_, p_fontDrawShadow_3_, p_fontDrawShadow_4_);
+        this.proxy.fontDrawShadow(p_fontDrawShadow_1_, p_fontDrawShadow_2_, p_fontDrawShadow_3_, p_fontDrawShadow_4_);
     }
 
     public List<String> fontSplit(String p_fontSplit_1_, int p_fontSplit_2_)
     {
-        return this.proxy.func_154323_a(p_fontSplit_1_, p_fontSplit_2_);
+        return this.proxy.fontSplit(p_fontSplit_1_, p_fontSplit_2_);
     }
 
     public void buttonClicked(RealmsButton p_buttonClicked_1_)
@@ -183,22 +183,22 @@ public class RealmsScreen
 
     public void buttonsClear()
     {
-        this.proxy.func_154324_i();
+        this.proxy.buttonsClear();
     }
 
     public void buttonsAdd(RealmsButton p_buttonsAdd_1_)
     {
-        this.proxy.func_154327_a(p_buttonsAdd_1_);
+        this.proxy.buttonsAdd(p_buttonsAdd_1_);
     }
 
     public List<RealmsButton> buttons()
     {
-        return this.proxy.func_154320_j();
+        return this.proxy.buttons();
     }
 
     public void buttonsRemove(RealmsButton p_buttonsRemove_1_)
     {
-        this.proxy.func_154328_b(p_buttonsRemove_1_);
+        this.proxy.buttonsRemove(p_buttonsRemove_1_);
     }
 
     public RealmsEditBox newEditBox(int p_newEditBox_1_, int p_newEditBox_2_, int p_newEditBox_3_, int p_newEditBox_4_, int p_newEditBox_5_)
@@ -236,7 +236,7 @@ public class RealmsScreen
 
     public static String getLocalizedString(String p_getLocalizedString_0_)
     {
-        return I18n.format(p_getLocalizedString_0_, new Object[0]);
+        return I18n.format(p_getLocalizedString_0_);
     }
 
     public static String getLocalizedString(String p_getLocalizedString_0_, Object... p_getLocalizedString_1_)

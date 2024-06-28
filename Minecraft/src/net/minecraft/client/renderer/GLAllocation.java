@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
 public class GLAllocation
@@ -15,11 +14,11 @@ public class GLAllocation
      */
     public static synchronized int generateDisplayLists(int range)
     {
-        int i = GL11.glGenLists(range);
+        int i = GlStateManager.glGenLists(range);
 
         if (i == 0)
         {
-            int j = GL11.glGetError();
+            int j = GlStateManager.glGetError();
             String s = "No error code reported";
 
             if (j != 0)
@@ -37,12 +36,12 @@ public class GLAllocation
 
     public static synchronized void deleteDisplayLists(int list, int range)
     {
-        GL11.glDeleteLists(list, range);
+        GlStateManager.glDeleteLists(list, range);
     }
 
     public static synchronized void deleteDisplayLists(int list)
     {
-        GL11.glDeleteLists(list, 1);
+        deleteDisplayLists(list, 1);
     }
 
     /**

@@ -3,6 +3,7 @@ package net.minecraft.entity.ai;
 import com.google.common.base.Predicate;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
@@ -20,7 +21,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
     private static final Logger LOGGER = LogManager.getLogger();
 
     /** The entity that use this AI */
-    private EntityLiving entityLiving;
+    private final EntityLiving entityLiving;
     private final Predicate<Entity> predicate;
 
     /** Used to compare two entities */
@@ -40,7 +41,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
 
         this.predicate = new Predicate<Entity>()
         {
-            public boolean apply(Entity p_apply_1_)
+            public boolean apply(@Nullable Entity p_apply_1_)
             {
                 if (!(p_apply_1_ instanceof EntityPlayer))
                 {
@@ -84,7 +85,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
     public boolean shouldExecute()
     {
         double d0 = this.maxTargetRange();
-        List<EntityPlayer> list = this.entityLiving.worldObj.<EntityPlayer>getEntitiesWithinAABB(EntityPlayer.class, this.entityLiving.getEntityBoundingBox().expand(d0, 4.0D, d0), this.predicate);
+        List<EntityPlayer> list = this.entityLiving.world.<EntityPlayer>getEntitiesWithinAABB(EntityPlayer.class, this.entityLiving.getEntityBoundingBox().expand(d0, 4.0D, d0), this.predicate);
         Collections.sort(list, this.sorter);
 
         if (list.isEmpty())
@@ -93,7 +94,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
         }
         else
         {
-            this.entityTarget = (EntityLivingBase)list.get(0);
+            this.entityTarget = list.get(0);
             return true;
         }
     }
@@ -129,7 +130,15 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
             else
             {
                 double d0 = this.maxTargetRange();
-                return this.entityLiving.getDistanceSqToEntity(entitylivingbase) > d0 * d0 ? false : !(entitylivingbase instanceof EntityPlayerMP) || !((EntityPlayerMP)entitylivingbase).theItemInWorldManager.isCreative();
+
+                if (this.entityLiving.getDistanceSqToEntity(entitylivingbase) > d0 * d0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return !(entitylivingbase instanceof EntityPlayerMP) || !((EntityPlayerMP)entitylivingbase).interactionManager.isCreative();
+                }
             }
         }
     }
@@ -157,7 +166,7 @@ public class EntityAIFindEntityNearestPlayer extends EntityAIBase
      */
     protected double maxTargetRange()
     {
-        IAttributeInstance iattributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.followRange);
+        IAttributeInstance iattributeinstance = this.entityLiving.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
         return iattributeinstance == null ? 16.0D : iattributeinstance.getAttributeValue();
     }
 }

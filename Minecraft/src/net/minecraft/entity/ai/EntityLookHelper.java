@@ -3,11 +3,11 @@ package net.minecraft.entity.ai;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class EntityLookHelper
 {
-    private EntityLiving entity;
+    private final EntityLiving entity;
 
     /**
      * The amount of change that is made each update for an entity facing a direction.
@@ -78,9 +78,9 @@ public class EntityLookHelper
             double d0 = this.posX - this.entity.posX;
             double d1 = this.posY - (this.entity.posY + (double)this.entity.getEyeHeight());
             double d2 = this.posZ - this.entity.posZ;
-            double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);
-            float f = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI) - 90.0F;
-            float f1 = (float)(-(MathHelper.atan2(d1, d3) * 180.0D / Math.PI));
+            double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
+            float f = (float)(MathHelper.atan2(d2, d0) * (180D / Math.PI)) - 90.0F;
+            float f1 = (float)(-(MathHelper.atan2(d1, d3) * (180D / Math.PI)));
             this.entity.rotationPitch = this.updateRotation(this.entity.rotationPitch, f1, this.deltaLookPitch);
             this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, f, this.deltaLookYaw);
         }
@@ -89,7 +89,7 @@ public class EntityLookHelper
             this.entity.rotationYawHead = this.updateRotation(this.entity.rotationYawHead, this.entity.renderYawOffset, 10.0F);
         }
 
-        float f2 = MathHelper.wrapAngleTo180_float(this.entity.rotationYawHead - this.entity.renderYawOffset);
+        float f2 = MathHelper.wrapDegrees(this.entity.rotationYawHead - this.entity.renderYawOffset);
 
         if (!this.entity.getNavigator().noPath())
         {
@@ -107,7 +107,7 @@ public class EntityLookHelper
 
     private float updateRotation(float p_75652_1_, float p_75652_2_, float p_75652_3_)
     {
-        float f = MathHelper.wrapAngleTo180_float(p_75652_2_ - p_75652_1_);
+        float f = MathHelper.wrapDegrees(p_75652_2_ - p_75652_1_);
 
         if (f > p_75652_3_)
         {

@@ -4,12 +4,12 @@ import net.minecraft.crash.CrashReport;
 
 public class ReportedException extends RuntimeException
 {
-    /** Instance of CrashReport. */
-    private final CrashReport theReportedExceptionCrashReport;
+    /** The crash report associated with this exception */
+    private final CrashReport crashReport;
 
     public ReportedException(CrashReport report)
     {
-        this.theReportedExceptionCrashReport = report;
+        this.crashReport = report;
     }
 
     /**
@@ -17,16 +17,16 @@ public class ReportedException extends RuntimeException
      */
     public CrashReport getCrashReport()
     {
-        return this.theReportedExceptionCrashReport;
+        return this.crashReport;
     }
 
     public Throwable getCause()
     {
-        return this.theReportedExceptionCrashReport.getCrashCause();
+        return this.crashReport.getCrashCause();
     }
 
     public String getMessage()
     {
-        return this.theReportedExceptionCrashReport.getDescription();
+        return this.crashReport.getDescription();
     }
 }

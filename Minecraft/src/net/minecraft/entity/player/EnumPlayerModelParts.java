@@ -1,7 +1,7 @@
 package net.minecraft.entity.player;
 
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public enum EnumPlayerModelParts
 {
@@ -16,14 +16,14 @@ public enum EnumPlayerModelParts
     private final int partId;
     private final int partMask;
     private final String partName;
-    private final IChatComponent field_179339_k;
+    private final ITextComponent name;
 
     private EnumPlayerModelParts(int partIdIn, String partNameIn)
     {
         this.partId = partIdIn;
         this.partMask = 1 << partIdIn;
         this.partName = partNameIn;
-        this.field_179339_k = new ChatComponentTranslation("options.modelPart." + partNameIn, new Object[0]);
+        this.name = new TextComponentTranslation("options.modelPart." + partNameIn, new Object[0]);
     }
 
     public int getPartMask()
@@ -41,8 +41,8 @@ public enum EnumPlayerModelParts
         return this.partName;
     }
 
-    public IChatComponent func_179326_d()
+    public ITextComponent getName()
     {
-        return this.field_179339_k;
+        return this.name;
     }
 }

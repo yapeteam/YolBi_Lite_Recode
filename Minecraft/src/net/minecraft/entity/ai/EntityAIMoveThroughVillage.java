@@ -3,24 +3,24 @@ package net.minecraft.entity.ai;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 
 public class EntityAIMoveThroughVillage extends EntityAIBase
 {
-    private EntityCreature theEntity;
-    private double movementSpeed;
+    private final EntityCreature theEntity;
+    private final double movementSpeed;
 
     /** The PathNavigate of our entity. */
-    private PathEntity entityPathNavigate;
+    private Path entityPathNavigate;
     private VillageDoorInfo doorInfo;
-    private boolean isNocturnal;
-    private List<VillageDoorInfo> doorList = Lists.<VillageDoorInfo>newArrayList();
+    private final boolean isNocturnal;
+    private final List<VillageDoorInfo> doorList = Lists.<VillageDoorInfo>newArrayList();
 
     public EntityAIMoveThroughVillage(EntityCreature theEntityIn, double movementSpeedIn, boolean isNocturnalIn)
     {
@@ -42,13 +42,13 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
     {
         this.resizeDoorList();
 
-        if (this.isNocturnal && this.theEntity.worldObj.isDaytime())
+        if (this.isNocturnal && this.theEntity.world.isDaytime())
         {
             return false;
         }
         else
         {
-            Village village = this.theEntity.worldObj.getVillageCollection().getNearestVillage(new BlockPos(this.theEntity), 0);
+            Village village = this.theEntity.world.getVillageCollection().getNearestVillage(new BlockPos(this.theEntity), 0);
 
             if (village == null)
             {
@@ -76,16 +76,16 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
                     }
                     else
                     {
-                        Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 10, 7, new Vec3((double)this.doorInfo.getDoorBlockPos().getX(), (double)this.doorInfo.getDoorBlockPos().getY(), (double)this.doorInfo.getDoorBlockPos().getZ()));
+                        Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 10, 7, new Vec3d((double)this.doorInfo.getDoorBlockPos().getX(), (double)this.doorInfo.getDoorBlockPos().getY(), (double)this.doorInfo.getDoorBlockPos().getZ()));
 
-                        if (vec3 == null)
+                        if (vec3d == null)
                         {
                             return false;
                         }
                         else
                         {
                             pathnavigateground.setBreakDoors(false);
-                            this.entityPathNavigate = this.theEntity.getNavigator().getPathToXYZ(vec3.xCoord, vec3.yCoord, vec3.zCoord);
+                            this.entityPathNavigate = this.theEntity.getNavigator().getPathToXYZ(vec3d.xCoord, vec3d.yCoord, vec3d.zCoord);
                             pathnavigateground.setBreakDoors(flag);
                             return this.entityPathNavigate != null;
                         }
@@ -137,7 +137,7 @@ public class EntityAIMoveThroughVillage extends EntityAIBase
 
         for (VillageDoorInfo villagedoorinfo1 : villageIn.getVillageDoorInfoList())
         {
-            int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor_double(this.theEntity.posX), MathHelper.floor_double(this.theEntity.posY), MathHelper.floor_double(this.theEntity.posZ));
+            int j = villagedoorinfo1.getDistanceSquared(MathHelper.floor(this.theEntity.posX), MathHelper.floor(this.theEntity.posY), MathHelper.floor(this.theEntity.posZ));
 
             if (j < i && !this.doesDoorListContain(villagedoorinfo1))
             {

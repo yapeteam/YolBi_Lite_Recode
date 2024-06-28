@@ -1,38 +1,72 @@
 package net.minecraft.block;
 
 import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.block.material.EnumPushReaction;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityBed;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
 
-public class BlockBed extends BlockDirectional
+public class BlockBed extends BlockHorizontal implements ITileEntityProvider
 {
     public static final PropertyEnum<BlockBed.EnumPartType> PART = PropertyEnum.<BlockBed.EnumPartType>create("part", BlockBed.EnumPartType.class);
     public static final PropertyBool OCCUPIED = PropertyBool.create("occupied");
+    protected static final AxisAlignedBB BED_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D);
 
     public BlockBed()
     {
-        super(Material.cloth);
+        super(Material.CLOTH);
         this.setDefaultState(this.blockState.getBaseState().withProperty(PART, BlockBed.EnumPartType.FOOT).withProperty(OCCUPIED, Boolean.valueOf(false)));
-        this.setBedBounds();
+        this.isBlockContainer = true;
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    /**
+     * Get the MapColor for this Block and the given BlockState
+     */
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
+    {
+        if (state.getValue(PART) == BlockBed.EnumPartType.FOOT)
+        {
+            TileEntity tileentity = p_180659_2_.getTileEntity(p_180659_3_);
+
+            if (tileentity instanceof TileEntityBed)
+            {
+                EnumDyeColor enumdyecolor = ((TileEntityBed)tileentity).func_193048_a();
+                return MapColor.func_193558_a(enumdyecolor);
+            }
+        }
+
+        return MapColor.CLOTH;
+    }
+
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -51,7 +85,7 @@ public class BlockBed extends BlockDirectional
                 }
             }
 
-            if (worldIn.provider.canRespawnHere() && worldIn.getBiomeGenForCoords(pos) != BiomeGenBase.hell)
+            if (worldIn.provider.canRespawnHere() && worldIn.getBiome(pos) != Biomes.HELL)
             {
                 if (((Boolean)state.getValue(OCCUPIED)).booleanValue())
                 {
@@ -59,7 +93,7 @@ public class BlockBed extends BlockDirectional
 
                     if (entityplayer != null)
                     {
-                        playerIn.addChatComponentMessage(new ChatComponentTranslation("tile.bed.occupied", new Object[0]));
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.occupied", new Object[0]), true);
                         return true;
                     }
 
@@ -67,9 +101,9 @@ public class BlockBed extends BlockDirectional
                     worldIn.setBlockState(pos, state, 4);
                 }
 
-                EntityPlayer.EnumStatus entityplayer$enumstatus = playerIn.trySleep(pos);
+                EntityPlayer.SleepResult entityplayer$sleepresult = playerIn.trySleep(pos);
 
-                if (entityplayer$enumstatus == EntityPlayer.EnumStatus.OK)
+                if (entityplayer$sleepresult == EntityPlayer.SleepResult.OK)
                 {
                     state = state.withProperty(OCCUPIED, Boolean.valueOf(true));
                     worldIn.setBlockState(pos, state, 4);
@@ -77,13 +111,17 @@ public class BlockBed extends BlockDirectional
                 }
                 else
                 {
-                    if (entityplayer$enumstatus == EntityPlayer.EnumStatus.NOT_POSSIBLE_NOW)
+                    if (entityplayer$sleepresult == EntityPlayer.SleepResult.NOT_POSSIBLE_NOW)
                     {
-                        playerIn.addChatComponentMessage(new ChatComponentTranslation("tile.bed.noSleep", new Object[0]));
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.noSleep", new Object[0]), true);
                     }
-                    else if (entityplayer$enumstatus == EntityPlayer.EnumStatus.NOT_SAFE)
+                    else if (entityplayer$sleepresult == EntityPlayer.SleepResult.NOT_SAFE)
                     {
-                        playerIn.addChatComponentMessage(new ChatComponentTranslation("tile.bed.notSafe", new Object[0]));
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.notSafe", new Object[0]), true);
+                    }
+                    else if (entityplayer$sleepresult == EntityPlayer.SleepResult.TOO_FAR_AWAY)
+                    {
+                        playerIn.addChatComponentMessage(new TextComponentTranslation("tile.bed.tooFarAway", new Object[0]), true);
                     }
 
                     return true;
@@ -105,11 +143,12 @@ public class BlockBed extends BlockDirectional
         }
     }
 
+    @Nullable
     private EntityPlayer getPlayerInBed(World worldIn, BlockPos pos)
     {
         for (EntityPlayer entityplayer : worldIn.playerEntities)
         {
-            if (entityplayer.isPlayerSleeping() && entityplayer.playerLocation.equals(pos))
+            if (entityplayer.isPlayerSleeping() && entityplayer.bedLocation.equals(pos))
             {
                 return entityplayer;
             }
@@ -118,7 +157,7 @@ public class BlockBed extends BlockDirectional
         return null;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -126,38 +165,64 @@ public class BlockBed extends BlockDirectional
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    /**
+     * Block's chance to react to a living entity falling on it.
+     */
+    public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance)
     {
-        this.setBedBounds();
+        super.onFallenUpon(worldIn, pos, entityIn, fallDistance * 0.5F);
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when an Entity lands on this Block. This method *must* update motionY because the entity will not do that
+     * on its own
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void onLanded(World worldIn, Entity entityIn)
+    {
+        if (entityIn.isSneaking())
+        {
+            super.onLanded(worldIn, entityIn);
+        }
+        else if (entityIn.motionY < 0.0D)
+        {
+            entityIn.motionY = -entityIn.motionY * 0.6600000262260437D;
+
+            if (!(entityIn instanceof EntityLivingBase))
+            {
+                entityIn.motionY *= 0.8D;
+            }
+        }
+    }
+
+    /**
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
+     */
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
 
-        if (state.getValue(PART) == BlockBed.EnumPartType.HEAD)
+        if (state.getValue(PART) == BlockBed.EnumPartType.FOOT)
         {
-            if (worldIn.getBlockState(pos.offset(enumfacing.getOpposite())).getBlock() != this)
+            if (worldIn.getBlockState(pos.offset(enumfacing)).getBlock() != this)
             {
                 worldIn.setBlockToAir(pos);
             }
         }
-        else if (worldIn.getBlockState(pos.offset(enumfacing)).getBlock() != this)
+        else if (worldIn.getBlockState(pos.offset(enumfacing.getOpposite())).getBlock() != this)
         {
-            worldIn.setBlockToAir(pos);
-
             if (!worldIn.isRemote)
             {
                 this.dropBlockAsItem(worldIn, pos, state, 0);
             }
+
+            worldIn.setBlockToAir(pos);
         }
     }
 
@@ -166,13 +231,20 @@ public class BlockBed extends BlockDirectional
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return state.getValue(PART) == BlockBed.EnumPartType.HEAD ? null : Items.bed;
+        return state.getValue(PART) == BlockBed.EnumPartType.FOOT ? Items.field_190931_a : Items.BED;
     }
 
-    private void setBedBounds()
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5625F, 1.0F);
+        return BED_AABB;
     }
+
+    public boolean func_190946_v(IBlockState p_190946_1_)
+    {
+        return true;
+    }
+
+    @Nullable
 
     /**
      * Returns a safe BlockPos to disembark the bed
@@ -215,7 +287,7 @@ public class BlockBed extends BlockDirectional
 
     protected static boolean hasRoomForPlayer(World worldIn, BlockPos pos)
     {
-        return World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && !worldIn.getBlockState(pos).getBlock().getMaterial().isSolid() && !worldIn.getBlockState(pos.up()).getBlock().getMaterial().isSolid();
+        return worldIn.getBlockState(pos.down()).isFullyOpaque() && !worldIn.getBlockState(pos).getMaterial().isSolid() && !worldIn.getBlockState(pos.up()).getMaterial().isSolid();
     }
 
     /**
@@ -223,38 +295,81 @@ public class BlockBed extends BlockDirectional
      */
     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
     {
-        if (state.getValue(PART) == BlockBed.EnumPartType.FOOT)
+        if (state.getValue(PART) == BlockBed.EnumPartType.HEAD)
         {
-            super.dropBlockAsItemWithChance(worldIn, pos, state, chance, 0);
+            TileEntity tileentity = worldIn.getTileEntity(pos);
+            EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).func_193048_a() : EnumDyeColor.RED;
+            spawnAsEntity(worldIn, pos, new ItemStack(Items.BED, 1, enumdyecolor.getMetadata()));
         }
     }
 
-    public int getMobilityFlag()
+    public EnumPushReaction getMobilityFlag(IBlockState state)
     {
-        return 1;
+        return EnumPushReaction.DESTROY;
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
     }
 
-    public Item getItem(World worldIn, BlockPos pos)
+    /**
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
+     */
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return Items.bed;
+        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
+
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
+    {
+        BlockPos blockpos = pos;
+
+        if (state.getValue(PART) == BlockBed.EnumPartType.FOOT)
+        {
+            blockpos = pos.offset((EnumFacing)state.getValue(FACING));
+        }
+
+        TileEntity tileentity = worldIn.getTileEntity(blockpos);
+        EnumDyeColor enumdyecolor = tileentity instanceof TileEntityBed ? ((TileEntityBed)tileentity).func_193048_a() : EnumDyeColor.RED;
+        return new ItemStack(Items.BED, 1, enumdyecolor.getMetadata());
     }
 
     public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
     {
-        if (player.capabilities.isCreativeMode && state.getValue(PART) == BlockBed.EnumPartType.HEAD)
+        if (player.capabilities.isCreativeMode && state.getValue(PART) == BlockBed.EnumPartType.FOOT)
         {
-            BlockPos blockpos = pos.offset(((EnumFacing)state.getValue(FACING)).getOpposite());
+            BlockPos blockpos = pos.offset((EnumFacing)state.getValue(FACING));
 
             if (worldIn.getBlockState(blockpos).getBlock() == this)
             {
                 worldIn.setBlockToAir(blockpos);
             }
         }
+    }
+
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te, ItemStack stack)
+    {
+        if (state.getValue(PART) == BlockBed.EnumPartType.HEAD && te instanceof TileEntityBed)
+        {
+            TileEntityBed tileentitybed = (TileEntityBed)te;
+            ItemStack itemstack = tileentitybed.func_193049_f();
+            spawnAsEntity(worldIn, pos, itemstack);
+        }
+        else
+        {
+            super.harvestBlock(worldIn, player, pos, state, (TileEntity)null, stack);
+        }
+    }
+
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.breakBlock(worldIn, pos, state);
+        worldIn.removeTileEntity(pos);
     }
 
     /**
@@ -286,6 +401,24 @@ public class BlockBed extends BlockDirectional
     }
 
     /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
+    {
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
+
+    /**
      * Convert the BlockState into the correct metadata value
      */
     public int getMetaFromState(IBlockState state)
@@ -306,9 +439,27 @@ public class BlockBed extends BlockDirectional
         return i;
     }
 
-    protected BlockState createBlockState()
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
     {
-        return new BlockState(this, new IProperty[] {FACING, PART, OCCUPIED});
+        return BlockFaceShape.UNDEFINED;
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING, PART, OCCUPIED});
+    }
+
+    /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     */
+    public TileEntity createNewTileEntity(World worldIn, int meta)
+    {
+        return new TileEntityBed();
+    }
+
+    public static boolean func_193385_b(int p_193385_0_)
+    {
+        return (p_193385_0_ & 8) != 0;
     }
 
     public static enum EnumPartType implements IStringSerializable

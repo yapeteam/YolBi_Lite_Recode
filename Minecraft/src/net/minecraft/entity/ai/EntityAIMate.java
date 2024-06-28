@@ -2,19 +2,19 @@ package net.minecraft.entity.ai;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityCow;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.stats.AchievementList;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class EntityAIMate extends EntityAIBase
 {
-    private EntityAnimal theAnimal;
+    private final EntityAnimal theAnimal;
+    private final Class <? extends EntityAnimal > field_190857_e;
     World theWorld;
     private EntityAnimal targetMate;
 
@@ -28,9 +28,15 @@ public class EntityAIMate extends EntityAIBase
 
     public EntityAIMate(EntityAnimal animal, double speedIn)
     {
-        this.theAnimal = animal;
-        this.theWorld = animal.worldObj;
-        this.moveSpeed = speedIn;
+        this(animal, speedIn, animal.getClass());
+    }
+
+    public EntityAIMate(EntityAnimal p_i47306_1_, double p_i47306_2_, Class <? extends EntityAnimal > p_i47306_4_)
+    {
+        this.theAnimal = p_i47306_1_;
+        this.theWorld = p_i47306_1_.world;
+        this.field_190857_e = p_i47306_4_;
+        this.moveSpeed = p_i47306_2_;
         this.setMutexBits(3);
     }
 
@@ -88,8 +94,7 @@ public class EntityAIMate extends EntityAIBase
      */
     private EntityAnimal getNearbyMate()
     {
-        float f = 8.0F;
-        List<EntityAnimal> list = this.theWorld.<EntityAnimal>getEntitiesWithinAABB(this.theAnimal.getClass(), this.theAnimal.getEntityBoundingBox().expand((double)f, (double)f, (double)f));
+        List<EntityAnimal> list = this.theWorld.<EntityAnimal>getEntitiesWithinAABB(this.field_190857_e, this.theAnimal.getEntityBoundingBox().expandXyz(8.0D));
         double d0 = Double.MAX_VALUE;
         EntityAnimal entityanimal = null;
 
@@ -114,21 +119,17 @@ public class EntityAIMate extends EntityAIBase
 
         if (entityageable != null)
         {
-            EntityPlayer entityplayer = this.theAnimal.getPlayerInLove();
+            EntityPlayerMP entityplayermp = this.theAnimal.func_191993_do();
 
-            if (entityplayer == null && this.targetMate.getPlayerInLove() != null)
+            if (entityplayermp == null && this.targetMate.func_191993_do() != null)
             {
-                entityplayer = this.targetMate.getPlayerInLove();
+                entityplayermp = this.targetMate.func_191993_do();
             }
 
-            if (entityplayer != null)
+            if (entityplayermp != null)
             {
-                entityplayer.triggerAchievement(StatList.animalsBredStat);
-
-                if (this.theAnimal instanceof EntityCow)
-                {
-                    entityplayer.triggerAchievement(AchievementList.breedCow);
-                }
+                entityplayermp.addStat(StatList.ANIMALS_BRED);
+                CriteriaTriggers.field_192134_n.func_192168_a(entityplayermp, this.theAnimal, this.targetMate, entityageable);
             }
 
             this.theAnimal.setGrowingAge(6000);
@@ -148,7 +149,7 @@ public class EntityAIMate extends EntityAIBase
                 double d3 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
                 double d4 = 0.5D + random.nextDouble() * (double)this.theAnimal.height;
                 double d5 = random.nextDouble() * (double)this.theAnimal.width * 2.0D - (double)this.theAnimal.width;
-                this.theWorld.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + d3, this.theAnimal.posY + d4, this.theAnimal.posZ + d5, d0, d1, d2, new int[0]);
+                this.theWorld.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + d3, this.theAnimal.posY + d4, this.theAnimal.posZ + d5, d0, d1, d2);
             }
 
             if (this.theWorld.getGameRules().getBoolean("doMobLoot"))

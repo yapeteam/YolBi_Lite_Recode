@@ -11,10 +11,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBeacon;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -23,9 +25,9 @@ public class BlockBeacon extends BlockContainer
 {
     public BlockBeacon()
     {
-        super(Material.glass, MapColor.diamondColor);
+        super(Material.GLASS, MapColor.DIAMOND);
         this.setHardness(3.0F);
-        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setCreativeTab(CreativeTabs.MISC);
     }
 
     /**
@@ -36,7 +38,7 @@ public class BlockBeacon extends BlockContainer
         return new TileEntityBeacon();
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -49,7 +51,7 @@ public class BlockBeacon extends BlockContainer
             if (tileentity instanceof TileEntityBeacon)
             {
                 playerIn.displayGUIChest((TileEntityBeacon)tileentity);
-                playerIn.triggerAchievement(StatList.field_181730_N);
+                playerIn.addStat(StatList.BEACON_INTERACTION);
             }
 
             return true;
@@ -59,22 +61,23 @@ public class BlockBeacon extends BlockContainer
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
 
     /**
-     * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
      */
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return 3;
+        return EnumBlockRenderType.MODEL;
     }
 
     /**
@@ -96,9 +99,11 @@ public class BlockBeacon extends BlockContainer
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -109,14 +114,14 @@ public class BlockBeacon extends BlockContainer
         }
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
     }
 
     public static void updateColorAsync(final World worldIn, final BlockPos glassPos)
     {
-        HttpUtil.field_180193_a.submit(new Runnable()
+        HttpUtil.DOWNLOADER_EXECUTOR.submit(new Runnable()
         {
             public void run()
             {
@@ -133,7 +138,7 @@ public class BlockBeacon extends BlockContainer
 
                     IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-                    if (iblockstate.getBlock() == Blocks.beacon)
+                    if (iblockstate.getBlock() == Blocks.BEACON)
                     {
                         ((WorldServer)worldIn).addScheduledTask(new Runnable()
                         {
@@ -144,7 +149,7 @@ public class BlockBeacon extends BlockContainer
                                 if (tileentity instanceof TileEntityBeacon)
                                 {
                                     ((TileEntityBeacon)tileentity).updateBeacon();
-                                    worldIn.addBlockEvent(blockpos, Blocks.beacon, 1, 0);
+                                    worldIn.addBlockEvent(blockpos, Blocks.BEACON, 1, 0);
                                 }
                             }
                         });

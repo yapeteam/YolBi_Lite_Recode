@@ -1,17 +1,17 @@
 package net.minecraft.realms;
 
 import java.util.List;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class DisconnectedRealmsScreen extends RealmsScreen
 {
-    private String title;
-    private IChatComponent reason;
+    private final String title;
+    private final ITextComponent reason;
     private List<String> lines;
     private final RealmsScreen parent;
     private int textHeight;
 
-    public DisconnectedRealmsScreen(RealmsScreen parentIn, String unlocalizedTitle, IChatComponent reasonIn)
+    public DisconnectedRealmsScreen(RealmsScreen parentIn, String unlocalizedTitle, ITextComponent reasonIn)
     {
         this.parent = parentIn;
         this.title = getLocalizedString(unlocalizedTitle);
@@ -21,6 +21,7 @@ public class DisconnectedRealmsScreen extends RealmsScreen
     public void init()
     {
         Realms.setConnectedToRealms(false);
+        Realms.clearResourcePack();
         this.buttonsClear();
         this.lines = this.fontSplit(this.reason.getFormattedText(), this.width() - 50);
         this.textHeight = this.lines.size() * this.fontLineHeight();

@@ -14,7 +14,7 @@ public class EntityAIOcelotAttack extends EntityAIBase
     public EntityAIOcelotAttack(EntityLiving theEntityIn)
     {
         this.theEntity = theEntityIn;
-        this.theWorld = theEntityIn.worldObj;
+        this.theWorld = theEntityIn.world;
         this.setMutexBits(3);
     }
 
@@ -41,7 +41,18 @@ public class EntityAIOcelotAttack extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        return !this.theVictim.isEntityAlive() ? false : (this.theEntity.getDistanceSqToEntity(this.theVictim) > 225.0D ? false : !this.theEntity.getNavigator().noPath() || this.shouldExecute());
+        if (!this.theVictim.isEntityAlive())
+        {
+            return false;
+        }
+        else if (this.theEntity.getDistanceSqToEntity(this.theVictim) > 225.0D)
+        {
+            return false;
+        }
+        else
+        {
+            return !this.theEntity.getNavigator().noPath() || this.shouldExecute();
+        }
     }
 
     /**

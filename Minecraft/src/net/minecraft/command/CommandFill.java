@@ -1,7 +1,9 @@
 package net.minecraft.command;
 
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -9,8 +11,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class CommandFill extends CommandBase
@@ -40,9 +43,9 @@ public class CommandFill extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length < 7)
         {
@@ -54,30 +57,34 @@ public class CommandFill extends CommandBase
             BlockPos blockpos = parseBlockPos(sender, args, 0, false);
             BlockPos blockpos1 = parseBlockPos(sender, args, 3, false);
             Block block = CommandBase.getBlockByText(sender, args[6]);
-            int i = 0;
+            IBlockState iblockstate;
 
             if (args.length >= 8)
             {
-                i = parseInt(args[7], 0, 15);
+                iblockstate = func_190794_a(block, args[7]);
+            }
+            else
+            {
+                iblockstate = block.getDefaultState();
             }
 
             BlockPos blockpos2 = new BlockPos(Math.min(blockpos.getX(), blockpos1.getX()), Math.min(blockpos.getY(), blockpos1.getY()), Math.min(blockpos.getZ(), blockpos1.getZ()));
             BlockPos blockpos3 = new BlockPos(Math.max(blockpos.getX(), blockpos1.getX()), Math.max(blockpos.getY(), blockpos1.getY()), Math.max(blockpos.getZ(), blockpos1.getZ()));
-            int j = (blockpos3.getX() - blockpos2.getX() + 1) * (blockpos3.getY() - blockpos2.getY() + 1) * (blockpos3.getZ() - blockpos2.getZ() + 1);
+            int i = (blockpos3.getX() - blockpos2.getX() + 1) * (blockpos3.getY() - blockpos2.getY() + 1) * (blockpos3.getZ() - blockpos2.getZ() + 1);
 
-            if (j > 32768)
+            if (i > 32768)
             {
-                throw new CommandException("commands.fill.tooManyBlocks", new Object[] {Integer.valueOf(j), Integer.valueOf(32768)});
+                throw new CommandException("commands.fill.tooManyBlocks", new Object[] {i, Integer.valueOf(32768)});
             }
             else if (blockpos2.getY() >= 0 && blockpos3.getY() < 256)
             {
                 World world = sender.getEntityWorld();
 
-                for (int k = blockpos2.getZ(); k < blockpos3.getZ() + 16; k += 16)
+                for (int j = blockpos2.getZ(); j <= blockpos3.getZ(); j += 16)
                 {
-                    for (int l = blockpos2.getX(); l < blockpos3.getX() + 16; l += 16)
+                    for (int k = blockpos2.getX(); k <= blockpos3.getX(); k += 16)
                     {
-                        if (!world.isBlockLoaded(new BlockPos(l, blockpos3.getY() - blockpos2.getY(), k)))
+                        if (!world.isBlockLoaded(new BlockPos(k, blockpos3.getY() - blockpos2.getY(), j)))
                         {
                             throw new CommandException("commands.fill.outOfWorld", new Object[0]);
                         }
@@ -89,7 +96,7 @@ public class CommandFill extends CommandBase
 
                 if (args.length >= 10 && block.hasTileEntity())
                 {
-                    String s = getChatComponentFromNthArg(sender, args, 9).getUnformattedText();
+                    String s = buildString(args, 9);
 
                     try
                     {
@@ -103,60 +110,46 @@ public class CommandFill extends CommandBase
                 }
 
                 List<BlockPos> list = Lists.<BlockPos>newArrayList();
-                j = 0;
+                i = 0;
 
-                for (int i1 = blockpos2.getZ(); i1 <= blockpos3.getZ(); ++i1)
+                for (int l = blockpos2.getZ(); l <= blockpos3.getZ(); ++l)
                 {
-                    for (int j1 = blockpos2.getY(); j1 <= blockpos3.getY(); ++j1)
+                    for (int i1 = blockpos2.getY(); i1 <= blockpos3.getY(); ++i1)
                     {
-                        for (int k1 = blockpos2.getX(); k1 <= blockpos3.getX(); ++k1)
+                        for (int j1 = blockpos2.getX(); j1 <= blockpos3.getX(); ++j1)
                         {
-                            BlockPos blockpos4 = new BlockPos(k1, j1, i1);
+                            BlockPos blockpos4 = new BlockPos(j1, i1, l);
 
                             if (args.length >= 9)
                             {
-                                if (!args[8].equals("outline") && !args[8].equals("hollow"))
+                                if (!"outline".equals(args[8]) && !"hollow".equals(args[8]))
                                 {
-                                    if (args[8].equals("destroy"))
+                                    if ("destroy".equals(args[8]))
                                     {
                                         world.destroyBlock(blockpos4, true);
                                     }
-                                    else if (args[8].equals("keep"))
+                                    else if ("keep".equals(args[8]))
                                     {
                                         if (!world.isAirBlock(blockpos4))
                                         {
                                             continue;
                                         }
                                     }
-                                    else if (args[8].equals("replace") && !block.hasTileEntity())
+                                    else if ("replace".equals(args[8]) && !block.hasTileEntity() && args.length > 9)
                                     {
-                                        if (args.length > 9)
+                                        Block block1 = CommandBase.getBlockByText(sender, args[9]);
+
+                                        if (world.getBlockState(blockpos4).getBlock() != block1 || args.length > 10 && !"-1".equals(args[10]) && !"*".equals(args[10]) && !CommandBase.func_190791_b(block1, args[10]).apply(world.getBlockState(blockpos4)))
                                         {
-                                            Block block1 = CommandBase.getBlockByText(sender, args[9]);
-
-                                            if (world.getBlockState(blockpos4).getBlock() != block1)
-                                            {
-                                                continue;
-                                            }
-                                        }
-
-                                        if (args.length > 10)
-                                        {
-                                            int l1 = CommandBase.parseInt(args[10]);
-                                            IBlockState iblockstate = world.getBlockState(blockpos4);
-
-                                            if (iblockstate.getBlock().getMetaFromState(iblockstate) != l1)
-                                            {
-                                                continue;
-                                            }
+                                            continue;
                                         }
                                     }
                                 }
-                                else if (k1 != blockpos2.getX() && k1 != blockpos3.getX() && j1 != blockpos2.getY() && j1 != blockpos3.getY() && i1 != blockpos2.getZ() && i1 != blockpos3.getZ())
+                                else if (j1 != blockpos2.getX() && j1 != blockpos3.getX() && i1 != blockpos2.getY() && i1 != blockpos3.getY() && l != blockpos2.getZ() && l != blockpos3.getZ())
                                 {
-                                    if (args[8].equals("hollow"))
+                                    if ("hollow".equals(args[8]))
                                     {
-                                        world.setBlockState(blockpos4, Blocks.air.getDefaultState(), 2);
+                                        world.setBlockState(blockpos4, Blocks.AIR.getDefaultState(), 2);
                                         list.add(blockpos4);
                                     }
 
@@ -166,22 +159,15 @@ public class CommandFill extends CommandBase
 
                             TileEntity tileentity1 = world.getTileEntity(blockpos4);
 
-                            if (tileentity1 != null)
+                            if (tileentity1 != null && tileentity1 instanceof IInventory)
                             {
-                                if (tileentity1 instanceof IInventory)
-                                {
-                                    ((IInventory)tileentity1).clear();
-                                }
-
-                                world.setBlockState(blockpos4, Blocks.barrier.getDefaultState(), block == Blocks.barrier ? 2 : 4);
+                                ((IInventory)tileentity1).clear();
                             }
 
-                            IBlockState iblockstate1 = block.getStateFromMeta(i);
-
-                            if (world.setBlockState(blockpos4, iblockstate1, 2))
+                            if (world.setBlockState(blockpos4, iblockstate, 2))
                             {
                                 list.add(blockpos4);
-                                ++j;
+                                ++i;
 
                                 if (flag)
                                 {
@@ -203,17 +189,17 @@ public class CommandFill extends CommandBase
                 for (BlockPos blockpos5 : list)
                 {
                     Block block2 = world.getBlockState(blockpos5).getBlock();
-                    world.notifyNeighborsRespectDebug(blockpos5, block2);
+                    world.notifyNeighborsRespectDebug(blockpos5, block2, false);
                 }
 
-                if (j <= 0)
+                if (i <= 0)
                 {
                     throw new CommandException("commands.fill.failed", new Object[0]);
                 }
                 else
                 {
-                    sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, j);
-                    notifyOperators(sender, this, "commands.fill.success", new Object[] {Integer.valueOf(j)});
+                    sender.setCommandStat(CommandResultStats.Type.AFFECTED_BLOCKS, i);
+                    notifyCommandListener(sender, this, "commands.fill.success", new Object[] {i});
                 }
             }
             else
@@ -223,8 +209,27 @@ public class CommandFill extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length > 0 && args.length <= 3 ? func_175771_a(args, 0, pos) : (args.length > 3 && args.length <= 6 ? func_175771_a(args, 3, pos) : (args.length == 7 ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : (args.length == 9 ? getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep", "hollow", "outline"}): (args.length == 10 && "replace".equals(args[8]) ? getListOfStringsMatchingLastWord(args, Block.blockRegistry.getKeys()) : null))));
+        if (args.length > 0 && args.length <= 3)
+        {
+            return getTabCompletionCoordinate(args, 0, pos);
+        }
+        else if (args.length > 3 && args.length <= 6)
+        {
+            return getTabCompletionCoordinate(args, 3, pos);
+        }
+        else if (args.length == 7)
+        {
+            return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
+        }
+        else if (args.length == 9)
+        {
+            return getListOfStringsMatchingLastWord(args, new String[] {"replace", "destroy", "keep", "hollow", "outline"});
+        }
+        else
+        {
+            return args.length == 10 && "replace".equals(args[8]) ? getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys()) : Collections.emptyList();
+        }
     }
 }

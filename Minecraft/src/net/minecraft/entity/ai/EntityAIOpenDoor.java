@@ -33,7 +33,7 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
     public void startExecuting()
     {
         this.closeDoorTemporisation = 20;
-        this.doorBlock.toggleDoor(this.theEntity.worldObj, this.doorPosition, true);
+        this.doorBlock.toggleDoor(this.theEntity.world, this.doorPosition, true);
     }
 
     /**
@@ -43,7 +43,7 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
     {
         if (this.closeDoor)
         {
-            this.doorBlock.toggleDoor(this.theEntity.worldObj, this.doorPosition, false);
+            this.doorBlock.toggleDoor(this.theEntity.world, this.doorPosition, false);
         }
     }
 

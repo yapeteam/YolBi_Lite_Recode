@@ -2,6 +2,7 @@ package net.minecraft.entity.ai.attributes;
 
 import java.util.Collection;
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 public interface IAttributeInstance
 {
@@ -16,9 +17,11 @@ public interface IAttributeInstance
 
     Collection<AttributeModifier> getModifiersByOperation(int operation);
 
-    Collection<AttributeModifier> func_111122_c();
+    Collection<AttributeModifier> getModifiers();
 
     boolean hasModifier(AttributeModifier modifier);
+
+    @Nullable
 
     /**
      * Returns attribute modifier, if any, by the given UUID
@@ -28,6 +31,8 @@ public interface IAttributeInstance
     void applyModifier(AttributeModifier modifier);
 
     void removeModifier(AttributeModifier modifier);
+
+    void removeModifier(UUID p_188479_1_);
 
     void removeAllModifiers();
 

@@ -1,12 +1,9 @@
 package net.minecraft.world.gen.layer;
 
-import java.util.concurrent.Callable;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.util.ReportedException;
+import net.minecraft.init.Biomes;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.gen.ChunkProviderSettings;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 
 public abstract class GenLayer
 {
@@ -25,36 +22,34 @@ public abstract class GenLayer
     /** base seed to the LCG prng provided via the constructor */
     protected long baseSeed;
 
-    public static GenLayer[] initializeAllBiomeGenerators(long seed, WorldType p_180781_2_, String p_180781_3_)
+    public static GenLayer[] initializeAllBiomeGenerators(long seed, WorldType p_180781_2_, ChunkGeneratorSettings p_180781_3_)
     {
         GenLayer genlayer = new GenLayerIsland(1L);
         genlayer = new GenLayerFuzzyZoom(2000L, genlayer);
-        GenLayerAddIsland genlayeraddisland = new GenLayerAddIsland(1L, genlayer);
-        GenLayerZoom genlayerzoom = new GenLayerZoom(2001L, genlayeraddisland);
-        GenLayerAddIsland genlayeraddisland1 = new GenLayerAddIsland(2L, genlayerzoom);
+        GenLayer genlayeraddisland = new GenLayerAddIsland(1L, genlayer);
+        GenLayer genlayerzoom = new GenLayerZoom(2001L, genlayeraddisland);
+        GenLayer genlayeraddisland1 = new GenLayerAddIsland(2L, genlayerzoom);
         genlayeraddisland1 = new GenLayerAddIsland(50L, genlayeraddisland1);
         genlayeraddisland1 = new GenLayerAddIsland(70L, genlayeraddisland1);
-        GenLayerRemoveTooMuchOcean genlayerremovetoomuchocean = new GenLayerRemoveTooMuchOcean(2L, genlayeraddisland1);
-        GenLayerAddSnow genlayeraddsnow = new GenLayerAddSnow(2L, genlayerremovetoomuchocean);
-        GenLayerAddIsland genlayeraddisland2 = new GenLayerAddIsland(3L, genlayeraddsnow);
-        GenLayerEdge genlayeredge = new GenLayerEdge(2L, genlayeraddisland2, GenLayerEdge.Mode.COOL_WARM);
+        GenLayer genlayerremovetoomuchocean = new GenLayerRemoveTooMuchOcean(2L, genlayeraddisland1);
+        GenLayer genlayeraddsnow = new GenLayerAddSnow(2L, genlayerremovetoomuchocean);
+        GenLayer genlayeraddisland2 = new GenLayerAddIsland(3L, genlayeraddsnow);
+        GenLayer genlayeredge = new GenLayerEdge(2L, genlayeraddisland2, GenLayerEdge.Mode.COOL_WARM);
         genlayeredge = new GenLayerEdge(2L, genlayeredge, GenLayerEdge.Mode.HEAT_ICE);
         genlayeredge = new GenLayerEdge(3L, genlayeredge, GenLayerEdge.Mode.SPECIAL);
-        GenLayerZoom genlayerzoom1 = new GenLayerZoom(2002L, genlayeredge);
+        GenLayer genlayerzoom1 = new GenLayerZoom(2002L, genlayeredge);
         genlayerzoom1 = new GenLayerZoom(2003L, genlayerzoom1);
-        GenLayerAddIsland genlayeraddisland3 = new GenLayerAddIsland(4L, genlayerzoom1);
-        GenLayerAddMushroomIsland genlayeraddmushroomisland = new GenLayerAddMushroomIsland(5L, genlayeraddisland3);
-        GenLayerDeepOcean genlayerdeepocean = new GenLayerDeepOcean(4L, genlayeraddmushroomisland);
+        GenLayer genlayeraddisland3 = new GenLayerAddIsland(4L, genlayerzoom1);
+        GenLayer genlayeraddmushroomisland = new GenLayerAddMushroomIsland(5L, genlayeraddisland3);
+        GenLayer genlayerdeepocean = new GenLayerDeepOcean(4L, genlayeraddmushroomisland);
         GenLayer genlayer4 = GenLayerZoom.magnify(1000L, genlayerdeepocean, 0);
-        ChunkProviderSettings chunkprovidersettings = null;
         int i = 4;
         int j = i;
 
-        if (p_180781_2_ == WorldType.CUSTOMIZED && p_180781_3_.length() > 0)
+        if (p_180781_3_ != null)
         {
-            chunkprovidersettings = ChunkProviderSettings.Factory.jsonToFactory(p_180781_3_).func_177864_b();
-            i = chunkprovidersettings.biomeSize;
-            j = chunkprovidersettings.riverSize;
+            i = p_180781_3_.biomeSize;
+            j = p_180781_3_.riverSize;
         }
 
         if (p_180781_2_ == WorldType.LARGE_BIOMES)
@@ -62,17 +57,17 @@ public abstract class GenLayer
             i = 6;
         }
 
-        GenLayer lvt_8_1_ = GenLayerZoom.magnify(1000L, genlayer4, 0);
-        GenLayerRiverInit genlayerriverinit = new GenLayerRiverInit(100L, lvt_8_1_);
-        GenLayerBiome lvt_9_1_ = new GenLayerBiome(200L, genlayer4, p_180781_2_, p_180781_3_);
-        GenLayer genlayer6 = GenLayerZoom.magnify(1000L, lvt_9_1_, 2);
-        GenLayerBiomeEdge genlayerbiomeedge = new GenLayerBiomeEdge(1000L, genlayer6);
-        GenLayer lvt_10_1_ = GenLayerZoom.magnify(1000L, genlayerriverinit, 2);
-        GenLayer genlayerhills = new GenLayerHills(1000L, genlayerbiomeedge, lvt_10_1_);
+        GenLayer lvt_7_1_ = GenLayerZoom.magnify(1000L, genlayer4, 0);
+        GenLayer genlayerriverinit = new GenLayerRiverInit(100L, lvt_7_1_);
+        GenLayer lvt_8_1_ = new GenLayerBiome(200L, genlayer4, p_180781_2_, p_180781_3_);
+        GenLayer genlayer6 = GenLayerZoom.magnify(1000L, lvt_8_1_, 2);
+        GenLayer genlayerbiomeedge = new GenLayerBiomeEdge(1000L, genlayer6);
+        GenLayer lvt_9_1_ = GenLayerZoom.magnify(1000L, genlayerriverinit, 2);
+        GenLayer genlayerhills = new GenLayerHills(1000L, genlayerbiomeedge, lvt_9_1_);
         GenLayer genlayer5 = GenLayerZoom.magnify(1000L, genlayerriverinit, 2);
         genlayer5 = GenLayerZoom.magnify(1000L, genlayer5, j);
-        GenLayerRiver genlayerriver = new GenLayerRiver(1L, genlayer5);
-        GenLayerSmooth genlayersmooth = new GenLayerSmooth(1000L, genlayerriver);
+        GenLayer genlayerriver = new GenLayerRiver(1L, genlayer5);
+        GenLayer genlayersmooth = new GenLayerSmooth(1000L, genlayerriver);
         genlayerhills = new GenLayerRareBiome(1001L, genlayerhills);
 
         for (int k = 0; k < i; ++k)
@@ -90,8 +85,8 @@ public abstract class GenLayer
             }
         }
 
-        GenLayerSmooth genlayersmooth1 = new GenLayerSmooth(1000L, genlayerhills);
-        GenLayerRiverMix genlayerrivermix = new GenLayerRiverMix(100L, genlayersmooth1, genlayersmooth);
+        GenLayer genlayersmooth1 = new GenLayerSmooth(1000L, genlayerhills);
+        GenLayer genlayerrivermix = new GenLayerRiverMix(100L, genlayersmooth1, genlayersmooth);
         GenLayer genlayer3 = new GenLayerVoronoiZoom(10L, genlayerrivermix);
         genlayerrivermix.initWorldGenSeed(seed);
         genlayer3.initWorldGenSeed(seed);
@@ -147,7 +142,7 @@ public abstract class GenLayer
     }
 
     /**
-     * returns a LCG pseudo random number from [0, x). Args: int x
+     * Generates a pseudo random number between 0 and another integer.
      */
     protected int nextInt(int p_75902_1_)
     {
@@ -175,41 +170,26 @@ public abstract class GenLayer
         {
             return true;
         }
-        else if (biomeIDA != BiomeGenBase.mesaPlateau_F.biomeID && biomeIDA != BiomeGenBase.mesaPlateau.biomeID)
-        {
-            final BiomeGenBase biomegenbase = BiomeGenBase.getBiome(biomeIDA);
-            final BiomeGenBase biomegenbase1 = BiomeGenBase.getBiome(biomeIDB);
-
-            try
-            {
-                return biomegenbase != null && biomegenbase1 != null ? biomegenbase.isEqualTo(biomegenbase1) : false;
-            }
-            catch (Throwable throwable)
-            {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Comparing biomes");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Biomes being compared");
-                crashreportcategory.addCrashSection("Biome A ID", Integer.valueOf(biomeIDA));
-                crashreportcategory.addCrashSection("Biome B ID", Integer.valueOf(biomeIDB));
-                crashreportcategory.addCrashSectionCallable("Biome A", new Callable<String>()
-                {
-                    public String call() throws Exception
-                    {
-                        return String.valueOf((Object)biomegenbase);
-                    }
-                });
-                crashreportcategory.addCrashSectionCallable("Biome B", new Callable<String>()
-                {
-                    public String call() throws Exception
-                    {
-                        return String.valueOf((Object)biomegenbase1);
-                    }
-                });
-                throw new ReportedException(crashreport);
-            }
-        }
         else
         {
-            return biomeIDB == BiomeGenBase.mesaPlateau_F.biomeID || biomeIDB == BiomeGenBase.mesaPlateau.biomeID;
+            Biome biome = Biome.getBiome(biomeIDA);
+            Biome biome1 = Biome.getBiome(biomeIDB);
+
+            if (biome != null && biome1 != null)
+            {
+                if (biome != Biomes.MESA_ROCK && biome != Biomes.MESA_CLEAR_ROCK)
+                {
+                    return biome == biome1 || biome.getBiomeClass() == biome1.getBiomeClass();
+                }
+                else
+                {
+                    return biome1 == Biomes.MESA_ROCK || biome1 == Biomes.MESA_CLEAR_ROCK;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -218,7 +198,8 @@ public abstract class GenLayer
      */
     protected static boolean isBiomeOceanic(int p_151618_0_)
     {
-        return p_151618_0_ == BiomeGenBase.ocean.biomeID || p_151618_0_ == BiomeGenBase.deepOcean.biomeID || p_151618_0_ == BiomeGenBase.frozenOcean.biomeID;
+        Biome biome = Biome.getBiome(p_151618_0_);
+        return biome == Biomes.OCEAN || biome == Biomes.DEEP_OCEAN || biome == Biomes.FROZEN_OCEAN;
     }
 
     /**
@@ -234,6 +215,45 @@ public abstract class GenLayer
      */
     protected int selectModeOrRandom(int p_151617_1_, int p_151617_2_, int p_151617_3_, int p_151617_4_)
     {
-        return p_151617_2_ == p_151617_3_ && p_151617_3_ == p_151617_4_ ? p_151617_2_ : (p_151617_1_ == p_151617_2_ && p_151617_1_ == p_151617_3_ ? p_151617_1_ : (p_151617_1_ == p_151617_2_ && p_151617_1_ == p_151617_4_ ? p_151617_1_ : (p_151617_1_ == p_151617_3_ && p_151617_1_ == p_151617_4_ ? p_151617_1_ : (p_151617_1_ == p_151617_2_ && p_151617_3_ != p_151617_4_ ? p_151617_1_ : (p_151617_1_ == p_151617_3_ && p_151617_2_ != p_151617_4_ ? p_151617_1_ : (p_151617_1_ == p_151617_4_ && p_151617_2_ != p_151617_3_ ? p_151617_1_ : (p_151617_2_ == p_151617_3_ && p_151617_1_ != p_151617_4_ ? p_151617_2_ : (p_151617_2_ == p_151617_4_ && p_151617_1_ != p_151617_3_ ? p_151617_2_ : (p_151617_3_ == p_151617_4_ && p_151617_1_ != p_151617_2_ ? p_151617_3_ : this.selectRandom(new int[] {p_151617_1_, p_151617_2_, p_151617_3_, p_151617_4_}))))))))));
+        if (p_151617_2_ == p_151617_3_ && p_151617_3_ == p_151617_4_)
+        {
+            return p_151617_2_;
+        }
+        else if (p_151617_1_ == p_151617_2_ && p_151617_1_ == p_151617_3_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_1_ == p_151617_2_ && p_151617_1_ == p_151617_4_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_1_ == p_151617_3_ && p_151617_1_ == p_151617_4_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_1_ == p_151617_2_ && p_151617_3_ != p_151617_4_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_1_ == p_151617_3_ && p_151617_2_ != p_151617_4_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_1_ == p_151617_4_ && p_151617_2_ != p_151617_3_)
+        {
+            return p_151617_1_;
+        }
+        else if (p_151617_2_ == p_151617_3_ && p_151617_1_ != p_151617_4_)
+        {
+            return p_151617_2_;
+        }
+        else if (p_151617_2_ == p_151617_4_ && p_151617_1_ != p_151617_3_)
+        {
+            return p_151617_2_;
+        }
+        else
+        {
+            return p_151617_3_ == p_151617_4_ && p_151617_1_ != p_151617_2_ ? p_151617_3_ : this.selectRandom(p_151617_1_, p_151617_2_, p_151617_3_, p_151617_4_);
+        }
     }
 }

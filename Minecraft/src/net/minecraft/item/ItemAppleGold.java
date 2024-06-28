@@ -1,10 +1,10 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 public class ItemAppleGold extends ItemFood
@@ -17,7 +17,7 @@ public class ItemAppleGold extends ItemFood
 
     public boolean hasEffect(ItemStack stack)
     {
-        return stack.getMetadata() > 0;
+        return super.hasEffect(stack) || stack.getMetadata() > 0;
     }
 
     /**
@@ -32,30 +32,30 @@ public class ItemAppleGold extends ItemFood
     {
         if (!worldIn.isRemote)
         {
-            player.addPotionEffect(new PotionEffect(Potion.absorption.id, 2400, 0));
-        }
-
-        if (stack.getMetadata() > 0)
-        {
-            if (!worldIn.isRemote)
+            if (stack.getMetadata() > 0)
             {
-                player.addPotionEffect(new PotionEffect(Potion.regeneration.id, 600, 4));
-                player.addPotionEffect(new PotionEffect(Potion.resistance.id, 6000, 0));
-                player.addPotionEffect(new PotionEffect(Potion.fireResistance.id, 6000, 0));
+                player.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 400, 1));
+                player.addPotionEffect(new PotionEffect(MobEffects.RESISTANCE, 6000, 0));
+                player.addPotionEffect(new PotionEffect(MobEffects.FIRE_RESISTANCE, 6000, 0));
+                player.addPotionEffect(new PotionEffect(MobEffects.ABSORPTION, 2400, 3));
             }
-        }
-        else
-        {
-            super.onFoodEaten(stack, worldIn, player);
+            else
+            {
+                player.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 100, 1));
+                player.addPotionEffect(new PotionEffect(MobEffects.ABSORPTION, 2400, 0));
+            }
         }
     }
 
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        subItems.add(new ItemStack(itemIn, 1, 0));
-        subItems.add(new ItemStack(itemIn, 1, 1));
+        if (this.func_194125_a(itemIn))
+        {
+            tab.add(new ItemStack(this));
+            tab.add(new ItemStack(this, 1, 1));
+        }
     }
 }

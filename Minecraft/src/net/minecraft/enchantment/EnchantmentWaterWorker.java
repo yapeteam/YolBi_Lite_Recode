@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentWaterWorker extends Enchantment
 {
-    public EnchantmentWaterWorker(int p_i45761_1_, ResourceLocation p_i45761_2_, int p_i45761_3_)
+    public EnchantmentWaterWorker(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(p_i45761_1_, p_i45761_2_, p_i45761_3_, EnumEnchantmentType.ARMOR_HEAD);
+        super(rarityIn, EnumEnchantmentType.ARMOR_HEAD, slots);
         this.setName("waterWorker");
     }
 

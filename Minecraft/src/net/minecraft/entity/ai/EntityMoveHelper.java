@@ -2,31 +2,33 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.MathHelper;
+import net.minecraft.pathfinding.NodeProcessor;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.math.MathHelper;
 
 public class EntityMoveHelper
 {
     /** The EntityLiving that is being moved */
-    protected EntityLiving entity;
+    protected final EntityLiving entity;
     protected double posX;
     protected double posY;
     protected double posZ;
 
     /** The speed at which the entity should move */
     protected double speed;
-    protected boolean update;
+    protected float moveForward;
+    protected float moveStrafe;
+    public EntityMoveHelper.Action action = EntityMoveHelper.Action.WAIT;
 
     public EntityMoveHelper(EntityLiving entitylivingIn)
     {
         this.entity = entitylivingIn;
-        this.posX = entitylivingIn.posX;
-        this.posY = entitylivingIn.posY;
-        this.posZ = entitylivingIn.posZ;
     }
 
     public boolean isUpdating()
     {
-        return this.update;
+        return this.action == EntityMoveHelper.Action.MOVE_TO;
     }
 
     public double getSpeed()
@@ -43,33 +45,105 @@ public class EntityMoveHelper
         this.posY = y;
         this.posZ = z;
         this.speed = speedIn;
-        this.update = true;
+        this.action = EntityMoveHelper.Action.MOVE_TO;
+    }
+
+    public void strafe(float forward, float strafe)
+    {
+        this.action = EntityMoveHelper.Action.STRAFE;
+        this.moveForward = forward;
+        this.moveStrafe = strafe;
+        this.speed = 0.25D;
+    }
+
+    public void read(EntityMoveHelper that)
+    {
+        this.action = that.action;
+        this.posX = that.posX;
+        this.posY = that.posY;
+        this.posZ = that.posZ;
+        this.speed = Math.max(that.speed, 1.0D);
+        this.moveForward = that.moveForward;
+        this.moveStrafe = that.moveStrafe;
     }
 
     public void onUpdateMoveHelper()
     {
-        this.entity.setMoveForward(0.0F);
-
-        if (this.update)
+        if (this.action == EntityMoveHelper.Action.STRAFE)
         {
-            this.update = false;
-            int i = MathHelper.floor_double(this.entity.getEntityBoundingBox().minY + 0.5D);
-            double d0 = this.posX - this.entity.posX;
-            double d1 = this.posZ - this.entity.posZ;
-            double d2 = this.posY - (double)i;
-            double d3 = d0 * d0 + d2 * d2 + d1 * d1;
+            float f = (float)this.entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+            float f1 = (float)this.speed * f;
+            float f2 = this.moveForward;
+            float f3 = this.moveStrafe;
+            float f4 = MathHelper.sqrt(f2 * f2 + f3 * f3);
 
-            if (d3 >= 2.500000277905201E-7D)
+            if (f4 < 1.0F)
             {
-                float f = (float)(MathHelper.atan2(d1, d0) * 180.0D / Math.PI) - 90.0F;
-                this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, f, 30.0F);
-                this.entity.setAIMoveSpeed((float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue()));
+                f4 = 1.0F;
+            }
 
-                if (d2 > 0.0D && d0 * d0 + d1 * d1 < 1.0D)
+            f4 = f1 / f4;
+            f2 = f2 * f4;
+            f3 = f3 * f4;
+            float f5 = MathHelper.sin(this.entity.rotationYaw * 0.017453292F);
+            float f6 = MathHelper.cos(this.entity.rotationYaw * 0.017453292F);
+            float f7 = f2 * f6 - f3 * f5;
+            float f8 = f3 * f6 + f2 * f5;
+            PathNavigate pathnavigate = this.entity.getNavigator();
+
+            if (pathnavigate != null)
+            {
+                NodeProcessor nodeprocessor = pathnavigate.getNodeProcessor();
+
+                if (nodeprocessor != null && nodeprocessor.getPathNodeType(this.entity.world, MathHelper.floor(this.entity.posX + (double)f7), MathHelper.floor(this.entity.posY), MathHelper.floor(this.entity.posZ + (double)f8)) != PathNodeType.WALKABLE)
                 {
-                    this.entity.getJumpHelper().setJumping();
+                    this.moveForward = 1.0F;
+                    this.moveStrafe = 0.0F;
+                    f1 = f;
                 }
             }
+
+            this.entity.setAIMoveSpeed(f1);
+            this.entity.func_191989_p(this.moveForward);
+            this.entity.setMoveStrafing(this.moveStrafe);
+            this.action = EntityMoveHelper.Action.WAIT;
+        }
+        else if (this.action == EntityMoveHelper.Action.MOVE_TO)
+        {
+            this.action = EntityMoveHelper.Action.WAIT;
+            double d0 = this.posX - this.entity.posX;
+            double d1 = this.posZ - this.entity.posZ;
+            double d2 = this.posY - this.entity.posY;
+            double d3 = d0 * d0 + d2 * d2 + d1 * d1;
+
+            if (d3 < 2.500000277905201E-7D)
+            {
+                this.entity.func_191989_p(0.0F);
+                return;
+            }
+
+            float f9 = (float)(MathHelper.atan2(d1, d0) * (180D / Math.PI)) - 90.0F;
+            this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, f9, 90.0F);
+            this.entity.setAIMoveSpeed((float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+
+            if (d2 > (double)this.entity.stepHeight && d0 * d0 + d1 * d1 < (double)Math.max(1.0F, this.entity.width))
+            {
+                this.entity.getJumpHelper().setJumping();
+                this.action = EntityMoveHelper.Action.JUMPING;
+            }
+        }
+        else if (this.action == EntityMoveHelper.Action.JUMPING)
+        {
+            this.entity.setAIMoveSpeed((float)(this.speed * this.entity.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue()));
+
+            if (this.entity.onGround)
+            {
+                this.action = EntityMoveHelper.Action.WAIT;
+            }
+        }
+        else
+        {
+            this.entity.func_191989_p(0.0F);
         }
     }
 
@@ -78,7 +152,7 @@ public class EntityMoveHelper
      */
     protected float limitAngle(float p_75639_1_, float p_75639_2_, float p_75639_3_)
     {
-        float f = MathHelper.wrapAngleTo180_float(p_75639_2_ - p_75639_1_);
+        float f = MathHelper.wrapDegrees(p_75639_2_ - p_75639_1_);
 
         if (f > p_75639_3_)
         {
@@ -117,5 +191,13 @@ public class EntityMoveHelper
     public double getZ()
     {
         return this.posZ;
+    }
+
+    public static enum Action
+    {
+        WAIT,
+        MOVE_TO,
+        STRAFE,
+        JUMPING;
     }
 }

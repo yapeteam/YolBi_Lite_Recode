@@ -1,31 +1,36 @@
 package net.minecraft.item;
 
 import com.mojang.authlib.GameProfile;
-import java.util.List;
 import java.util.UUID;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSkull;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySkull;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.StringUtils;
 
 public class ItemSkull extends Item
 {
-    private static final String[] skullTypes = new String[] {"skeleton", "wither", "zombie", "char", "creeper"};
+    private static final String[] SKULL_TYPES = new String[] {"skeleton", "wither", "zombie", "char", "creeper", "dragon"};
 
     public ItemSkull()
     {
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
     }
@@ -33,67 +38,65 @@ public class ItemSkull extends Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (side == EnumFacing.DOWN)
+        if (hand == EnumFacing.DOWN)
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
         else
         {
-            IBlockState iblockstate = worldIn.getBlockState(pos);
+            IBlockState iblockstate = playerIn.getBlockState(worldIn);
             Block block = iblockstate.getBlock();
-            boolean flag = block.isReplaceable(worldIn, pos);
+            boolean flag = block.isReplaceable(playerIn, worldIn);
 
             if (!flag)
             {
-                if (!worldIn.getBlockState(pos).getBlock().getMaterial().isSolid())
+                if (!playerIn.getBlockState(worldIn).getMaterial().isSolid())
                 {
-                    return false;
+                    return EnumActionResult.FAIL;
                 }
 
-                pos = pos.offset(side);
+                worldIn = worldIn.offset(hand);
             }
 
-            if (!playerIn.canPlayerEdit(pos, side, stack))
+            ItemStack itemstack = stack.getHeldItem(pos);
+
+            if (stack.canPlayerEdit(worldIn, hand, itemstack) && Blocks.SKULL.canPlaceBlockAt(playerIn, worldIn))
             {
-                return false;
-            }
-            else if (!Blocks.skull.canPlaceBlockAt(worldIn, pos))
-            {
-                return false;
-            }
-            else
-            {
-                if (!worldIn.isRemote)
+                if (playerIn.isRemote)
                 {
-                    worldIn.setBlockState(pos, Blocks.skull.getDefaultState().withProperty(BlockSkull.FACING, side), 3);
+                    return EnumActionResult.SUCCESS;
+                }
+                else
+                {
+                    playerIn.setBlockState(worldIn, Blocks.SKULL.getDefaultState().withProperty(BlockSkull.FACING, hand), 11);
                     int i = 0;
 
-                    if (side == EnumFacing.UP)
+                    if (hand == EnumFacing.UP)
                     {
-                        i = MathHelper.floor_double((double)(playerIn.rotationYaw * 16.0F / 360.0F) + 0.5D) & 15;
+                        i = MathHelper.floor((double)(stack.rotationYaw * 16.0F / 360.0F) + 0.5D) & 15;
                     }
 
-                    TileEntity tileentity = worldIn.getTileEntity(pos);
+                    TileEntity tileentity = playerIn.getTileEntity(worldIn);
 
                     if (tileentity instanceof TileEntitySkull)
                     {
                         TileEntitySkull tileentityskull = (TileEntitySkull)tileentity;
 
-                        if (stack.getMetadata() == 3)
+                        if (itemstack.getMetadata() == 3)
                         {
                             GameProfile gameprofile = null;
 
-                            if (stack.hasTagCompound())
+                            if (itemstack.hasTagCompound())
                             {
-                                NBTTagCompound nbttagcompound = stack.getTagCompound();
+                                NBTTagCompound nbttagcompound = itemstack.getTagCompound();
 
                                 if (nbttagcompound.hasKey("SkullOwner", 10))
                                 {
                                     gameprofile = NBTUtil.readGameProfileFromNBT(nbttagcompound.getCompoundTag("SkullOwner"));
                                 }
-                                else if (nbttagcompound.hasKey("SkullOwner", 8) && nbttagcompound.getString("SkullOwner").length() > 0)
+                                else if (nbttagcompound.hasKey("SkullOwner", 8) && !StringUtils.isBlank(nbttagcompound.getString("SkullOwner")))
                                 {
                                     gameprofile = new GameProfile((UUID)null, nbttagcompound.getString("SkullOwner"));
                                 }
@@ -103,17 +106,25 @@ public class ItemSkull extends Item
                         }
                         else
                         {
-                            tileentityskull.setType(stack.getMetadata());
+                            tileentityskull.setType(itemstack.getMetadata());
                         }
 
                         tileentityskull.setSkullRotation(i);
-                        Blocks.skull.checkWitherSpawn(worldIn, pos, tileentityskull);
+                        Blocks.SKULL.checkWitherSpawn(playerIn, worldIn, tileentityskull);
                     }
 
-                    --stack.stackSize;
-                }
+                    if (stack instanceof EntityPlayerMP)
+                    {
+                        CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                    }
 
-                return true;
+                    itemstack.func_190918_g(1);
+                    return EnumActionResult.SUCCESS;
+                }
+            }
+            else
+            {
+                return EnumActionResult.FAIL;
             }
         }
     }
@@ -121,11 +132,14 @@ public class ItemSkull extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        for (int i = 0; i < skullTypes.length; ++i)
+        if (this.func_194125_a(itemIn))
         {
-            subItems.add(new ItemStack(itemIn, 1, i));
+            for (int i = 0; i < SKULL_TYPES.length; ++i)
+            {
+                tab.add(new ItemStack(this, 1, i));
+            }
         }
     }
 
@@ -146,12 +160,12 @@ public class ItemSkull extends Item
     {
         int i = stack.getMetadata();
 
-        if (i < 0 || i >= skullTypes.length)
+        if (i < 0 || i >= SKULL_TYPES.length)
         {
             i = 0;
         }
 
-        return super.getUnlocalizedName() + "." + skullTypes[i];
+        return super.getUnlocalizedName() + "." + SKULL_TYPES[i];
     }
 
     public String getItemStackDisplayName(ItemStack stack)
@@ -160,7 +174,7 @@ public class ItemSkull extends Item
         {
             if (stack.getTagCompound().hasKey("SkullOwner", 8))
             {
-                return StatCollector.translateToLocalFormatted("item.skull.player.name", new Object[] {stack.getTagCompound().getString("SkullOwner")});
+                return I18n.translateToLocalFormatted("item.skull.player.name", stack.getTagCompound().getString("SkullOwner"));
             }
 
             if (stack.getTagCompound().hasKey("SkullOwner", 10))
@@ -169,7 +183,7 @@ public class ItemSkull extends Item
 
                 if (nbttagcompound.hasKey("Name", 8))
                 {
-                    return StatCollector.translateToLocalFormatted("item.skull.player.name", new Object[] {nbttagcompound.getString("Name")});
+                    return I18n.translateToLocalFormatted("item.skull.player.name", nbttagcompound.getString("Name"));
                 }
             }
         }
@@ -184,7 +198,7 @@ public class ItemSkull extends Item
     {
         super.updateItemStackNBT(nbt);
 
-        if (nbt.hasKey("SkullOwner", 8) && nbt.getString("SkullOwner").length() > 0)
+        if (nbt.hasKey("SkullOwner", 8) && !StringUtils.isBlank(nbt.getString("SkullOwner")))
         {
             GameProfile gameprofile = new GameProfile((UUID)null, nbt.getString("SkullOwner"));
             gameprofile = TileEntitySkull.updateGameprofile(gameprofile);

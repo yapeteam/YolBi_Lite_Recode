@@ -1,21 +1,22 @@
 package net.minecraft.world.biome;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.List;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.LongHashMap;
 
 public class BiomeCache
 {
     /** Reference to the WorldChunkManager */
-    private final WorldChunkManager chunkManager;
+    private final BiomeProvider chunkManager;
 
     /** The last time this BiomeCache was cleaned, in milliseconds. */
     private long lastCleanupTime;
-    private LongHashMap<BiomeCache.Block> cacheMap = new LongHashMap();
-    private List<BiomeCache.Block> cache = Lists.<BiomeCache.Block>newArrayList();
+    private final Long2ObjectMap<BiomeCache.Block> cacheMap = new Long2ObjectOpenHashMap<BiomeCache.Block>(4096);
+    private final List<BiomeCache.Block> cache = Lists.<BiomeCache.Block>newArrayList();
 
-    public BiomeCache(WorldChunkManager chunkManagerIn)
+    public BiomeCache(BiomeProvider chunkManagerIn)
     {
         this.chunkManager = chunkManagerIn;
     }
@@ -28,12 +29,12 @@ public class BiomeCache
         x = x >> 4;
         z = z >> 4;
         long i = (long)x & 4294967295L | ((long)z & 4294967295L) << 32;
-        BiomeCache.Block biomecache$block = (BiomeCache.Block)this.cacheMap.getValueByKey(i);
+        BiomeCache.Block biomecache$block = (BiomeCache.Block)this.cacheMap.get(i);
 
         if (biomecache$block == null)
         {
             biomecache$block = new BiomeCache.Block(x, z);
-            this.cacheMap.add(i, biomecache$block);
+            this.cacheMap.put(i, biomecache$block);
             this.cache.add(biomecache$block);
         }
 
@@ -41,10 +42,10 @@ public class BiomeCache
         return biomecache$block;
     }
 
-    public BiomeGenBase func_180284_a(int x, int z, BiomeGenBase p_180284_3_)
+    public Biome getBiome(int x, int z, Biome defaultValue)
     {
-        BiomeGenBase biomegenbase = this.getBiomeCacheBlock(x, z).getBiomeGenAt(x, z);
-        return biomegenbase == null ? p_180284_3_ : biomegenbase;
+        Biome biome = this.getBiomeCacheBlock(x, z).getBiome(x, z);
+        return biome == null ? defaultValue : biome;
     }
 
     /**
@@ -61,7 +62,7 @@ public class BiomeCache
 
             for (int k = 0; k < this.cache.size(); ++k)
             {
-                BiomeCache.Block biomecache$block = (BiomeCache.Block)this.cache.get(k);
+                BiomeCache.Block biomecache$block = this.cache.get(k);
                 long l = i - biomecache$block.lastAccessTime;
 
                 if (l > 30000L || l < 0L)
@@ -77,15 +78,14 @@ public class BiomeCache
     /**
      * Returns the array of cached biome types in the BiomeCacheBlock at the given location.
      */
-    public BiomeGenBase[] getCachedBiomes(int x, int z)
+    public Biome[] getCachedBiomes(int x, int z)
     {
         return this.getBiomeCacheBlock(x, z).biomes;
     }
 
     public class Block
     {
-        public float[] rainfallValues = new float[256];
-        public BiomeGenBase[] biomes = new BiomeGenBase[256];
+        public Biome[] biomes = new Biome[256];
         public int xPosition;
         public int zPosition;
         public long lastAccessTime;
@@ -94,11 +94,10 @@ public class BiomeCache
         {
             this.xPosition = x;
             this.zPosition = z;
-            BiomeCache.this.chunkManager.getRainfall(this.rainfallValues, x << 4, z << 4, 16, 16);
-            BiomeCache.this.chunkManager.getBiomeGenAt(this.biomes, x << 4, z << 4, 16, 16, false);
+            BiomeCache.this.chunkManager.getBiomes(this.biomes, x << 4, z << 4, 16, 16, false);
         }
 
-        public BiomeGenBase getBiomeGenAt(int x, int z)
+        public Biome getBiome(int x, int z)
         {
             return this.biomes[x & 15 | (z & 15) << 4];
         }

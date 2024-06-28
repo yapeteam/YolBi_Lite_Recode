@@ -1,18 +1,24 @@
 package net.minecraft.entity;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class EntityAgeable extends EntityCreature
 {
+    private static final DataParameter<Boolean> BABY = EntityDataManager.<Boolean>createKey(EntityAgeable.class, DataSerializers.BOOLEAN);
     protected int growingAge;
-    protected int field_175502_b;
-    protected int field_175503_c;
+    protected int forcedAge;
+    protected int forcedAgeTimer;
     private float ageWidth = -1.0F;
     private float ageHeight;
 
@@ -21,20 +27,18 @@ public abstract class EntityAgeable extends EntityCreature
         super(worldIn);
     }
 
+    @Nullable
     public abstract EntityAgeable createChild(EntityAgeable ageable);
 
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    public boolean interact(EntityPlayer player)
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
-        ItemStack itemstack = player.inventory.getCurrentItem();
+        ItemStack itemstack = player.getHeldItem(hand);
 
-        if (itemstack != null && itemstack.getItem() == Items.spawn_egg)
+        if (itemstack.getItem() == Items.SPAWN_EGG)
         {
-            if (!this.worldObj.isRemote)
+            if (!this.world.isRemote)
             {
-                Class <? extends Entity > oclass = EntityList.getClassFromID(itemstack.getMetadata());
+                Class <? extends Entity > oclass = (Class)EntityList.field_191308_b.getObject(ItemMonsterPlacer.func_190908_h(itemstack));
 
                 if (oclass != null && this.getClass() == oclass)
                 {
@@ -44,7 +48,7 @@ public abstract class EntityAgeable extends EntityCreature
                     {
                         entityageable.setGrowingAge(-24000);
                         entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
-                        this.worldObj.spawnEntityInWorld(entityageable);
+                        this.world.spawnEntityInWorld(entityageable);
 
                         if (itemstack.hasDisplayName())
                         {
@@ -53,12 +57,7 @@ public abstract class EntityAgeable extends EntityCreature
 
                         if (!player.capabilities.isCreativeMode)
                         {
-                            --itemstack.stackSize;
-
-                            if (itemstack.stackSize <= 0)
-                            {
-                                player.inventory.setInventorySlotContents(player.inventory.currentItem, (ItemStack)null);
-                            }
+                            itemstack.func_190918_g(1);
                         }
                     }
                 }
@@ -72,10 +71,23 @@ public abstract class EntityAgeable extends EntityCreature
         }
     }
 
+    protected boolean func_190669_a(ItemStack p_190669_1_, Class <? extends Entity > p_190669_2_)
+    {
+        if (p_190669_1_.getItem() != Items.SPAWN_EGG)
+        {
+            return false;
+        }
+        else
+        {
+            Class <? extends Entity > oclass = (Class)EntityList.field_191308_b.getObject(ItemMonsterPlacer.func_190908_h(p_190669_1_));
+            return oclass != null && p_190669_2_ == oclass;
+        }
+    }
+
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(12, Byte.valueOf((byte)0));
+        this.dataManager.register(BABY, Boolean.valueOf(false));
     }
 
     /**
@@ -85,10 +97,17 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public int getGrowingAge()
     {
-        return this.worldObj.isRemote ? this.dataWatcher.getWatchableObjectByte(12) : this.growingAge;
+        if (this.world.isRemote)
+        {
+            return ((Boolean)this.dataManager.get(BABY)).booleanValue() ? -1 : 1;
+        }
+        else
+        {
+            return this.growingAge;
+        }
     }
 
-    public void func_175501_a(int p_175501_1_, boolean p_175501_2_)
+    public void ageUp(int p_175501_1_, boolean p_175501_2_)
     {
         int i = this.getGrowingAge();
         int j = i;
@@ -109,17 +128,17 @@ public abstract class EntityAgeable extends EntityCreature
 
         if (p_175501_2_)
         {
-            this.field_175502_b += k;
+            this.forcedAge += k;
 
-            if (this.field_175503_c == 0)
+            if (this.forcedAgeTimer == 0)
             {
-                this.field_175503_c = 40;
+                this.forcedAgeTimer = 40;
             }
         }
 
         if (this.getGrowingAge() == 0)
         {
-            this.setGrowingAge(this.field_175502_b);
+            this.setGrowingAge(this.forcedAge);
         }
     }
 
@@ -129,7 +148,7 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public void addGrowth(int growth)
     {
-        this.func_175501_a(growth, false);
+        this.ageUp(growth, false);
     }
 
     /**
@@ -138,7 +157,7 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public void setGrowingAge(int age)
     {
-        this.dataWatcher.updateObject(12, Byte.valueOf((byte)MathHelper.clamp_int(age, -1, 1)));
+        this.dataManager.set(BABY, Boolean.valueOf(age < 0));
         this.growingAge = age;
         this.setScaleForAge(this.isChild());
     }
@@ -146,21 +165,31 @@ public abstract class EntityAgeable extends EntityCreature
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("Age", this.getGrowingAge());
-        tagCompound.setInteger("ForcedAge", this.field_175502_b);
+        super.writeEntityToNBT(compound);
+        compound.setInteger("Age", this.getGrowingAge());
+        compound.setInteger("ForcedAge", this.forcedAge);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        this.setGrowingAge(tagCompund.getInteger("Age"));
-        this.field_175502_b = tagCompund.getInteger("ForcedAge");
+        super.readEntityFromNBT(compound);
+        this.setGrowingAge(compound.getInteger("Age"));
+        this.forcedAge = compound.getInteger("ForcedAge");
+    }
+
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (BABY.equals(key))
+        {
+            this.setScaleForAge(this.isChild());
+        }
+
+        super.notifyDataManagerChange(key);
     }
 
     /**
@@ -171,19 +200,17 @@ public abstract class EntityAgeable extends EntityCreature
     {
         super.onLivingUpdate();
 
-        if (this.worldObj.isRemote)
+        if (this.world.isRemote)
         {
-            if (this.field_175503_c > 0)
+            if (this.forcedAgeTimer > 0)
             {
-                if (this.field_175503_c % 4 == 0)
+                if (this.forcedAgeTimer % 4 == 0)
                 {
-                    this.worldObj.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D);
                 }
 
-                --this.field_175503_c;
+                --this.forcedAgeTimer;
             }
-
-            this.setScaleForAge(this.isChild());
         }
         else
         {
@@ -226,13 +253,13 @@ public abstract class EntityAgeable extends EntityCreature
     /**
      * "Sets the scale for an ageable entity according to the boolean parameter, which says if it's a child."
      */
-    public void setScaleForAge(boolean p_98054_1_)
+    public void setScaleForAge(boolean child)
     {
-        this.setScale(p_98054_1_ ? 0.5F : 1.0F);
+        this.setScale(child ? 0.5F : 1.0F);
     }
 
     /**
-     * Sets the width and height of the entity. Args: width, height
+     * Sets the width and height of the entity.
      */
     protected final void setSize(float width, float height)
     {

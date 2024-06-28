@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StringUtils;
@@ -28,7 +29,7 @@ public class PreYggdrasilConverter
     {
         String[] astring = (String[])Iterators.toArray(Iterators.filter(names.iterator(), new Predicate<String>()
         {
-            public boolean apply(String p_apply_1_)
+            public boolean apply(@Nullable String p_apply_1_)
             {
                 return !StringUtils.isNullOrEmpty(p_apply_1_);
             }
@@ -49,43 +50,42 @@ public class PreYggdrasilConverter
         }
     }
 
-    public static String getStringUUIDFromName(String p_152719_0_)
+    public static String convertMobOwnerIfNeeded(final MinecraftServer server, String username)
     {
-        if (!StringUtils.isNullOrEmpty(p_152719_0_) && p_152719_0_.length() <= 16)
+        if (!StringUtils.isNullOrEmpty(username) && username.length() <= 16)
         {
-            final MinecraftServer minecraftserver = MinecraftServer.getServer();
-            GameProfile gameprofile = minecraftserver.getPlayerProfileCache().getGameProfileForUsername(p_152719_0_);
+            GameProfile gameprofile = server.getPlayerProfileCache().getGameProfileForUsername(username);
 
             if (gameprofile != null && gameprofile.getId() != null)
             {
                 return gameprofile.getId().toString();
             }
-            else if (!minecraftserver.isSinglePlayer() && minecraftserver.isServerInOnlineMode())
+            else if (!server.isSinglePlayer() && server.isServerInOnlineMode())
             {
                 final List<GameProfile> list = Lists.<GameProfile>newArrayList();
                 ProfileLookupCallback profilelookupcallback = new ProfileLookupCallback()
                 {
                     public void onProfileLookupSucceeded(GameProfile p_onProfileLookupSucceeded_1_)
                     {
-                        minecraftserver.getPlayerProfileCache().addEntry(p_onProfileLookupSucceeded_1_);
+                        server.getPlayerProfileCache().addEntry(p_onProfileLookupSucceeded_1_);
                         list.add(p_onProfileLookupSucceeded_1_);
                     }
                     public void onProfileLookupFailed(GameProfile p_onProfileLookupFailed_1_, Exception p_onProfileLookupFailed_2_)
                     {
-                        PreYggdrasilConverter.LOGGER.warn((String)("Could not lookup user whitelist entry for " + p_onProfileLookupFailed_1_.getName()), (Throwable)p_onProfileLookupFailed_2_);
+                        PreYggdrasilConverter.LOGGER.warn("Could not lookup user whitelist entry for {}", p_onProfileLookupFailed_1_.getName(), p_onProfileLookupFailed_2_);
                     }
                 };
-                lookupNames(minecraftserver, Lists.newArrayList(new String[] {p_152719_0_}), profilelookupcallback);
-                return list.size() > 0 && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId().toString() : "";
+                lookupNames(server, Lists.newArrayList(username), profilelookupcallback);
+                return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId().toString() : "";
             }
             else
             {
-                return EntityPlayer.getUUID(new GameProfile((UUID)null, p_152719_0_)).toString();
+                return EntityPlayer.getUUID(new GameProfile((UUID)null, username)).toString();
             }
         }
         else
         {
-            return p_152719_0_;
+            return username;
         }
     }
 }

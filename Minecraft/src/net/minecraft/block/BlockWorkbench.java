@@ -9,10 +9,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 
@@ -20,11 +21,11 @@ public class BlockWorkbench extends Block
 {
     protected BlockWorkbench()
     {
-        super(Material.wood);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        super(Material.WOOD);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -33,7 +34,7 @@ public class BlockWorkbench extends Block
         else
         {
             playerIn.displayGui(new BlockWorkbench.InterfaceCraftingTable(worldIn, pos));
-            playerIn.triggerAchievement(StatList.field_181742_Z);
+            playerIn.addStat(StatList.CRAFTING_TABLE_INTERACTION);
             return true;
         }
     }
@@ -51,7 +52,7 @@ public class BlockWorkbench extends Block
 
         public String getName()
         {
-            return null;
+            return "crafting_table";
         }
 
         public boolean hasCustomName()
@@ -59,9 +60,9 @@ public class BlockWorkbench extends Block
             return false;
         }
 
-        public IChatComponent getDisplayName()
+        public ITextComponent getDisplayName()
         {
-            return new ChatComponentTranslation(Blocks.crafting_table.getUnlocalizedName() + ".name", new Object[0]);
+            return new TextComponentTranslation(Blocks.CRAFTING_TABLE.getUnlocalizedName() + ".name", new Object[0]);
         }
 
         public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)

@@ -23,9 +23,9 @@ public class ModelSkeletonHead extends ModelBase
     /**
      * Sets the models various rotation angles then renders the model.
      */
-    public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale, entityIn);
+        this.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entityIn);
         this.skeletonHead.render(scale);
     }
 
@@ -37,7 +37,7 @@ public class ModelSkeletonHead extends ModelBase
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn)
     {
         super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
-        this.skeletonHead.rotateAngleY = netHeadYaw / (180F / (float)Math.PI);
-        this.skeletonHead.rotateAngleX = headPitch / (180F / (float)Math.PI);
+        this.skeletonHead.rotateAngleY = netHeadYaw * 0.017453292F;
+        this.skeletonHead.rotateAngleX = headPitch * 0.017453292F;
     }
 }

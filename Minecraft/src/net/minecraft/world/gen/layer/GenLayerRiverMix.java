@@ -1,11 +1,12 @@
 package net.minecraft.world.gen.layer;
 
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.init.Biomes;
+import net.minecraft.world.biome.Biome;
 
 public class GenLayerRiverMix extends GenLayer
 {
-    private GenLayer biomePatternGeneratorChain;
-    private GenLayer riverPatternGeneratorChain;
+    private final GenLayer biomePatternGeneratorChain;
+    private final GenLayer riverPatternGeneratorChain;
 
     public GenLayerRiverMix(long p_i2129_1_, GenLayer p_i2129_3_, GenLayer p_i2129_4_)
     {
@@ -37,21 +38,21 @@ public class GenLayerRiverMix extends GenLayer
 
         for (int i = 0; i < areaWidth * areaHeight; ++i)
         {
-            if (aint[i] != BiomeGenBase.ocean.biomeID && aint[i] != BiomeGenBase.deepOcean.biomeID)
+            if (aint[i] != Biome.getIdForBiome(Biomes.OCEAN) && aint[i] != Biome.getIdForBiome(Biomes.DEEP_OCEAN))
             {
-                if (aint1[i] == BiomeGenBase.river.biomeID)
+                if (aint1[i] == Biome.getIdForBiome(Biomes.RIVER))
                 {
-                    if (aint[i] == BiomeGenBase.icePlains.biomeID)
+                    if (aint[i] == Biome.getIdForBiome(Biomes.ICE_PLAINS))
                     {
-                        aint2[i] = BiomeGenBase.frozenRiver.biomeID;
+                        aint2[i] = Biome.getIdForBiome(Biomes.FROZEN_RIVER);
                     }
-                    else if (aint[i] != BiomeGenBase.mushroomIsland.biomeID && aint[i] != BiomeGenBase.mushroomIslandShore.biomeID)
+                    else if (aint[i] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND) && aint[i] != Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE))
                     {
                         aint2[i] = aint1[i] & 255;
                     }
                     else
                     {
-                        aint2[i] = BiomeGenBase.mushroomIslandShore.biomeID;
+                        aint2[i] = Biome.getIdForBiome(Biomes.MUSHROOM_ISLAND_SHORE);
                     }
                 }
                 else

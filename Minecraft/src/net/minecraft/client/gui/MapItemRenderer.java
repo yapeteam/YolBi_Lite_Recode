@@ -2,20 +2,21 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec4b;
 import net.minecraft.world.storage.MapData;
+import net.minecraft.world.storage.MapDecoration;
 
 public class MapItemRenderer
 {
-    private static final ResourceLocation mapIcons = new ResourceLocation("textures/map/map_icons.png");
+    private static final ResourceLocation TEXTURE_MAP_ICONS = new ResourceLocation("textures/map/map_icons.png");
     private final TextureManager textureManager;
     private final Map<String, MapItemRenderer.Instance> loadedMaps = Maps.<String, MapItemRenderer.Instance>newHashMap();
 
@@ -42,7 +43,7 @@ public class MapItemRenderer
      */
     private MapItemRenderer.Instance getMapRendererInstance(MapData mapdataIn)
     {
-        MapItemRenderer.Instance mapitemrenderer$instance = (MapItemRenderer.Instance)this.loadedMaps.get(mapdataIn.mapName);
+        MapItemRenderer.Instance mapitemrenderer$instance = this.loadedMaps.get(mapdataIn.mapName);
 
         if (mapitemrenderer$instance == null)
         {
@@ -51,6 +52,12 @@ public class MapItemRenderer
         }
 
         return mapitemrenderer$instance;
+    }
+
+    @Nullable
+    public MapItemRenderer.Instance func_191205_a(String p_191205_1_)
+    {
+        return this.loadedMaps.get(p_191205_1_);
     }
 
     /**
@@ -64,6 +71,12 @@ public class MapItemRenderer
         }
 
         this.loadedMaps.clear();
+    }
+
+    @Nullable
+    public MapData func_191207_a(@Nullable MapItemRenderer.Instance p_191207_1_)
+    {
+        return p_191207_1_ != null ? p_191207_1_.mapData : null;
     }
 
     class Instance
@@ -98,7 +111,7 @@ public class MapItemRenderer
                 }
                 else
                 {
-                    this.mapTextureData[i] = MapColor.mapColorArray[j / 4].getMapColor(j & 3);
+                    this.mapTextureData[i] = MapColor.COLORS[j / 4].getMapColor(j & 3);
                 }
             }
 
@@ -110,43 +123,43 @@ public class MapItemRenderer
             int i = 0;
             int j = 0;
             Tessellator tessellator = Tessellator.getInstance();
-            WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
             float f = 0.0F;
             MapItemRenderer.this.textureManager.bindTexture(this.location);
             GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(1, 771, 0, 1);
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
             GlStateManager.disableAlpha();
-            worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-            worldrenderer.pos((double)((float)(i + 0) + f), (double)((float)(j + 128) - f), -0.009999999776482582D).tex(0.0D, 1.0D).endVertex();
-            worldrenderer.pos((double)((float)(i + 128) - f), (double)((float)(j + 128) - f), -0.009999999776482582D).tex(1.0D, 1.0D).endVertex();
-            worldrenderer.pos((double)((float)(i + 128) - f), (double)((float)(j + 0) + f), -0.009999999776482582D).tex(1.0D, 0.0D).endVertex();
-            worldrenderer.pos((double)((float)(i + 0) + f), (double)((float)(j + 0) + f), -0.009999999776482582D).tex(0.0D, 0.0D).endVertex();
+            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+            bufferbuilder.pos(0.0D, 128.0D, -0.009999999776482582D).tex(0.0D, 1.0D).endVertex();
+            bufferbuilder.pos(128.0D, 128.0D, -0.009999999776482582D).tex(1.0D, 1.0D).endVertex();
+            bufferbuilder.pos(128.0D, 0.0D, -0.009999999776482582D).tex(1.0D, 0.0D).endVertex();
+            bufferbuilder.pos(0.0D, 0.0D, -0.009999999776482582D).tex(0.0D, 0.0D).endVertex();
             tessellator.draw();
             GlStateManager.enableAlpha();
             GlStateManager.disableBlend();
-            MapItemRenderer.this.textureManager.bindTexture(MapItemRenderer.mapIcons);
+            MapItemRenderer.this.textureManager.bindTexture(MapItemRenderer.TEXTURE_MAP_ICONS);
             int k = 0;
 
-            for (Vec4b vec4b : this.mapData.mapDecorations.values())
+            for (MapDecoration mapdecoration : this.mapData.mapDecorations.values())
             {
-                if (!noOverlayRendering || vec4b.func_176110_a() == 1)
+                if (!noOverlayRendering || mapdecoration.func_191180_f())
                 {
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate((float)i + (float)vec4b.func_176112_b() / 2.0F + 64.0F, (float)j + (float)vec4b.func_176113_c() / 2.0F + 64.0F, -0.02F);
-                    GlStateManager.rotate((float)(vec4b.func_176111_d() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
+                    GlStateManager.translate(0.0F + (float)mapdecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapdecoration.getY() / 2.0F + 64.0F, -0.02F);
+                    GlStateManager.rotate((float)(mapdecoration.getRotation() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
                     GlStateManager.scale(4.0F, 4.0F, 3.0F);
                     GlStateManager.translate(-0.125F, 0.125F, 0.0F);
-                    byte b0 = vec4b.func_176110_a();
+                    byte b0 = mapdecoration.getType();
                     float f1 = (float)(b0 % 4 + 0) / 4.0F;
                     float f2 = (float)(b0 / 4 + 0) / 4.0F;
                     float f3 = (float)(b0 % 4 + 1) / 4.0F;
                     float f4 = (float)(b0 / 4 + 1) / 4.0F;
-                    worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
                     float f5 = -0.001F;
-                    worldrenderer.pos(-1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f2).endVertex();
-                    worldrenderer.pos(1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f2).endVertex();
-                    worldrenderer.pos(1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f4).endVertex();
-                    worldrenderer.pos(-1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f4).endVertex();
+                    bufferbuilder.pos(-1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f2).endVertex();
+                    bufferbuilder.pos(1.0D, 1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f2).endVertex();
+                    bufferbuilder.pos(1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f3, (double)f4).endVertex();
+                    bufferbuilder.pos(-1.0D, -1.0D, (double)((float)k * -0.001F)).tex((double)f1, (double)f4).endVertex();
                     tessellator.draw();
                     GlStateManager.popMatrix();
                     ++k;

@@ -8,31 +8,31 @@ import javax.crypto.ShortBufferException;
 public class NettyEncryptionTranslator
 {
     private final Cipher cipher;
-    private byte[] field_150505_b = new byte[0];
-    private byte[] field_150506_c = new byte[0];
+    private byte[] inputBuffer = new byte[0];
+    private byte[] outputBuffer = new byte[0];
 
     protected NettyEncryptionTranslator(Cipher cipherIn)
     {
         this.cipher = cipherIn;
     }
 
-    private byte[] func_150502_a(ByteBuf buf)
+    private byte[] bufToBytes(ByteBuf buf)
     {
         int i = buf.readableBytes();
 
-        if (this.field_150505_b.length < i)
+        if (this.inputBuffer.length < i)
         {
-            this.field_150505_b = new byte[i];
+            this.inputBuffer = new byte[i];
         }
 
-        buf.readBytes((byte[])this.field_150505_b, 0, i);
-        return this.field_150505_b;
+        buf.readBytes(this.inputBuffer, 0, i);
+        return this.inputBuffer;
     }
 
     protected ByteBuf decipher(ChannelHandlerContext ctx, ByteBuf buffer) throws ShortBufferException
     {
         int i = buffer.readableBytes();
-        byte[] abyte = this.func_150502_a(buffer);
+        byte[] abyte = this.bufToBytes(buffer);
         ByteBuf bytebuf = ctx.alloc().heapBuffer(this.cipher.getOutputSize(i));
         bytebuf.writerIndex(this.cipher.update(abyte, 0, i, bytebuf.array(), bytebuf.arrayOffset()));
         return bytebuf;
@@ -41,14 +41,14 @@ public class NettyEncryptionTranslator
     protected void cipher(ByteBuf in, ByteBuf out) throws ShortBufferException
     {
         int i = in.readableBytes();
-        byte[] abyte = this.func_150502_a(in);
+        byte[] abyte = this.bufToBytes(in);
         int j = this.cipher.getOutputSize(i);
 
-        if (this.field_150506_c.length < j)
+        if (this.outputBuffer.length < j)
         {
-            this.field_150506_c = new byte[j];
+            this.outputBuffer = new byte[j];
         }
 
-        out.writeBytes((byte[])this.field_150506_c, 0, this.cipher.update(abyte, 0, i, this.field_150506_c));
+        out.writeBytes(this.outputBuffer, 0, this.cipher.update(abyte, 0, i, this.outputBuffer));
     }
 }

@@ -3,12 +3,17 @@ package net.minecraft.realms;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.mojang.authlib.GameProfile;
 import com.mojang.util.UUIDTypeAdapter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.Proxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Session;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 
 public class Realms
 {
@@ -71,22 +76,22 @@ public class Realms
 
     public static int survivalId()
     {
-        return WorldSettings.GameType.SURVIVAL.getID();
+        return GameType.SURVIVAL.getID();
     }
 
     public static int creativeId()
     {
-        return WorldSettings.GameType.CREATIVE.getID();
+        return GameType.CREATIVE.getID();
     }
 
     public static int adventureId()
     {
-        return WorldSettings.GameType.ADVENTURE.getID();
+        return GameType.ADVENTURE.getID();
     }
 
     public static int spectatorId()
     {
-        return WorldSettings.GameType.SPECTATOR.getID();
+        return GameType.SPECTATOR.getID();
     }
 
     public static void setConnectedToRealms(boolean p_setConnectedToRealms_0_)
@@ -96,8 +101,7 @@ public class Realms
 
     public static ListenableFuture<Object> downloadResourcePack(String p_downloadResourcePack_0_, String p_downloadResourcePack_1_)
     {
-        ListenableFuture<Object> listenablefuture = Minecraft.getMinecraft().getResourcePackRepository().downloadResourcePack(p_downloadResourcePack_0_, p_downloadResourcePack_1_);
-        return listenablefuture;
+        return Minecraft.getMinecraft().getResourcePackRepository().downloadResourcePack(p_downloadResourcePack_0_, p_downloadResourcePack_1_);
     }
 
     public static void clearResourcePack()
@@ -113,5 +117,23 @@ public class Realms
     public static boolean inTitleScreen()
     {
         return Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu;
+    }
+
+    public static void deletePlayerTag(File p_deletePlayerTag_0_)
+    {
+        if (p_deletePlayerTag_0_.exists())
+        {
+            try
+            {
+                NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(new FileInputStream(p_deletePlayerTag_0_));
+                NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("Data");
+                nbttagcompound1.removeTag("Player");
+                CompressedStreamTools.writeCompressed(nbttagcompound, new FileOutputStream(p_deletePlayerTag_0_));
+            }
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
+        }
     }
 }

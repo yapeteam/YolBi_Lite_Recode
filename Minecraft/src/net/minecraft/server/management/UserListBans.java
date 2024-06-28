@@ -42,7 +42,11 @@ public class UserListBans extends UserList<GameProfile, UserListBansEntry>
         return obj.getId().toString();
     }
 
-    public GameProfile isUsernameBanned(String username)
+    /**
+     * Get a {@link GameProfile} that is a member of this list by its user name. Returns {@code null} if no entry was
+     * found.
+     */
+    public GameProfile getBannedProfile(String username)
     {
         for (UserListBansEntry userlistbansentry : this.getValues().values())
         {

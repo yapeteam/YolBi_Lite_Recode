@@ -2,15 +2,13 @@ package net.minecraft.entity.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import pisi.unitedmeows.meowlib.math.MeowMath;
-
 
 public class EntityEnderEye extends Entity
 {
@@ -36,8 +34,7 @@ public class EntityEnderEye extends Entity
     }
 
     /**
-     * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge
-     * length * 64 * renderDistanceWeight Args: distance
+     * Checks if the entity is in range to render.
      */
     public boolean isInRangeToRenderDist(double distance)
     {
@@ -60,14 +57,14 @@ public class EntityEnderEye extends Entity
         this.setPosition(x, y, z);
     }
 
-    public void moveTowards(BlockPos p_180465_1_)
+    public void moveTowards(BlockPos pos)
     {
-        double d0 = (double)p_180465_1_.getX();
-        int i = p_180465_1_.getY();
-        double d1 = (double)p_180465_1_.getZ();
+        double d0 = (double)pos.getX();
+        int i = pos.getY();
+        double d1 = (double)pos.getZ();
         double d2 = d0 - this.posX;
         double d3 = d1 - this.posZ;
-        float f = MathHelper.sqrt_double(d2 * d2 + d3 * d3);
+        float f = MathHelper.sqrt(d2 * d2 + d3 * d3);
 
         if (f > 12.0F)
         {
@@ -87,7 +84,7 @@ public class EntityEnderEye extends Entity
     }
 
     /**
-     * Sets the velocity to the args. Args: x, y, z
+     * Updates the velocity of the entity to a new value.
      */
     public void setVelocity(double x, double y, double z)
     {
@@ -97,9 +94,11 @@ public class EntityEnderEye extends Entity
 
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
-            float f = MathHelper.sqrt_double(x * x + z * z);
-            this.prevRotationYaw = this.rotationYaw = (float)(MathHelper.atan2(x, z) * 180.0D / Math.PI);
-            this.prevRotationPitch = this.rotationPitch = (float)(MathHelper.atan2(y, (double)f) * 180.0D / Math.PI);
+            float f = MathHelper.sqrt(x * x + z * z);
+            this.rotationYaw = (float)(MathHelper.atan2(x, z) * (180D / Math.PI));
+            this.rotationPitch = (float)(MathHelper.atan2(y, (double)f) * (180D / Math.PI));
+            this.prevRotationYaw = this.rotationYaw;
+            this.prevRotationPitch = this.rotationPitch;
         }
     }
 
@@ -115,10 +114,10 @@ public class EntityEnderEye extends Entity
         this.posX += this.motionX;
         this.posY += this.motionY;
         this.posZ += this.motionZ;
-        float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
-        this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
+        float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        this.rotationYaw = (float)(MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
 
-        for (this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
+        for (this.rotationPitch = (float)(MathHelper.atan2(this.motionY, (double)f) * (180D / Math.PI)); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
         {
             ;
         }
@@ -141,12 +140,11 @@ public class EntityEnderEye extends Entity
         this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
         this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
 
-        if (!this.worldObj.isRemote)
+        if (!this.world.isRemote)
         {
             double d0 = this.targetX - this.posX;
             double d1 = this.targetZ - this.posZ;
-
-            float f1 = (float)MeowMath.sqrt(d0 * d0 + d1 * d1);
+            float f1 = (float)Math.sqrt(d0 * d0 + d1 * d1);
             float f2 = (float)MathHelper.atan2(d1, d0);
             double d2 = (double)f + (double)(f1 - f) * 0.0025D;
 
@@ -175,30 +173,31 @@ public class EntityEnderEye extends Entity
         {
             for (int i = 0; i < 4; ++i)
             {
-                this.worldObj.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * (double)f3, this.posY - this.motionY * (double)f3, this.posZ - this.motionZ * (double)f3, this.motionX, this.motionY, this.motionZ, new int[0]);
+                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * 0.25D, this.posY - this.motionY * 0.25D, this.posZ - this.motionZ * 0.25D, this.motionX, this.motionY, this.motionZ);
             }
         }
         else
         {
-            this.worldObj.spawnParticle(EnumParticleTypes.PORTAL, this.posX - this.motionX * (double)f3 + this.rand.nextDouble() * 0.6D - 0.3D, this.posY - this.motionY * (double)f3 - 0.5D, this.posZ - this.motionZ * (double)f3 + this.rand.nextDouble() * 0.6D - 0.3D, this.motionX, this.motionY, this.motionZ, new int[0]);
+            this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX - this.motionX * 0.25D + this.rand.nextDouble() * 0.6D - 0.3D, this.posY - this.motionY * 0.25D - 0.5D, this.posZ - this.motionZ * 0.25D + this.rand.nextDouble() * 0.6D - 0.3D, this.motionX, this.motionY, this.motionZ);
         }
 
-        if (!this.worldObj.isRemote)
+        if (!this.world.isRemote)
         {
             this.setPosition(this.posX, this.posY, this.posZ);
             ++this.despawnTimer;
 
-            if (this.despawnTimer > 80 && !this.worldObj.isRemote)
+            if (this.despawnTimer > 80 && !this.world.isRemote)
             {
+                this.playSound(SoundEvents.field_193777_bb, 1.0F, 1.0F);
                 this.setDead();
 
                 if (this.shatterOrDrop)
                 {
-                    this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, new ItemStack(Items.ender_eye)));
+                    this.world.spawnEntityInWorld(new EntityItem(this.world, this.posX, this.posY, this.posZ, new ItemStack(Items.ENDER_EYE)));
                 }
                 else
                 {
-                    this.worldObj.playAuxSFX(2003, new BlockPos(this), 0);
+                    this.world.playEvent(2003, new BlockPos(this), 0);
                 }
             }
         }
@@ -207,34 +206,34 @@ public class EntityEnderEye extends Entity
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
     }
 
     /**
      * Gets how bright this entity is.
      */
-    public float getBrightness(float partialTicks)
+    public float getBrightness()
     {
         return 1.0F;
     }
 
-    public int getBrightnessForRender(float partialTicks)
+    public int getBrightnessForRender()
     {
         return 15728880;
     }
 
     /**
-     * If returns false, the item will not inflict any damage against entities.
+     * Returns true if it's possible to attack this entity with an item.
      */
-    public boolean canAttackWithItem()
+    public boolean canBeAttackedWithItem()
     {
         return false;
     }

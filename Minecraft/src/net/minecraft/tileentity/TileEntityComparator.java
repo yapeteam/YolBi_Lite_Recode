@@ -6,10 +6,11 @@ public class TileEntityComparator extends TileEntity
 {
     private int outputSignal;
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
         compound.setInteger("OutputSignal", this.outputSignal);
+        return compound;
     }
 
     public void readFromNBT(NBTTagCompound compound)
@@ -23,8 +24,8 @@ public class TileEntityComparator extends TileEntity
         return this.outputSignal;
     }
 
-    public void setOutputSignal(int p_145995_1_)
+    public void setOutputSignal(int outputSignalIn)
     {
-        this.outputSignal = p_145995_1_;
+        this.outputSignal = outputSignalIn;
     }
 }

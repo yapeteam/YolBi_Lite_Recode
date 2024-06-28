@@ -3,71 +3,74 @@ package net.minecraft.item;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 public class ItemRecord extends Item
 {
-    private static final Map<String, ItemRecord> RECORDS = Maps.<String, ItemRecord>newHashMap();
+    private static final Map<SoundEvent, ItemRecord> RECORDS = Maps.<SoundEvent, ItemRecord>newHashMap();
+    private final SoundEvent sound;
+    private final String displayName;
 
-    /** The name of the record. */
-    public final String recordName;
-
-    protected ItemRecord(String name)
+    protected ItemRecord(String p_i46742_1_, SoundEvent soundIn)
     {
-        this.recordName = name;
+        this.displayName = "item.record." + p_i46742_1_ + ".desc";
+        this.sound = soundIn;
         this.maxStackSize = 1;
-        this.setCreativeTab(CreativeTabs.tabMisc);
-        RECORDS.put("records." + name, this);
+        this.setCreativeTab(CreativeTabs.MISC);
+        RECORDS.put(this.sound, this);
     }
 
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
+        IBlockState iblockstate = playerIn.getBlockState(worldIn);
 
-        if (iblockstate.getBlock() == Blocks.jukebox && !((Boolean)iblockstate.getValue(BlockJukebox.HAS_RECORD)).booleanValue())
+        if (iblockstate.getBlock() == Blocks.JUKEBOX && !((Boolean)iblockstate.getValue(BlockJukebox.HAS_RECORD)).booleanValue())
         {
-            if (worldIn.isRemote)
+            if (!playerIn.isRemote)
             {
-                return true;
+                ItemStack itemstack = stack.getHeldItem(pos);
+                ((BlockJukebox)Blocks.JUKEBOX).insertRecord(playerIn, worldIn, iblockstate, itemstack);
+                playerIn.playEvent((EntityPlayer)null, 1010, worldIn, Item.getIdFromItem(this));
+                itemstack.func_190918_g(1);
+                stack.addStat(StatList.RECORD_PLAYED);
             }
-            else
-            {
-                ((BlockJukebox)Blocks.jukebox).insertRecord(worldIn, pos, iblockstate, stack);
-                worldIn.playAuxSFXAtEntity((EntityPlayer)null, 1005, pos, Item.getIdFromItem(this));
-                --stack.stackSize;
-                playerIn.triggerAchievement(StatList.field_181740_X);
-                return true;
-            }
+
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            return false;
+            return EnumActionResult.PASS;
         }
     }
 
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
     {
         tooltip.add(this.getRecordNameLocal());
     }
 
     public String getRecordNameLocal()
     {
-        return StatCollector.translateToLocal("item.record." + this.recordName + ".desc");
+        return I18n.translateToLocal(this.displayName);
     }
 
     /**
@@ -78,11 +81,14 @@ public class ItemRecord extends Item
         return EnumRarity.RARE;
     }
 
-    /**
-     * Return the record item corresponding to the given name.
-     */
-    public static ItemRecord getRecord(String name)
+    @Nullable
+    public static ItemRecord getBySound(SoundEvent soundIn)
     {
-        return (ItemRecord)RECORDS.get(name);
+        return RECORDS.get(soundIn);
+    }
+
+    public SoundEvent getSound()
+    {
+        return this.sound;
     }
 }

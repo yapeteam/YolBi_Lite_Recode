@@ -4,8 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.client.resources.data.IMetadataSection;
-import net.minecraft.client.resources.data.IMetadataSerializer;
+import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
 
 public interface IResourcePack
@@ -16,7 +17,8 @@ public interface IResourcePack
 
     Set<String> getResourceDomains();
 
-    <T extends IMetadataSection> T getPackMetadata(IMetadataSerializer metadataSerializer, String metadataSectionName) throws IOException;
+    @Nullable
+    <T extends IMetadataSection> T getPackMetadata(MetadataSerializer metadataSerializer, String metadataSectionName) throws IOException;
 
     BufferedImage getPackImage() throws IOException;
 

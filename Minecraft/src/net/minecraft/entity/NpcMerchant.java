@@ -1,47 +1,52 @@
 package net.minecraft.entity;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryMerchant;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import net.minecraft.world.World;
 
 public class NpcMerchant implements IMerchant
 {
     /** Instance of Merchants Inventory. */
-    private InventoryMerchant theMerchantInventory;
+    private final InventoryMerchant theMerchantInventory;
 
     /** This merchant's current player customer. */
-    private EntityPlayer customer;
+    private final EntityPlayer customer;
 
     /** The MerchantRecipeList instance. */
     private MerchantRecipeList recipeList;
-    private IChatComponent field_175548_d;
+    private final ITextComponent name;
 
-    public NpcMerchant(EntityPlayer p_i45817_1_, IChatComponent p_i45817_2_)
+    public NpcMerchant(EntityPlayer customerIn, ITextComponent nameIn)
     {
-        this.customer = p_i45817_1_;
-        this.field_175548_d = p_i45817_2_;
-        this.theMerchantInventory = new InventoryMerchant(p_i45817_1_, this);
+        this.customer = customerIn;
+        this.name = nameIn;
+        this.theMerchantInventory = new InventoryMerchant(customerIn, this);
     }
 
+    @Nullable
     public EntityPlayer getCustomer()
     {
         return this.customer;
     }
 
-    public void setCustomer(EntityPlayer p_70932_1_)
+    public void setCustomer(@Nullable EntityPlayer player)
     {
     }
 
-    public MerchantRecipeList getRecipes(EntityPlayer p_70934_1_)
+    @Nullable
+    public MerchantRecipeList getRecipes(EntityPlayer player)
     {
         return this.recipeList;
     }
 
-    public void setRecipes(MerchantRecipeList recipeList)
+    public void setRecipes(@Nullable MerchantRecipeList recipeList)
     {
         this.recipeList = recipeList;
     }
@@ -62,8 +67,18 @@ public class NpcMerchant implements IMerchant
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.field_175548_d != null ? this.field_175548_d : new ChatComponentTranslation("entity.Villager.name", new Object[0]));
+        return (ITextComponent)(this.name != null ? this.name : new TextComponentTranslation("entity.Villager.name", new Object[0]));
+    }
+
+    public World func_190670_t_()
+    {
+        return this.customer.world;
+    }
+
+    public BlockPos func_190671_u_()
+    {
+        return new BlockPos(this.customer);
     }
 }

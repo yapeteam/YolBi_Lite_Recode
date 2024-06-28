@@ -1,13 +1,15 @@
 package net.minecraft.command;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.Vec3;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
 public class CommandResultStats
@@ -30,14 +32,9 @@ public class CommandResultStats
         this.objectives = STRING_RESULT_TYPES;
     }
 
-    /**
-     * Set the score on the ScoreBoard
-     *  
-     * @param scorePoint The score to set to the score board
-     */
-    public void setCommandStatScore(final ICommandSender sender, CommandResultStats.Type resultTypeIn, int scorePoint)
+    public void setCommandStatForSender(MinecraftServer server, final ICommandSender sender, CommandResultStats.Type typeIn, int p_184932_4_)
     {
-        String s = this.entitiesID[resultTypeIn.getTypeID()];
+        String s = this.entitiesID[typeIn.getTypeID()];
 
         if (s != null)
         {
@@ -47,11 +44,11 @@ public class CommandResultStats
                 {
                     return sender.getName();
                 }
-                public IChatComponent getDisplayName()
+                public ITextComponent getDisplayName()
                 {
                     return sender.getDisplayName();
                 }
-                public void addChatMessage(IChatComponent component)
+                public void addChatMessage(ITextComponent component)
                 {
                     sender.addChatMessage(component);
                 }
@@ -63,7 +60,7 @@ public class CommandResultStats
                 {
                     return sender.getPosition();
                 }
-                public Vec3 getPositionVector()
+                public Vec3d getPositionVector()
                 {
                     return sender.getPositionVector();
                 }
@@ -83,19 +80,23 @@ public class CommandResultStats
                 {
                     sender.setCommandStat(type, amount);
                 }
+                public MinecraftServer getServer()
+                {
+                    return sender.getServer();
+                }
             };
             String s1;
 
             try
             {
-                s1 = CommandBase.getEntityName(icommandsender, s);
+                s1 = CommandBase.getEntityName(server, icommandsender, s);
             }
-            catch (EntityNotFoundException var11)
+            catch (CommandException var12)
             {
                 return;
             }
 
-            String s2 = this.objectives[resultTypeIn.getTypeID()];
+            String s2 = this.objectives[typeIn.getTypeID()];
 
             if (s2 != null)
             {
@@ -106,8 +107,8 @@ public class CommandResultStats
                 {
                     if (scoreboard.entityHasObjective(s1, scoreobjective))
                     {
-                        Score score = scoreboard.getValueFromObjective(s1, scoreobjective);
-                        score.setScorePoints(scorePoint);
+                        Score score = scoreboard.getOrCreateScore(s1, scoreobjective);
+                        score.setScorePoints(p_184932_4_);
                     }
                 }
             }
@@ -159,13 +160,10 @@ public class CommandResultStats
 
     /**
      * Set a stat in the scoreboard
-     *  
-     * @param entityID The username of the player or the UUID of an Entity
-     * @param objectiveName The name of the Objective
      */
-    public static void setScoreBoardStat(CommandResultStats stats, CommandResultStats.Type resultType, String entityID, String objectiveName)
+    public static void setScoreBoardStat(CommandResultStats stats, CommandResultStats.Type resultType, @Nullable String entityID, @Nullable String objectiveName)
     {
-        if (entityID != null && entityID.length() != 0 && objectiveName != null && objectiveName.length() != 0)
+        if (entityID != null && !entityID.isEmpty() && objectiveName != null && !objectiveName.isEmpty())
         {
             if (stats.entitiesID == STRING_RESULT_TYPES || stats.objectives == STRING_RESULT_TYPES)
             {
@@ -261,6 +259,7 @@ public class CommandResultStats
             return astring;
         }
 
+        @Nullable
         public static CommandResultStats.Type getTypeByName(String name)
         {
             for (CommandResultStats.Type commandresultstats$type : values())

@@ -24,19 +24,19 @@ public class MixinManager {
 
     public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
-        add("MixinMinecraft");
-        add("MixinGuiIngame");
-        add("MixinEntityPlayerSP");
-        add("MixinEntityRenderer");
-        add("MixinEntityLivingBase");
-        add("MixinRendererLivingEntity");
-        add("MixinNetworkManager");
-        add("MixinPlayerControllerMP");
-        add("MixinEntityPlayer");
-        add("MixinBlockNote");
-        add("MixinBlock");
-        add("MixinEntity");
-        add("MixinModelBiped");
+        //  add("MixinMinecraft");
+        //  add("MixinGuiIngame");
+        //  add("MixinEntityPlayerSP");
+        //  add("MixinEntityRenderer");
+        //  add("MixinEntityLivingBase");
+        //  add("MixinRendererLivingEntity");
+        //  add("MixinNetworkManager");
+        //  add("MixinPlayerControllerMP");
+        //  add("MixinEntityPlayer");
+        //  add("MixinBlockNote");
+        //  add("MixinBlock");
+        //  add("MixinEntity");
+        //  add("MixinModelBiped");
     }
 
     public static void destroyClient() throws IOException {

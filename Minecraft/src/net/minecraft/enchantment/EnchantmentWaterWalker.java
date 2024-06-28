@@ -1,12 +1,13 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.init.Enchantments;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentWaterWalker extends Enchantment
 {
-    public EnchantmentWaterWalker(int p_i45762_1_, ResourceLocation p_i45762_2_, int p_i45762_3_)
+    public EnchantmentWaterWalker(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(p_i45762_1_, p_i45762_2_, p_i45762_3_, EnumEnchantmentType.ARMOR_FEET);
+        super(rarityIn, EnumEnchantmentType.ARMOR_FEET, slots);
         this.setName("waterWalker");
     }
 
@@ -32,5 +33,13 @@ public class EnchantmentWaterWalker extends Enchantment
     public int getMaxLevel()
     {
         return 3;
+    }
+
+    /**
+     * Determines if the enchantment passed can be applyied together with this enchantment.
+     */
+    public boolean canApplyTogether(Enchantment ench)
+    {
+        return super.canApplyTogether(ench) && ench != Enchantments.FROST_WALKER;
     }
 }

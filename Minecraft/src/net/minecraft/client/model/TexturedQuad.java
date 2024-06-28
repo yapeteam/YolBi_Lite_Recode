@@ -1,11 +1,9 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.src.Config;
-import net.minecraft.util.Vec3;
-import net.optifine.shaders.SVertexFormat;
+import net.minecraft.util.math.Vec3d;
 
 public class TexturedQuad
 {
@@ -46,14 +44,14 @@ public class TexturedQuad
      * Draw this primitve. This is typically called only once as the generated drawing instructions are saved by the
      * renderer and reused later.
      */
-    public void draw(WorldRenderer renderer, float scale)
+    public void draw(BufferBuilder renderer, float scale)
     {
-        Vec3 vec3 = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[0].vector3D);
-        Vec3 vec31 = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[2].vector3D);
-        Vec3 vec32 = vec31.crossProduct(vec3).normalize();
-        float f = (float)vec32.xCoord;
-        float f1 = (float)vec32.yCoord;
-        float f2 = (float)vec32.zCoord;
+        Vec3d vec3d = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[0].vector3D);
+        Vec3d vec3d1 = this.vertexPositions[1].vector3D.subtractReverse(this.vertexPositions[2].vector3D);
+        Vec3d vec3d2 = vec3d1.crossProduct(vec3d).normalize();
+        float f = (float)vec3d2.xCoord;
+        float f1 = (float)vec3d2.yCoord;
+        float f2 = (float)vec3d2.zCoord;
 
         if (this.invertNormal)
         {
@@ -62,14 +60,7 @@ public class TexturedQuad
             f2 = -f2;
         }
 
-        if (Config.isShaders())
-        {
-            renderer.begin(7, SVertexFormat.defVertexFormatTextured);
-        }
-        else
-        {
-            renderer.begin(7, DefaultVertexFormats.OLDMODEL_POSITION_TEX_NORMAL);
-        }
+        renderer.begin(7, DefaultVertexFormats.OLDMODEL_POSITION_TEX_NORMAL);
 
         for (int i = 0; i < 4; ++i)
         {

@@ -1,14 +1,13 @@
 package net.minecraft.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.world.IInteractionObject;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 
-public abstract class TileEntityLockable extends TileEntity implements IInteractionObject, ILockableContainer
+public abstract class TileEntityLockable extends TileEntity implements ILockableContainer
 {
     private LockCode code = LockCode.EMPTY_CODE;
 
@@ -18,7 +17,7 @@ public abstract class TileEntityLockable extends TileEntity implements IInteract
         this.code = LockCode.fromNBT(compound);
     }
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
 
@@ -26,6 +25,8 @@ public abstract class TileEntityLockable extends TileEntity implements IInteract
         {
             this.code.toNBT(compound);
         }
+
+        return compound;
     }
 
     public boolean isLocked()
@@ -46,8 +47,8 @@ public abstract class TileEntityLockable extends TileEntity implements IInteract
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 }

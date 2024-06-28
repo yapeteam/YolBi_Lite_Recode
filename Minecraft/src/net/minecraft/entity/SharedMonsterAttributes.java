@@ -2,8 +2,9 @@ package net.minecraft.entity;
 
 import java.util.Collection;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
@@ -14,17 +15,22 @@ import org.apache.logging.log4j.Logger;
 
 public class SharedMonsterAttributes
 {
-    private static final Logger logger = LogManager.getLogger();
-    public static final IAttribute maxHealth = (new RangedAttribute((IAttribute)null, "generic.maxHealth", 20.0D, 0.0D, 1024.0D)).setDescription("Max Health").setShouldWatch(true);
-    public static final IAttribute followRange = (new RangedAttribute((IAttribute)null, "generic.followRange", 32.0D, 0.0D, 2048.0D)).setDescription("Follow Range");
-    public static final IAttribute knockbackResistance = (new RangedAttribute((IAttribute)null, "generic.knockbackResistance", 0.0D, 0.0D, 1.0D)).setDescription("Knockback Resistance");
-    public static final IAttribute movementSpeed = (new RangedAttribute((IAttribute)null, "generic.movementSpeed", 0.699999988079071D, 0.0D, 1024.0D)).setDescription("Movement Speed").setShouldWatch(true);
-    public static final IAttribute attackDamage = new RangedAttribute((IAttribute)null, "generic.attackDamage", 2.0D, 0.0D, 2048.0D);
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final IAttribute MAX_HEALTH = (new RangedAttribute((IAttribute)null, "generic.maxHealth", 20.0D, 0.0D, 1024.0D)).setDescription("Max Health").setShouldWatch(true);
+    public static final IAttribute FOLLOW_RANGE = (new RangedAttribute((IAttribute)null, "generic.followRange", 32.0D, 0.0D, 2048.0D)).setDescription("Follow Range");
+    public static final IAttribute KNOCKBACK_RESISTANCE = (new RangedAttribute((IAttribute)null, "generic.knockbackResistance", 0.0D, 0.0D, 1.0D)).setDescription("Knockback Resistance");
+    public static final IAttribute MOVEMENT_SPEED = (new RangedAttribute((IAttribute)null, "generic.movementSpeed", 0.699999988079071D, 0.0D, 1024.0D)).setDescription("Movement Speed").setShouldWatch(true);
+    public static final IAttribute field_193334_e = (new RangedAttribute((IAttribute)null, "generic.flyingSpeed", 0.4000000059604645D, 0.0D, 1024.0D)).setDescription("Flying Speed").setShouldWatch(true);
+    public static final IAttribute ATTACK_DAMAGE = new RangedAttribute((IAttribute)null, "generic.attackDamage", 2.0D, 0.0D, 2048.0D);
+    public static final IAttribute ATTACK_SPEED = (new RangedAttribute((IAttribute)null, "generic.attackSpeed", 4.0D, 0.0D, 1024.0D)).setShouldWatch(true);
+    public static final IAttribute ARMOR = (new RangedAttribute((IAttribute)null, "generic.armor", 0.0D, 0.0D, 30.0D)).setShouldWatch(true);
+    public static final IAttribute ARMOR_TOUGHNESS = (new RangedAttribute((IAttribute)null, "generic.armorToughness", 0.0D, 0.0D, 20.0D)).setShouldWatch(true);
+    public static final IAttribute LUCK = (new RangedAttribute((IAttribute)null, "generic.luck", 0.0D, -1024.0D, 1024.0D)).setShouldWatch(true);
 
     /**
      * Creates an NBTTagList from a BaseAttributeMap, including all its AttributeInstances
      */
-    public static NBTTagList writeBaseAttributeMapToNBT(BaseAttributeMap map)
+    public static NBTTagList writeBaseAttributeMapToNBT(AbstractAttributeMap map)
     {
         NBTTagList nbttaglist = new NBTTagList();
 
@@ -45,7 +51,7 @@ public class SharedMonsterAttributes
         IAttribute iattribute = instance.getAttribute();
         nbttagcompound.setString("Name", iattribute.getAttributeUnlocalizedName());
         nbttagcompound.setDouble("Base", instance.getBaseValue());
-        Collection<AttributeModifier> collection = instance.func_111122_c();
+        Collection<AttributeModifier> collection = instance.getModifiers();
 
         if (collection != null && !collection.isEmpty())
         {
@@ -68,31 +74,30 @@ public class SharedMonsterAttributes
     /**
      * Creates an NBTTagCompound from an AttributeModifier
      */
-    private static NBTTagCompound writeAttributeModifierToNBT(AttributeModifier modifier)
+    public static NBTTagCompound writeAttributeModifierToNBT(AttributeModifier modifier)
     {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         nbttagcompound.setString("Name", modifier.getName());
         nbttagcompound.setDouble("Amount", modifier.getAmount());
         nbttagcompound.setInteger("Operation", modifier.getOperation());
-        nbttagcompound.setLong("UUIDMost", modifier.getID().getMostSignificantBits());
-        nbttagcompound.setLong("UUIDLeast", modifier.getID().getLeastSignificantBits());
+        nbttagcompound.setUniqueId("UUID", modifier.getID());
         return nbttagcompound;
     }
 
-    public static void setAttributeModifiers(BaseAttributeMap map, NBTTagList list)
+    public static void setAttributeModifiers(AbstractAttributeMap map, NBTTagList list)
     {
         for (int i = 0; i < list.tagCount(); ++i)
         {
             NBTTagCompound nbttagcompound = list.getCompoundTagAt(i);
             IAttributeInstance iattributeinstance = map.getAttributeInstanceByName(nbttagcompound.getString("Name"));
 
-            if (iattributeinstance != null)
+            if (iattributeinstance == null)
             {
-                applyModifiersToAttributeInstance(iattributeinstance, nbttagcompound);
+                LOGGER.warn("Ignoring unknown attribute '{}'", (Object)nbttagcompound.getString("Name"));
             }
             else
             {
-                logger.warn("Ignoring unknown attribute \'" + nbttagcompound.getString("Name") + "\'");
+                applyModifiersToAttributeInstance(iattributeinstance, nbttagcompound);
             }
         }
     }
@@ -124,12 +129,14 @@ public class SharedMonsterAttributes
         }
     }
 
+    @Nullable
+
     /**
      * Creates an AttributeModifier from an NBTTagCompound
      */
     public static AttributeModifier readAttributeModifierFromNBT(NBTTagCompound compound)
     {
-        UUID uuid = new UUID(compound.getLong("UUIDMost"), compound.getLong("UUIDLeast"));
+        UUID uuid = compound.getUniqueId("UUID");
 
         try
         {
@@ -137,7 +144,7 @@ public class SharedMonsterAttributes
         }
         catch (Exception exception)
         {
-            logger.warn("Unable to create attribute: " + exception.getMessage());
+            LOGGER.warn("Unable to create attribute: {}", (Object)exception.getMessage());
             return null;
         }
     }

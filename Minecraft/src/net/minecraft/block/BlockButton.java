@@ -2,41 +2,58 @@ package net.minecraft.block;
 
 import java.util.List;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public abstract class BlockButton extends Block
+public abstract class BlockButton extends BlockDirectional
 {
-    public static final PropertyDirection FACING = PropertyDirection.create("facing");
     public static final PropertyBool POWERED = PropertyBool.create("powered");
+    protected static final AxisAlignedBB AABB_DOWN_OFF = new AxisAlignedBB(0.3125D, 0.875D, 0.375D, 0.6875D, 1.0D, 0.625D);
+    protected static final AxisAlignedBB AABB_UP_OFF = new AxisAlignedBB(0.3125D, 0.0D, 0.375D, 0.6875D, 0.125D, 0.625D);
+    protected static final AxisAlignedBB AABB_NORTH_OFF = new AxisAlignedBB(0.3125D, 0.375D, 0.875D, 0.6875D, 0.625D, 1.0D);
+    protected static final AxisAlignedBB AABB_SOUTH_OFF = new AxisAlignedBB(0.3125D, 0.375D, 0.0D, 0.6875D, 0.625D, 0.125D);
+    protected static final AxisAlignedBB AABB_WEST_OFF = new AxisAlignedBB(0.875D, 0.375D, 0.3125D, 1.0D, 0.625D, 0.6875D);
+    protected static final AxisAlignedBB AABB_EAST_OFF = new AxisAlignedBB(0.0D, 0.375D, 0.3125D, 0.125D, 0.625D, 0.6875D);
+    protected static final AxisAlignedBB AABB_DOWN_ON = new AxisAlignedBB(0.3125D, 0.9375D, 0.375D, 0.6875D, 1.0D, 0.625D);
+    protected static final AxisAlignedBB AABB_UP_ON = new AxisAlignedBB(0.3125D, 0.0D, 0.375D, 0.6875D, 0.0625D, 0.625D);
+    protected static final AxisAlignedBB AABB_NORTH_ON = new AxisAlignedBB(0.3125D, 0.375D, 0.9375D, 0.6875D, 0.625D, 1.0D);
+    protected static final AxisAlignedBB AABB_SOUTH_ON = new AxisAlignedBB(0.3125D, 0.375D, 0.0D, 0.6875D, 0.625D, 0.0625D);
+    protected static final AxisAlignedBB AABB_WEST_ON = new AxisAlignedBB(0.9375D, 0.375D, 0.3125D, 1.0D, 0.625D, 0.6875D);
+    protected static final AxisAlignedBB AABB_EAST_ON = new AxisAlignedBB(0.0D, 0.375D, 0.3125D, 0.0625D, 0.625D, 0.6875D);
     private final boolean wooden;
 
     protected BlockButton(boolean wooden)
     {
-        super(Material.circuits);
+        super(Material.CIRCUITS);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(POWERED, Boolean.valueOf(false)));
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        this.setCreativeTab(CreativeTabs.REDSTONE);
         this.wooden = wooden;
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
@@ -50,12 +67,12 @@ public abstract class BlockButton extends Block
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -65,14 +82,14 @@ public abstract class BlockButton extends Block
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
-        return func_181088_a(worldIn, pos, side.getOpposite());
+        return canPlaceBlock(worldIn, pos, side);
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
         for (EnumFacing enumfacing : EnumFacing.values())
         {
-            if (func_181088_a(worldIn, pos, enumfacing))
+            if (canPlaceBlock(worldIn, pos, enumfacing))
             {
                 return true;
             }
@@ -81,10 +98,24 @@ public abstract class BlockButton extends Block
         return false;
     }
 
-    protected static boolean func_181088_a(World p_181088_0_, BlockPos p_181088_1_, EnumFacing p_181088_2_)
+    /**
+     * Check whether this block can be placed on the block in the given direction.
+     */
+    protected static boolean canPlaceBlock(World worldIn, BlockPos pos, EnumFacing direction)
     {
-        BlockPos blockpos = p_181088_1_.offset(p_181088_2_);
-        return p_181088_2_ == EnumFacing.DOWN ? World.doesBlockHaveSolidTopSurface(p_181088_0_, blockpos) : p_181088_0_.getBlockState(blockpos).getBlock().isNormalCube();
+        BlockPos blockpos = pos.offset(direction.getOpposite());
+        IBlockState iblockstate = worldIn.getBlockState(blockpos);
+        boolean flag = iblockstate.func_193401_d(worldIn, blockpos, direction) == BlockFaceShape.SOLID;
+        Block block = iblockstate.getBlock();
+
+        if (direction == EnumFacing.UP)
+        {
+            return block == Blocks.HOPPER || !func_193384_b(block) && flag;
+        }
+        else
+        {
+            return !func_193382_c(block) && flag;
+        }
     }
 
     /**
@@ -93,15 +124,17 @@ public abstract class BlockButton extends Block
      */
     public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return func_181088_a(worldIn, pos, facing.getOpposite()) ? this.getDefaultState().withProperty(FACING, facing).withProperty(POWERED, Boolean.valueOf(false)) : this.getDefaultState().withProperty(FACING, EnumFacing.DOWN).withProperty(POWERED, Boolean.valueOf(false));
+        return canPlaceBlock(worldIn, pos, facing) ? this.getDefaultState().withProperty(FACING, facing).withProperty(POWERED, Boolean.valueOf(false)) : this.getDefaultState().withProperty(FACING, EnumFacing.DOWN).withProperty(POWERED, Boolean.valueOf(false));
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
-        if (this.checkForDrop(worldIn, pos, state) && !func_181088_a(worldIn, pos, ((EnumFacing)state.getValue(FACING)).getOpposite()))
+        if (this.checkForDrop(worldIn, pos, state) && !canPlaceBlock(worldIn, pos, (EnumFacing)state.getValue(FACING)))
         {
             this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);
@@ -122,49 +155,35 @@ public abstract class BlockButton extends Block
         }
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        this.updateBlockBounds(worldIn.getBlockState(pos));
-    }
-
-    private void updateBlockBounds(IBlockState state)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
         EnumFacing enumfacing = (EnumFacing)state.getValue(FACING);
         boolean flag = ((Boolean)state.getValue(POWERED)).booleanValue();
-        float f = 0.25F;
-        float f1 = 0.375F;
-        float f2 = (float)(flag ? 1 : 2) / 16.0F;
-        float f3 = 0.125F;
-        float f4 = 0.1875F;
 
         switch (enumfacing)
         {
             case EAST:
-                this.setBlockBounds(0.0F, 0.375F, 0.3125F, f2, 0.625F, 0.6875F);
-                break;
+                return flag ? AABB_EAST_ON : AABB_EAST_OFF;
 
             case WEST:
-                this.setBlockBounds(1.0F - f2, 0.375F, 0.3125F, 1.0F, 0.625F, 0.6875F);
-                break;
+                return flag ? AABB_WEST_ON : AABB_WEST_OFF;
 
             case SOUTH:
-                this.setBlockBounds(0.3125F, 0.375F, 0.0F, 0.6875F, 0.625F, f2);
-                break;
+                return flag ? AABB_SOUTH_ON : AABB_SOUTH_OFF;
 
             case NORTH:
-                this.setBlockBounds(0.3125F, 0.375F, 1.0F - f2, 0.6875F, 0.625F, 1.0F);
-                break;
+            default:
+                return flag ? AABB_NORTH_ON : AABB_NORTH_OFF;
 
             case UP:
-                this.setBlockBounds(0.3125F, 0.0F, 0.375F, 0.6875F, 0.0F + f2, 0.625F);
-                break;
+                return flag ? AABB_UP_ON : AABB_UP_OFF;
 
             case DOWN:
-                this.setBlockBounds(0.3125F, 1.0F - f2, 0.375F, 0.6875F, 1.0F, 0.625F);
+                return flag ? AABB_DOWN_ON : AABB_DOWN_OFF;
         }
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (((Boolean)state.getValue(POWERED)).booleanValue())
         {
@@ -174,13 +193,20 @@ public abstract class BlockButton extends Block
         {
             worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(true)), 3);
             worldIn.markBlockRangeForRenderUpdate(pos, pos);
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.6F);
+            this.playClickSound(playerIn, worldIn, pos);
             this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
             worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
             return true;
         }
     }
 
+    protected abstract void playClickSound(EntityPlayer player, World worldIn, BlockPos pos);
+
+    protected abstract void playReleaseSound(World worldIn, BlockPos pos);
+
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         if (((Boolean)state.getValue(POWERED)).booleanValue())
@@ -191,20 +217,27 @@ public abstract class BlockButton extends Block
         super.breakBlock(worldIn, pos, state);
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 15 : 0;
+        return ((Boolean)blockState.getValue(POWERED)).booleanValue() ? 15 : 0;
     }
 
-    public int getStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return !((Boolean)state.getValue(POWERED)).booleanValue() ? 0 : (state.getValue(FACING) == side ? 15 : 0);
+        if (!((Boolean)blockState.getValue(POWERED)).booleanValue())
+        {
+            return 0;
+        }
+        else
+        {
+            return blockState.getValue(FACING) == side ? 15 : 0;
+        }
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return true;
     }
@@ -224,28 +257,17 @@ public abstract class BlockButton extends Block
             {
                 if (this.wooden)
                 {
-                    this.checkForArrows(worldIn, pos, state);
+                    this.checkPressed(state, worldIn, pos);
                 }
                 else
                 {
                     worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(false)));
                     this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
-                    worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.5F);
+                    this.playReleaseSound(worldIn, pos);
                     worldIn.markBlockRangeForRenderUpdate(pos, pos);
                 }
             }
         }
-    }
-
-    /**
-     * Sets the block's bounds for rendering it as an item
-     */
-    public void setBlockBoundsForItemRender()
-    {
-        float f = 0.1875F;
-        float f1 = 0.125F;
-        float f2 = 0.125F;
-        this.setBlockBounds(0.5F - f, 0.5F - f1, 0.5F - f2, 0.5F + f, 0.5F + f1, 0.5F + f2);
     }
 
     /**
@@ -259,45 +281,44 @@ public abstract class BlockButton extends Block
             {
                 if (!((Boolean)state.getValue(POWERED)).booleanValue())
                 {
-                    this.checkForArrows(worldIn, pos, state);
+                    this.checkPressed(state, worldIn, pos);
                 }
             }
         }
     }
 
-    private void checkForArrows(World worldIn, BlockPos pos, IBlockState state)
+    private void checkPressed(IBlockState p_185616_1_, World p_185616_2_, BlockPos p_185616_3_)
     {
-        this.updateBlockBounds(state);
-        List <? extends Entity > list = worldIn.<Entity>getEntitiesWithinAABB(EntityArrow.class, new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ));
+        List <? extends Entity > list = p_185616_2_.<Entity>getEntitiesWithinAABB(EntityArrow.class, p_185616_1_.getBoundingBox(p_185616_2_, p_185616_3_).offset(p_185616_3_));
         boolean flag = !list.isEmpty();
-        boolean flag1 = ((Boolean)state.getValue(POWERED)).booleanValue();
+        boolean flag1 = ((Boolean)p_185616_1_.getValue(POWERED)).booleanValue();
 
         if (flag && !flag1)
         {
-            worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(true)));
-            this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
-            worldIn.markBlockRangeForRenderUpdate(pos, pos);
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.6F);
+            p_185616_2_.setBlockState(p_185616_3_, p_185616_1_.withProperty(POWERED, Boolean.valueOf(true)));
+            this.notifyNeighbors(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.getValue(FACING));
+            p_185616_2_.markBlockRangeForRenderUpdate(p_185616_3_, p_185616_3_);
+            this.playClickSound((EntityPlayer)null, p_185616_2_, p_185616_3_);
         }
 
         if (!flag && flag1)
         {
-            worldIn.setBlockState(pos, state.withProperty(POWERED, Boolean.valueOf(false)));
-            this.notifyNeighbors(worldIn, pos, (EnumFacing)state.getValue(FACING));
-            worldIn.markBlockRangeForRenderUpdate(pos, pos);
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.5F);
+            p_185616_2_.setBlockState(p_185616_3_, p_185616_1_.withProperty(POWERED, Boolean.valueOf(false)));
+            this.notifyNeighbors(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.getValue(FACING));
+            p_185616_2_.markBlockRangeForRenderUpdate(p_185616_3_, p_185616_3_);
+            this.playReleaseSound(p_185616_2_, p_185616_3_);
         }
 
         if (flag)
         {
-            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            p_185616_2_.scheduleUpdate(new BlockPos(p_185616_3_), this, this.tickRate(p_185616_2_));
         }
     }
 
     private void notifyNeighbors(World worldIn, BlockPos pos, EnumFacing facing)
     {
-        worldIn.notifyNeighborsOfStateChange(pos, this);
-        worldIn.notifyNeighborsOfStateChange(pos.offset(facing.getOpposite()), this);
+        worldIn.notifyNeighborsOfStateChange(pos, this, false);
+        worldIn.notifyNeighborsOfStateChange(pos.offset(facing.getOpposite()), this, false);
     }
 
     /**
@@ -379,8 +400,31 @@ public abstract class BlockButton extends Block
         return i;
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {FACING, POWERED});
+        return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING, POWERED});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
     }
 }

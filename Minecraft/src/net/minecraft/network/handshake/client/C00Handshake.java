@@ -17,12 +17,12 @@ public class C00Handshake implements Packet<INetHandlerHandshakeServer>
     {
     }
 
-    public C00Handshake(int version, String ip, int port, EnumConnectionState requestedState)
+    public C00Handshake(String p_i47613_1_, int p_i47613_2_, EnumConnectionState p_i47613_3_)
     {
-        this.protocolVersion = version;
-        this.ip = ip;
-        this.port = port;
-        this.requestedState = requestedState;
+        this.protocolVersion = 340;
+        this.ip = p_i47613_1_;
+        this.port = p_i47613_2_;
+        this.requestedState = p_i47613_3_;
     }
 
     /**

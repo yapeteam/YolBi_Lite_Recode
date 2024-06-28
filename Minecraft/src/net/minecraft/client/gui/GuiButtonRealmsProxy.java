@@ -5,7 +5,7 @@ import net.minecraft.realms.RealmsButton;
 
 public class GuiButtonRealmsProxy extends GuiButton
 {
-    private RealmsButton realmsButton;
+    private final RealmsButton realmsButton;
 
     public GuiButtonRealmsProxy(RealmsButton realmsButtonIn, int buttonId, int x, int y, String text)
     {
@@ -21,17 +21,17 @@ public class GuiButtonRealmsProxy extends GuiButton
 
     public int getId()
     {
-        return super.id;
+        return this.id;
     }
 
     public boolean getEnabled()
     {
-        return super.enabled;
+        return this.enabled;
     }
 
     public void setEnabled(boolean isEnabled)
     {
-        super.enabled = isEnabled;
+        this.enabled = isEnabled;
     }
 
     public void setText(String text)
@@ -46,7 +46,7 @@ public class GuiButtonRealmsProxy extends GuiButton
 
     public int getPositionY()
     {
-        return super.yPosition;
+        return this.yPosition;
     }
 
     /**
@@ -93,7 +93,7 @@ public class GuiButtonRealmsProxy extends GuiButton
         return this.realmsButton.getYImage(mouseOver);
     }
 
-    public int func_154312_c(boolean p_154312_1_)
+    public int getYImage(boolean p_154312_1_)
     {
         return super.getHoverState(p_154312_1_);
     }

@@ -4,17 +4,15 @@ import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.world.ColorizerGrass;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeColorHelper;
 
 public class BlockGrass extends Block implements IGrowable
 {
@@ -22,10 +20,10 @@ public class BlockGrass extends Block implements IGrowable
 
     protected BlockGrass()
     {
-        super(Material.grass);
+        super(Material.GRASS);
         this.setDefaultState(this.blockState.getBaseState().withProperty(SNOWY, Boolean.valueOf(false)));
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -35,31 +33,16 @@ public class BlockGrass extends Block implements IGrowable
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
         Block block = worldIn.getBlockState(pos.up()).getBlock();
-        return state.withProperty(SNOWY, Boolean.valueOf(block == Blocks.snow || block == Blocks.snow_layer));
-    }
-
-    public int getBlockColor()
-    {
-        return ColorizerGrass.getGrassColor(0.5D, 1.0D);
-    }
-
-    public int getRenderColor(IBlockState state)
-    {
-        return this.getBlockColor();
-    }
-
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        return BiomeColorHelper.getGrassColorAtPos(worldIn, pos);
+        return state.withProperty(SNOWY, Boolean.valueOf(block == Blocks.SNOW || block == Blocks.SNOW_LAYER));
     }
 
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
         if (!worldIn.isRemote)
         {
-            if (worldIn.getLightFromNeighbors(pos.up()) < 4 && worldIn.getBlockState(pos.up()).getBlock().getLightOpacity() > 2)
+            if (worldIn.getLightFromNeighbors(pos.up()) < 4 && worldIn.getBlockState(pos.up()).getLightOpacity() > 2)
             {
-                worldIn.setBlockState(pos, Blocks.dirt.getDefaultState());
+                worldIn.setBlockState(pos, Blocks.DIRT.getDefaultState());
             }
             else
             {
@@ -68,12 +51,18 @@ public class BlockGrass extends Block implements IGrowable
                     for (int i = 0; i < 4; ++i)
                     {
                         BlockPos blockpos = pos.add(rand.nextInt(3) - 1, rand.nextInt(5) - 3, rand.nextInt(3) - 1);
-                        Block block = worldIn.getBlockState(blockpos.up()).getBlock();
-                        IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-                        if (iblockstate.getBlock() == Blocks.dirt && iblockstate.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && worldIn.getLightFromNeighbors(blockpos.up()) >= 4 && block.getLightOpacity() <= 2)
+                        if (blockpos.getY() >= 0 && blockpos.getY() < 256 && !worldIn.isBlockLoaded(blockpos))
                         {
-                            worldIn.setBlockState(blockpos, Blocks.grass.getDefaultState());
+                            return;
+                        }
+
+                        IBlockState iblockstate = worldIn.getBlockState(blockpos.up());
+                        IBlockState iblockstate1 = worldIn.getBlockState(blockpos);
+
+                        if (iblockstate1.getBlock() == Blocks.DIRT && iblockstate1.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT && worldIn.getLightFromNeighbors(blockpos.up()) >= 4 && iblockstate.getLightOpacity() <= 2)
+                        {
+                            worldIn.setBlockState(blockpos, Blocks.GRASS.getDefaultState());
                         }
                     }
                 }
@@ -86,7 +75,7 @@ public class BlockGrass extends Block implements IGrowable
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Blocks.dirt.getItemDropped(Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
+        return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
     }
 
     /**
@@ -115,11 +104,11 @@ public class BlockGrass extends Block implements IGrowable
             {
                 if (j >= i / 16)
                 {
-                    if (worldIn.getBlockState(blockpos1).getBlock().blockMaterial == Material.air)
+                    if (worldIn.getBlockState(blockpos1).getBlock().blockMaterial == Material.AIR)
                     {
                         if (rand.nextInt(8) == 0)
                         {
-                            BlockFlower.EnumFlowerType blockflower$enumflowertype = worldIn.getBiomeGenForCoords(blockpos1).pickRandomFlower(rand, blockpos1);
+                            BlockFlower.EnumFlowerType blockflower$enumflowertype = worldIn.getBiome(blockpos1).pickRandomFlower(rand, blockpos1);
                             BlockFlower blockflower = blockflower$enumflowertype.getBlockType().getBlock();
                             IBlockState iblockstate = blockflower.getDefaultState().withProperty(blockflower.getTypeProperty(), blockflower$enumflowertype);
 
@@ -130,9 +119,9 @@ public class BlockGrass extends Block implements IGrowable
                         }
                         else
                         {
-                            IBlockState iblockstate1 = Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
+                            IBlockState iblockstate1 = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
 
-                            if (Blocks.tallgrass.canBlockStay(worldIn, blockpos1, iblockstate1))
+                            if (Blocks.TALLGRASS.canBlockStay(worldIn, blockpos1, iblockstate1))
                             {
                                 worldIn.setBlockState(blockpos1, iblockstate1, 3);
                             }
@@ -144,7 +133,7 @@ public class BlockGrass extends Block implements IGrowable
 
                 blockpos1 = blockpos1.add(rand.nextInt(3) - 1, (rand.nextInt(3) - 1) * rand.nextInt(3) / 2, rand.nextInt(3) - 1);
 
-                if (worldIn.getBlockState(blockpos1.down()).getBlock() != Blocks.grass || worldIn.getBlockState(blockpos1).getBlock().isNormalCube())
+                if (worldIn.getBlockState(blockpos1.down()).getBlock() != Blocks.GRASS || worldIn.getBlockState(blockpos1).isNormalCube())
                 {
                     break;
                 }
@@ -154,9 +143,9 @@ public class BlockGrass extends Block implements IGrowable
         }
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT_MIPPED;
+        return BlockRenderLayer.CUTOUT_MIPPED;
     }
 
     /**
@@ -167,8 +156,8 @@ public class BlockGrass extends Block implements IGrowable
         return 0;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {SNOWY});
+        return new BlockStateContainer(this, new IProperty[] {SNOWY});
     }
 }

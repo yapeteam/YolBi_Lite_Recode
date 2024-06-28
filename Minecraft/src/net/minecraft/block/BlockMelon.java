@@ -12,8 +12,8 @@ public class BlockMelon extends Block
 {
     protected BlockMelon()
     {
-        super(Material.gourd, MapColor.limeColor);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        super(Material.GOURD, MapColor.LIME);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -21,7 +21,7 @@ public class BlockMelon extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.melon;
+        return Items.MELON;
     }
 
     /**

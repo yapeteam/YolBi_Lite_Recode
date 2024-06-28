@@ -1,26 +1,26 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.realms.RealmsSimpleScrolledSelectionList;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
 {
-    private final RealmsSimpleScrolledSelectionList field_178050_u;
+    private final RealmsSimpleScrolledSelectionList realmsScrolledSelectionList;
 
     public GuiSimpleScrolledSelectionListProxy(RealmsSimpleScrolledSelectionList p_i45525_1_, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn)
     {
         super(Minecraft.getMinecraft(), widthIn, heightIn, topIn, bottomIn, slotHeightIn);
-        this.field_178050_u = p_i45525_1_;
+        this.realmsScrolledSelectionList = p_i45525_1_;
     }
 
     protected int getSize()
     {
-        return this.field_178050_u.getItemCount();
+        return this.realmsScrolledSelectionList.getItemCount();
     }
 
     /**
@@ -28,7 +28,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
      */
     protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
     {
-        this.field_178050_u.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
+        this.realmsScrolledSelectionList.selectItem(slotIndex, isDoubleClick, mouseX, mouseY);
     }
 
     /**
@@ -36,32 +36,32 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
      */
     protected boolean isSelected(int slotIndex)
     {
-        return this.field_178050_u.isSelectedItem(slotIndex);
+        return this.realmsScrolledSelectionList.isSelectedItem(slotIndex);
     }
 
     protected void drawBackground()
     {
-        this.field_178050_u.renderBackground();
+        this.realmsScrolledSelectionList.renderBackground();
     }
 
-    protected void drawSlot(int entryID, int p_180791_2_, int p_180791_3_, int p_180791_4_, int mouseXIn, int mouseYIn)
+    protected void func_192637_a(int p_192637_1_, int p_192637_2_, int p_192637_3_, int p_192637_4_, int p_192637_5_, int p_192637_6_, float p_192637_7_)
     {
-        this.field_178050_u.renderItem(entryID, p_180791_2_, p_180791_3_, p_180791_4_, mouseXIn, mouseYIn);
+        this.realmsScrolledSelectionList.renderItem(p_192637_1_, p_192637_2_, p_192637_3_, p_192637_4_, p_192637_5_, p_192637_6_);
     }
 
     public int getWidth()
     {
-        return super.width;
+        return this.width;
     }
 
     public int getMouseY()
     {
-        return super.mouseY;
+        return this.mouseY;
     }
 
     public int getMouseX()
     {
-        return super.mouseX;
+        return this.mouseX;
     }
 
     /**
@@ -69,12 +69,12 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
      */
     protected int getContentHeight()
     {
-        return this.field_178050_u.getMaxPosition();
+        return this.realmsScrolledSelectionList.getMaxPosition();
     }
 
     protected int getScrollBarX()
     {
-        return this.field_178050_u.getScrollbarPosition();
+        return this.realmsScrolledSelectionList.getScrollbarPosition();
     }
 
     public void handleMouseInput()
@@ -82,9 +82,9 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
         super.handleMouseInput();
     }
 
-    public void drawScreen(int mouseXIn, int mouseYIn, float p_148128_3_)
+    public void drawScreen(int mouseXIn, int mouseYIn, float partialTicks)
     {
-        if (this.field_178041_q)
+        if (this.visible)
         {
             this.mouseX = mouseXIn;
             this.mouseY = mouseYIn;
@@ -95,7 +95,7 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
             GlStateManager.disableLighting();
             GlStateManager.disableFog();
             Tessellator tessellator = Tessellator.getInstance();
-            WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+            BufferBuilder bufferbuilder = tessellator.getBuffer();
             int k = this.left + this.width / 2 - this.getListWidth() / 2 + 2;
             int l = this.top + 4 - (int)this.amountScrolled;
 
@@ -104,50 +104,49 @@ public class GuiSimpleScrolledSelectionListProxy extends GuiSlot
                 this.drawListHeader(k, l, tessellator);
             }
 
-            this.drawSelectionBox(k, l, mouseXIn, mouseYIn);
+            this.func_192638_a(k, l, mouseXIn, mouseYIn, partialTicks);
             GlStateManager.disableDepth();
-            int i1 = 4;
             this.overlayBackground(0, this.top, 255, 255);
             this.overlayBackground(this.bottom, this.height, 255, 255);
             GlStateManager.enableBlend();
-            GlStateManager.tryBlendFuncSeparate(770, 771, 0, 1);
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
             GlStateManager.disableAlpha();
             GlStateManager.shadeModel(7425);
             GlStateManager.disableTexture2D();
-            int j1 = this.func_148135_f();
+            int i1 = this.getMaxScroll();
 
-            if (j1 > 0)
+            if (i1 > 0)
             {
-                int k1 = (this.bottom - this.top) * (this.bottom - this.top) / this.getContentHeight();
-                k1 = MathHelper.clamp_int(k1, 32, this.bottom - this.top - 8);
-                int l1 = (int)this.amountScrolled * (this.bottom - this.top - k1) / j1 + this.top;
+                int j1 = (this.bottom - this.top) * (this.bottom - this.top) / this.getContentHeight();
+                j1 = MathHelper.clamp(j1, 32, this.bottom - this.top - 8);
+                int k1 = (int)this.amountScrolled * (this.bottom - this.top - j1) / i1 + this.top;
 
-                if (l1 < this.top)
+                if (k1 < this.top)
                 {
-                    l1 = this.top;
+                    k1 = this.top;
                 }
 
-                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldrenderer.pos((double)i, (double)this.bottom, 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-                worldrenderer.pos((double)j, (double)this.bottom, 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
-                worldrenderer.pos((double)j, (double)this.top, 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
-                worldrenderer.pos((double)i, (double)this.top, 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)this.bottom, 0.0D).tex(0.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.bottom, 0.0D).tex(1.0D, 1.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)this.top, 0.0D).tex(1.0D, 0.0D).color(0, 0, 0, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)this.top, 0.0D).tex(0.0D, 0.0D).color(0, 0, 0, 255).endVertex();
                 tessellator.draw();
-                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldrenderer.pos((double)i, (double)(l1 + k1), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255).endVertex();
-                worldrenderer.pos((double)j, (double)(l1 + k1), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255).endVertex();
-                worldrenderer.pos((double)j, (double)l1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
-                worldrenderer.pos((double)i, (double)l1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(k1 + j1), 0.0D).tex(0.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)(k1 + j1), 0.0D).tex(1.0D, 1.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)j, (double)k1, 0.0D).tex(1.0D, 0.0D).color(128, 128, 128, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)k1, 0.0D).tex(0.0D, 0.0D).color(128, 128, 128, 255).endVertex();
                 tessellator.draw();
-                worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
-                worldrenderer.pos((double)i, (double)(l1 + k1 - 1), 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255).endVertex();
-                worldrenderer.pos((double)(j - 1), (double)(l1 + k1 - 1), 0.0D).tex(1.0D, 1.0D).color(192, 192, 192, 255).endVertex();
-                worldrenderer.pos((double)(j - 1), (double)l1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255).endVertex();
-                worldrenderer.pos((double)i, (double)l1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+                bufferbuilder.pos((double)i, (double)(k1 + j1 - 1), 0.0D).tex(0.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)(k1 + j1 - 1), 0.0D).tex(1.0D, 1.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)(j - 1), (double)k1, 0.0D).tex(1.0D, 0.0D).color(192, 192, 192, 255).endVertex();
+                bufferbuilder.pos((double)i, (double)k1, 0.0D).tex(0.0D, 0.0D).color(192, 192, 192, 255).endVertex();
                 tessellator.draw();
             }
 
-            this.func_148142_b(mouseXIn, mouseYIn);
+            this.renderDecorations(mouseXIn, mouseYIn);
             GlStateManager.enableTexture2D();
             GlStateManager.shadeModel(7424);
             GlStateManager.enableAlpha();

@@ -4,10 +4,8 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockBed;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockColored;
-import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockDoor;
@@ -44,17 +42,16 @@ import net.minecraft.block.BlockTripWire;
 import net.minecraft.block.BlockWall;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelManager;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 
 public class BlockModelShapes
 {
@@ -80,34 +77,119 @@ public class BlockModelShapes
 
         if (ibakedmodel == null || ibakedmodel == this.modelManager.getMissingModel())
         {
-            if (block == Blocks.wall_sign || block == Blocks.standing_sign || block == Blocks.chest || block == Blocks.trapped_chest || block == Blocks.standing_banner || block == Blocks.wall_banner)
+            if (block == Blocks.WALL_SIGN || block == Blocks.STANDING_SIGN || block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST || block == Blocks.STANDING_BANNER || block == Blocks.WALL_BANNER || block == Blocks.BED)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/planks_oak");
             }
 
-            if (block == Blocks.ender_chest)
+            if (block == Blocks.ENDER_CHEST)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/obsidian");
             }
 
-            if (block == Blocks.flowing_lava || block == Blocks.lava)
+            if (block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/lava_still");
             }
 
-            if (block == Blocks.flowing_water || block == Blocks.water)
+            if (block == Blocks.FLOWING_WATER || block == Blocks.WATER)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/water_still");
             }
 
-            if (block == Blocks.skull)
+            if (block == Blocks.SKULL)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/soul_sand");
             }
 
-            if (block == Blocks.barrier)
+            if (block == Blocks.BARRIER)
             {
                 return this.modelManager.getTextureMap().getAtlasSprite("minecraft:items/barrier");
+            }
+
+            if (block == Blocks.STRUCTURE_VOID)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:items/structure_void");
+            }
+
+            if (block == Blocks.field_190977_dl)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_white");
+            }
+
+            if (block == Blocks.field_190978_dm)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_orange");
+            }
+
+            if (block == Blocks.field_190979_dn)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_magenta");
+            }
+
+            if (block == Blocks.field_190980_do)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_light_blue");
+            }
+
+            if (block == Blocks.field_190981_dp)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_yellow");
+            }
+
+            if (block == Blocks.field_190982_dq)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_lime");
+            }
+
+            if (block == Blocks.field_190983_dr)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_pink");
+            }
+
+            if (block == Blocks.field_190984_ds)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_gray");
+            }
+
+            if (block == Blocks.field_190985_dt)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_silver");
+            }
+
+            if (block == Blocks.field_190986_du)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_cyan");
+            }
+
+            if (block == Blocks.field_190987_dv)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_purple");
+            }
+
+            if (block == Blocks.field_190988_dw)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_blue");
+            }
+
+            if (block == Blocks.field_190989_dx)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_brown");
+            }
+
+            if (block == Blocks.field_190990_dy)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_green");
+            }
+
+            if (block == Blocks.field_190991_dz)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_red");
+            }
+
+            if (block == Blocks.field_190975_dA)
+            {
+                return this.modelManager.getTextureMap().getAtlasSprite("minecraft:blocks/shulker_top_black");
             }
         }
 
@@ -121,7 +203,7 @@ public class BlockModelShapes
 
     public IBakedModel getModelForState(IBlockState state)
     {
-        IBakedModel ibakedmodel = (IBakedModel)this.bakedModelStore.get(state);
+        IBakedModel ibakedmodel = this.bakedModelStore.get(state);
 
         if (ibakedmodel == null)
         {
@@ -142,7 +224,7 @@ public class BlockModelShapes
 
         for (Entry<IBlockState, ModelResourceLocation> entry : this.blockStateMapper.putAllStateModelLocations().entrySet())
         {
-            this.bakedModelStore.put(entry.getKey(), this.modelManager.getModel((ModelResourceLocation)entry.getValue()));
+            this.bakedModelStore.put(entry.getKey(), this.modelManager.getModel(entry.getValue()));
         }
     }
 
@@ -158,61 +240,61 @@ public class BlockModelShapes
 
     private void registerAllBlocks()
     {
-        this.registerBuiltInBlocks(new Block[] {Blocks.air, Blocks.flowing_water, Blocks.water, Blocks.flowing_lava, Blocks.lava, Blocks.piston_extension, Blocks.chest, Blocks.ender_chest, Blocks.trapped_chest, Blocks.standing_sign, Blocks.skull, Blocks.end_portal, Blocks.barrier, Blocks.wall_sign, Blocks.wall_banner, Blocks.standing_banner});
-        this.registerBlockWithStateMapper(Blocks.stone, (new StateMap.Builder()).withName(BlockStone.VARIANT).build());
-        this.registerBlockWithStateMapper(Blocks.prismarine, (new StateMap.Builder()).withName(BlockPrismarine.VARIANT).build());
-        this.registerBlockWithStateMapper(Blocks.leaves, (new StateMap.Builder()).withName(BlockOldLeaf.VARIANT).withSuffix("_leaves").ignore(new IProperty[] {BlockLeaves.CHECK_DECAY, BlockLeaves.DECAYABLE}).build());
-        this.registerBlockWithStateMapper(Blocks.leaves2, (new StateMap.Builder()).withName(BlockNewLeaf.VARIANT).withSuffix("_leaves").ignore(new IProperty[] {BlockLeaves.CHECK_DECAY, BlockLeaves.DECAYABLE}).build());
-        this.registerBlockWithStateMapper(Blocks.cactus, (new StateMap.Builder()).ignore(new IProperty[] {BlockCactus.AGE}).build());
-        this.registerBlockWithStateMapper(Blocks.reeds, (new StateMap.Builder()).ignore(new IProperty[] {BlockReed.AGE}).build());
-        this.registerBlockWithStateMapper(Blocks.jukebox, (new StateMap.Builder()).ignore(new IProperty[] {BlockJukebox.HAS_RECORD}).build());
-        this.registerBlockWithStateMapper(Blocks.command_block, (new StateMap.Builder()).ignore(new IProperty[] {BlockCommandBlock.TRIGGERED}).build());
-        this.registerBlockWithStateMapper(Blocks.cobblestone_wall, (new StateMap.Builder()).withName(BlockWall.VARIANT).withSuffix("_wall").build());
-        this.registerBlockWithStateMapper(Blocks.double_plant, (new StateMap.Builder()).withName(BlockDoublePlant.VARIANT).ignore(new IProperty[] {BlockDoublePlant.FACING}).build());
-        this.registerBlockWithStateMapper(Blocks.oak_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.spruce_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.birch_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.jungle_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.dark_oak_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.acacia_fence_gate, (new StateMap.Builder()).ignore(new IProperty[] {BlockFenceGate.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.tripwire, (new StateMap.Builder()).ignore(new IProperty[] {BlockTripWire.DISARMED, BlockTripWire.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.double_wooden_slab, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_double_slab").build());
-        this.registerBlockWithStateMapper(Blocks.wooden_slab, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_slab").build());
-        this.registerBlockWithStateMapper(Blocks.tnt, (new StateMap.Builder()).ignore(new IProperty[] {BlockTNT.EXPLODE}).build());
-        this.registerBlockWithStateMapper(Blocks.fire, (new StateMap.Builder()).ignore(new IProperty[] {BlockFire.AGE}).build());
-        this.registerBlockWithStateMapper(Blocks.redstone_wire, (new StateMap.Builder()).ignore(new IProperty[] {BlockRedstoneWire.POWER}).build());
-        this.registerBlockWithStateMapper(Blocks.oak_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.spruce_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.birch_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.jungle_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.acacia_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.dark_oak_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.iron_door, (new StateMap.Builder()).ignore(new IProperty[] {BlockDoor.POWERED}).build());
-        this.registerBlockWithStateMapper(Blocks.wool, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_wool").build());
-        this.registerBlockWithStateMapper(Blocks.carpet, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_carpet").build());
-        this.registerBlockWithStateMapper(Blocks.stained_hardened_clay, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_hardened_clay").build());
-        this.registerBlockWithStateMapper(Blocks.stained_glass_pane, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_glass_pane").build());
-        this.registerBlockWithStateMapper(Blocks.stained_glass, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_glass").build());
-        this.registerBlockWithStateMapper(Blocks.sandstone, (new StateMap.Builder()).withName(BlockSandStone.TYPE).build());
-        this.registerBlockWithStateMapper(Blocks.red_sandstone, (new StateMap.Builder()).withName(BlockRedSandstone.TYPE).build());
-        this.registerBlockWithStateMapper(Blocks.tallgrass, (new StateMap.Builder()).withName(BlockTallGrass.TYPE).build());
-        this.registerBlockWithStateMapper(Blocks.bed, (new StateMap.Builder()).ignore(new IProperty[] {BlockBed.OCCUPIED}).build());
-        this.registerBlockWithStateMapper(Blocks.yellow_flower, (new StateMap.Builder()).withName(Blocks.yellow_flower.getTypeProperty()).build());
-        this.registerBlockWithStateMapper(Blocks.red_flower, (new StateMap.Builder()).withName(Blocks.red_flower.getTypeProperty()).build());
-        this.registerBlockWithStateMapper(Blocks.stone_slab, (new StateMap.Builder()).withName(BlockStoneSlab.VARIANT).withSuffix("_slab").build());
-        this.registerBlockWithStateMapper(Blocks.stone_slab2, (new StateMap.Builder()).withName(BlockStoneSlabNew.VARIANT).withSuffix("_slab").build());
-        this.registerBlockWithStateMapper(Blocks.monster_egg, (new StateMap.Builder()).withName(BlockSilverfish.VARIANT).withSuffix("_monster_egg").build());
-        this.registerBlockWithStateMapper(Blocks.stonebrick, (new StateMap.Builder()).withName(BlockStoneBrick.VARIANT).build());
-        this.registerBlockWithStateMapper(Blocks.dispenser, (new StateMap.Builder()).ignore(new IProperty[] {BlockDispenser.TRIGGERED}).build());
-        this.registerBlockWithStateMapper(Blocks.dropper, (new StateMap.Builder()).ignore(new IProperty[] {BlockDropper.TRIGGERED}).build());
-        this.registerBlockWithStateMapper(Blocks.log, (new StateMap.Builder()).withName(BlockOldLog.VARIANT).withSuffix("_log").build());
-        this.registerBlockWithStateMapper(Blocks.log2, (new StateMap.Builder()).withName(BlockNewLog.VARIANT).withSuffix("_log").build());
-        this.registerBlockWithStateMapper(Blocks.planks, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_planks").build());
-        this.registerBlockWithStateMapper(Blocks.sapling, (new StateMap.Builder()).withName(BlockSapling.TYPE).withSuffix("_sapling").build());
-        this.registerBlockWithStateMapper(Blocks.sand, (new StateMap.Builder()).withName(BlockSand.VARIANT).build());
-        this.registerBlockWithStateMapper(Blocks.hopper, (new StateMap.Builder()).ignore(new IProperty[] {BlockHopper.ENABLED}).build());
-        this.registerBlockWithStateMapper(Blocks.flower_pot, (new StateMap.Builder()).ignore(new IProperty[] {BlockFlowerPot.LEGACY_DATA}).build());
-        this.registerBlockWithStateMapper(Blocks.quartz_block, new StateMapperBase()
+        this.registerBuiltInBlocks(Blocks.AIR, Blocks.FLOWING_WATER, Blocks.WATER, Blocks.FLOWING_LAVA, Blocks.LAVA, Blocks.PISTON_EXTENSION, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.TRAPPED_CHEST, Blocks.STANDING_SIGN, Blocks.SKULL, Blocks.END_PORTAL, Blocks.BARRIER, Blocks.WALL_SIGN, Blocks.WALL_BANNER, Blocks.STANDING_BANNER, Blocks.END_GATEWAY, Blocks.STRUCTURE_VOID, Blocks.field_190977_dl, Blocks.field_190978_dm, Blocks.field_190979_dn, Blocks.field_190980_do, Blocks.field_190981_dp, Blocks.field_190982_dq, Blocks.field_190983_dr, Blocks.field_190984_ds, Blocks.field_190985_dt, Blocks.field_190986_du, Blocks.field_190987_dv, Blocks.field_190988_dw, Blocks.field_190989_dx, Blocks.field_190990_dy, Blocks.field_190991_dz, Blocks.field_190975_dA, Blocks.BED);
+        this.registerBlockWithStateMapper(Blocks.STONE, (new StateMap.Builder()).withName(BlockStone.VARIANT).build());
+        this.registerBlockWithStateMapper(Blocks.PRISMARINE, (new StateMap.Builder()).withName(BlockPrismarine.VARIANT).build());
+        this.registerBlockWithStateMapper(Blocks.LEAVES, (new StateMap.Builder()).withName(BlockOldLeaf.VARIANT).withSuffix("_leaves").ignore(BlockLeaves.CHECK_DECAY, BlockLeaves.DECAYABLE).build());
+        this.registerBlockWithStateMapper(Blocks.LEAVES2, (new StateMap.Builder()).withName(BlockNewLeaf.VARIANT).withSuffix("_leaves").ignore(BlockLeaves.CHECK_DECAY, BlockLeaves.DECAYABLE).build());
+        this.registerBlockWithStateMapper(Blocks.CACTUS, (new StateMap.Builder()).ignore(BlockCactus.AGE).build());
+        this.registerBlockWithStateMapper(Blocks.REEDS, (new StateMap.Builder()).ignore(BlockReed.AGE).build());
+        this.registerBlockWithStateMapper(Blocks.JUKEBOX, (new StateMap.Builder()).ignore(BlockJukebox.HAS_RECORD).build());
+        this.registerBlockWithStateMapper(Blocks.COBBLESTONE_WALL, (new StateMap.Builder()).withName(BlockWall.VARIANT).withSuffix("_wall").build());
+        this.registerBlockWithStateMapper(Blocks.DOUBLE_PLANT, (new StateMap.Builder()).withName(BlockDoublePlant.VARIANT).ignore(BlockDoublePlant.FACING).build());
+        this.registerBlockWithStateMapper(Blocks.OAK_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.SPRUCE_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.BIRCH_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.JUNGLE_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.DARK_OAK_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.ACACIA_FENCE_GATE, (new StateMap.Builder()).ignore(BlockFenceGate.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.TRIPWIRE, (new StateMap.Builder()).ignore(BlockTripWire.DISARMED, BlockTripWire.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.DOUBLE_WOODEN_SLAB, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_double_slab").build());
+        this.registerBlockWithStateMapper(Blocks.WOODEN_SLAB, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_slab").build());
+        this.registerBlockWithStateMapper(Blocks.TNT, (new StateMap.Builder()).ignore(BlockTNT.EXPLODE).build());
+        this.registerBlockWithStateMapper(Blocks.FIRE, (new StateMap.Builder()).ignore(BlockFire.AGE).build());
+        this.registerBlockWithStateMapper(Blocks.REDSTONE_WIRE, (new StateMap.Builder()).ignore(BlockRedstoneWire.POWER).build());
+        this.registerBlockWithStateMapper(Blocks.OAK_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.SPRUCE_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.BIRCH_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.JUNGLE_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.ACACIA_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.DARK_OAK_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.IRON_DOOR, (new StateMap.Builder()).ignore(BlockDoor.POWERED).build());
+        this.registerBlockWithStateMapper(Blocks.WOOL, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_wool").build());
+        this.registerBlockWithStateMapper(Blocks.CARPET, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_carpet").build());
+        this.registerBlockWithStateMapper(Blocks.STAINED_HARDENED_CLAY, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_hardened_clay").build());
+        this.registerBlockWithStateMapper(Blocks.STAINED_GLASS_PANE, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_glass_pane").build());
+        this.registerBlockWithStateMapper(Blocks.STAINED_GLASS, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_stained_glass").build());
+        this.registerBlockWithStateMapper(Blocks.SANDSTONE, (new StateMap.Builder()).withName(BlockSandStone.TYPE).build());
+        this.registerBlockWithStateMapper(Blocks.RED_SANDSTONE, (new StateMap.Builder()).withName(BlockRedSandstone.TYPE).build());
+        this.registerBlockWithStateMapper(Blocks.TALLGRASS, (new StateMap.Builder()).withName(BlockTallGrass.TYPE).build());
+        this.registerBlockWithStateMapper(Blocks.YELLOW_FLOWER, (new StateMap.Builder()).withName(Blocks.YELLOW_FLOWER.getTypeProperty()).build());
+        this.registerBlockWithStateMapper(Blocks.RED_FLOWER, (new StateMap.Builder()).withName(Blocks.RED_FLOWER.getTypeProperty()).build());
+        this.registerBlockWithStateMapper(Blocks.STONE_SLAB, (new StateMap.Builder()).withName(BlockStoneSlab.VARIANT).withSuffix("_slab").build());
+        this.registerBlockWithStateMapper(Blocks.STONE_SLAB2, (new StateMap.Builder()).withName(BlockStoneSlabNew.VARIANT).withSuffix("_slab").build());
+        this.registerBlockWithStateMapper(Blocks.MONSTER_EGG, (new StateMap.Builder()).withName(BlockSilverfish.VARIANT).withSuffix("_monster_egg").build());
+        this.registerBlockWithStateMapper(Blocks.STONEBRICK, (new StateMap.Builder()).withName(BlockStoneBrick.VARIANT).build());
+        this.registerBlockWithStateMapper(Blocks.DISPENSER, (new StateMap.Builder()).ignore(BlockDispenser.TRIGGERED).build());
+        this.registerBlockWithStateMapper(Blocks.DROPPER, (new StateMap.Builder()).ignore(BlockDropper.TRIGGERED).build());
+        this.registerBlockWithStateMapper(Blocks.LOG, (new StateMap.Builder()).withName(BlockOldLog.VARIANT).withSuffix("_log").build());
+        this.registerBlockWithStateMapper(Blocks.LOG2, (new StateMap.Builder()).withName(BlockNewLog.VARIANT).withSuffix("_log").build());
+        this.registerBlockWithStateMapper(Blocks.PLANKS, (new StateMap.Builder()).withName(BlockPlanks.VARIANT).withSuffix("_planks").build());
+        this.registerBlockWithStateMapper(Blocks.SAPLING, (new StateMap.Builder()).withName(BlockSapling.TYPE).withSuffix("_sapling").build());
+        this.registerBlockWithStateMapper(Blocks.SAND, (new StateMap.Builder()).withName(BlockSand.VARIANT).build());
+        this.registerBlockWithStateMapper(Blocks.HOPPER, (new StateMap.Builder()).ignore(BlockHopper.ENABLED).build());
+        this.registerBlockWithStateMapper(Blocks.FLOWER_POT, (new StateMap.Builder()).ignore(BlockFlowerPot.LEGACY_DATA).build());
+        this.registerBlockWithStateMapper(Blocks.field_192443_dR, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_concrete").build());
+        this.registerBlockWithStateMapper(Blocks.field_192444_dS, (new StateMap.Builder()).withName(BlockColored.COLOR).withSuffix("_concrete_powder").build());
+        this.registerBlockWithStateMapper(Blocks.QUARTZ_BLOCK, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
@@ -238,46 +320,46 @@ public class BlockModelShapes
                 }
             }
         });
-        this.registerBlockWithStateMapper(Blocks.deadbush, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.DEADBUSH, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
                 return new ModelResourceLocation("dead_bush", "normal");
             }
         });
-        this.registerBlockWithStateMapper(Blocks.pumpkin_stem, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.PUMPKIN_STEM, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
-                Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+                Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
 
                 if (state.getValue(BlockStem.FACING) != EnumFacing.UP)
                 {
                     map.remove(BlockStem.AGE);
                 }
 
-                return new ModelResourceLocation((ResourceLocation)Block.blockRegistry.getNameForObject(state.getBlock()), this.getPropertyString(map));
+                return new ModelResourceLocation(Block.REGISTRY.getNameForObject(state.getBlock()), this.getPropertyString(map));
             }
         });
-        this.registerBlockWithStateMapper(Blocks.melon_stem, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.MELON_STEM, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
-                Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+                Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
 
                 if (state.getValue(BlockStem.FACING) != EnumFacing.UP)
                 {
                     map.remove(BlockStem.AGE);
                 }
 
-                return new ModelResourceLocation((ResourceLocation)Block.blockRegistry.getNameForObject(state.getBlock()), this.getPropertyString(map));
+                return new ModelResourceLocation(Block.REGISTRY.getNameForObject(state.getBlock()), this.getPropertyString(map));
             }
         });
-        this.registerBlockWithStateMapper(Blocks.dirt, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.DIRT, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
-                Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+                Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
                 String s = BlockDirt.VARIANT.getName((BlockDirt.DirtType)map.remove(BlockDirt.VARIANT));
 
                 if (BlockDirt.DirtType.PODZOL != state.getValue(BlockDirt.VARIANT))
@@ -288,22 +370,22 @@ public class BlockModelShapes
                 return new ModelResourceLocation(s, this.getPropertyString(map));
             }
         });
-        this.registerBlockWithStateMapper(Blocks.double_stone_slab, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.DOUBLE_STONE_SLAB, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
-                Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+                Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
                 String s = BlockStoneSlab.VARIANT.getName((BlockStoneSlab.EnumType)map.remove(BlockStoneSlab.VARIANT));
                 map.remove(BlockStoneSlab.SEAMLESS);
                 String s1 = ((Boolean)state.getValue(BlockStoneSlab.SEAMLESS)).booleanValue() ? "all" : "normal";
                 return new ModelResourceLocation(s + "_double_slab", s1);
             }
         });
-        this.registerBlockWithStateMapper(Blocks.double_stone_slab2, new StateMapperBase()
+        this.registerBlockWithStateMapper(Blocks.DOUBLE_STONE_SLAB2, new StateMapperBase()
         {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state)
             {
-                Map<IProperty, Comparable> map = Maps.<IProperty, Comparable>newLinkedHashMap(state.getProperties());
+                Map < IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
                 String s = BlockStoneSlabNew.VARIANT.getName((BlockStoneSlabNew.EnumType)map.remove(BlockStoneSlabNew.VARIANT));
                 map.remove(BlockStoneSlab.SEAMLESS);
                 String s1 = ((Boolean)state.getValue(BlockStoneSlabNew.SEAMLESS)).booleanValue() ? "all" : "normal";

@@ -1,6 +1,8 @@
 package net.minecraft.world.storage;
 
+import java.io.File;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.util.IProgressUpdate;
 
@@ -16,9 +18,11 @@ public interface ISaveFormat
      */
     ISaveHandler getSaveLoader(String saveName, boolean storePlayerdata);
 
-    List<SaveFormatComparator> getSaveList() throws AnvilConverterException;
+    List<WorldSummary> getSaveList() throws AnvilConverterException;
 
     void flushCache();
+
+    @Nullable
 
     /**
      * Returns the world's WorldInfo object
@@ -28,10 +32,7 @@ public interface ISaveFormat
     boolean isNewLevelIdAcceptable(String saveName);
 
     /**
-     * @args: Takes one argument - the name of the directory of the world to delete. @desc: Delete the world by deleting
-     * the associated directory recursively.
-     *  
-     * @param saveName The current save's name
+     * Deletes a world directory.
      */
     boolean deleteWorldDirectory(String saveName);
 
@@ -55,8 +56,8 @@ public interface ISaveFormat
 
     /**
      * Return whether the given world can be loaded.
-     *  
-     * @param saveName The current save's name
      */
     boolean canLoadWorld(String saveName);
+
+    File getFile(String p_186352_1_, String p_186352_2_);
 }

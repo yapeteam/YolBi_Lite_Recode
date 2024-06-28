@@ -1,13 +1,15 @@
 package net.minecraft.world;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 
 public interface IBlockAccess
 {
+    @Nullable
     TileEntity getTileEntity(BlockPos pos);
 
     int getCombinedLight(BlockPos pos, int lightValue);
@@ -20,12 +22,7 @@ public interface IBlockAccess
      */
     boolean isAirBlock(BlockPos pos);
 
-    BiomeGenBase getBiomeGenForCoords(BlockPos pos);
-
-    /**
-     * set by !chunk.getAreLevelsEmpty
-     */
-    boolean extendedLevelsInChunkCache();
+    Biome getBiome(BlockPos pos);
 
     int getStrongPower(BlockPos pos, EnumFacing direction);
 

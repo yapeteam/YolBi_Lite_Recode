@@ -1,18 +1,18 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class RenderFallingBlock extends Render<EntityFallingBlock>
@@ -30,31 +30,39 @@ public class RenderFallingBlock extends Render<EntityFallingBlock>
     {
         if (entity.getBlock() != null)
         {
-            this.bindTexture(TextureMap.locationBlocksTexture);
             IBlockState iblockstate = entity.getBlock();
-            Block block = iblockstate.getBlock();
-            BlockPos blockpos = new BlockPos(entity);
-            World world = entity.getWorldObj();
 
-            if (iblockstate != world.getBlockState(blockpos) && block.getRenderType() != -1)
+            if (iblockstate.getRenderType() == EnumBlockRenderType.MODEL)
             {
-                if (block.getRenderType() == 3)
+                World world = entity.getWorldObj();
+
+                if (iblockstate != world.getBlockState(new BlockPos(entity)) && iblockstate.getRenderType() != EnumBlockRenderType.INVISIBLE)
                 {
+                    this.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
                     GlStateManager.pushMatrix();
-                    GlStateManager.translate((float)x, (float)y, (float)z);
                     GlStateManager.disableLighting();
                     Tessellator tessellator = Tessellator.getInstance();
-                    WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-                    worldrenderer.begin(7, DefaultVertexFormats.BLOCK);
-                    int i = blockpos.getX();
-                    int j = blockpos.getY();
-                    int k = blockpos.getZ();
-                    worldrenderer.setTranslation((double)((float)(-i) - 0.5F), (double)(-j), (double)((float)(-k) - 0.5F));
+                    BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+                    if (this.renderOutlines)
+                    {
+                        GlStateManager.enableColorMaterial();
+                        GlStateManager.enableOutlineMode(this.getTeamColor(entity));
+                    }
+
+                    bufferbuilder.begin(7, DefaultVertexFormats.BLOCK);
+                    BlockPos blockpos = new BlockPos(entity.posX, entity.getEntityBoundingBox().maxY, entity.posZ);
+                    GlStateManager.translate((float)(x - (double)blockpos.getX() - 0.5D), (float)(y - (double)blockpos.getY()), (float)(z - (double)blockpos.getZ() - 0.5D));
                     BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
-                    IBakedModel ibakedmodel = blockrendererdispatcher.getModelFromBlockState(iblockstate, world, (BlockPos)null);
-                    blockrendererdispatcher.getBlockModelRenderer().renderModel(world, ibakedmodel, iblockstate, blockpos, worldrenderer, false);
-                    worldrenderer.setTranslation(0.0D, 0.0D, 0.0D);
+                    blockrendererdispatcher.getBlockModelRenderer().renderModel(world, blockrendererdispatcher.getModelForState(iblockstate), iblockstate, blockpos, bufferbuilder, false, MathHelper.getPositionRandom(entity.getOrigin()));
                     tessellator.draw();
+
+                    if (this.renderOutlines)
+                    {
+                        GlStateManager.disableOutlineMode();
+                        GlStateManager.disableColorMaterial();
+                    }
+
                     GlStateManager.enableLighting();
                     GlStateManager.popMatrix();
                     super.doRender(entity, x, y, z, entityYaw, partialTicks);
@@ -68,6 +76,6 @@ public class RenderFallingBlock extends Render<EntityFallingBlock>
      */
     protected ResourceLocation getEntityTexture(EntityFallingBlock entity)
     {
-        return TextureMap.locationBlocksTexture;
+        return TextureMap.LOCATION_BLOCKS_TEXTURE;
     }
 }

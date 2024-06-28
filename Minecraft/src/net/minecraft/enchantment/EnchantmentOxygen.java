@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentOxygen extends Enchantment
 {
-    public EnchantmentOxygen(int enchID, ResourceLocation p_i45766_2_, int p_i45766_3_)
+    public EnchantmentOxygen(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, p_i45766_2_, p_i45766_3_, EnumEnchantmentType.ARMOR_HEAD);
+        super(rarityIn, EnumEnchantmentType.ARMOR_HEAD, slots);
         this.setName("oxygen");
     }
 

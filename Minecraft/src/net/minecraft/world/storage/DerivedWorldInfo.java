@@ -1,10 +1,12 @@
 package net.minecraft.world.storage;
 
+import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 
 public class DerivedWorldInfo extends WorldInfo
@@ -12,23 +14,15 @@ public class DerivedWorldInfo extends WorldInfo
     /** Instance of WorldInfo. */
     private final WorldInfo theWorldInfo;
 
-    public DerivedWorldInfo(WorldInfo p_i2145_1_)
+    public DerivedWorldInfo(WorldInfo worldInfoIn)
     {
-        this.theWorldInfo = p_i2145_1_;
-    }
-
-    /**
-     * Gets the NBTTagCompound for the worldInfo
-     */
-    public NBTTagCompound getNBTTagCompound()
-    {
-        return this.theWorldInfo.getNBTTagCompound();
+        this.theWorldInfo = worldInfoIn;
     }
 
     /**
      * Creates a new NBTTagCompound for the world, with the given NBTTag as the "Player"
      */
-    public NBTTagCompound cloneNBTCompound(NBTTagCompound nbt)
+    public NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt)
     {
         return this.theWorldInfo.cloneNBTCompound(nbt);
     }
@@ -150,7 +144,7 @@ public class DerivedWorldInfo extends WorldInfo
     /**
      * Gets the GameType.
      */
-    public WorldSettings.GameType getGameType()
+    public GameType getGameType()
     {
         return this.theWorldInfo.getGameType();
     }
@@ -306,5 +300,15 @@ public class DerivedWorldInfo extends WorldInfo
 
     public void setDifficultyLocked(boolean locked)
     {
+    }
+
+    public void setDimensionData(DimensionType dimensionIn, NBTTagCompound compound)
+    {
+        this.theWorldInfo.setDimensionData(dimensionIn, compound);
+    }
+
+    public NBTTagCompound getDimensionData(DimensionType dimensionIn)
+    {
+        return this.theWorldInfo.getDimensionData(dimensionIn);
     }
 }

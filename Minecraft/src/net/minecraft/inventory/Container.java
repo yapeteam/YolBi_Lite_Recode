@@ -4,16 +4,22 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public abstract class Container
 {
-    public List<ItemStack> inventoryItemStacks = Lists.<ItemStack>newArrayList();
+    public NonNullList<ItemStack> inventoryItemStacks = NonNullList.<ItemStack>func_191196_a();
     public List<Slot> inventorySlots = Lists.<Slot>newArrayList();
     public int windowId;
     private short transactionID;
@@ -26,8 +32,8 @@ public abstract class Container
     /** The current drag event (0 : start, 1 : add slot : 2 : end) */
     private int dragEvent;
     private final Set<Slot> dragSlots = Sets.<Slot>newHashSet();
-    protected List<ICrafting> crafters = Lists.<ICrafting>newArrayList();
-    private Set<EntityPlayer> playerList = Sets.<EntityPlayer>newHashSet();
+    protected List<IContainerListener> listeners = Lists.<IContainerListener>newArrayList();
+    private final Set<EntityPlayer> playerList = Sets.<EntityPlayer>newHashSet();
 
     /**
      * Adds an item slot to this container
@@ -36,19 +42,19 @@ public abstract class Container
     {
         slotIn.slotNumber = this.inventorySlots.size();
         this.inventorySlots.add(slotIn);
-        this.inventoryItemStacks.add((ItemStack)null);
+        this.inventoryItemStacks.add(ItemStack.field_190927_a);
         return slotIn;
     }
 
-    public void onCraftGuiOpened(ICrafting listener)
+    public void addListener(IContainerListener listener)
     {
-        if (this.crafters.contains(listener))
+        if (this.listeners.contains(listener))
         {
             throw new IllegalArgumentException("Listener already listening");
         }
         else
         {
-            this.crafters.add(listener);
+            this.listeners.add(listener);
             listener.updateCraftingInventory(this, this.getInventory());
             this.detectAndSendChanges();
         }
@@ -57,21 +63,21 @@ public abstract class Container
     /**
      * Remove the given Listener. Method name is for legacy.
      */
-    public void removeCraftingFromCrafters(ICrafting listeners)
+    public void removeListener(IContainerListener listener)
     {
-        this.crafters.remove(listeners);
+        this.listeners.remove(listener);
     }
 
-    public List<ItemStack> getInventory()
+    public NonNullList<ItemStack> getInventory()
     {
-        List<ItemStack> list = Lists.<ItemStack>newArrayList();
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191196_a();
 
         for (int i = 0; i < this.inventorySlots.size(); ++i)
         {
-            list.add(((Slot)this.inventorySlots.get(i)).getStack());
+            nonnulllist.add(((Slot)this.inventorySlots.get(i)).getStack());
         }
 
-        return list;
+        return nonnulllist;
     }
 
     /**
@@ -82,16 +88,16 @@ public abstract class Container
         for (int i = 0; i < this.inventorySlots.size(); ++i)
         {
             ItemStack itemstack = ((Slot)this.inventorySlots.get(i)).getStack();
-            ItemStack itemstack1 = (ItemStack)this.inventoryItemStacks.get(i);
+            ItemStack itemstack1 = this.inventoryItemStacks.get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack))
             {
-                itemstack1 = itemstack == null ? null : itemstack.copy();
+                itemstack1 = itemstack.func_190926_b() ? ItemStack.field_190927_a : itemstack.copy();
                 this.inventoryItemStacks.set(i, itemstack1);
 
-                for (int j = 0; j < this.crafters.size(); ++j)
+                for (int j = 0; j < this.listeners.size(); ++j)
                 {
-                    ((ICrafting)this.crafters.get(j)).sendSlotContents(this, i, itemstack1);
+                    ((IContainerListener)this.listeners.get(j)).sendSlotContents(this, i, itemstack1);
                 }
             }
         }
@@ -105,11 +111,12 @@ public abstract class Container
         return false;
     }
 
+    @Nullable
     public Slot getSlotFromInventory(IInventory inv, int slotIn)
     {
         for (int i = 0; i < this.inventorySlots.size(); ++i)
         {
-            Slot slot = (Slot)this.inventorySlots.get(i);
+            Slot slot = this.inventorySlots.get(i);
 
             if (slot.isHere(inv, slotIn))
             {
@@ -122,7 +129,7 @@ public abstract class Container
 
     public Slot getSlot(int slotId)
     {
-        return (Slot)this.inventorySlots.get(slotId);
+        return this.inventorySlots.get(slotId);
     }
 
     /**
@@ -130,36 +137,33 @@ public abstract class Container
      */
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
-        Slot slot = (Slot)this.inventorySlots.get(index);
-        return slot != null ? slot.getStack() : null;
+        Slot slot = this.inventorySlots.get(index);
+        return slot != null ? slot.getStack() : ItemStack.field_190927_a;
     }
 
-    /**
-     * Handles slot click.
-     */
-    public ItemStack slotClick(int slotId, int clickedButton, int mode, EntityPlayer playerIn)
+    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player)
     {
-        ItemStack itemstack = null;
-        InventoryPlayer inventoryplayer = playerIn.inventory;
+        ItemStack itemstack = ItemStack.field_190927_a;
+        InventoryPlayer inventoryplayer = player.inventory;
 
-        if (mode == 5)
+        if (clickTypeIn == ClickType.QUICK_CRAFT)
         {
-            int i = this.dragEvent;
-            this.dragEvent = getDragEvent(clickedButton);
+            int j1 = this.dragEvent;
+            this.dragEvent = getDragEvent(dragType);
 
-            if ((i != 1 || this.dragEvent != 2) && i != this.dragEvent)
+            if ((j1 != 1 || this.dragEvent != 2) && j1 != this.dragEvent)
             {
                 this.resetDrag();
             }
-            else if (inventoryplayer.getItemStack() == null)
+            else if (inventoryplayer.getItemStack().func_190926_b())
             {
                 this.resetDrag();
             }
             else if (this.dragEvent == 0)
             {
-                this.dragMode = extractDragMode(clickedButton);
+                this.dragMode = extractDragMode(dragType);
 
-                if (isValidDragMode(this.dragMode, playerIn))
+                if (isValidDragMode(this.dragMode, player))
                 {
                     this.dragEvent = 1;
                     this.dragSlots.clear();
@@ -171,51 +175,44 @@ public abstract class Container
             }
             else if (this.dragEvent == 1)
             {
-                Slot slot = (Slot)this.inventorySlots.get(slotId);
+                Slot slot7 = this.inventorySlots.get(slotId);
+                ItemStack itemstack12 = inventoryplayer.getItemStack();
 
-                if (slot != null && canAddItemToSlot(slot, inventoryplayer.getItemStack(), true) && slot.isItemValid(inventoryplayer.getItemStack()) && inventoryplayer.getItemStack().stackSize > this.dragSlots.size() && this.canDragIntoSlot(slot))
+                if (slot7 != null && canAddItemToSlot(slot7, itemstack12, true) && slot7.isItemValid(itemstack12) && (this.dragMode == 2 || itemstack12.func_190916_E() > this.dragSlots.size()) && this.canDragIntoSlot(slot7))
                 {
-                    this.dragSlots.add(slot);
+                    this.dragSlots.add(slot7);
                 }
             }
             else if (this.dragEvent == 2)
             {
                 if (!this.dragSlots.isEmpty())
                 {
-                    ItemStack itemstack3 = inventoryplayer.getItemStack().copy();
-                    int j = inventoryplayer.getItemStack().stackSize;
+                    ItemStack itemstack9 = inventoryplayer.getItemStack().copy();
+                    int k1 = inventoryplayer.getItemStack().func_190916_E();
 
-                    for (Slot slot1 : this.dragSlots)
+                    for (Slot slot8 : this.dragSlots)
                     {
-                        if (slot1 != null && canAddItemToSlot(slot1, inventoryplayer.getItemStack(), true) && slot1.isItemValid(inventoryplayer.getItemStack()) && inventoryplayer.getItemStack().stackSize >= this.dragSlots.size() && this.canDragIntoSlot(slot1))
+                        ItemStack itemstack13 = inventoryplayer.getItemStack();
+
+                        if (slot8 != null && canAddItemToSlot(slot8, itemstack13, true) && slot8.isItemValid(itemstack13) && (this.dragMode == 2 || itemstack13.func_190916_E() >= this.dragSlots.size()) && this.canDragIntoSlot(slot8))
                         {
-                            ItemStack itemstack1 = itemstack3.copy();
-                            int k = slot1.getHasStack() ? slot1.getStack().stackSize : 0;
-                            computeStackSize(this.dragSlots, this.dragMode, itemstack1, k);
+                            ItemStack itemstack14 = itemstack9.copy();
+                            int j3 = slot8.getHasStack() ? slot8.getStack().func_190916_E() : 0;
+                            computeStackSize(this.dragSlots, this.dragMode, itemstack14, j3);
+                            int k3 = Math.min(itemstack14.getMaxStackSize(), slot8.getItemStackLimit(itemstack14));
 
-                            if (itemstack1.stackSize > itemstack1.getMaxStackSize())
+                            if (itemstack14.func_190916_E() > k3)
                             {
-                                itemstack1.stackSize = itemstack1.getMaxStackSize();
+                                itemstack14.func_190920_e(k3);
                             }
 
-                            if (itemstack1.stackSize > slot1.getItemStackLimit(itemstack1))
-                            {
-                                itemstack1.stackSize = slot1.getItemStackLimit(itemstack1);
-                            }
-
-                            j -= itemstack1.stackSize - k;
-                            slot1.putStack(itemstack1);
+                            k1 -= itemstack14.func_190916_E() - j3;
+                            slot8.putStack(itemstack14);
                         }
                     }
 
-                    itemstack3.stackSize = j;
-
-                    if (itemstack3.stackSize <= 0)
-                    {
-                        itemstack3 = null;
-                    }
-
-                    inventoryplayer.setItemStack(itemstack3);
+                    itemstack9.func_190920_e(k1);
+                    inventoryplayer.setItemStack(itemstack9);
                 }
 
                 this.resetDrag();
@@ -229,259 +226,259 @@ public abstract class Container
         {
             this.resetDrag();
         }
-        else if ((mode == 0 || mode == 1) && (clickedButton == 0 || clickedButton == 1))
+        else if ((clickTypeIn == ClickType.PICKUP || clickTypeIn == ClickType.QUICK_MOVE) && (dragType == 0 || dragType == 1))
         {
             if (slotId == -999)
             {
-                if (inventoryplayer.getItemStack() != null)
+                if (!inventoryplayer.getItemStack().func_190926_b())
                 {
-                    if (clickedButton == 0)
+                    if (dragType == 0)
                     {
-                        playerIn.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack(), true);
-                        inventoryplayer.setItemStack((ItemStack)null);
+                        player.dropItem(inventoryplayer.getItemStack(), true);
+                        inventoryplayer.setItemStack(ItemStack.field_190927_a);
                     }
 
-                    if (clickedButton == 1)
+                    if (dragType == 1)
                     {
-                        playerIn.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack().splitStack(1), true);
-
-                        if (inventoryplayer.getItemStack().stackSize == 0)
-                        {
-                            inventoryplayer.setItemStack((ItemStack)null);
-                        }
+                        player.dropItem(inventoryplayer.getItemStack().splitStack(1), true);
                     }
                 }
             }
-            else if (mode == 1)
+            else if (clickTypeIn == ClickType.QUICK_MOVE)
             {
                 if (slotId < 0)
                 {
-                    return null;
+                    return ItemStack.field_190927_a;
                 }
 
-                Slot slot6 = (Slot)this.inventorySlots.get(slotId);
+                Slot slot5 = this.inventorySlots.get(slotId);
 
-                if (slot6 != null && slot6.canTakeStack(playerIn))
+                if (slot5 == null || !slot5.canTakeStack(player))
                 {
-                    ItemStack itemstack8 = this.transferStackInSlot(playerIn, slotId);
+                    return ItemStack.field_190927_a;
+                }
 
-                    if (itemstack8 != null)
-                    {
-                        Item item = itemstack8.getItem();
-                        itemstack = itemstack8.copy();
-
-                        if (slot6.getStack() != null && slot6.getStack().getItem() == item)
-                        {
-                            this.retrySlotClick(slotId, clickedButton, true, playerIn);
-                        }
-                    }
+                for (ItemStack itemstack7 = this.transferStackInSlot(player, slotId); !itemstack7.func_190926_b() && ItemStack.areItemsEqual(slot5.getStack(), itemstack7); itemstack7 = this.transferStackInSlot(player, slotId))
+                {
+                    itemstack = itemstack7.copy();
                 }
             }
             else
             {
                 if (slotId < 0)
                 {
-                    return null;
+                    return ItemStack.field_190927_a;
                 }
 
-                Slot slot7 = (Slot)this.inventorySlots.get(slotId);
+                Slot slot6 = this.inventorySlots.get(slotId);
 
-                if (slot7 != null)
+                if (slot6 != null)
                 {
-                    ItemStack itemstack9 = slot7.getStack();
-                    ItemStack itemstack10 = inventoryplayer.getItemStack();
+                    ItemStack itemstack8 = slot6.getStack();
+                    ItemStack itemstack11 = inventoryplayer.getItemStack();
 
-                    if (itemstack9 != null)
+                    if (!itemstack8.func_190926_b())
                     {
-                        itemstack = itemstack9.copy();
+                        itemstack = itemstack8.copy();
                     }
 
-                    if (itemstack9 == null)
+                    if (itemstack8.func_190926_b())
                     {
-                        if (itemstack10 != null && slot7.isItemValid(itemstack10))
+                        if (!itemstack11.func_190926_b() && slot6.isItemValid(itemstack11))
                         {
-                            int k2 = clickedButton == 0 ? itemstack10.stackSize : 1;
+                            int i3 = dragType == 0 ? itemstack11.func_190916_E() : 1;
 
-                            if (k2 > slot7.getItemStackLimit(itemstack10))
+                            if (i3 > slot6.getItemStackLimit(itemstack11))
                             {
-                                k2 = slot7.getItemStackLimit(itemstack10);
+                                i3 = slot6.getItemStackLimit(itemstack11);
                             }
 
-                            if (itemstack10.stackSize >= k2)
-                            {
-                                slot7.putStack(itemstack10.splitStack(k2));
-                            }
-
-                            if (itemstack10.stackSize == 0)
-                            {
-                                inventoryplayer.setItemStack((ItemStack)null);
-                            }
+                            slot6.putStack(itemstack11.splitStack(i3));
                         }
                     }
-                    else if (slot7.canTakeStack(playerIn))
+                    else if (slot6.canTakeStack(player))
                     {
-                        if (itemstack10 == null)
+                        if (itemstack11.func_190926_b())
                         {
-                            int j2 = clickedButton == 0 ? itemstack9.stackSize : (itemstack9.stackSize + 1) / 2;
-                            ItemStack itemstack12 = slot7.decrStackSize(j2);
-                            inventoryplayer.setItemStack(itemstack12);
-
-                            if (itemstack9.stackSize == 0)
+                            if (itemstack8.func_190926_b())
                             {
-                                slot7.putStack((ItemStack)null);
+                                slot6.putStack(ItemStack.field_190927_a);
+                                inventoryplayer.setItemStack(ItemStack.field_190927_a);
                             }
-
-                            slot7.onPickupFromSlot(playerIn, inventoryplayer.getItemStack());
-                        }
-                        else if (slot7.isItemValid(itemstack10))
-                        {
-                            if (itemstack9.getItem() == itemstack10.getItem() && itemstack9.getMetadata() == itemstack10.getMetadata() && ItemStack.areItemStackTagsEqual(itemstack9, itemstack10))
+                            else
                             {
-                                int i2 = clickedButton == 0 ? itemstack10.stackSize : 1;
+                                int l2 = dragType == 0 ? itemstack8.func_190916_E() : (itemstack8.func_190916_E() + 1) / 2;
+                                inventoryplayer.setItemStack(slot6.decrStackSize(l2));
 
-                                if (i2 > slot7.getItemStackLimit(itemstack10) - itemstack9.stackSize)
+                                if (itemstack8.func_190926_b())
                                 {
-                                    i2 = slot7.getItemStackLimit(itemstack10) - itemstack9.stackSize;
+                                    slot6.putStack(ItemStack.field_190927_a);
                                 }
 
-                                if (i2 > itemstack10.getMaxStackSize() - itemstack9.stackSize)
-                                {
-                                    i2 = itemstack10.getMaxStackSize() - itemstack9.stackSize;
-                                }
-
-                                itemstack10.splitStack(i2);
-
-                                if (itemstack10.stackSize == 0)
-                                {
-                                    inventoryplayer.setItemStack((ItemStack)null);
-                                }
-
-                                itemstack9.stackSize += i2;
-                            }
-                            else if (itemstack10.stackSize <= slot7.getItemStackLimit(itemstack10))
-                            {
-                                slot7.putStack(itemstack10);
-                                inventoryplayer.setItemStack(itemstack9);
+                                slot6.func_190901_a(player, inventoryplayer.getItemStack());
                             }
                         }
-                        else if (itemstack9.getItem() == itemstack10.getItem() && itemstack10.getMaxStackSize() > 1 && (!itemstack9.getHasSubtypes() || itemstack9.getMetadata() == itemstack10.getMetadata()) && ItemStack.areItemStackTagsEqual(itemstack9, itemstack10))
+                        else if (slot6.isItemValid(itemstack11))
                         {
-                            int l1 = itemstack9.stackSize;
-
-                            if (l1 > 0 && l1 + itemstack10.stackSize <= itemstack10.getMaxStackSize())
+                            if (itemstack8.getItem() == itemstack11.getItem() && itemstack8.getMetadata() == itemstack11.getMetadata() && ItemStack.areItemStackTagsEqual(itemstack8, itemstack11))
                             {
-                                itemstack10.stackSize += l1;
-                                itemstack9 = slot7.decrStackSize(l1);
+                                int k2 = dragType == 0 ? itemstack11.func_190916_E() : 1;
 
-                                if (itemstack9.stackSize == 0)
+                                if (k2 > slot6.getItemStackLimit(itemstack11) - itemstack8.func_190916_E())
                                 {
-                                    slot7.putStack((ItemStack)null);
+                                    k2 = slot6.getItemStackLimit(itemstack11) - itemstack8.func_190916_E();
                                 }
 
-                                slot7.onPickupFromSlot(playerIn, inventoryplayer.getItemStack());
+                                if (k2 > itemstack11.getMaxStackSize() - itemstack8.func_190916_E())
+                                {
+                                    k2 = itemstack11.getMaxStackSize() - itemstack8.func_190916_E();
+                                }
+
+                                itemstack11.func_190918_g(k2);
+                                itemstack8.func_190917_f(k2);
+                            }
+                            else if (itemstack11.func_190916_E() <= slot6.getItemStackLimit(itemstack11))
+                            {
+                                slot6.putStack(itemstack11);
+                                inventoryplayer.setItemStack(itemstack8);
+                            }
+                        }
+                        else if (itemstack8.getItem() == itemstack11.getItem() && itemstack11.getMaxStackSize() > 1 && (!itemstack8.getHasSubtypes() || itemstack8.getMetadata() == itemstack11.getMetadata()) && ItemStack.areItemStackTagsEqual(itemstack8, itemstack11) && !itemstack8.func_190926_b())
+                        {
+                            int j2 = itemstack8.func_190916_E();
+
+                            if (j2 + itemstack11.func_190916_E() <= itemstack11.getMaxStackSize())
+                            {
+                                itemstack11.func_190917_f(j2);
+                                itemstack8 = slot6.decrStackSize(j2);
+
+                                if (itemstack8.func_190926_b())
+                                {
+                                    slot6.putStack(ItemStack.field_190927_a);
+                                }
+
+                                slot6.func_190901_a(player, inventoryplayer.getItemStack());
                             }
                         }
                     }
 
-                    slot7.onSlotChanged();
+                    slot6.onSlotChanged();
                 }
             }
         }
-        else if (mode == 2 && clickedButton >= 0 && clickedButton < 9)
+        else if (clickTypeIn == ClickType.SWAP && dragType >= 0 && dragType < 9)
         {
-            Slot slot5 = (Slot)this.inventorySlots.get(slotId);
+            Slot slot4 = this.inventorySlots.get(slotId);
+            ItemStack itemstack6 = inventoryplayer.getStackInSlot(dragType);
+            ItemStack itemstack10 = slot4.getStack();
 
-            if (slot5.canTakeStack(playerIn))
+            if (!itemstack6.func_190926_b() || !itemstack10.func_190926_b())
             {
-                ItemStack itemstack7 = inventoryplayer.getStackInSlot(clickedButton);
-                boolean flag = itemstack7 == null || slot5.inventory == inventoryplayer && slot5.isItemValid(itemstack7);
-                int k1 = -1;
-
-                if (!flag)
+                if (itemstack6.func_190926_b())
                 {
-                    k1 = inventoryplayer.getFirstEmptyStack();
-                    flag |= k1 > -1;
-                }
-
-                if (slot5.getHasStack() && flag)
-                {
-                    ItemStack itemstack11 = slot5.getStack();
-                    inventoryplayer.setInventorySlotContents(clickedButton, itemstack11.copy());
-
-                    if ((slot5.inventory != inventoryplayer || !slot5.isItemValid(itemstack7)) && itemstack7 != null)
+                    if (slot4.canTakeStack(player))
                     {
-                        if (k1 > -1)
+                        inventoryplayer.setInventorySlotContents(dragType, itemstack10);
+                        slot4.func_190900_b(itemstack10.func_190916_E());
+                        slot4.putStack(ItemStack.field_190927_a);
+                        slot4.func_190901_a(player, itemstack10);
+                    }
+                }
+                else if (itemstack10.func_190926_b())
+                {
+                    if (slot4.isItemValid(itemstack6))
+                    {
+                        int l1 = slot4.getItemStackLimit(itemstack6);
+
+                        if (itemstack6.func_190916_E() > l1)
                         {
-                            inventoryplayer.addItemStackToInventory(itemstack7);
-                            slot5.decrStackSize(itemstack11.stackSize);
-                            slot5.putStack((ItemStack)null);
-                            slot5.onPickupFromSlot(playerIn, itemstack11);
+                            slot4.putStack(itemstack6.splitStack(l1));
+                        }
+                        else
+                        {
+                            slot4.putStack(itemstack6);
+                            inventoryplayer.setInventorySlotContents(dragType, ItemStack.field_190927_a);
+                        }
+                    }
+                }
+                else if (slot4.canTakeStack(player) && slot4.isItemValid(itemstack6))
+                {
+                    int i2 = slot4.getItemStackLimit(itemstack6);
+
+                    if (itemstack6.func_190916_E() > i2)
+                    {
+                        slot4.putStack(itemstack6.splitStack(i2));
+                        slot4.func_190901_a(player, itemstack10);
+
+                        if (!inventoryplayer.addItemStackToInventory(itemstack10))
+                        {
+                            player.dropItem(itemstack10, true);
                         }
                     }
                     else
                     {
-                        slot5.decrStackSize(itemstack11.stackSize);
-                        slot5.putStack(itemstack7);
-                        slot5.onPickupFromSlot(playerIn, itemstack11);
+                        slot4.putStack(itemstack6);
+                        inventoryplayer.setInventorySlotContents(dragType, itemstack10);
+                        slot4.func_190901_a(player, itemstack10);
                     }
                 }
-                else if (!slot5.getHasStack() && itemstack7 != null && slot5.isItemValid(itemstack7))
+            }
+        }
+        else if (clickTypeIn == ClickType.CLONE && player.capabilities.isCreativeMode && inventoryplayer.getItemStack().func_190926_b() && slotId >= 0)
+        {
+            Slot slot3 = this.inventorySlots.get(slotId);
+
+            if (slot3 != null && slot3.getHasStack())
+            {
+                ItemStack itemstack5 = slot3.getStack().copy();
+                itemstack5.func_190920_e(itemstack5.getMaxStackSize());
+                inventoryplayer.setItemStack(itemstack5);
+            }
+        }
+        else if (clickTypeIn == ClickType.THROW && inventoryplayer.getItemStack().func_190926_b() && slotId >= 0)
+        {
+            Slot slot2 = this.inventorySlots.get(slotId);
+
+            if (slot2 != null && slot2.getHasStack() && slot2.canTakeStack(player))
+            {
+                ItemStack itemstack4 = slot2.decrStackSize(dragType == 0 ? 1 : slot2.getStack().func_190916_E());
+                slot2.func_190901_a(player, itemstack4);
+                player.dropItem(itemstack4, true);
+            }
+        }
+        else if (clickTypeIn == ClickType.PICKUP_ALL && slotId >= 0)
+        {
+            Slot slot = this.inventorySlots.get(slotId);
+            ItemStack itemstack1 = inventoryplayer.getItemStack();
+
+            if (!itemstack1.func_190926_b() && (slot == null || !slot.getHasStack() || !slot.canTakeStack(player)))
+            {
+                int i = dragType == 0 ? 0 : this.inventorySlots.size() - 1;
+                int j = dragType == 0 ? 1 : -1;
+
+                for (int k = 0; k < 2; ++k)
                 {
-                    inventoryplayer.setInventorySlotContents(clickedButton, (ItemStack)null);
-                    slot5.putStack(itemstack7);
-                }
-            }
-        }
-        else if (mode == 3 && playerIn.capabilities.isCreativeMode && inventoryplayer.getItemStack() == null && slotId >= 0)
-        {
-            Slot slot4 = (Slot)this.inventorySlots.get(slotId);
-
-            if (slot4 != null && slot4.getHasStack())
-            {
-                ItemStack itemstack6 = slot4.getStack().copy();
-                itemstack6.stackSize = itemstack6.getMaxStackSize();
-                inventoryplayer.setItemStack(itemstack6);
-            }
-        }
-        else if (mode == 4 && inventoryplayer.getItemStack() == null && slotId >= 0)
-        {
-            Slot slot3 = (Slot)this.inventorySlots.get(slotId);
-
-            if (slot3 != null && slot3.getHasStack() && slot3.canTakeStack(playerIn))
-            {
-                ItemStack itemstack5 = slot3.decrStackSize(clickedButton == 0 ? 1 : slot3.getStack().stackSize);
-                slot3.onPickupFromSlot(playerIn, itemstack5);
-                playerIn.dropPlayerItemWithRandomChoice(itemstack5, true);
-            }
-        }
-        else if (mode == 6 && slotId >= 0)
-        {
-            Slot slot2 = (Slot)this.inventorySlots.get(slotId);
-            ItemStack itemstack4 = inventoryplayer.getItemStack();
-
-            if (itemstack4 != null && (slot2 == null || !slot2.getHasStack() || !slot2.canTakeStack(playerIn)))
-            {
-                int i1 = clickedButton == 0 ? 0 : this.inventorySlots.size() - 1;
-                int j1 = clickedButton == 0 ? 1 : -1;
-
-                for (int l2 = 0; l2 < 2; ++l2)
-                {
-                    for (int i3 = i1; i3 >= 0 && i3 < this.inventorySlots.size() && itemstack4.stackSize < itemstack4.getMaxStackSize(); i3 += j1)
+                    for (int l = i; l >= 0 && l < this.inventorySlots.size() && itemstack1.func_190916_E() < itemstack1.getMaxStackSize(); l += j)
                     {
-                        Slot slot8 = (Slot)this.inventorySlots.get(i3);
+                        Slot slot1 = this.inventorySlots.get(l);
 
-                        if (slot8.getHasStack() && canAddItemToSlot(slot8, itemstack4, true) && slot8.canTakeStack(playerIn) && this.canMergeSlot(itemstack4, slot8) && (l2 != 0 || slot8.getStack().stackSize != slot8.getStack().getMaxStackSize()))
+                        if (slot1.getHasStack() && canAddItemToSlot(slot1, itemstack1, true) && slot1.canTakeStack(player) && this.canMergeSlot(itemstack1, slot1))
                         {
-                            int l = Math.min(itemstack4.getMaxStackSize() - itemstack4.stackSize, slot8.getStack().stackSize);
-                            ItemStack itemstack2 = slot8.decrStackSize(l);
-                            itemstack4.stackSize += l;
+                            ItemStack itemstack2 = slot1.getStack();
 
-                            if (itemstack2.stackSize <= 0)
+                            if (k != 0 || itemstack2.func_190916_E() != itemstack2.getMaxStackSize())
                             {
-                                slot8.putStack((ItemStack)null);
-                            }
+                                int i1 = Math.min(itemstack1.getMaxStackSize() - itemstack1.func_190916_E(), itemstack2.func_190916_E());
+                                ItemStack itemstack3 = slot1.decrStackSize(i1);
+                                itemstack1.func_190917_f(i1);
 
-                            slot8.onPickupFromSlot(playerIn, itemstack2);
+                                if (itemstack3.func_190926_b())
+                                {
+                                    slot1.putStack(ItemStack.field_190927_a);
+                                }
+
+                                slot1.func_190901_a(player, itemstack3);
+                            }
                         }
                     }
                 }
@@ -503,24 +500,34 @@ public abstract class Container
     }
 
     /**
-     * Retries slotClick() in case of failure
-     */
-    protected void retrySlotClick(int slotId, int clickedButton, boolean mode, EntityPlayer playerIn)
-    {
-        this.slotClick(slotId, clickedButton, 1, playerIn);
-    }
-
-    /**
      * Called when the container is closed.
      */
     public void onContainerClosed(EntityPlayer playerIn)
     {
         InventoryPlayer inventoryplayer = playerIn.inventory;
 
-        if (inventoryplayer.getItemStack() != null)
+        if (!inventoryplayer.getItemStack().func_190926_b())
         {
-            playerIn.dropPlayerItemWithRandomChoice(inventoryplayer.getItemStack(), false);
-            inventoryplayer.setItemStack((ItemStack)null);
+            playerIn.dropItem(inventoryplayer.getItemStack(), false);
+            inventoryplayer.setItemStack(ItemStack.field_190927_a);
+        }
+    }
+
+    protected void func_193327_a(EntityPlayer p_193327_1_, World p_193327_2_, IInventory p_193327_3_)
+    {
+        if (!p_193327_1_.isEntityAlive() || p_193327_1_ instanceof EntityPlayerMP && ((EntityPlayerMP)p_193327_1_).func_193105_t())
+        {
+            for (int j = 0; j < p_193327_3_.getSizeInventory(); ++j)
+            {
+                p_193327_1_.dropItem(p_193327_3_.removeStackFromSlot(j), false);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < p_193327_3_.getSizeInventory(); ++i)
+            {
+                p_193327_1_.inventory.func_191975_a(p_193327_2_, p_193327_3_.removeStackFromSlot(i));
+            }
         }
     }
 
@@ -533,21 +540,18 @@ public abstract class Container
     }
 
     /**
-     * args: slotID, itemStack to put in slot
+     * Puts an ItemStack in a slot.
      */
     public void putStackInSlot(int slotID, ItemStack stack)
     {
         this.getSlot(slotID).putStack(stack);
     }
 
-    /**
-     * places itemstacks in first x slots, x being aitemstack.lenght
-     */
-    public void putStacksInSlots(ItemStack[] p_75131_1_)
+    public void func_190896_a(List<ItemStack> p_190896_1_)
     {
-        for (int i = 0; i < p_75131_1_.length; ++i)
+        for (int i = 0; i < p_190896_1_.size(); ++i)
         {
-            this.getSlot(i).putStack(p_75131_1_[i]);
+            this.getSlot(i).putStack(p_190896_1_.get(i));
         }
     }
 
@@ -558,7 +562,7 @@ public abstract class Container
     /**
      * Gets a unique transaction ID. Parameter is unused.
      */
-    public short getNextTransactionID(InventoryPlayer p_75136_1_)
+    public short getNextTransactionID(InventoryPlayer invPlayer)
     {
         ++this.transactionID;
         return this.transactionID;
@@ -567,26 +571,29 @@ public abstract class Container
     /**
      * gets whether or not the player can craft in this inventory or not
      */
-    public boolean getCanCraft(EntityPlayer p_75129_1_)
+    public boolean getCanCraft(EntityPlayer player)
     {
-        return !this.playerList.contains(p_75129_1_);
+        return !this.playerList.contains(player);
     }
 
     /**
      * sets whether the player can craft in this inventory or not
      */
-    public void setCanCraft(EntityPlayer p_75128_1_, boolean p_75128_2_)
+    public void setCanCraft(EntityPlayer player, boolean canCraft)
     {
-        if (p_75128_2_)
+        if (canCraft)
         {
-            this.playerList.remove(p_75128_1_);
+            this.playerList.remove(player);
         }
         else
         {
-            this.playerList.add(p_75128_1_);
+            this.playerList.add(player);
         }
     }
 
+    /**
+     * Determines whether supplied player can use this container
+     */
     public abstract boolean canInteractWith(EntityPlayer playerIn);
 
     /**
@@ -606,26 +613,38 @@ public abstract class Container
 
         if (stack.isStackable())
         {
-            while (stack.stackSize > 0 && (!reverseDirection && i < endIndex || reverseDirection && i >= startIndex))
+            while (!stack.func_190926_b())
             {
-                Slot slot = (Slot)this.inventorySlots.get(i);
+                if (reverseDirection)
+                {
+                    if (i < startIndex)
+                    {
+                        break;
+                    }
+                }
+                else if (i >= endIndex)
+                {
+                    break;
+                }
+
+                Slot slot = this.inventorySlots.get(i);
                 ItemStack itemstack = slot.getStack();
 
-                if (itemstack != null && itemstack.getItem() == stack.getItem() && (!stack.getHasSubtypes() || stack.getMetadata() == itemstack.getMetadata()) && ItemStack.areItemStackTagsEqual(stack, itemstack))
+                if (!itemstack.func_190926_b() && itemstack.getItem() == stack.getItem() && (!stack.getHasSubtypes() || stack.getMetadata() == itemstack.getMetadata()) && ItemStack.areItemStackTagsEqual(stack, itemstack))
                 {
-                    int j = itemstack.stackSize + stack.stackSize;
+                    int j = itemstack.func_190916_E() + stack.func_190916_E();
 
                     if (j <= stack.getMaxStackSize())
                     {
-                        stack.stackSize = 0;
-                        itemstack.stackSize = j;
+                        stack.func_190920_e(0);
+                        itemstack.func_190920_e(j);
                         slot.onSlotChanged();
                         flag = true;
                     }
-                    else if (itemstack.stackSize < stack.getMaxStackSize())
+                    else if (itemstack.func_190916_E() < stack.getMaxStackSize())
                     {
-                        stack.stackSize -= stack.getMaxStackSize() - itemstack.stackSize;
-                        itemstack.stackSize = stack.getMaxStackSize();
+                        stack.func_190918_g(stack.getMaxStackSize() - itemstack.func_190916_E());
+                        itemstack.func_190920_e(stack.getMaxStackSize());
                         slot.onSlotChanged();
                         flag = true;
                     }
@@ -642,7 +661,7 @@ public abstract class Container
             }
         }
 
-        if (stack.stackSize > 0)
+        if (!stack.func_190926_b())
         {
             if (reverseDirection)
             {
@@ -653,16 +672,35 @@ public abstract class Container
                 i = startIndex;
             }
 
-            while (!reverseDirection && i < endIndex || reverseDirection && i >= startIndex)
+            while (true)
             {
-                Slot slot1 = (Slot)this.inventorySlots.get(i);
+                if (reverseDirection)
+                {
+                    if (i < startIndex)
+                    {
+                        break;
+                    }
+                }
+                else if (i >= endIndex)
+                {
+                    break;
+                }
+
+                Slot slot1 = this.inventorySlots.get(i);
                 ItemStack itemstack1 = slot1.getStack();
 
-                if (itemstack1 == null)
+                if (itemstack1.func_190926_b() && slot1.isItemValid(stack))
                 {
-                    slot1.putStack(stack.copy());
+                    if (stack.func_190916_E() > slot1.getSlotStackLimit())
+                    {
+                        slot1.putStack(stack.splitStack(slot1.getSlotStackLimit()));
+                    }
+                    else
+                    {
+                        slot1.putStack(stack.splitStack(stack.func_190916_E()));
+                    }
+
                     slot1.onSlotChanged();
-                    stack.stackSize = 0;
                     flag = true;
                     break;
                 }
@@ -684,27 +722,38 @@ public abstract class Container
     /**
      * Extracts the drag mode. Args : eventButton. Return (0 : evenly split, 1 : one item by slot, 2 : not used ?)
      */
-    public static int extractDragMode(int p_94529_0_)
+    public static int extractDragMode(int eventButton)
     {
-        return p_94529_0_ >> 2 & 3;
+        return eventButton >> 2 & 3;
     }
 
     /**
      * Args : clickedButton, Returns (0 : start drag, 1 : add slot, 2 : end drag)
      */
-    public static int getDragEvent(int p_94532_0_)
+    public static int getDragEvent(int clickedButton)
     {
-        return p_94532_0_ & 3;
+        return clickedButton & 3;
     }
 
-    public static int func_94534_d(int p_94534_0_, int p_94534_1_)
+    public static int getQuickcraftMask(int p_94534_0_, int p_94534_1_)
     {
         return p_94534_0_ & 3 | (p_94534_1_ & 3) << 2;
     }
 
     public static boolean isValidDragMode(int dragModeIn, EntityPlayer player)
     {
-        return dragModeIn == 0 ? true : (dragModeIn == 1 ? true : dragModeIn == 2 && player.capabilities.isCreativeMode);
+        if (dragModeIn == 0)
+        {
+            return true;
+        }
+        else if (dragModeIn == 1)
+        {
+            return true;
+        }
+        else
+        {
+            return dragModeIn == 2 && player.capabilities.isCreativeMode;
+        }
     }
 
     /**
@@ -719,46 +768,48 @@ public abstract class Container
     /**
      * Checks if it's possible to add the given itemstack to the given slot.
      */
-    public static boolean canAddItemToSlot(Slot slotIn, ItemStack stack, boolean stackSizeMatters)
+    public static boolean canAddItemToSlot(@Nullable Slot slotIn, ItemStack stack, boolean stackSizeMatters)
     {
         boolean flag = slotIn == null || !slotIn.getHasStack();
 
-        if (slotIn != null && slotIn.getHasStack() && stack != null && stack.isItemEqual(slotIn.getStack()) && ItemStack.areItemStackTagsEqual(slotIn.getStack(), stack))
+        if (!flag && stack.isItemEqual(slotIn.getStack()) && ItemStack.areItemStackTagsEqual(slotIn.getStack(), stack))
         {
-            flag |= slotIn.getStack().stackSize + (stackSizeMatters ? 0 : stack.stackSize) <= stack.getMaxStackSize();
+            return slotIn.getStack().func_190916_E() + (stackSizeMatters ? 0 : stack.func_190916_E()) <= stack.getMaxStackSize();
         }
-
-        return flag;
+        else
+        {
+            return flag;
+        }
     }
 
     /**
      * Compute the new stack size, Returns the stack with the new size. Args : dragSlots, dragMode, dragStack,
      * slotStackSize
      */
-    public static void computeStackSize(Set<Slot> p_94525_0_, int p_94525_1_, ItemStack p_94525_2_, int p_94525_3_)
+    public static void computeStackSize(Set<Slot> dragSlotsIn, int dragModeIn, ItemStack stack, int slotStackSize)
     {
-        switch (p_94525_1_)
+        switch (dragModeIn)
         {
             case 0:
-                p_94525_2_.stackSize = MathHelper.floor_float((float)p_94525_2_.stackSize / (float)p_94525_0_.size());
+                stack.func_190920_e(MathHelper.floor((float)stack.func_190916_E() / (float)dragSlotsIn.size()));
                 break;
 
             case 1:
-                p_94525_2_.stackSize = 1;
+                stack.func_190920_e(1);
                 break;
 
             case 2:
-                p_94525_2_.stackSize = p_94525_2_.getItem().getItemStackLimit();
+                stack.func_190920_e(stack.getItem().getItemStackLimit());
         }
 
-        p_94525_2_.stackSize += p_94525_3_;
+        stack.func_190917_f(slotStackSize);
     }
 
     /**
      * Returns true if the player can "drag-spilt" items into this slot,. returns true by default. Called to check if
      * the slot can be added to a list of Slots to split the held ItemStack across.
      */
-    public boolean canDragIntoSlot(Slot p_94531_1_)
+    public boolean canDragIntoSlot(Slot slotIn)
     {
         return true;
     }
@@ -766,12 +817,12 @@ public abstract class Container
     /**
      * Like the version that takes an inventory. If the given TileEntity is not an Inventory, 0 is returned instead.
      */
-    public static int calcRedstone(TileEntity te)
+    public static int calcRedstone(@Nullable TileEntity te)
     {
         return te instanceof IInventory ? calcRedstoneFromInventory((IInventory)te) : 0;
     }
 
-    public static int calcRedstoneFromInventory(IInventory inv)
+    public static int calcRedstoneFromInventory(@Nullable IInventory inv)
     {
         if (inv == null)
         {
@@ -786,15 +837,34 @@ public abstract class Container
             {
                 ItemStack itemstack = inv.getStackInSlot(j);
 
-                if (itemstack != null)
+                if (!itemstack.func_190926_b())
                 {
-                    f += (float)itemstack.stackSize / (float)Math.min(inv.getInventoryStackLimit(), itemstack.getMaxStackSize());
+                    f += (float)itemstack.func_190916_E() / (float)Math.min(inv.getInventoryStackLimit(), itemstack.getMaxStackSize());
                     ++i;
                 }
             }
 
             f = f / (float)inv.getSizeInventory();
-            return MathHelper.floor_float(f * 14.0F) + (i > 0 ? 1 : 0);
+            return MathHelper.floor(f * 14.0F) + (i > 0 ? 1 : 0);
+        }
+    }
+
+    protected void func_192389_a(World p_192389_1_, EntityPlayer p_192389_2_, InventoryCrafting p_192389_3_, InventoryCraftResult p_192389_4_)
+    {
+        if (!p_192389_1_.isRemote)
+        {
+            EntityPlayerMP entityplayermp = (EntityPlayerMP)p_192389_2_;
+            ItemStack itemstack = ItemStack.field_190927_a;
+            IRecipe irecipe = CraftingManager.func_192413_b(p_192389_3_, p_192389_1_);
+
+            if (irecipe != null && (irecipe.func_192399_d() || !p_192389_1_.getGameRules().getBoolean("doLimitedCrafting") || entityplayermp.func_192037_E().func_193830_f(irecipe)))
+            {
+                p_192389_4_.func_193056_a(irecipe);
+                itemstack = irecipe.getCraftingResult(p_192389_3_);
+            }
+
+            p_192389_4_.setInventorySlotContents(0, itemstack);
+            entityplayermp.connection.sendPacket(new SPacketSetSlot(this.windowId, 0, itemstack));
         }
     }
 }

@@ -4,17 +4,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.event.ClickEvent;
+import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
 
 public class CommandHelp extends CommandBase
 {
+    private static final String[] seargeSays = new String[] {"Yolo", "Ask for help on twitter", "/deop @p", "Scoreboard deleted, commands blocked", "Contact helpdesk for help", "/testfornoob @p", "/trigger warning", "Oh my god, it's full of stats", "/kill @p[name=!Searge]", "Have you tried turning it off and on again?", "Sorry, no help today"};
+    private final Random rand = new Random();
+
     /**
      * Gets the name of the command
      */
@@ -41,84 +47,91 @@ public class CommandHelp extends CommandBase
 
     public List<String> getCommandAliases()
     {
-        return Arrays.<String>asList(new String[] {"?"});
+        return Arrays.<String>asList("?");
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        List<ICommand> list = this.getSortedPossibleCommands(sender);
-        int i = 7;
-        int j = (list.size() - 1) / 7;
-        int k = 0;
-
-        try
+        if (sender instanceof CommandBlockBaseLogic)
         {
-            k = args.length == 0 ? 0 : parseInt(args[0], 1, j + 1) - 1;
+            sender.addChatMessage((new TextComponentString("Searge says: ")).appendText(seargeSays[this.rand.nextInt(seargeSays.length) % seargeSays.length]));
         }
-        catch (NumberInvalidException numberinvalidexception)
+        else
         {
-            Map<String, ICommand> map = this.getCommands();
-            ICommand icommand = (ICommand)map.get(args[0]);
+            List<ICommand> list = this.getSortedPossibleCommands(sender, server);
+            int i = 7;
+            int j = (list.size() - 1) / 7;
+            int k = 0;
 
-            if (icommand != null)
+            try
             {
-                throw new WrongUsageException(icommand.getCommandUsage(sender), new Object[0]);
+                k = args.length == 0 ? 0 : parseInt(args[0], 1, j + 1) - 1;
             }
-
-            if (MathHelper.parseIntWithDefault(args[0], -1) != -1)
+            catch (NumberInvalidException numberinvalidexception)
             {
+                Map<String, ICommand> map = this.getCommandMap(server);
+                ICommand icommand = map.get(args[0]);
+
+                if (icommand != null)
+                {
+                    throw new WrongUsageException(icommand.getCommandUsage(sender), new Object[0]);
+                }
+
+                if (MathHelper.getInt(args[0], -1) == -1 && MathHelper.getInt(args[0], -2) == -2)
+                {
+                    throw new CommandNotFoundException();
+                }
+
                 throw numberinvalidexception;
             }
 
-            throw new CommandNotFoundException();
-        }
+            int l = Math.min((k + 1) * 7, list.size());
+            TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.help.header", new Object[] {k + 1, j + 1});
+            textcomponenttranslation1.getStyle().setColor(TextFormatting.DARK_GREEN);
+            sender.addChatMessage(textcomponenttranslation1);
 
-        int l = Math.min((k + 1) * 7, list.size());
-        ChatComponentTranslation chatcomponenttranslation1 = new ChatComponentTranslation("commands.help.header", new Object[] {Integer.valueOf(k + 1), Integer.valueOf(j + 1)});
-        chatcomponenttranslation1.getChatStyle().setColor(EnumChatFormatting.DARK_GREEN);
-        sender.addChatMessage(chatcomponenttranslation1);
+            for (int i1 = k * 7; i1 < l; ++i1)
+            {
+                ICommand icommand1 = list.get(i1);
+                TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(icommand1.getCommandUsage(sender), new Object[0]);
+                textcomponenttranslation.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + icommand1.getCommandName() + " "));
+                sender.addChatMessage(textcomponenttranslation);
+            }
 
-        for (int i1 = k * 7; i1 < l; ++i1)
-        {
-            ICommand icommand1 = (ICommand)list.get(i1);
-            ChatComponentTranslation chatcomponenttranslation = new ChatComponentTranslation(icommand1.getCommandUsage(sender), new Object[0]);
-            chatcomponenttranslation.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + icommand1.getCommandName() + " "));
-            sender.addChatMessage(chatcomponenttranslation);
-        }
-
-        if (k == 0 && sender instanceof EntityPlayer)
-        {
-            ChatComponentTranslation chatcomponenttranslation2 = new ChatComponentTranslation("commands.help.footer", new Object[0]);
-            chatcomponenttranslation2.getChatStyle().setColor(EnumChatFormatting.GREEN);
-            sender.addChatMessage(chatcomponenttranslation2);
+            if (k == 0)
+            {
+                TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.help.footer", new Object[0]);
+                textcomponenttranslation2.getStyle().setColor(TextFormatting.GREEN);
+                sender.addChatMessage(textcomponenttranslation2);
+            }
         }
     }
 
-    protected List<ICommand> getSortedPossibleCommands(ICommandSender p_71534_1_)
+    protected List<ICommand> getSortedPossibleCommands(ICommandSender sender, MinecraftServer server)
     {
-        List<ICommand> list = MinecraftServer.getServer().getCommandManager().getPossibleCommands(p_71534_1_);
+        List<ICommand> list = server.getCommandManager().getPossibleCommands(sender);
         Collections.sort(list);
         return list;
     }
 
-    protected Map<String, ICommand> getCommands()
+    protected Map<String, ICommand> getCommandMap(MinecraftServer server)
     {
-        return MinecraftServer.getServer().getCommandManager().getCommands();
+        return server.getCommandManager().getCommands();
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
         if (args.length == 1)
         {
-            Set<String> set = this.getCommands().keySet();
+            Set<String> set = this.getCommandMap(server).keySet();
             return getListOfStringsMatchingLastWord(args, (String[])set.toArray(new String[set.size()]));
         }
         else
         {
-            return null;
+            return Collections.<String>emptyList();
         }
     }
 }

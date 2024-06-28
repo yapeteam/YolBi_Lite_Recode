@@ -6,6 +6,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import io.netty.util.internal.ThreadLocalRandom;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,12 +17,15 @@ import java.net.URLStreamHandler;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -38,7 +42,8 @@ public class SoundManager
 {
     /** The marker used for logging */
     private static final Marker LOG_MARKER = MarkerManager.getMarker("SOUNDS");
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Set<ResourceLocation> UNABLE_TO_PLAY = Sets.<ResourceLocation>newHashSet();
 
     /** A reference to the sound handler. */
     private final SoundHandler sndHandler;
@@ -53,23 +58,25 @@ public class SoundManager
     private boolean loaded;
 
     /** A counter for how long the sound manager has been running */
-    private int playTime = 0;
+    private int playTime;
     private final Map<String, ISound> playingSounds = HashBiMap.<String, ISound>create();
     private final Map<ISound, String> invPlayingSounds;
-    private Map<ISound, SoundPoolEntry> playingSoundPoolEntries;
     private final Multimap<SoundCategory, String> categorySounds;
     private final List<ITickableSound> tickableSounds;
     private final Map<ISound, Integer> delayedSounds;
     private final Map<String, Integer> playingSoundsStopTime;
+    private final List<ISoundEventListener> listeners;
+    private final List<String> pausedChannels;
 
     public SoundManager(SoundHandler p_i45119_1_, GameSettings p_i45119_2_)
     {
         this.invPlayingSounds = ((BiMap)this.playingSounds).inverse();
-        this.playingSoundPoolEntries = Maps.<ISound, SoundPoolEntry>newHashMap();
         this.categorySounds = HashMultimap.<SoundCategory, String>create();
         this.tickableSounds = Lists.<ITickableSound>newArrayList();
         this.delayedSounds = Maps.<ISound, Integer>newHashMap();
         this.playingSoundsStopTime = Maps.<String, Integer>newHashMap();
+        this.listeners = Lists.<ISoundEventListener>newArrayList();
+        this.pausedChannels = Lists.<String>newArrayList();
         this.sndHandler = p_i45119_1_;
         this.options = p_i45119_2_;
 
@@ -80,12 +87,25 @@ public class SoundManager
         }
         catch (SoundSystemException soundsystemexception)
         {
-            logger.error(LOG_MARKER, (String)"Error linking with the LibraryJavaSound plug-in", (Throwable)soundsystemexception);
+            LOGGER.error(LOG_MARKER, "Error linking with the LibraryJavaSound plug-in", (Throwable)soundsystemexception);
         }
     }
 
     public void reloadSoundSystem()
     {
+        UNABLE_TO_PLAY.clear();
+
+        for (SoundEvent soundevent : SoundEvent.REGISTRY)
+        {
+            ResourceLocation resourcelocation = soundevent.getSoundName();
+
+            if (this.sndHandler.getAccessor(resourcelocation) == null)
+            {
+                LOGGER.warn("Missing sound for event: {}", SoundEvent.REGISTRY.getNameForObject(soundevent));
+                UNABLE_TO_PLAY.add(resourcelocation);
+            }
+        }
+
         this.unloadSoundSystem();
         this.loadSoundSystem();
     }
@@ -109,53 +129,47 @@ public class SoundManager
                             {
                                 if (!p_message_1_.isEmpty())
                                 {
-                                    SoundManager.logger.info(p_message_1_);
+                                    SoundManager.LOGGER.info(p_message_1_);
                                 }
                             }
                             public void importantMessage(String p_importantMessage_1_, int p_importantMessage_2_)
                             {
                                 if (!p_importantMessage_1_.isEmpty())
                                 {
-                                    SoundManager.logger.warn(p_importantMessage_1_);
+                                    SoundManager.LOGGER.warn(p_importantMessage_1_);
                                 }
                             }
                             public void errorMessage(String p_errorMessage_1_, String p_errorMessage_2_, int p_errorMessage_3_)
                             {
                                 if (!p_errorMessage_2_.isEmpty())
                                 {
-                                    SoundManager.logger.error("Error in class \'" + p_errorMessage_1_ + "\'");
-                                    SoundManager.logger.error(p_errorMessage_2_);
+                                    SoundManager.LOGGER.error("Error in class '{}'", (Object)p_errorMessage_1_);
+                                    SoundManager.LOGGER.error(p_errorMessage_2_);
                                 }
                             }
                         });
                         SoundManager.this.sndSystem = SoundManager.this.new SoundSystemStarterThread();
                         SoundManager.this.loaded = true;
                         SoundManager.this.sndSystem.setMasterVolume(SoundManager.this.options.getSoundLevel(SoundCategory.MASTER));
-                        SoundManager.logger.info(SoundManager.LOG_MARKER, "Sound engine started");
+                        SoundManager.LOGGER.info(SoundManager.LOG_MARKER, "Sound engine started");
                     }
                 }, "Sound Library Loader")).start();
             }
             catch (RuntimeException runtimeexception)
             {
-                logger.error(LOG_MARKER, (String)"Error starting SoundSystem. Turning off sounds & music", (Throwable)runtimeexception);
+                LOGGER.error(LOG_MARKER, "Error starting SoundSystem. Turning off sounds & music", (Throwable)runtimeexception);
                 this.options.setSoundLevel(SoundCategory.MASTER, 0.0F);
                 this.options.saveOptions();
             }
         }
     }
 
-    /**
-     * Returns the sound level (between 0.0 and 1.0) for a category, but 1.0 for the master sound category
-     */
-    private float getSoundCategoryVolume(SoundCategory category)
+    private float getVolume(SoundCategory category)
     {
         return category != null && category != SoundCategory.MASTER ? this.options.getSoundLevel(category) : 1.0F;
     }
 
-    /**
-     * Adjusts volume for currently playing sounds in this category
-     */
-    public void setSoundCategoryVolume(SoundCategory category, float volume)
+    public void setVolume(SoundCategory category, float volume)
     {
         if (this.loaded)
         {
@@ -167,8 +181,8 @@ public class SoundManager
             {
                 for (String s : this.categorySounds.get(category))
                 {
-                    ISound isound = (ISound)this.playingSounds.get(s);
-                    float f = this.getNormalizedVolume(isound, (SoundPoolEntry)this.playingSoundPoolEntries.get(isound), category);
+                    ISound isound = this.playingSounds.get(s);
+                    float f = this.getClampedVolume(isound);
 
                     if (f <= 0.0F)
                     {
@@ -212,9 +226,18 @@ public class SoundManager
             this.delayedSounds.clear();
             this.tickableSounds.clear();
             this.categorySounds.clear();
-            this.playingSoundPoolEntries.clear();
             this.playingSoundsStopTime.clear();
         }
+    }
+
+    public void addListener(ISoundEventListener listener)
+    {
+        this.listeners.add(listener);
+    }
+
+    public void removeListener(ISoundEventListener listener)
+    {
+        this.listeners.remove(listener);
     }
 
     public void updateAllSounds()
@@ -231,9 +254,9 @@ public class SoundManager
             }
             else
             {
-                String s = (String)this.invPlayingSounds.get(itickablesound);
-                this.sndSystem.setVolume(s, this.getNormalizedVolume(itickablesound, (SoundPoolEntry)this.playingSoundPoolEntries.get(itickablesound), this.sndHandler.getSound(itickablesound.getSoundLocation()).getSoundCategory()));
-                this.sndSystem.setPitch(s, this.getNormalizedPitch(itickablesound, (SoundPoolEntry)this.playingSoundPoolEntries.get(itickablesound)));
+                String s = this.invPlayingSounds.get(itickablesound);
+                this.sndSystem.setVolume(s, this.getClampedVolume(itickablesound));
+                this.sndSystem.setPitch(s, this.getClampedPitch(itickablesound));
                 this.sndSystem.setPosition(s, itickablesound.getXPosF(), itickablesound.getYPosF(), itickablesound.getZPosF());
             }
         }
@@ -243,8 +266,8 @@ public class SoundManager
         while (iterator.hasNext())
         {
             Entry<String, ISound> entry = (Entry)iterator.next();
-            String s1 = (String)entry.getKey();
-            ISound isound = (ISound)entry.getValue();
+            String s1 = entry.getKey();
+            ISound isound = entry.getValue();
 
             if (!this.sndSystem.playing(s1))
             {
@@ -260,14 +283,13 @@ public class SoundManager
                     }
 
                     iterator.remove();
-                    logger.debug(LOG_MARKER, "Removed channel {} because it\'s not playing anymore", new Object[] {s1});
+                    LOGGER.debug(LOG_MARKER, "Removed channel {} because it's not playing anymore", (Object)s1);
                     this.sndSystem.removeSource(s1);
                     this.playingSoundsStopTime.remove(s1);
-                    this.playingSoundPoolEntries.remove(isound);
 
                     try
                     {
-                        this.categorySounds.remove(this.sndHandler.getSound(isound.getSoundLocation()).getSoundCategory(), s1);
+                        this.categorySounds.remove(isound.getCategory(), s1);
                     }
                     catch (RuntimeException var8)
                     {
@@ -290,7 +312,7 @@ public class SoundManager
 
             if (this.playTime >= ((Integer)entry1.getValue()).intValue())
             {
-                ISound isound1 = (ISound)entry1.getKey();
+                ISound isound1 = entry1.getKey();
 
                 if (isound1 instanceof ITickableSound)
                 {
@@ -314,8 +336,16 @@ public class SoundManager
         }
         else
         {
-            String s = (String)this.invPlayingSounds.get(sound);
-            return s == null ? false : this.sndSystem.playing(s) || this.playingSoundsStopTime.containsKey(s) && ((Integer)this.playingSoundsStopTime.get(s)).intValue() <= this.playTime;
+            String s = this.invPlayingSounds.get(sound);
+
+            if (s == null)
+            {
+                return false;
+            }
+            else
+            {
+                return this.sndSystem.playing(s) || this.playingSoundsStopTime.containsKey(s) && ((Integer)this.playingSoundsStopTime.get(s)).intValue() <= this.playTime;
+            }
         }
     }
 
@@ -323,7 +353,7 @@ public class SoundManager
     {
         if (this.loaded)
         {
-            String s = (String)this.invPlayingSounds.get(sound);
+            String s = this.invPlayingSounds.get(sound);
 
             if (s != null)
             {
@@ -336,71 +366,81 @@ public class SoundManager
     {
         if (this.loaded)
         {
-            if (this.sndSystem.getMasterVolume() <= 0.0F)
+            SoundEventAccessor soundeventaccessor = p_sound.createAccessor(this.sndHandler);
+            ResourceLocation resourcelocation = p_sound.getSoundLocation();
+
+            if (soundeventaccessor == null)
             {
-                logger.debug(LOG_MARKER, "Skipped playing soundEvent: {}, master volume was zero", new Object[] {p_sound.getSoundLocation()});
+                if (UNABLE_TO_PLAY.add(resourcelocation))
+                {
+                    LOGGER.warn(LOG_MARKER, "Unable to play unknown soundEvent: {}", (Object)resourcelocation);
+                }
             }
             else
             {
-                SoundEventAccessorComposite soundeventaccessorcomposite = this.sndHandler.getSound(p_sound.getSoundLocation());
-
-                if (soundeventaccessorcomposite == null)
+                if (!this.listeners.isEmpty())
                 {
-                    logger.warn(LOG_MARKER, "Unable to play unknown soundEvent: {}", new Object[] {p_sound.getSoundLocation()});
+                    for (ISoundEventListener isoundeventlistener : this.listeners)
+                    {
+                        isoundeventlistener.soundPlay(p_sound, soundeventaccessor);
+                    }
+                }
+
+                if (this.sndSystem.getMasterVolume() <= 0.0F)
+                {
+                    LOGGER.debug(LOG_MARKER, "Skipped playing soundEvent: {}, master volume was zero", (Object)resourcelocation);
                 }
                 else
                 {
-                    SoundPoolEntry soundpoolentry = soundeventaccessorcomposite.cloneEntry();
+                    Sound sound = p_sound.getSound();
 
-                    if (soundpoolentry == SoundHandler.missing_sound)
+                    if (sound == SoundHandler.MISSING_SOUND)
                     {
-                        logger.warn(LOG_MARKER, "Unable to play empty soundEvent: {}", new Object[] {soundeventaccessorcomposite.getSoundEventLocation()});
+                        if (UNABLE_TO_PLAY.add(resourcelocation))
+                        {
+                            LOGGER.warn(LOG_MARKER, "Unable to play empty soundEvent: {}", (Object)resourcelocation);
+                        }
                     }
                     else
                     {
-                        float f = p_sound.getVolume();
-                        float f1 = 16.0F;
+                        float f3 = p_sound.getVolume();
+                        float f = 16.0F;
 
-                        if (f > 1.0F)
+                        if (f3 > 1.0F)
                         {
-                            f1 *= f;
+                            f *= f3;
                         }
 
-                        SoundCategory soundcategory = soundeventaccessorcomposite.getSoundCategory();
-                        float f2 = this.getNormalizedVolume(p_sound, soundpoolentry, soundcategory);
-                        double d0 = (double)this.getNormalizedPitch(p_sound, soundpoolentry);
-                        ResourceLocation resourcelocation = soundpoolentry.getSoundPoolEntryLocation();
+                        SoundCategory soundcategory = p_sound.getCategory();
+                        float f1 = this.getClampedVolume(p_sound);
+                        float f2 = this.getClampedPitch(p_sound);
 
-                        if (f2 == 0.0F)
+                        if (f1 == 0.0F)
                         {
-                            logger.debug(LOG_MARKER, "Skipped playing sound {}, volume was zero.", new Object[] {resourcelocation});
+                            LOGGER.debug(LOG_MARKER, "Skipped playing sound {}, volume was zero.", (Object)sound.getSoundLocation());
                         }
                         else
                         {
                             boolean flag = p_sound.canRepeat() && p_sound.getRepeatDelay() == 0;
-                            String s = MathHelper.getRandomUuid(ThreadLocalRandom.current()).toString();
+                            String s = MathHelper.getRandomUUID(ThreadLocalRandom.current()).toString();
+                            ResourceLocation resourcelocation1 = sound.getSoundAsOggLocation();
 
-                            if (soundpoolentry.isStreamingSound())
+                            if (sound.isStreaming())
                             {
-                                this.sndSystem.newStreamingSource(false, s, getURLForSoundResource(resourcelocation), resourcelocation.toString(), flag, p_sound.getXPosF(), p_sound.getYPosF(), p_sound.getZPosF(), p_sound.getAttenuationType().getTypeInt(), f1);
+                                this.sndSystem.newStreamingSource(false, s, getURLForSoundResource(resourcelocation1), resourcelocation1.toString(), flag, p_sound.getXPosF(), p_sound.getYPosF(), p_sound.getZPosF(), p_sound.getAttenuationType().getTypeInt(), f);
                             }
                             else
                             {
-                                this.sndSystem.newSource(false, s, getURLForSoundResource(resourcelocation), resourcelocation.toString(), flag, p_sound.getXPosF(), p_sound.getYPosF(), p_sound.getZPosF(), p_sound.getAttenuationType().getTypeInt(), f1);
+                                this.sndSystem.newSource(false, s, getURLForSoundResource(resourcelocation1), resourcelocation1.toString(), flag, p_sound.getXPosF(), p_sound.getYPosF(), p_sound.getZPosF(), p_sound.getAttenuationType().getTypeInt(), f);
                             }
 
-                            logger.debug(LOG_MARKER, "Playing sound {} for event {} as channel {}", new Object[] {soundpoolentry.getSoundPoolEntryLocation(), soundeventaccessorcomposite.getSoundEventLocation(), s});
-                            this.sndSystem.setPitch(s, (float)d0);
-                            this.sndSystem.setVolume(s, f2);
+                            LOGGER.debug(LOG_MARKER, "Playing sound {} for event {} as channel {}", sound.getSoundLocation(), resourcelocation, s);
+                            this.sndSystem.setPitch(s, f2);
+                            this.sndSystem.setVolume(s, f1);
                             this.sndSystem.play(s);
                             this.playingSoundsStopTime.put(s, Integer.valueOf(this.playTime + 20));
                             this.playingSounds.put(s, p_sound);
-                            this.playingSoundPoolEntries.put(p_sound, soundpoolentry);
-
-                            if (soundcategory != SoundCategory.MASTER)
-                            {
-                                this.categorySounds.put(soundcategory, s);
-                            }
+                            this.categorySounds.put(soundcategory, s);
 
                             if (p_sound instanceof ITickableSound)
                             {
@@ -413,20 +453,14 @@ public class SoundManager
         }
     }
 
-    /**
-     * Normalizes pitch from parameters and clamps to [0.5, 2.0]
-     */
-    private float getNormalizedPitch(ISound sound, SoundPoolEntry entry)
+    private float getClampedPitch(ISound soundIn)
     {
-        return (float)MathHelper.clamp_double((double)sound.getPitch() * entry.getPitch(), 0.5D, 2.0D);
+        return MathHelper.clamp(soundIn.getPitch(), 0.5F, 2.0F);
     }
 
-    /**
-     * Normalizes volume level from parameters.  Range [0.0, 1.0]
-     */
-    private float getNormalizedVolume(ISound sound, SoundPoolEntry entry, SoundCategory category)
+    private float getClampedVolume(ISound soundIn)
     {
-        return (float)MathHelper.clamp_double((double)sound.getVolume() * entry.getVolume(), 0.0D, 1.0D) * this.getSoundCategoryVolume(category);
+        return MathHelper.clamp(soundIn.getVolume() * this.getVolume(soundIn.getCategory()), 0.0F, 1.0F);
     }
 
     /**
@@ -434,10 +468,17 @@ public class SoundManager
      */
     public void pauseAllSounds()
     {
-        for (String s : this.playingSounds.keySet())
+        for (Entry<String, ISound> entry : this.playingSounds.entrySet())
         {
-            logger.debug(LOG_MARKER, "Pausing channel {}", new Object[] {s});
-            this.sndSystem.pause(s);
+            String s = entry.getKey();
+            boolean flag = this.isSoundPlaying(entry.getValue());
+
+            if (flag)
+            {
+                LOGGER.debug(LOG_MARKER, "Pausing channel {}", (Object)s);
+                this.sndSystem.pause(s);
+                this.pausedChannels.add(s);
+            }
         }
     }
 
@@ -446,11 +487,13 @@ public class SoundManager
      */
     public void resumeAllSounds()
     {
-        for (String s : this.playingSounds.keySet())
+        for (String s : this.pausedChannels)
         {
-            logger.debug(LOG_MARKER, "Resuming channel {}", new Object[] {s});
+            LOGGER.debug(LOG_MARKER, "Resuming channel {}", (Object)s);
             this.sndSystem.play(s);
         }
+
+        this.pausedChannels.clear();
     }
 
     /**
@@ -463,10 +506,10 @@ public class SoundManager
 
     private static URL getURLForSoundResource(final ResourceLocation p_148612_0_)
     {
-        String s = String.format("%s:%s:%s", new Object[] {"mcsounddomain", p_148612_0_.getResourceDomain(), p_148612_0_.getResourcePath()});
+        String s = String.format("%s:%s:%s", "mcsounddomain", p_148612_0_.getResourceDomain(), p_148612_0_.getResourcePath());
         URLStreamHandler urlstreamhandler = new URLStreamHandler()
         {
-            protected URLConnection openConnection(final URL p_openConnection_1_)
+            protected URLConnection openConnection(URL p_openConnection_1_)
             {
                 return new URLConnection(p_openConnection_1_)
                 {
@@ -518,6 +561,40 @@ public class SoundManager
         }
     }
 
+    public void stop(String p_189567_1_, SoundCategory p_189567_2_)
+    {
+        if (p_189567_2_ != null)
+        {
+            for (String s : this.categorySounds.get(p_189567_2_))
+            {
+                ISound isound = this.playingSounds.get(s);
+
+                if (p_189567_1_.isEmpty())
+                {
+                    this.stopSound(isound);
+                }
+                else if (isound.getSoundLocation().equals(new ResourceLocation(p_189567_1_)))
+                {
+                    this.stopSound(isound);
+                }
+            }
+        }
+        else if (p_189567_1_.isEmpty())
+        {
+            this.stopAllSounds();
+        }
+        else
+        {
+            for (ISound isound1 : this.playingSounds.values())
+            {
+                if (isound1.getSoundLocation().equals(new ResourceLocation(p_189567_1_)))
+                {
+                    this.stopSound(isound1);
+                }
+            }
+        }
+    }
+
     class SoundSystemStarterThread extends SoundSystem
     {
         private SoundSystemStarterThread()
@@ -535,7 +612,15 @@ public class SoundManager
                 else
                 {
                     Source source = (Source)this.soundLibrary.getSources().get(p_playing_1_);
-                    return source == null ? false : source.playing() || source.paused() || source.preLoad;
+
+                    if (source == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return source.playing() || source.paused() || source.preLoad;
+                    }
                 }
             }
         }

@@ -6,21 +6,21 @@ import net.minecraft.entity.Entity;
 public class ModelEnderCrystal extends ModelBase
 {
     /** The cube model for the Ender Crystal. */
-    private ModelRenderer cube;
+    private final ModelRenderer cube;
 
     /** The glass model for the Ender Crystal. */
-    private ModelRenderer glass = new ModelRenderer(this, "glass");
+    private final ModelRenderer glass = new ModelRenderer(this, "glass");
 
     /** The base model for the Ender Crystal. */
     private ModelRenderer base;
 
-    public ModelEnderCrystal(float p_i1170_1_, boolean p_i1170_2_)
+    public ModelEnderCrystal(float p_i1170_1_, boolean renderBase)
     {
         this.glass.setTextureOffset(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
         this.cube = new ModelRenderer(this, "cube");
         this.cube.setTextureOffset(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
 
-        if (p_i1170_2_)
+        if (renderBase)
         {
             this.base = new ModelRenderer(this, "base");
             this.base.setTextureOffset(0, 16).addBox(-6.0F, 0.0F, -6.0F, 12, 4, 12);
@@ -30,7 +30,7 @@ public class ModelEnderCrystal extends ModelBase
     /**
      * Sets the models various rotation angles then renders the model.
      */
-    public void render(Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale)
+    public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
         GlStateManager.pushMatrix();
         GlStateManager.scale(2.0F, 2.0F, 2.0F);
@@ -41,18 +41,18 @@ public class ModelEnderCrystal extends ModelBase
             this.base.render(scale);
         }
 
-        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
-        GlStateManager.translate(0.0F, 0.8F + p_78088_4_, 0.0F);
+        GlStateManager.rotate(limbSwingAmount, 0.0F, 1.0F, 0.0F);
+        GlStateManager.translate(0.0F, 0.8F + ageInTicks, 0.0F);
         GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
         this.glass.render(scale);
         float f = 0.875F;
-        GlStateManager.scale(f, f, f);
+        GlStateManager.scale(0.875F, 0.875F, 0.875F);
         GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
-        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(limbSwingAmount, 0.0F, 1.0F, 0.0F);
         this.glass.render(scale);
-        GlStateManager.scale(f, f, f);
+        GlStateManager.scale(0.875F, 0.875F, 0.875F);
         GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
-        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(limbSwingAmount, 0.0F, 1.0F, 0.0F);
         this.cube.render(scale);
         GlStateManager.popMatrix();
     }

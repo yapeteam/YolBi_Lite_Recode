@@ -10,6 +10,7 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.Item;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
 
 public class EntityMinecartChest extends EntityMinecartContainer
@@ -24,13 +25,18 @@ public class EntityMinecartChest extends EntityMinecartContainer
         super(worldIn, x, y, z);
     }
 
+    public static void registerFixesMinecartChest(DataFixer fixer)
+    {
+        EntityMinecartContainer.func_190574_b(fixer, EntityMinecartChest.class);
+    }
+
     public void killMinecart(DamageSource source)
     {
         super.killMinecart(source);
 
-        if (this.worldObj.getGameRules().getBoolean("doEntityDrops"))
+        if (this.world.getGameRules().getBoolean("doEntityDrops"))
         {
-            this.dropItemWithOffset(Item.getItemFromBlock(Blocks.chest), 1, 0.0F);
+            this.dropItemWithOffset(Item.getItemFromBlock(Blocks.CHEST), 1, 0.0F);
         }
     }
 
@@ -42,14 +48,14 @@ public class EntityMinecartChest extends EntityMinecartContainer
         return 27;
     }
 
-    public EntityMinecart.EnumMinecartType getMinecartType()
+    public EntityMinecart.Type getType()
     {
-        return EntityMinecart.EnumMinecartType.CHEST;
+        return EntityMinecart.Type.CHEST;
     }
 
     public IBlockState getDefaultDisplayTile()
     {
-        return Blocks.chest.getDefaultState().withProperty(BlockChest.FACING, EnumFacing.NORTH);
+        return Blocks.CHEST.getDefaultState().withProperty(BlockChest.FACING, EnumFacing.NORTH);
     }
 
     public int getDefaultDisplayTileOffset()
@@ -64,6 +70,7 @@ public class EntityMinecartChest extends EntityMinecartContainer
 
     public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
     {
+        this.addLoot(playerIn);
         return new ContainerChest(playerInventory, this, playerIn);
     }
 }

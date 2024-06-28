@@ -8,32 +8,33 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class LayerCustomHead implements LayerRenderer<EntityLivingBase>
 {
-    private final ModelRenderer field_177209_a;
+    private final ModelRenderer modelRenderer;
 
     public LayerCustomHead(ModelRenderer p_i46120_1_)
     {
-        this.field_177209_a = p_i46120_1_;
+        this.modelRenderer = p_i46120_1_;
     }
 
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
+    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        ItemStack itemstack = entitylivingbaseIn.getCurrentArmor(3);
+        ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
 
-        if (itemstack != null && itemstack.getItem() != null)
+        if (!itemstack.func_190926_b())
         {
             Item item = itemstack.getItem();
             Minecraft minecraft = Minecraft.getMinecraft();
@@ -44,37 +45,24 @@ public class LayerCustomHead implements LayerRenderer<EntityLivingBase>
                 GlStateManager.translate(0.0F, 0.2F, 0.0F);
             }
 
-            boolean flag = entitylivingbaseIn instanceof EntityVillager || entitylivingbaseIn instanceof EntityZombie && ((EntityZombie)entitylivingbaseIn).isVillager();
+            boolean flag = entitylivingbaseIn instanceof EntityVillager || entitylivingbaseIn instanceof EntityZombieVillager;
 
-            if (!flag && entitylivingbaseIn.isChild())
+            if (entitylivingbaseIn.isChild() && !(entitylivingbaseIn instanceof EntityVillager))
             {
                 float f = 2.0F;
                 float f1 = 1.4F;
-                GlStateManager.scale(f1 / f, f1 / f, f1 / f);
+                GlStateManager.translate(0.0F, 0.5F * scale, 0.0F);
+                GlStateManager.scale(0.7F, 0.7F, 0.7F);
                 GlStateManager.translate(0.0F, 16.0F * scale, 0.0F);
             }
 
-            this.field_177209_a.postRender(0.0625F);
+            this.modelRenderer.postRender(0.0625F);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-            if (item instanceof ItemBlock)
+            if (item == Items.SKULL)
             {
-                float f2 = 0.625F;
-                GlStateManager.translate(0.0F, -0.25F, 0.0F);
-                GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-                GlStateManager.scale(f2, -f2, -f2);
-
-                if (flag)
-                {
-                    GlStateManager.translate(0.0F, 0.1875F, 0.0F);
-                }
-
-                minecraft.getItemRenderer().renderItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.HEAD);
-            }
-            else if (item == Items.skull)
-            {
-                float f3 = 1.1875F;
-                GlStateManager.scale(f3, -f3, -f3);
+                float f2 = 1.1875F;
+                GlStateManager.scale(1.1875F, -1.1875F, -1.1875F);
 
                 if (flag)
                 {
@@ -95,7 +83,7 @@ public class LayerCustomHead implements LayerRenderer<EntityLivingBase>
                     {
                         String s = nbttagcompound.getString("SkullOwner");
 
-                        if (!StringUtils.isNullOrEmpty(s))
+                        if (!StringUtils.isBlank(s))
                         {
                             gameprofile = TileEntitySkull.updateGameprofile(new GameProfile((UUID)null, s));
                             nbttagcompound.setTag("SkullOwner", NBTUtil.writeGameProfile(new NBTTagCompound(), gameprofile));
@@ -103,7 +91,21 @@ public class LayerCustomHead implements LayerRenderer<EntityLivingBase>
                     }
                 }
 
-                TileEntitySkullRenderer.instance.renderSkull(-0.5F, 0.0F, -0.5F, EnumFacing.UP, 180.0F, itemstack.getMetadata(), gameprofile, -1);
+                TileEntitySkullRenderer.instance.renderSkull(-0.5F, 0.0F, -0.5F, EnumFacing.UP, 180.0F, itemstack.getMetadata(), gameprofile, -1, limbSwing);
+            }
+            else if (!(item instanceof ItemArmor) || ((ItemArmor)item).getEquipmentSlot() != EntityEquipmentSlot.HEAD)
+            {
+                float f3 = 0.625F;
+                GlStateManager.translate(0.0F, -0.25F, 0.0F);
+                GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+                GlStateManager.scale(0.625F, -0.625F, -0.625F);
+
+                if (flag)
+                {
+                    GlStateManager.translate(0.0F, 0.1875F, 0.0F);
+                }
+
+                minecraft.getItemRenderer().renderItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.HEAD);
             }
 
             GlStateManager.popMatrix();
@@ -112,6 +114,6 @@ public class LayerCustomHead implements LayerRenderer<EntityLivingBase>
 
     public boolean shouldCombineTextures()
     {
-        return true;
+        return false;
     }
 }

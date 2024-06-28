@@ -1,12 +1,11 @@
 package net.minecraft.entity;
 
 import java.util.UUID;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class EntityCreature extends EntityLiving
@@ -17,8 +16,7 @@ public abstract class EntityCreature extends EntityLiving
 
     /** If -1 there is no maximum distance */
     private float maximumHomeDistance = -1.0F;
-    private EntityAIBase aiBase = new EntityAIMoveTowardsRestriction(this, 1.0D);
-    private boolean isMovementAITaskSet;
+    private final float restoreWaterCost = PathNodeType.WATER.getPriority();
 
     public EntityCreature(World worldIn)
     {
@@ -53,7 +51,14 @@ public abstract class EntityCreature extends EntityLiving
 
     public boolean isWithinHomeDistanceFromPosition(BlockPos pos)
     {
-        return this.maximumHomeDistance == -1.0F ? true : this.homePosition.distanceSq(pos) < (double)(this.maximumHomeDistance * this.maximumHomeDistance);
+        if (this.maximumHomeDistance == -1.0F)
+        {
+            return true;
+        }
+        else
+        {
+            return this.homePosition.distanceSq(pos) < (double)(this.maximumHomeDistance * this.maximumHomeDistance);
+        }
     }
 
     /**
@@ -95,7 +100,7 @@ public abstract class EntityCreature extends EntityLiving
     {
         super.updateLeashedState();
 
-        if (this.getLeashed() && this.getLeashedToEntity() != null && this.getLeashedToEntity().worldObj == this.worldObj)
+        if (this.getLeashed() && this.getLeashedToEntity() != null && this.getLeashedToEntity().world == this.world)
         {
             Entity entity = this.getLeashedToEntity();
             this.setHomePosAndDistance(new BlockPos((int)entity.posX, (int)entity.posY, (int)entity.posZ), 5);
@@ -111,26 +116,14 @@ public abstract class EntityCreature extends EntityLiving
                 return;
             }
 
-            if (!this.isMovementAITaskSet)
+            this.onLeashDistance(f);
+
+            if (f > 10.0F)
             {
-                this.tasks.addTask(2, this.aiBase);
-
-                if (this.getNavigator() instanceof PathNavigateGround)
-                {
-                    ((PathNavigateGround)this.getNavigator()).setAvoidsWater(false);
-                }
-
-                this.isMovementAITaskSet = true;
+                this.clearLeashed(true, true);
+                this.tasks.disableControlFlag(1);
             }
-
-            this.func_142017_o(f);
-
-            if (f > 4.0F)
-            {
-                this.getNavigator().tryMoveToEntityLiving(entity, 1.0D);
-            }
-
-            if (f > 6.0F)
+            else if (f > 6.0F)
             {
                 double d0 = (entity.posX - this.posX) / (double)f;
                 double d1 = (entity.posY - this.posY) / (double)f;
@@ -139,27 +132,22 @@ public abstract class EntityCreature extends EntityLiving
                 this.motionY += d1 * Math.abs(d1) * 0.4D;
                 this.motionZ += d2 * Math.abs(d2) * 0.4D;
             }
-
-            if (f > 10.0F)
+            else
             {
-                this.clearLeashed(true, true);
+                this.tasks.enableControlFlag(1);
+                float f1 = 2.0F;
+                Vec3d vec3d = (new Vec3d(entity.posX - this.posX, entity.posY - this.posY, entity.posZ - this.posZ)).normalize().scale((double)Math.max(f - 2.0F, 0.0F));
+                this.getNavigator().tryMoveToXYZ(this.posX + vec3d.xCoord, this.posY + vec3d.yCoord, this.posZ + vec3d.zCoord, this.func_190634_dg());
             }
-        }
-        else if (!this.getLeashed() && this.isMovementAITaskSet)
-        {
-            this.isMovementAITaskSet = false;
-            this.tasks.removeTask(this.aiBase);
-
-            if (this.getNavigator() instanceof PathNavigateGround)
-            {
-                ((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
-            }
-
-            this.detachHome();
         }
     }
 
-    protected void func_142017_o(float p_142017_1_)
+    protected double func_190634_dg()
+    {
+        return 1.0D;
+    }
+
+    protected void onLeashDistance(float p_142017_1_)
     {
     }
 }

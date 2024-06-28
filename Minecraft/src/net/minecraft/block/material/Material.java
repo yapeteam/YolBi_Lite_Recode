@@ -2,41 +2,41 @@ package net.minecraft.block.material;
 
 public class Material
 {
-    public static final Material air = new MaterialTransparent(MapColor.airColor);
-    public static final Material grass = new Material(MapColor.grassColor);
-    public static final Material ground = new Material(MapColor.dirtColor);
-    public static final Material wood = (new Material(MapColor.woodColor)).setBurning();
-    public static final Material rock = (new Material(MapColor.stoneColor)).setRequiresTool();
-    public static final Material iron = (new Material(MapColor.ironColor)).setRequiresTool();
-    public static final Material anvil = (new Material(MapColor.ironColor)).setRequiresTool().setImmovableMobility();
-    public static final Material water = (new MaterialLiquid(MapColor.waterColor)).setNoPushMobility();
-    public static final Material lava = (new MaterialLiquid(MapColor.tntColor)).setNoPushMobility();
-    public static final Material leaves = (new Material(MapColor.foliageColor)).setBurning().setTranslucent().setNoPushMobility();
-    public static final Material plants = (new MaterialLogic(MapColor.foliageColor)).setNoPushMobility();
-    public static final Material vine = (new MaterialLogic(MapColor.foliageColor)).setBurning().setNoPushMobility().setReplaceable();
-    public static final Material sponge = new Material(MapColor.yellowColor);
-    public static final Material cloth = (new Material(MapColor.clothColor)).setBurning();
-    public static final Material fire = (new MaterialTransparent(MapColor.airColor)).setNoPushMobility();
-    public static final Material sand = new Material(MapColor.sandColor);
-    public static final Material circuits = (new MaterialLogic(MapColor.airColor)).setNoPushMobility();
-    public static final Material carpet = (new MaterialLogic(MapColor.clothColor)).setBurning();
-    public static final Material glass = (new Material(MapColor.airColor)).setTranslucent().setAdventureModeExempt();
-    public static final Material redstoneLight = (new Material(MapColor.airColor)).setAdventureModeExempt();
-    public static final Material tnt = (new Material(MapColor.tntColor)).setBurning().setTranslucent();
-    public static final Material coral = (new Material(MapColor.foliageColor)).setNoPushMobility();
-    public static final Material ice = (new Material(MapColor.iceColor)).setTranslucent().setAdventureModeExempt();
-    public static final Material packedIce = (new Material(MapColor.iceColor)).setAdventureModeExempt();
-    public static final Material snow = (new MaterialLogic(MapColor.snowColor)).setReplaceable().setTranslucent().setRequiresTool().setNoPushMobility();
+    public static final Material AIR = new MaterialTransparent(MapColor.AIR);
+    public static final Material GRASS = new Material(MapColor.GRASS);
+    public static final Material GROUND = new Material(MapColor.DIRT);
+    public static final Material WOOD = (new Material(MapColor.WOOD)).setBurning();
+    public static final Material ROCK = (new Material(MapColor.STONE)).setRequiresTool();
+    public static final Material IRON = (new Material(MapColor.IRON)).setRequiresTool();
+    public static final Material ANVIL = (new Material(MapColor.IRON)).setRequiresTool().setImmovableMobility();
+    public static final Material WATER = (new MaterialLiquid(MapColor.WATER)).setNoPushMobility();
+    public static final Material LAVA = (new MaterialLiquid(MapColor.TNT)).setNoPushMobility();
+    public static final Material LEAVES = (new Material(MapColor.FOLIAGE)).setBurning().setTranslucent().setNoPushMobility();
+    public static final Material PLANTS = (new MaterialLogic(MapColor.FOLIAGE)).setNoPushMobility();
+    public static final Material VINE = (new MaterialLogic(MapColor.FOLIAGE)).setBurning().setNoPushMobility().setReplaceable();
+    public static final Material SPONGE = new Material(MapColor.YELLOW);
+    public static final Material CLOTH = (new Material(MapColor.CLOTH)).setBurning();
+    public static final Material FIRE = (new MaterialTransparent(MapColor.AIR)).setNoPushMobility();
+    public static final Material SAND = new Material(MapColor.SAND);
+    public static final Material CIRCUITS = (new MaterialLogic(MapColor.AIR)).setNoPushMobility();
+    public static final Material CARPET = (new MaterialLogic(MapColor.CLOTH)).setBurning();
+    public static final Material GLASS = (new Material(MapColor.AIR)).setTranslucent().setAdventureModeExempt();
+    public static final Material REDSTONE_LIGHT = (new Material(MapColor.AIR)).setAdventureModeExempt();
+    public static final Material TNT = (new Material(MapColor.TNT)).setBurning().setTranslucent();
+    public static final Material CORAL = (new Material(MapColor.FOLIAGE)).setNoPushMobility();
+    public static final Material ICE = (new Material(MapColor.ICE)).setTranslucent().setAdventureModeExempt();
+    public static final Material PACKED_ICE = (new Material(MapColor.ICE)).setAdventureModeExempt();
+    public static final Material SNOW = (new MaterialLogic(MapColor.SNOW)).setReplaceable().setTranslucent().setRequiresTool().setNoPushMobility();
 
     /** The material for crafted snow. */
-    public static final Material craftedSnow = (new Material(MapColor.snowColor)).setRequiresTool();
-    public static final Material cactus = (new Material(MapColor.foliageColor)).setTranslucent().setNoPushMobility();
-    public static final Material clay = new Material(MapColor.clayColor);
-    public static final Material gourd = (new Material(MapColor.foliageColor)).setNoPushMobility();
-    public static final Material dragonEgg = (new Material(MapColor.foliageColor)).setNoPushMobility();
-    public static final Material portal = (new MaterialPortal(MapColor.airColor)).setImmovableMobility();
-    public static final Material cake = (new Material(MapColor.airColor)).setNoPushMobility();
-    public static final Material web = (new Material(MapColor.clothColor)
+    public static final Material CRAFTED_SNOW = (new Material(MapColor.SNOW)).setRequiresTool();
+    public static final Material CACTUS = (new Material(MapColor.FOLIAGE)).setTranslucent().setNoPushMobility();
+    public static final Material CLAY = new Material(MapColor.CLAY);
+    public static final Material GOURD = (new Material(MapColor.FOLIAGE)).setNoPushMobility();
+    public static final Material DRAGON_EGG = (new Material(MapColor.FOLIAGE)).setNoPushMobility();
+    public static final Material PORTAL = (new MaterialPortal(MapColor.AIR)).setImmovableMobility();
+    public static final Material CAKE = (new Material(MapColor.AIR)).setNoPushMobility();
+    public static final Material WEB = (new Material(MapColor.CLOTH)
     {
         public boolean blocksMovement()
         {
@@ -45,8 +45,9 @@ public class Material
     }).setRequiresTool().setNoPushMobility();
 
     /** Pistons' material. */
-    public static final Material piston = (new Material(MapColor.stoneColor)).setImmovableMobility();
-    public static final Material barrier = (new Material(MapColor.airColor)).setRequiresTool().setImmovableMobility();
+    public static final Material PISTON = (new Material(MapColor.STONE)).setImmovableMobility();
+    public static final Material BARRIER = (new Material(MapColor.AIR)).setRequiresTool().setImmovableMobility();
+    public static final Material STRUCTURE_VOID = new MaterialTransparent(MapColor.AIR);
 
     /** Bool defining if the block can burn or not. */
     private boolean canBurn;
@@ -72,7 +73,7 @@ public class Material
      * Mobility information flag. 0 indicates that this block is normal, 1 indicates that it can't push other blocks, 2
      * indicates that it can't be pushed.
      */
-    private int mobilityFlag;
+    private EnumPushReaction mobilityFlag = EnumPushReaction.NORMAL;
     private boolean isAdventureModeExempt;
 
     public Material(MapColor color)
@@ -180,11 +181,7 @@ public class Material
         return this.requiresNoTool;
     }
 
-    /**
-     * Returns the mobility information of the material, 0 = free, 1 = can't push but can move over, 2 = total
-     * immobility and stop pistons.
-     */
-    public int getMaterialMobility()
+    public EnumPushReaction getMobilityFlag()
     {
         return this.mobilityFlag;
     }
@@ -194,7 +191,7 @@ public class Material
      */
     protected Material setNoPushMobility()
     {
-        this.mobilityFlag = 1;
+        this.mobilityFlag = EnumPushReaction.DESTROY;
         return this;
     }
 
@@ -203,7 +200,7 @@ public class Material
      */
     protected Material setImmovableMobility()
     {
-        this.mobilityFlag = 2;
+        this.mobilityFlag = EnumPushReaction.BLOCK;
         return this;
     }
 

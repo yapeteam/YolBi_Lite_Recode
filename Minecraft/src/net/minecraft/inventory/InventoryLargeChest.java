@@ -3,22 +3,22 @@ package net.minecraft.inventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 
 public class InventoryLargeChest implements ILockableContainer
 {
     /** Name of the chest. */
-    private String name;
+    private final String name;
 
     /** Inventory object corresponding to double chest upper part */
-    private ILockableContainer upperChest;
+    private final ILockableContainer upperChest;
 
     /** Inventory object corresponding to double chest lower part */
-    private ILockableContainer lowerChest;
+    private final ILockableContainer lowerChest;
 
     public InventoryLargeChest(String nameIn, ILockableContainer upperChestIn, ILockableContainer lowerChestIn)
     {
@@ -55,6 +55,11 @@ public class InventoryLargeChest implements ILockableContainer
         return this.upperChest.getSizeInventory() + this.lowerChest.getSizeInventory();
     }
 
+    public boolean func_191420_l()
+    {
+        return this.upperChest.func_191420_l() && this.lowerChest.func_191420_l();
+    }
+
     /**
      * Return whether the given inventory is part of this large chest.
      */
@@ -68,7 +73,14 @@ public class InventoryLargeChest implements ILockableContainer
      */
     public String getName()
     {
-        return this.upperChest.hasCustomName() ? this.upperChest.getName() : (this.lowerChest.hasCustomName() ? this.lowerChest.getName() : this.name);
+        if (this.upperChest.hasCustomName())
+        {
+            return this.upperChest.getName();
+        }
+        else
+        {
+            return this.lowerChest.hasCustomName() ? this.lowerChest.getName() : this.name;
+        }
     }
 
     /**
@@ -82,9 +94,9 @@ public class InventoryLargeChest implements ILockableContainer
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
@@ -145,11 +157,11 @@ public class InventoryLargeChest implements ILockableContainer
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
-        return this.upperChest.isUseableByPlayer(player) && this.lowerChest.isUseableByPlayer(player);
+        return this.upperChest.isUsableByPlayer(player) && this.lowerChest.isUsableByPlayer(player);
     }
 
     public void openInventory(EntityPlayer player)
@@ -165,7 +177,8 @@ public class InventoryLargeChest implements ILockableContainer
     }
 
     /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
      */
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {

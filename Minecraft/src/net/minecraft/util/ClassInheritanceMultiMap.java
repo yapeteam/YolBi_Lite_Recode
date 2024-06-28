@@ -10,17 +10,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import net.optifine.util.IteratorCache;
 
 public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
 {
-    private static final Set < Class<? >> field_181158_a = Collections. < Class<? >> newSetFromMap(new ConcurrentHashMap());
+    private static final Set < Class<? >> ALL_KNOWN = Sets. < Class<? >> newHashSet();
     private final Map < Class<?>, List<T >> map = Maps. < Class<?>, List<T >> newHashMap();
     private final Set < Class<? >> knownKeys = Sets. < Class<? >> newIdentityHashSet();
     private final Class<T> baseClass;
     private final List<T> values = Lists.<T>newArrayList();
-    public boolean empty;
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn)
     {
@@ -28,23 +25,18 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
         this.knownKeys.add(baseClassIn);
         this.map.put(baseClassIn, this.values);
 
-        for (Class<?> oclass : field_181158_a)
+        for (Class<?> oclass : ALL_KNOWN)
         {
             this.createLookup(oclass);
         }
-
-        this.empty = this.values.size() == 0;
     }
 
     protected void createLookup(Class<?> clazz)
     {
-        field_181158_a.add(clazz);
-        int i = this.values.size();
+        ALL_KNOWN.add(clazz);
 
-        for (int j = 0; j < i; ++j)
+        for (T t : this.values)
         {
-            T t = this.values.get(j);
-
             if (clazz.isAssignableFrom(t.getClass()))
             {
                 this.addForClass(t, clazz);
@@ -67,7 +59,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
         }
         else
         {
-            throw new IllegalArgumentException("Don\'t know how to search for " + clazz);
+            throw new IllegalArgumentException("Don't know how to search for " + clazz);
         }
     }
 
@@ -81,7 +73,6 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
             }
         }
 
-        this.empty = this.values.size() == 0;
         return true;
     }
 
@@ -97,8 +88,6 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
         {
             list.add(value);
         }
-
-        this.empty = this.values.size() == 0;
     }
 
     public boolean remove(Object p_remove_1_)
@@ -119,7 +108,6 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
             }
         }
 
-        this.empty = this.values.size() == 0;
         return flag;
     }
 
@@ -138,7 +126,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
 
                 if (list == null)
                 {
-                    return Iterators.<S>emptyIterator();
+                    return Collections.<S>emptyIterator();
                 }
                 else
                 {
@@ -151,16 +139,11 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
 
     public Iterator<T> iterator()
     {
-        return (Iterator<T>)(this.values.isEmpty() ? Iterators.emptyIterator() : IteratorCache.getReadOnly(this.values));
+        return (Iterator<T>)(this.values.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.values.iterator()));
     }
 
     public int size()
     {
         return this.values.size();
-    }
-
-    public boolean isEmpty()
-    {
-        return this.empty;
     }
 }

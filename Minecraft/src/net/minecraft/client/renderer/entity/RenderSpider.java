@@ -7,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderSpider<T extends EntitySpider> extends RenderLiving<T>
 {
-    private static final ResourceLocation spiderTextures = new ResourceLocation("textures/entity/spider/spider.png");
+    private static final ResourceLocation SPIDER_TEXTURES = new ResourceLocation("textures/entity/spider/spider.png");
 
     public RenderSpider(RenderManager renderManagerIn)
     {
@@ -25,6 +25,6 @@ public class RenderSpider<T extends EntitySpider> extends RenderLiving<T>
      */
     protected ResourceLocation getEntityTexture(T entity)
     {
-        return spiderTextures;
+        return SPIDER_TEXTURES;
     }
 }

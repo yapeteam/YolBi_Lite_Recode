@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class NBTTagInt extends NBTBase.NBTPrimitive
+public class NBTTagInt extends NBTPrimitive
 {
     /** The integer value for the tag. */
     private int data;
@@ -37,33 +37,25 @@ public class NBTTagInt extends NBTBase.NBTPrimitive
      */
     public byte getId()
     {
-        return (byte)3;
+        return 3;
     }
 
     public String toString()
     {
-        return "" + this.data;
+        return String.valueOf(this.data);
     }
 
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagInt copy()
     {
         return new NBTTagInt(this.data);
     }
 
     public boolean equals(Object p_equals_1_)
     {
-        if (super.equals(p_equals_1_))
-        {
-            NBTTagInt nbttagint = (NBTTagInt)p_equals_1_;
-            return this.data == nbttagint.data;
-        }
-        else
-        {
-            return false;
-        }
+        return super.equals(p_equals_1_) && this.data == ((NBTTagInt)p_equals_1_).data;
     }
 
     public int hashCode()

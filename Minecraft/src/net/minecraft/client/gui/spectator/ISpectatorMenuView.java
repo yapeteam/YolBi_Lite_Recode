@@ -1,11 +1,11 @@
 package net.minecraft.client.gui.spectator;
 
 import java.util.List;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public interface ISpectatorMenuView
 {
-    List<ISpectatorMenuObject> func_178669_a();
+    List<ISpectatorMenuObject> getItems();
 
-    IChatComponent func_178670_b();
+    ITextComponent getPrompt();
 }

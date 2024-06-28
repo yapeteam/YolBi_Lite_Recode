@@ -2,9 +2,9 @@ package net.minecraft.item.crafting;
 
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.ItemEditableBook;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.ItemWrittenBook;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 public class RecipeBookCloning implements IRecipe
@@ -15,17 +15,17 @@ public class RecipeBookCloning implements IRecipe
     public boolean matches(InventoryCrafting inv, World worldIn)
     {
         int i = 0;
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.field_190927_a;
 
         for (int j = 0; j < inv.getSizeInventory(); ++j)
         {
             ItemStack itemstack1 = inv.getStackInSlot(j);
 
-            if (itemstack1 != null)
+            if (!itemstack1.func_190926_b())
             {
-                if (itemstack1.getItem() == Items.written_book)
+                if (itemstack1.getItem() == Items.WRITTEN_BOOK)
                 {
-                    if (itemstack != null)
+                    if (!itemstack.func_190926_b())
                     {
                         return false;
                     }
@@ -34,7 +34,7 @@ public class RecipeBookCloning implements IRecipe
                 }
                 else
                 {
-                    if (itemstack1.getItem() != Items.writable_book)
+                    if (itemstack1.getItem() != Items.WRITABLE_BOOK)
                     {
                         return false;
                     }
@@ -44,7 +44,7 @@ public class RecipeBookCloning implements IRecipe
             }
         }
 
-        return itemstack != null && i > 0;
+        return !itemstack.func_190926_b() && itemstack.hasTagCompound() && i > 0;
     }
 
     /**
@@ -53,28 +53,28 @@ public class RecipeBookCloning implements IRecipe
     public ItemStack getCraftingResult(InventoryCrafting inv)
     {
         int i = 0;
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.field_190927_a;
 
         for (int j = 0; j < inv.getSizeInventory(); ++j)
         {
             ItemStack itemstack1 = inv.getStackInSlot(j);
 
-            if (itemstack1 != null)
+            if (!itemstack1.func_190926_b())
             {
-                if (itemstack1.getItem() == Items.written_book)
+                if (itemstack1.getItem() == Items.WRITTEN_BOOK)
                 {
-                    if (itemstack != null)
+                    if (!itemstack.func_190926_b())
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
 
                     itemstack = itemstack1;
                 }
                 else
                 {
-                    if (itemstack1.getItem() != Items.writable_book)
+                    if (itemstack1.getItem() != Items.WRITABLE_BOOK)
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
 
                     ++i;
@@ -82,11 +82,11 @@ public class RecipeBookCloning implements IRecipe
             }
         }
 
-        if (itemstack != null && i >= 1 && ItemEditableBook.getGeneration(itemstack) < 2)
+        if (!itemstack.func_190926_b() && itemstack.hasTagCompound() && i >= 1 && ItemWrittenBook.getGeneration(itemstack) < 2)
         {
-            ItemStack itemstack2 = new ItemStack(Items.written_book, i);
-            itemstack2.setTagCompound((NBTTagCompound)itemstack.getTagCompound().copy());
-            itemstack2.getTagCompound().setInteger("generation", ItemEditableBook.getGeneration(itemstack) + 1);
+            ItemStack itemstack2 = new ItemStack(Items.WRITTEN_BOOK, i);
+            itemstack2.setTagCompound(itemstack.getTagCompound().copy());
+            itemstack2.getTagCompound().setInteger("generation", ItemWrittenBook.getGeneration(itemstack) + 1);
 
             if (itemstack.hasDisplayName())
             {
@@ -97,38 +97,42 @@ public class RecipeBookCloning implements IRecipe
         }
         else
         {
-            return null;
+            return ItemStack.field_190927_a;
         }
-    }
-
-    /**
-     * Returns the size of the recipe area
-     */
-    public int getRecipeSize()
-    {
-        return 9;
     }
 
     public ItemStack getRecipeOutput()
     {
-        return null;
+        return ItemStack.field_190927_a;
     }
 
-    public ItemStack[] getRemainingItems(InventoryCrafting inv)
+    public NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
     {
-        ItemStack[] aitemstack = new ItemStack[inv.getSizeInventory()];
+        NonNullList<ItemStack> nonnulllist = NonNullList.<ItemStack>func_191197_a(inv.getSizeInventory(), ItemStack.field_190927_a);
 
-        for (int i = 0; i < aitemstack.length; ++i)
+        for (int i = 0; i < nonnulllist.size(); ++i)
         {
             ItemStack itemstack = inv.getStackInSlot(i);
 
-            if (itemstack != null && itemstack.getItem() instanceof ItemEditableBook)
+            if (itemstack.getItem() instanceof ItemWrittenBook)
             {
-                aitemstack[i] = itemstack;
+                ItemStack itemstack1 = itemstack.copy();
+                itemstack1.func_190920_e(1);
+                nonnulllist.set(i, itemstack1);
                 break;
             }
         }
 
-        return aitemstack;
+        return nonnulllist;
+    }
+
+    public boolean func_192399_d()
+    {
+        return true;
+    }
+
+    public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
+    {
+        return p_194133_1_ >= 3 && p_194133_2_ >= 3;
     }
 }

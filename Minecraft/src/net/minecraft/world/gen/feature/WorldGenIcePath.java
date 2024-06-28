@@ -3,17 +3,17 @@ package net.minecraft.world.gen.feature;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenIcePath extends WorldGenerator
 {
-    private Block block = Blocks.packed_ice;
-    private int basePathWidth;
+    private final Block block = Blocks.PACKED_ICE;
+    private final int basePathWidth;
 
-    public WorldGenIcePath(int p_i45454_1_)
+    public WorldGenIcePath(int basePathWidthIn)
     {
-        this.basePathWidth = p_i45454_1_;
+        this.basePathWidth = basePathWidthIn;
     }
 
     public boolean generate(World worldIn, Random rand, BlockPos position)
@@ -23,7 +23,7 @@ public class WorldGenIcePath extends WorldGenerator
             position = position.down();
         }
 
-        if (worldIn.getBlockState(position).getBlock() != Blocks.snow)
+        if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW)
         {
             return false;
         }
@@ -41,12 +41,12 @@ public class WorldGenIcePath extends WorldGenerator
 
                     if (i1 * i1 + j1 * j1 <= i * i)
                     {
-                        for (int k1 = position.getY() - j; k1 <= position.getY() + j; ++k1)
+                        for (int k1 = position.getY() - 1; k1 <= position.getY() + 1; ++k1)
                         {
                             BlockPos blockpos = new BlockPos(k, k1, l);
                             Block block = worldIn.getBlockState(blockpos).getBlock();
 
-                            if (block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice)
+                            if (block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE)
                             {
                                 worldIn.setBlockState(blockpos, this.block.getDefaultState(), 2);
                             }

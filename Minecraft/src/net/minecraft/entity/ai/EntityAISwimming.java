@@ -1,17 +1,26 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.pathfinding.PathNavigateFlying;
 import net.minecraft.pathfinding.PathNavigateGround;
 
 public class EntityAISwimming extends EntityAIBase
 {
-    private EntityLiving theEntity;
+    private final EntityLiving theEntity;
 
     public EntityAISwimming(EntityLiving entitylivingIn)
     {
         this.theEntity = entitylivingIn;
         this.setMutexBits(4);
-        ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+
+        if (entitylivingIn.getNavigator() instanceof PathNavigateGround)
+        {
+            ((PathNavigateGround)entitylivingIn.getNavigator()).setCanSwim(true);
+        }
+        else if (entitylivingIn.getNavigator() instanceof PathNavigateFlying)
+        {
+            ((PathNavigateFlying)entitylivingIn.getNavigator()).func_192877_c(true);
+        }
     }
 
     /**

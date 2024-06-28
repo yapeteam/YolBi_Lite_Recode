@@ -2,6 +2,7 @@ package net.minecraft.village;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.annotation.Nullable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -19,6 +20,8 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
         this.readRecipiesFromTags(compound);
     }
 
+    @Nullable
+
     /**
      * can par1,par2 be used to in crafting recipe par3
      */
@@ -27,7 +30,7 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
         if (p_77203_3_ > 0 && p_77203_3_ < this.size())
         {
             MerchantRecipe merchantrecipe1 = (MerchantRecipe)this.get(p_77203_3_);
-            return !this.func_181078_a(p_77203_1_, merchantrecipe1.getItemToBuy()) || (p_77203_2_ != null || merchantrecipe1.hasSecondItemToBuy()) && (!merchantrecipe1.hasSecondItemToBuy() || !this.func_181078_a(p_77203_2_, merchantrecipe1.getSecondItemToBuy())) || p_77203_1_.stackSize < merchantrecipe1.getItemToBuy().stackSize || merchantrecipe1.hasSecondItemToBuy() && p_77203_2_.stackSize < merchantrecipe1.getSecondItemToBuy().stackSize ? null : merchantrecipe1;
+            return !this.areItemStacksExactlyEqual(p_77203_1_, merchantrecipe1.getItemToBuy()) || (!p_77203_2_.func_190926_b() || merchantrecipe1.hasSecondItemToBuy()) && (!merchantrecipe1.hasSecondItemToBuy() || !this.areItemStacksExactlyEqual(p_77203_2_, merchantrecipe1.getSecondItemToBuy())) || p_77203_1_.func_190916_E() < merchantrecipe1.getItemToBuy().func_190916_E() || merchantrecipe1.hasSecondItemToBuy() && p_77203_2_.func_190916_E() < merchantrecipe1.getSecondItemToBuy().func_190916_E() ? null : merchantrecipe1;
         }
         else
         {
@@ -35,7 +38,7 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
             {
                 MerchantRecipe merchantrecipe = (MerchantRecipe)this.get(i);
 
-                if (this.func_181078_a(p_77203_1_, merchantrecipe.getItemToBuy()) && p_77203_1_.stackSize >= merchantrecipe.getItemToBuy().stackSize && (!merchantrecipe.hasSecondItemToBuy() && p_77203_2_ == null || merchantrecipe.hasSecondItemToBuy() && this.func_181078_a(p_77203_2_, merchantrecipe.getSecondItemToBuy()) && p_77203_2_.stackSize >= merchantrecipe.getSecondItemToBuy().stackSize))
+                if (this.areItemStacksExactlyEqual(p_77203_1_, merchantrecipe.getItemToBuy()) && p_77203_1_.func_190916_E() >= merchantrecipe.getItemToBuy().func_190916_E() && (!merchantrecipe.hasSecondItemToBuy() && p_77203_2_.func_190926_b() || merchantrecipe.hasSecondItemToBuy() && this.areItemStacksExactlyEqual(p_77203_2_, merchantrecipe.getSecondItemToBuy()) && p_77203_2_.func_190916_E() >= merchantrecipe.getSecondItemToBuy().func_190916_E()))
                 {
                     return merchantrecipe;
                 }
@@ -45,9 +48,9 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
         }
     }
 
-    private boolean func_181078_a(ItemStack p_181078_1_, ItemStack p_181078_2_)
+    private boolean areItemStacksExactlyEqual(ItemStack stack1, ItemStack stack2)
     {
-        return ItemStack.areItemsEqual(p_181078_1_, p_181078_2_) && (!p_181078_2_.hasTagCompound() || p_181078_1_.hasTagCompound() && NBTUtil.func_181123_a(p_181078_2_.getTagCompound(), p_181078_1_.getTagCompound(), false));
+        return ItemStack.areItemsEqual(stack1, stack2) && (!stack2.hasTagCompound() || stack1.hasTagCompound() && NBTUtil.areNBTEquals(stack2.getTagCompound(), stack1.getTagCompound(), false));
     }
 
     public void writeToBuf(PacketBuffer buffer)
@@ -60,9 +63,9 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
             buffer.writeItemStackToBuffer(merchantrecipe.getItemToBuy());
             buffer.writeItemStackToBuffer(merchantrecipe.getItemToSell());
             ItemStack itemstack = merchantrecipe.getSecondItemToBuy();
-            buffer.writeBoolean(itemstack != null);
+            buffer.writeBoolean(!itemstack.func_190926_b());
 
-            if (itemstack != null)
+            if (!itemstack.func_190926_b())
             {
                 buffer.writeItemStackToBuffer(itemstack);
             }
@@ -82,7 +85,7 @@ public class MerchantRecipeList extends ArrayList<MerchantRecipe>
         {
             ItemStack itemstack = buffer.readItemStackFromBuffer();
             ItemStack itemstack1 = buffer.readItemStackFromBuffer();
-            ItemStack itemstack2 = null;
+            ItemStack itemstack2 = ItemStack.field_190927_a;
 
             if (buffer.readBoolean())
             {

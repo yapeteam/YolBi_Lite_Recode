@@ -10,7 +10,7 @@ import org.lwjgl.util.vector.Matrix4f;
 
 public class ShaderUniform
 {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private int uniformLocation;
     private final int uniformCount;
     private final int uniformType;
@@ -52,29 +52,29 @@ public class ShaderUniform
         }
     }
 
-    public static int parseType(String p_148085_0_)
+    public static int parseType(String typeName)
     {
         int i = -1;
 
-        if (p_148085_0_.equals("int"))
+        if ("int".equals(typeName))
         {
             i = 0;
         }
-        else if (p_148085_0_.equals("float"))
+        else if ("float".equals(typeName))
         {
             i = 4;
         }
-        else if (p_148085_0_.startsWith("matrix"))
+        else if (typeName.startsWith("matrix"))
         {
-            if (p_148085_0_.endsWith("2x2"))
+            if (typeName.endsWith("2x2"))
             {
                 i = 8;
             }
-            else if (p_148085_0_.endsWith("3x3"))
+            else if (typeName.endsWith("3x3"))
             {
                 i = 9;
             }
-            else if (p_148085_0_.endsWith("4x4"))
+            else if (typeName.endsWith("4x4"))
             {
                 i = 10;
             }
@@ -83,9 +83,9 @@ public class ShaderUniform
         return i;
     }
 
-    public void setUniformLocation(int p_148084_1_)
+    public void setUniformLocation(int uniformLocationIn)
     {
-        this.uniformLocation = p_148084_1_;
+        this.uniformLocation = uniformLocationIn;
     }
 
     public String getShaderName()
@@ -128,7 +128,7 @@ public class ShaderUniform
         this.markDirty();
     }
 
-    public void func_148092_b(float p_148092_1_, float p_148092_2_, float p_148092_3_, float p_148092_4_)
+    public void setSafe(float p_148092_1_, float p_148092_2_, float p_148092_3_, float p_148092_4_)
     {
         this.uniformFloatBuffer.position(0);
 
@@ -186,7 +186,7 @@ public class ShaderUniform
     {
         if (p_148097_1_.length < this.uniformCount)
         {
-            logger.warn("Uniform.set called with a too-small value array (expected " + this.uniformCount + ", got " + p_148097_1_.length + "). Ignoring.");
+            LOGGER.warn("Uniform.set called with a too-small value array (expected {}, got {}). Ignoring.", Integer.valueOf(this.uniformCount), Integer.valueOf(p_148097_1_.length));
         }
         else
         {
@@ -197,31 +197,31 @@ public class ShaderUniform
         }
     }
 
-    public void set(float p_148094_1_, float p_148094_2_, float p_148094_3_, float p_148094_4_, float p_148094_5_, float p_148094_6_, float p_148094_7_, float p_148094_8_, float p_148094_9_, float p_148094_10_, float p_148094_11_, float p_148094_12_, float p_148094_13_, float p_148094_14_, float p_148094_15_, float p_148094_16_)
+    public void set(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
     {
         this.uniformFloatBuffer.position(0);
-        this.uniformFloatBuffer.put(0, p_148094_1_);
-        this.uniformFloatBuffer.put(1, p_148094_2_);
-        this.uniformFloatBuffer.put(2, p_148094_3_);
-        this.uniformFloatBuffer.put(3, p_148094_4_);
-        this.uniformFloatBuffer.put(4, p_148094_5_);
-        this.uniformFloatBuffer.put(5, p_148094_6_);
-        this.uniformFloatBuffer.put(6, p_148094_7_);
-        this.uniformFloatBuffer.put(7, p_148094_8_);
-        this.uniformFloatBuffer.put(8, p_148094_9_);
-        this.uniformFloatBuffer.put(9, p_148094_10_);
-        this.uniformFloatBuffer.put(10, p_148094_11_);
-        this.uniformFloatBuffer.put(11, p_148094_12_);
-        this.uniformFloatBuffer.put(12, p_148094_13_);
-        this.uniformFloatBuffer.put(13, p_148094_14_);
-        this.uniformFloatBuffer.put(14, p_148094_15_);
-        this.uniformFloatBuffer.put(15, p_148094_16_);
+        this.uniformFloatBuffer.put(0, m00);
+        this.uniformFloatBuffer.put(1, m01);
+        this.uniformFloatBuffer.put(2, m02);
+        this.uniformFloatBuffer.put(3, m03);
+        this.uniformFloatBuffer.put(4, m10);
+        this.uniformFloatBuffer.put(5, m11);
+        this.uniformFloatBuffer.put(6, m12);
+        this.uniformFloatBuffer.put(7, m13);
+        this.uniformFloatBuffer.put(8, m20);
+        this.uniformFloatBuffer.put(9, m21);
+        this.uniformFloatBuffer.put(10, m22);
+        this.uniformFloatBuffer.put(11, m23);
+        this.uniformFloatBuffer.put(12, m30);
+        this.uniformFloatBuffer.put(13, m31);
+        this.uniformFloatBuffer.put(14, m32);
+        this.uniformFloatBuffer.put(15, m33);
         this.markDirty();
     }
 
-    public void set(Matrix4f p_148088_1_)
+    public void set(Matrix4f matrix)
     {
-        this.set(p_148088_1_.m00, p_148088_1_.m01, p_148088_1_.m02, p_148088_1_.m03, p_148088_1_.m10, p_148088_1_.m11, p_148088_1_.m12, p_148088_1_.m13, p_148088_1_.m20, p_148088_1_.m21, p_148088_1_.m22, p_148088_1_.m23, p_148088_1_.m30, p_148088_1_.m31, p_148088_1_.m32, p_148088_1_.m33);
+        this.set(matrix.m00, matrix.m01, matrix.m02, matrix.m03, matrix.m10, matrix.m11, matrix.m12, matrix.m13, matrix.m20, matrix.m21, matrix.m22, matrix.m23, matrix.m30, matrix.m31, matrix.m32, matrix.m33);
     }
 
     public void upload()
@@ -245,7 +245,7 @@ public class ShaderUniform
         {
             if (this.uniformType > 10)
             {
-                logger.warn("Uniform.upload called, but type value (" + this.uniformType + ") is not " + "a valid type. Ignoring.");
+                LOGGER.warn("Uniform.upload called, but type value ({}) is not a valid type. Ignoring.", (int)this.uniformType);
                 return;
             }
 
@@ -274,7 +274,7 @@ public class ShaderUniform
                 break;
 
             default:
-                logger.warn("Uniform.upload called, but count value (" + this.uniformCount + ") is " + " not in the range of 1 to 4. Ignoring.");
+                LOGGER.warn("Uniform.upload called, but count value ({}) is  not in the range of 1 to 4. Ignoring.", (int)this.uniformCount);
         }
     }
 
@@ -299,7 +299,7 @@ public class ShaderUniform
                 break;
 
             default:
-                logger.warn("Uniform.upload called, but count value (" + this.uniformCount + ") is " + "not in the range of 1 to 4. Ignoring.");
+                LOGGER.warn("Uniform.upload called, but count value ({}) is not in the range of 1 to 4. Ignoring.", (int)this.uniformCount);
         }
     }
 

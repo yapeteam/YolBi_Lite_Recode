@@ -1,10 +1,10 @@
 package net.minecraft.block;
 
 import com.google.common.base.Predicate;
-import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,16 +13,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.ColorizerFoliage;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockOldLeaf extends BlockLeaves
 {
     public static final PropertyEnum<BlockPlanks.EnumType> VARIANT = PropertyEnum.<BlockPlanks.EnumType>create("variant", BlockPlanks.EnumType.class, new Predicate<BlockPlanks.EnumType>()
     {
-        public boolean apply(BlockPlanks.EnumType p_apply_1_)
+        public boolean apply(@Nullable BlockPlanks.EnumType p_apply_1_)
         {
             return p_apply_1_.getMetadata() < 4;
         }
@@ -33,46 +32,11 @@ public class BlockOldLeaf extends BlockLeaves
         this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockPlanks.EnumType.OAK).withProperty(CHECK_DECAY, Boolean.valueOf(true)).withProperty(DECAYABLE, Boolean.valueOf(true)));
     }
 
-    public int getRenderColor(IBlockState state)
-    {
-        if (state.getBlock() != this)
-        {
-            return super.getRenderColor(state);
-        }
-        else
-        {
-            BlockPlanks.EnumType blockplanks$enumtype = (BlockPlanks.EnumType)state.getValue(VARIANT);
-            return blockplanks$enumtype == BlockPlanks.EnumType.SPRUCE ? ColorizerFoliage.getFoliageColorPine() : (blockplanks$enumtype == BlockPlanks.EnumType.BIRCH ? ColorizerFoliage.getFoliageColorBirch() : super.getRenderColor(state));
-        }
-    }
-
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-
-        if (iblockstate.getBlock() == this)
-        {
-            BlockPlanks.EnumType blockplanks$enumtype = (BlockPlanks.EnumType)iblockstate.getValue(VARIANT);
-
-            if (blockplanks$enumtype == BlockPlanks.EnumType.SPRUCE)
-            {
-                return ColorizerFoliage.getFoliageColorPine();
-            }
-
-            if (blockplanks$enumtype == BlockPlanks.EnumType.BIRCH)
-            {
-                return ColorizerFoliage.getFoliageColorBirch();
-            }
-        }
-
-        return super.colorMultiplier(worldIn, pos, renderPass);
-    }
-
     protected void dropApple(World worldIn, BlockPos pos, IBlockState state, int chance)
     {
         if (state.getValue(VARIANT) == BlockPlanks.EnumType.OAK && worldIn.rand.nextInt(chance) == 0)
         {
-            spawnAsEntity(worldIn, pos, new ItemStack(Items.apple, 1, 0));
+            spawnAsEntity(worldIn, pos, new ItemStack(Items.APPLE));
         }
     }
 
@@ -84,15 +48,15 @@ public class BlockOldLeaf extends BlockLeaves
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        list.add(new ItemStack(itemIn, 1, BlockPlanks.EnumType.OAK.getMetadata()));
-        list.add(new ItemStack(itemIn, 1, BlockPlanks.EnumType.SPRUCE.getMetadata()));
-        list.add(new ItemStack(itemIn, 1, BlockPlanks.EnumType.BIRCH.getMetadata()));
-        list.add(new ItemStack(itemIn, 1, BlockPlanks.EnumType.JUNGLE.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockPlanks.EnumType.OAK.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockPlanks.EnumType.SPRUCE.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockPlanks.EnumType.BIRCH.getMetadata()));
+        tab.add(new ItemStack(this, 1, BlockPlanks.EnumType.JUNGLE.getMetadata()));
     }
 
-    protected ItemStack createStackedBlock(IBlockState state)
+    protected ItemStack getSilkTouchDrop(IBlockState state)
     {
         return new ItemStack(Item.getItemFromBlock(this), 1, ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata());
     }
@@ -131,9 +95,9 @@ public class BlockOldLeaf extends BlockLeaves
         return BlockPlanks.EnumType.byMetadata((meta & 3) % 4);
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {VARIANT, CHECK_DECAY, DECAYABLE});
+        return new BlockStateContainer(this, new IProperty[] {VARIANT, CHECK_DECAY, DECAYABLE});
     }
 
     /**
@@ -145,16 +109,16 @@ public class BlockOldLeaf extends BlockLeaves
         return ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
-        if (!worldIn.isRemote && player.getCurrentEquippedItem() != null && player.getCurrentEquippedItem().getItem() == Items.shears)
+        if (!worldIn.isRemote && stack.getItem() == Items.SHEARS)
         {
-            player.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+            player.addStat(StatList.getBlockStats(this));
             spawnAsEntity(worldIn, pos, new ItemStack(Item.getItemFromBlock(this), 1, ((BlockPlanks.EnumType)state.getValue(VARIANT)).getMetadata()));
         }
         else
         {
-            super.harvestBlock(worldIn, player, pos, state, te);
+            super.harvestBlock(worldIn, player, pos, state, te, stack);
         }
     }
 }

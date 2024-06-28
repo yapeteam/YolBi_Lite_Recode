@@ -1,16 +1,21 @@
 package net.minecraft.scoreboard;
 
 import java.util.Comparator;
-import java.util.List;
-import net.minecraft.entity.player.EntityPlayer;
 
 public class Score
 {
-    public static final Comparator<Score> scoreComparator = new Comparator<Score>()
+    public static final Comparator<Score> SCORE_COMPARATOR = new Comparator<Score>()
     {
         public int compare(Score p_compare_1_, Score p_compare_2_)
         {
-            return p_compare_1_.getScorePoints() > p_compare_2_.getScorePoints() ? 1 : (p_compare_1_.getScorePoints() < p_compare_2_.getScorePoints() ? -1 : p_compare_2_.getPlayerName().compareToIgnoreCase(p_compare_1_.getPlayerName()));
+            if (p_compare_1_.getScorePoints() > p_compare_2_.getScorePoints())
+            {
+                return 1;
+            }
+            else
+            {
+                return p_compare_1_.getScorePoints() < p_compare_2_.getScorePoints() ? -1 : p_compare_2_.getPlayerName().compareToIgnoreCase(p_compare_1_.getPlayerName());
+            }
         }
     };
     private final Scoreboard theScoreboard;
@@ -28,7 +33,7 @@ public class Score
         this.forceUpdate = true;
     }
 
-    public void increseScore(int amount)
+    public void increaseScore(int amount)
     {
         if (this.theScoreObjective.getCriteria().isReadOnly())
         {
@@ -52,7 +57,7 @@ public class Score
         }
     }
 
-    public void func_96648_a()
+    public void incrementScore()
     {
         if (this.theScoreObjective.getCriteria().isReadOnly())
         {
@@ -60,7 +65,7 @@ public class Score
         }
         else
         {
-            this.increseScore(1);
+            this.increaseScore(1);
         }
     }
 
@@ -77,7 +82,7 @@ public class Score
         if (i != points || this.forceUpdate)
         {
             this.forceUpdate = false;
-            this.getScoreScoreboard().func_96536_a(this);
+            this.getScoreScoreboard().onScoreUpdated(this);
         }
     }
 
@@ -107,10 +112,5 @@ public class Score
     public void setLocked(boolean locked)
     {
         this.locked = locked;
-    }
-
-    public void func_96651_a(List<EntityPlayer> p_96651_1_)
-    {
-        this.setScorePoints(this.theScoreObjective.getCriteria().setScore(p_96651_1_));
     }
 }

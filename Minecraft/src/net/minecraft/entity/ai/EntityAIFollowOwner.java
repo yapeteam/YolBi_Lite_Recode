@@ -1,40 +1,42 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateFlying;
 import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class EntityAIFollowOwner extends EntityAIBase
 {
-    private EntityTameable thePet;
+    private final EntityTameable thePet;
     private EntityLivingBase theOwner;
     World theWorld;
-    private double followSpeed;
-    private PathNavigate petPathfinder;
-    private int field_75343_h;
+    private final double followSpeed;
+    private final PathNavigate petPathfinder;
+    private int timeToRecalcPath;
     float maxDist;
     float minDist;
-    private boolean field_75344_i;
+    private float oldWaterCost;
 
     public EntityAIFollowOwner(EntityTameable thePetIn, double followSpeedIn, float minDistIn, float maxDistIn)
     {
         this.thePet = thePetIn;
-        this.theWorld = thePetIn.worldObj;
+        this.theWorld = thePetIn.world;
         this.followSpeed = followSpeedIn;
         this.petPathfinder = thePetIn.getNavigator();
         this.minDist = minDistIn;
         this.maxDist = maxDistIn;
         this.setMutexBits(3);
 
-        if (!(thePetIn.getNavigator() instanceof PathNavigateGround))
+        if (!(thePetIn.getNavigator() instanceof PathNavigateGround) && !(thePetIn.getNavigator() instanceof PathNavigateFlying))
         {
             throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
         }
@@ -83,9 +85,9 @@ public class EntityAIFollowOwner extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.field_75343_h = 0;
-        this.field_75344_i = ((PathNavigateGround)this.thePet.getNavigator()).getAvoidsWater();
-        ((PathNavigateGround)this.thePet.getNavigator()).setAvoidsWater(false);
+        this.timeToRecalcPath = 0;
+        this.oldWaterCost = this.thePet.getPathPriority(PathNodeType.WATER);
+        this.thePet.setPathPriority(PathNodeType.WATER, 0.0F);
     }
 
     /**
@@ -95,14 +97,7 @@ public class EntityAIFollowOwner extends EntityAIBase
     {
         this.theOwner = null;
         this.petPathfinder.clearPathEntity();
-        ((PathNavigateGround)this.thePet.getNavigator()).setAvoidsWater(true);
-    }
-
-    private boolean func_181065_a(BlockPos p_181065_1_)
-    {
-        IBlockState iblockstate = this.theWorld.getBlockState(p_181065_1_);
-        Block block = iblockstate.getBlock();
-        return block == Blocks.air ? true : !block.isFullCube();
+        this.thePet.setPathPriority(PathNodeType.WATER, this.oldWaterCost);
     }
 
     /**
@@ -114,25 +109,25 @@ public class EntityAIFollowOwner extends EntityAIBase
 
         if (!this.thePet.isSitting())
         {
-            if (--this.field_75343_h <= 0)
+            if (--this.timeToRecalcPath <= 0)
             {
-                this.field_75343_h = 10;
+                this.timeToRecalcPath = 10;
 
                 if (!this.petPathfinder.tryMoveToEntityLiving(this.theOwner, this.followSpeed))
                 {
-                    if (!this.thePet.getLeashed())
+                    if (!this.thePet.getLeashed() && !this.thePet.isRiding())
                     {
                         if (this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D)
                         {
-                            int i = MathHelper.floor_double(this.theOwner.posX) - 2;
-                            int j = MathHelper.floor_double(this.theOwner.posZ) - 2;
-                            int k = MathHelper.floor_double(this.theOwner.getEntityBoundingBox().minY);
+                            int i = MathHelper.floor(this.theOwner.posX) - 2;
+                            int j = MathHelper.floor(this.theOwner.posZ) - 2;
+                            int k = MathHelper.floor(this.theOwner.getEntityBoundingBox().minY);
 
                             for (int l = 0; l <= 4; ++l)
                             {
                                 for (int i1 = 0; i1 <= 4; ++i1)
                                 {
-                                    if ((l < 1 || i1 < 1 || l > 3 || i1 > 3) && World.doesBlockHaveSolidTopSurface(this.theWorld, new BlockPos(i + l, k - 1, j + i1)) && this.func_181065_a(new BlockPos(i + l, k, j + i1)) && this.func_181065_a(new BlockPos(i + l, k + 1, j + i1)))
+                                    if ((l < 1 || i1 < 1 || l > 3 || i1 > 3) && this.func_192381_a(i, j, k, l, i1))
                                     {
                                         this.thePet.setLocationAndAngles((double)((float)(i + l) + 0.5F), (double)k, (double)((float)(j + i1) + 0.5F), this.thePet.rotationYaw, this.thePet.rotationPitch);
                                         this.petPathfinder.clearPathEntity();
@@ -145,5 +140,12 @@ public class EntityAIFollowOwner extends EntityAIBase
                 }
             }
         }
+    }
+
+    protected boolean func_192381_a(int p_192381_1_, int p_192381_2_, int p_192381_3_, int p_192381_4_, int p_192381_5_)
+    {
+        BlockPos blockpos = new BlockPos(p_192381_1_ + p_192381_4_, p_192381_3_ - 1, p_192381_2_ + p_192381_5_);
+        IBlockState iblockstate = this.theWorld.getBlockState(blockpos);
+        return iblockstate.func_193401_d(this.theWorld, blockpos, EnumFacing.DOWN) == BlockFaceShape.SOLID && iblockstate.canEntitySpawn(this.thePet) && this.theWorld.isAirBlock(blockpos.up()) && this.theWorld.isAirBlock(blockpos.up(2));
     }
 }

@@ -1,10 +1,13 @@
 package net.minecraft.entity.passive;
 
 import com.google.common.base.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
@@ -13,26 +16,35 @@ import net.minecraft.entity.ai.EntityAILeapAtTarget;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAIOcelotAttack;
 import net.minecraft.entity.ai.EntityAIOcelotSit;
+import net.minecraft.entity.ai.EntityAISit;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAITargetNonTamed;
 import net.minecraft.entity.ai.EntityAITempt;
-import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityOcelot extends EntityTameable
 {
+    private static final DataParameter<Integer> OCELOT_VARIANT = EntityDataManager.<Integer>createKey(EntityOcelot.class, DataSerializers.VARINT);
     private EntityAIAvoidEntity<EntityPlayer> avoidEntity;
 
     /**
@@ -44,16 +56,21 @@ public class EntityOcelot extends EntityTameable
     {
         super(worldIn);
         this.setSize(0.6F, 0.7F);
-        ((PathNavigateGround)this.getNavigator()).setAvoidsWater(true);
+    }
+
+    protected void initEntityAI()
+    {
+        this.aiSit = new EntityAISit(this);
+        this.aiTempt = new EntityAITempt(this, 0.6D, Items.FISH, true);
         this.tasks.addTask(1, new EntityAISwimming(this));
         this.tasks.addTask(2, this.aiSit);
-        this.tasks.addTask(3, this.aiTempt = new EntityAITempt(this, 0.6D, Items.fish, true));
+        this.tasks.addTask(3, this.aiTempt);
         this.tasks.addTask(5, new EntityAIFollowOwner(this, 1.0D, 10.0F, 5.0F));
         this.tasks.addTask(6, new EntityAIOcelotSit(this, 0.8D));
         this.tasks.addTask(7, new EntityAILeapAtTarget(this, 0.3F));
         this.tasks.addTask(8, new EntityAIOcelotAttack(this));
         this.tasks.addTask(9, new EntityAIMate(this, 0.8D));
-        this.tasks.addTask(10, new EntityAIWander(this, 0.8D));
+        this.tasks.addTask(10, new EntityAIWanderAvoidWater(this, 0.8D, 1.0000001E-5F));
         this.tasks.addTask(11, new EntityAIWatchClosest(this, EntityPlayer.class, 10.0F));
         this.targetTasks.addTask(1, new EntityAITargetNonTamed(this, EntityChicken.class, false, (Predicate)null));
     }
@@ -61,7 +78,7 @@ public class EntityOcelot extends EntityTameable
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(18, Byte.valueOf((byte)0));
+        this.dataManager.register(OCELOT_VARIANT, Integer.valueOf(0));
     }
 
     public void updateAITasks()
@@ -104,54 +121,65 @@ public class EntityOcelot extends EntityTameable
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.30000001192092896D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
     }
 
     public void fall(float distance, float damageMultiplier)
     {
     }
 
+    public static void registerFixesOcelot(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityOcelot.class);
+    }
+
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("CatType", this.getTameSkin());
+        super.writeEntityToNBT(compound);
+        compound.setInteger("CatType", this.getTameSkin());
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        this.setTameSkin(tagCompund.getInteger("CatType"));
+        super.readEntityFromNBT(compound);
+        this.setTameSkin(compound.getInteger("CatType"));
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    @Nullable
+    protected SoundEvent getAmbientSound()
     {
-        return this.isTamed() ? (this.isInLove() ? "mob.cat.purr" : (this.rand.nextInt(4) == 0 ? "mob.cat.purreow" : "mob.cat.meow")) : "";
+        if (this.isTamed())
+        {
+            if (this.isInLove())
+            {
+                return SoundEvents.ENTITY_CAT_PURR;
+            }
+            else
+            {
+                return this.rand.nextInt(4) == 0 ? SoundEvents.ENTITY_CAT_PURREOW : SoundEvents.ENTITY_CAT_AMBIENT;
+            }
+        }
+        else
+        {
+            return null;
+        }
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
     {
-        return "mob.cat.hitt";
+        return SoundEvents.ENTITY_CAT_HURT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getDeathSound()
     {
-        return "mob.cat.hitt";
+        return SoundEvents.ENTITY_CAT_DEATH;
     }
 
     /**
@@ -160,11 +188,6 @@ public class EntityOcelot extends EntityTameable
     protected float getSoundVolume()
     {
         return 0.4F;
-    }
-
-    protected Item getDropItem()
-    {
-        return Items.leather;
     }
 
     public boolean attackEntityAsMob(Entity entityIn)
@@ -183,75 +206,65 @@ public class EntityOcelot extends EntityTameable
         }
         else
         {
-            this.aiSit.setSitting(false);
+            if (this.aiSit != null)
+            {
+                this.aiSit.setSitting(false);
+            }
+
             return super.attackEntityFrom(source, amount);
         }
     }
 
-    /**
-     * Drop 0-2 items of this living's type
-     *  
-     * @param wasRecentlyHit true if this this entity was recently hit by appropriate entity (generally only if player
-     * or tameable)
-     * @param lootingModifier level of enchanment to be applied to this drop
-     */
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    @Nullable
+    protected ResourceLocation getLootTable()
     {
+        return LootTableList.ENTITIES_OCELOT;
     }
 
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    public boolean interact(EntityPlayer player)
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
     {
-        ItemStack itemstack = player.inventory.getCurrentItem();
+        ItemStack itemstack = player.getHeldItem(hand);
 
         if (this.isTamed())
         {
-            if (this.isOwner(player) && !this.worldObj.isRemote && !this.isBreedingItem(itemstack))
+            if (this.isOwner(player) && !this.world.isRemote && !this.isBreedingItem(itemstack))
             {
                 this.aiSit.setSitting(!this.isSitting());
             }
         }
-        else if (this.aiTempt.isRunning() && itemstack != null && itemstack.getItem() == Items.fish && player.getDistanceSqToEntity(this) < 9.0D)
+        else if ((this.aiTempt == null || this.aiTempt.isRunning()) && itemstack.getItem() == Items.FISH && player.getDistanceSqToEntity(this) < 9.0D)
         {
             if (!player.capabilities.isCreativeMode)
             {
-                --itemstack.stackSize;
+                itemstack.func_190918_g(1);
             }
 
-            if (itemstack.stackSize <= 0)
-            {
-                player.inventory.setInventorySlotContents(player.inventory.currentItem, (ItemStack)null);
-            }
-
-            if (!this.worldObj.isRemote)
+            if (!this.world.isRemote)
             {
                 if (this.rand.nextInt(3) == 0)
                 {
-                    this.setTamed(true);
-                    this.setTameSkin(1 + this.worldObj.rand.nextInt(3));
-                    this.setOwnerId(player.getUniqueID().toString());
+                    this.func_193101_c(player);
+                    this.setTameSkin(1 + this.world.rand.nextInt(3));
                     this.playTameEffect(true);
                     this.aiSit.setSitting(true);
-                    this.worldObj.setEntityState(this, (byte)7);
+                    this.world.setEntityState(this, (byte)7);
                 }
                 else
                 {
                     this.playTameEffect(false);
-                    this.worldObj.setEntityState(this, (byte)6);
+                    this.world.setEntityState(this, (byte)6);
                 }
             }
 
             return true;
         }
 
-        return super.interact(player);
+        return super.processInteract(player, hand);
     }
 
     public EntityOcelot createChild(EntityAgeable ageable)
     {
-        EntityOcelot entityocelot = new EntityOcelot(this.worldObj);
+        EntityOcelot entityocelot = new EntityOcelot(this.world);
 
         if (this.isTamed())
         {
@@ -269,7 +282,7 @@ public class EntityOcelot extends EntityTameable
      */
     public boolean isBreedingItem(ItemStack stack)
     {
-        return stack != null && stack.getItem() == Items.fish;
+        return stack.getItem() == Items.FISH;
     }
 
     /**
@@ -292,18 +305,26 @@ public class EntityOcelot extends EntityTameable
         else
         {
             EntityOcelot entityocelot = (EntityOcelot)otherAnimal;
-            return !entityocelot.isTamed() ? false : this.isInLove() && entityocelot.isInLove();
+
+            if (!entityocelot.isTamed())
+            {
+                return false;
+            }
+            else
+            {
+                return this.isInLove() && entityocelot.isInLove();
+            }
         }
     }
 
     public int getTameSkin()
     {
-        return this.dataWatcher.getWatchableObjectByte(18);
+        return ((Integer)this.dataManager.get(OCELOT_VARIANT)).intValue();
     }
 
     public void setTameSkin(int skinId)
     {
-        this.dataWatcher.updateObject(18, Byte.valueOf((byte)skinId));
+        this.dataManager.set(OCELOT_VARIANT, Integer.valueOf(skinId));
     }
 
     /**
@@ -311,7 +332,7 @@ public class EntityOcelot extends EntityTameable
      */
     public boolean getCanSpawnHere()
     {
-        return this.worldObj.rand.nextInt(3) != 0;
+        return this.world.rand.nextInt(3) != 0;
     }
 
     /**
@@ -319,18 +340,19 @@ public class EntityOcelot extends EntityTameable
      */
     public boolean isNotColliding()
     {
-        if (this.worldObj.checkNoEntityCollision(this.getEntityBoundingBox(), this) && this.worldObj.getCollidingBoundingBoxes(this, this.getEntityBoundingBox()).isEmpty() && !this.worldObj.isAnyLiquid(this.getEntityBoundingBox()))
+        if (this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this) && this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(this.getEntityBoundingBox()))
         {
             BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
 
-            if (blockpos.getY() < this.worldObj.getSeaLevel())
+            if (blockpos.getY() < this.world.getSeaLevel())
             {
                 return false;
             }
 
-            Block block = this.worldObj.getBlockState(blockpos.down()).getBlock();
+            IBlockState iblockstate = this.world.getBlockState(blockpos.down());
+            Block block = iblockstate.getBlock();
 
-            if (block == Blocks.grass || block.getMaterial() == Material.leaves)
+            if (block == Blocks.GRASS || iblockstate.getMaterial() == Material.LEAVES)
             {
                 return true;
             }
@@ -344,19 +366,21 @@ public class EntityOcelot extends EntityTameable
      */
     public String getName()
     {
-        return this.hasCustomName() ? this.getCustomNameTag() : (this.isTamed() ? StatCollector.translateToLocal("entity.Cat.name") : super.getName());
-    }
-
-    public void setTamed(boolean tamed)
-    {
-        super.setTamed(tamed);
+        if (this.hasCustomName())
+        {
+            return this.getCustomNameTag();
+        }
+        else
+        {
+            return this.isTamed() ? I18n.translateToLocal("entity.Cat.name") : super.getName();
+        }
     }
 
     protected void setupTamedAI()
     {
         if (this.avoidEntity == null)
         {
-            this.avoidEntity = new EntityAIAvoidEntity(this, EntityPlayer.class, 16.0F, 0.8D, 1.33D);
+            this.avoidEntity = new EntityAIAvoidEntity<EntityPlayer>(this, EntityPlayer.class, 16.0F, 0.8D, 1.33D);
         }
 
         this.tasks.removeTask(this.avoidEntity);
@@ -367,22 +391,24 @@ public class EntityOcelot extends EntityTameable
         }
     }
 
+    @Nullable
+
     /**
      * Called only once on an entity when first time spawned, via egg, mob spawner, natural spawning etc, but not called
      * when entity is reloaded from nbt. Mainly used for initializing attributes and inventory
      */
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, IEntityLivingData livingdata)
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata)
     {
         livingdata = super.onInitialSpawn(difficulty, livingdata);
 
-        if (this.worldObj.rand.nextInt(7) == 0)
+        if (this.getTameSkin() == 0 && this.world.rand.nextInt(7) == 0)
         {
             for (int i = 0; i < 2; ++i)
             {
-                EntityOcelot entityocelot = new EntityOcelot(this.worldObj);
+                EntityOcelot entityocelot = new EntityOcelot(this.world);
                 entityocelot.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
                 entityocelot.setGrowingAge(-24000);
-                this.worldObj.spawnEntityInWorld(entityocelot);
+                this.world.spawnEntityInWorld(entityocelot);
             }
         }
 

@@ -19,16 +19,16 @@ public class ModelSheep1 extends ModelQuadruped
         this.body.setRotationPoint(0.0F, 5.0F, 2.0F);
         float f = 0.5F;
         this.leg1 = new ModelRenderer(this, 0, 16);
-        this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, f);
+        this.leg1.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, 0.5F);
         this.leg1.setRotationPoint(-3.0F, 12.0F, 7.0F);
         this.leg2 = new ModelRenderer(this, 0, 16);
-        this.leg2.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, f);
+        this.leg2.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, 0.5F);
         this.leg2.setRotationPoint(3.0F, 12.0F, 7.0F);
         this.leg3 = new ModelRenderer(this, 0, 16);
-        this.leg3.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, f);
+        this.leg3.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, 0.5F);
         this.leg3.setRotationPoint(-3.0F, 12.0F, -5.0F);
         this.leg4 = new ModelRenderer(this, 0, 16);
-        this.leg4.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, f);
+        this.leg4.addBox(-2.0F, 0.0F, -2.0F, 4, 6, 4, 0.5F);
         this.leg4.setRotationPoint(3.0F, 12.0F, -5.0F);
     }
 

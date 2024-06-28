@@ -2,46 +2,38 @@ package net.minecraft.item;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
 
 public class ItemEmptyMap extends ItemMapBase
 {
     protected ItemEmptyMap()
     {
-        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setCreativeTab(CreativeTabs.MISC);
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
     {
-        ItemStack itemstack = new ItemStack(Items.filled_map, 1, worldIn.getUniqueDataId("map"));
-        String s = "map_" + itemstack.getMetadata();
-        MapData mapdata = new MapData(s);
-        worldIn.setItemData(s, mapdata);
-        mapdata.scale = 0;
-        mapdata.calculateMapCenter(playerIn.posX, playerIn.posZ, mapdata.scale);
-        mapdata.dimension = (byte)worldIn.provider.getDimensionId();
-        mapdata.markDirty();
-        --itemStackIn.stackSize;
+        ItemStack itemstack = ItemMap.func_190906_a(itemStackIn, worldIn.posX, worldIn.posZ, (byte)0, true, false);
+        ItemStack itemstack1 = worldIn.getHeldItem(playerIn);
+        itemstack1.func_190918_g(1);
 
-        if (itemStackIn.stackSize <= 0)
+        if (itemstack1.func_190926_b())
         {
-            return itemstack;
+            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
         }
         else
         {
-            if (!playerIn.inventory.addItemStackToInventory(itemstack.copy()))
+            if (!worldIn.inventory.addItemStackToInventory(itemstack.copy()))
             {
-                playerIn.dropPlayerItemWithRandomChoice(itemstack, false);
+                worldIn.dropItem(itemstack, false);
             }
 
-            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-            return itemStackIn;
+            worldIn.addStat(StatList.getObjectUseStats(this));
+            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack1);
         }
     }
 }

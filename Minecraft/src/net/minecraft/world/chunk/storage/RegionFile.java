@@ -2,6 +2,7 @@ package net.minecraft.world.chunk.storage;
 
 import com.google.common.collect.Lists;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -13,11 +14,12 @@ import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
 
 public class RegionFile
 {
-    private static final byte[] emptySector = new byte[4096];
+    private static final byte[] EMPTY_SECTOR = new byte[4096];
     private final File fileName;
     private RandomAccessFile dataFile;
     private final int[] offsets = new int[1024];
@@ -44,31 +46,23 @@ public class RegionFile
 
             if (this.dataFile.length() < 4096L)
             {
-                for (int i = 0; i < 1024; ++i)
-                {
-                    this.dataFile.writeInt(0);
-                }
-
-                for (int i1 = 0; i1 < 1024; ++i1)
-                {
-                    this.dataFile.writeInt(0);
-                }
-
+                this.dataFile.write(EMPTY_SECTOR);
+                this.dataFile.write(EMPTY_SECTOR);
                 this.sizeDelta += 8192;
             }
 
             if ((this.dataFile.length() & 4095L) != 0L)
             {
-                for (int j1 = 0; (long)j1 < (this.dataFile.length() & 4095L); ++j1)
+                for (int i = 0; (long)i < (this.dataFile.length() & 4095L); ++i)
                 {
                     this.dataFile.write(0);
                 }
             }
 
-            int k1 = (int)this.dataFile.length() / 4096;
-            this.sectorFree = Lists.<Boolean>newArrayListWithCapacity(k1);
+            int i1 = (int)this.dataFile.length() / 4096;
+            this.sectorFree = Lists.<Boolean>newArrayListWithCapacity(i1);
 
-            for (int j = 0; j < k1; ++j)
+            for (int j = 0; j < i1; ++j)
             {
                 this.sectorFree.add(Boolean.valueOf(true));
             }
@@ -77,10 +71,10 @@ public class RegionFile
             this.sectorFree.set(1, Boolean.valueOf(false));
             this.dataFile.seek(0L);
 
-            for (int l1 = 0; l1 < 1024; ++l1)
+            for (int j1 = 0; j1 < 1024; ++j1)
             {
                 int k = this.dataFile.readInt();
-                this.offsets[l1] = k;
+                this.offsets[j1] = k;
 
                 if (k != 0 && (k >> 8) + (k & 255) <= this.sectorFree.size())
                 {
@@ -91,10 +85,10 @@ public class RegionFile
                 }
             }
 
-            for (int i2 = 0; i2 < 1024; ++i2)
+            for (int k1 = 0; k1 < 1024; ++k1)
             {
-                int j2 = this.dataFile.readInt();
-                this.chunkTimestamps[i2] = j2;
+                int l1 = this.dataFile.readInt();
+                this.chunkTimestamps[k1] = l1;
             }
         }
         catch (IOException ioexception)
@@ -102,6 +96,8 @@ public class RegionFile
             ioexception.printStackTrace();
         }
     }
+
+    @Nullable
 
     /**
      * Returns an uncompressed chunk stream from the region file.
@@ -175,16 +171,18 @@ public class RegionFile
         }
     }
 
+    @Nullable
+
     /**
      * Returns an output stream used to write chunk data. Data is on disk when the returned stream is closed.
      */
     public DataOutputStream getChunkDataOutputStream(int x, int z)
     {
-        return this.outOfBounds(x, z) ? null : new DataOutputStream(new DeflaterOutputStream(new RegionFile.ChunkBuffer(x, z)));
+        return this.outOfBounds(x, z) ? null : new DataOutputStream(new BufferedOutputStream(new DeflaterOutputStream(new RegionFile.ChunkBuffer(x, z))));
     }
 
     /**
-     * args: x, z, data, length - write chunk data at (x, z) to disk
+     * Writes the specified chunk to disk.
      */
     protected synchronized void write(int x, int z, byte[] data, int length)
     {
@@ -261,7 +259,7 @@ public class RegionFile
 
                     for (int i2 = 0; i2 < l; ++i2)
                     {
-                        this.dataFile.write(emptySector);
+                        this.dataFile.write(EMPTY_SECTOR);
                         this.sectorFree.add(Boolean.valueOf(false));
                     }
 
@@ -280,7 +278,7 @@ public class RegionFile
     }
 
     /**
-     * args: sectorNumber, data, length - write the chunk data to this RegionFile
+     * Writes the chunk data to this RegionFile.
      */
     private void write(int sectorNumber, byte[] data, int length) throws IOException
     {
@@ -291,7 +289,7 @@ public class RegionFile
     }
 
     /**
-     * args: x, z - check region bounds
+     * Checks if region is out of bounds.
      */
     private boolean outOfBounds(int x, int z)
     {
@@ -299,7 +297,7 @@ public class RegionFile
     }
 
     /**
-     * args: x, z - get chunk's offset in region file
+     * Gets a chunk's offset in region file.
      */
     private int getOffset(int x, int z)
     {
@@ -307,7 +305,7 @@ public class RegionFile
     }
 
     /**
-     * args: x, z, - true if chunk has been saved / converted
+     * Checks if a chunk has been saved.
      */
     public boolean isChunkSaved(int x, int z)
     {
@@ -315,7 +313,7 @@ public class RegionFile
     }
 
     /**
-     * args: x, z, offset - sets the chunk's offset in the region file
+     * Sets the chunk's offset in the region file.
      */
     private void setOffset(int x, int z, int offset) throws IOException
     {
@@ -325,7 +323,7 @@ public class RegionFile
     }
 
     /**
-     * args: x, z, timestamp - sets the chunk's write timestamp
+     * Updates the specified chunk's write timestamp.
      */
     private void setChunkTimestamp(int x, int z, int timestamp) throws IOException
     {
@@ -347,8 +345,8 @@ public class RegionFile
 
     class ChunkBuffer extends ByteArrayOutputStream
     {
-        private int chunkX;
-        private int chunkZ;
+        private final int chunkX;
+        private final int chunkZ;
 
         public ChunkBuffer(int x, int z)
         {

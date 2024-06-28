@@ -1,9 +1,10 @@
 package net.minecraft.client.renderer.entity;
 
 import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.util.ResourceLocation;
@@ -21,11 +22,11 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
     public void doRender(EntityLightningBolt entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
         Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
         GlStateManager.disableTexture2D();
         GlStateManager.disableLighting();
         GlStateManager.enableBlend();
-        GlStateManager.blendFunc(770, 1);
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
         double[] adouble = new double[8];
         double[] adouble1 = new double[8];
         double d0 = 0.0D;
@@ -78,7 +79,7 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
                         d3 += (double)(random1.nextInt(31) - 15);
                     }
 
-                    worldrenderer.begin(5, DefaultVertexFormats.POSITION_COLOR);
+                    bufferbuilder.begin(5, DefaultVertexFormats.POSITION_COLOR);
                     float f = 0.5F;
                     float f1 = 0.45F;
                     float f2 = 0.45F;
@@ -125,8 +126,8 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
                             d11 += d7 * 2.0D;
                         }
 
-                        worldrenderer.pos(d10 + d2, y + (double)(i1 * 16), d11 + d3).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
-                        worldrenderer.pos(d8 + d4, y + (double)((i1 + 1) * 16), d9 + d5).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
+                        bufferbuilder.pos(d10 + d2, y + (double)(i1 * 16), d11 + d3).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
+                        bufferbuilder.pos(d8 + d4, y + (double)((i1 + 1) * 16), d9 + d5).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
                     }
 
                     tessellator.draw();
@@ -138,6 +139,8 @@ public class RenderLightningBolt extends Render<EntityLightningBolt>
         GlStateManager.enableLighting();
         GlStateManager.enableTexture2D();
     }
+
+    @Nullable
 
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.

@@ -7,7 +7,7 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityAIOcelotSit extends EntityAIMoveToBlock
@@ -26,14 +26,6 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock
     public boolean shouldExecute()
     {
         return this.ocelot.isTamed() && !this.ocelot.isSitting() && super.shouldExecute();
-    }
-
-    /**
-     * Returns whether an in-progress EntityAIBase should continue executing
-     */
-    public boolean continueExecuting()
-    {
-        return super.continueExecuting();
     }
 
     /**
@@ -86,7 +78,7 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock
             IBlockState iblockstate = worldIn.getBlockState(pos);
             Block block = iblockstate.getBlock();
 
-            if (block == Blocks.chest)
+            if (block == Blocks.CHEST)
             {
                 TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -97,12 +89,12 @@ public class EntityAIOcelotSit extends EntityAIMoveToBlock
             }
             else
             {
-                if (block == Blocks.lit_furnace)
+                if (block == Blocks.LIT_FURNACE)
                 {
                     return true;
                 }
 
-                if (block == Blocks.bed && iblockstate.getValue(BlockBed.PART) != BlockBed.EnumPartType.HEAD)
+                if (block == Blocks.BED && iblockstate.getValue(BlockBed.PART) != BlockBed.EnumPartType.HEAD)
                 {
                     return true;
                 }

@@ -1,17 +1,17 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelPig;
 import net.minecraft.client.renderer.entity.layers.LayerSaddle;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.util.ResourceLocation;
 
 public class RenderPig extends RenderLiving<EntityPig>
 {
-    private static final ResourceLocation pigTextures = new ResourceLocation("textures/entity/pig/pig.png");
+    private static final ResourceLocation PIG_TEXTURES = new ResourceLocation("textures/entity/pig/pig.png");
 
-    public RenderPig(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn)
+    public RenderPig(RenderManager p_i47198_1_)
     {
-        super(renderManagerIn, modelBaseIn, shadowSizeIn);
+        super(p_i47198_1_, new ModelPig(), 0.7F);
         this.addLayer(new LayerSaddle(this));
     }
 
@@ -20,6 +20,6 @@ public class RenderPig extends RenderLiving<EntityPig>
      */
     protected ResourceLocation getEntityTexture(EntityPig entity)
     {
-        return pigTextures;
+        return PIG_TEXTURES;
     }
 }

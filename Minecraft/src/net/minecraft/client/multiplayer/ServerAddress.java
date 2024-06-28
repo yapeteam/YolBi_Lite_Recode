@@ -19,7 +19,14 @@ public class ServerAddress
 
     public String getIP()
     {
-        return IDN.toASCII(this.ipAddress);
+        try
+        {
+            return IDN.toASCII(this.ipAddress);
+        }
+        catch (IllegalArgumentException var2)
+        {
+            return "";
+        }
     }
 
     public int getPort()
@@ -27,26 +34,26 @@ public class ServerAddress
         return this.serverPort;
     }
 
-    public static ServerAddress fromString(String p_78860_0_)
+    public static ServerAddress fromString(String addrString)
     {
-        if (p_78860_0_ == null)
+        if (addrString == null)
         {
             return null;
         }
         else
         {
-            String[] astring = p_78860_0_.split(":");
+            String[] astring = addrString.split(":");
 
-            if (p_78860_0_.startsWith("["))
+            if (addrString.startsWith("["))
             {
-                int i = p_78860_0_.indexOf("]");
+                int i = addrString.indexOf("]");
 
                 if (i > 0)
                 {
-                    String s = p_78860_0_.substring(1, i);
-                    String s1 = p_78860_0_.substring(i + 1).trim();
+                    String s = addrString.substring(1, i);
+                    String s1 = addrString.substring(i + 1).trim();
 
-                    if (s1.startsWith(":") && s1.length() > 0)
+                    if (s1.startsWith(":") && !s1.isEmpty())
                     {
                         s1 = s1.substring(1);
                         astring = new String[] {s, s1};
@@ -60,17 +67,17 @@ public class ServerAddress
 
             if (astring.length > 2)
             {
-                astring = new String[] {p_78860_0_};
+                astring = new String[] {addrString};
             }
 
             String s2 = astring[0];
-            int j = astring.length > 1 ? parseIntWithDefault(astring[1], 25565) : 25565;
+            int j = astring.length > 1 ? getInt(astring[1], 25565) : 25565;
 
             if (j == 25565)
             {
                 String[] astring1 = getServerAddress(s2);
                 s2 = astring1[0];
-                j = parseIntWithDefault(astring1[1], 25565);
+                j = getInt(astring1[1], 25565);
             }
 
             return new ServerAddress(s2, j);
@@ -86,7 +93,7 @@ public class ServerAddress
         {
             String s = "com.sun.jndi.dns.DnsContextFactory";
             Class.forName("com.sun.jndi.dns.DnsContextFactory");
-            Hashtable hashtable = new Hashtable();
+            Hashtable<String, String> hashtable = new Hashtable<String, String>();
             hashtable.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
             hashtable.put("java.naming.provider.url", "dns:");
             hashtable.put("com.sun.jndi.dns.timeout.retries", "1");
@@ -101,15 +108,15 @@ public class ServerAddress
         }
     }
 
-    private static int parseIntWithDefault(String p_78862_0_, int p_78862_1_)
+    private static int getInt(String value, int defaultValue)
     {
         try
         {
-            return Integer.parseInt(p_78862_0_.trim());
+            return Integer.parseInt(value.trim());
         }
         catch (Exception var3)
         {
-            return p_78862_1_;
+            return defaultValue;
         }
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -14,9 +14,9 @@ public class BlockSnowBlock extends Block
 {
     protected BlockSnowBlock()
     {
-        super(Material.craftedSnow);
+        super(Material.CRAFTED_SNOW);
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -24,7 +24,7 @@ public class BlockSnowBlock extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.snowball;
+        return Items.SNOWBALL;
     }
 
     /**

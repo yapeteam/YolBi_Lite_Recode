@@ -1,25 +1,40 @@
 package net.minecraft.entity.item;
 
+import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.loot.ILootContainer;
+import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.world.storage.loot.LootTable;
 
-public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer
+public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer
 {
-    private ItemStack[] minecartContainerItems = new ItemStack[36];
+    private NonNullList<ItemStack> minecartContainerItems = NonNullList.<ItemStack>func_191197_a(36, ItemStack.field_190927_a);
 
     /**
      * When set to true, the minecart will drop all items when setDead() is called. When false (such as when travelling
      * dimensions) it preserves its contents.
      */
     private boolean dropContentsWhenDead = true;
+    private ResourceLocation lootTable;
+    private long lootTableSeed;
 
     public EntityMinecartContainer(World worldIn)
     {
@@ -35,10 +50,23 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
     {
         super.killMinecart(source);
 
-        if (this.worldObj.getGameRules().getBoolean("doEntityDrops"))
+        if (this.world.getGameRules().getBoolean("doEntityDrops"))
         {
-            InventoryHelper.dropInventoryItems(this.worldObj, this, this);
+            InventoryHelper.dropInventoryItems(this.world, this, this);
         }
+    }
+
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.minecartContainerItems)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -46,7 +74,8 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
      */
     public ItemStack getStackInSlot(int index)
     {
-        return this.minecartContainerItems[index];
+        this.addLoot((EntityPlayer)null);
+        return this.minecartContainerItems.get(index);
     }
 
     /**
@@ -54,30 +83,8 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
      */
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.minecartContainerItems[index] != null)
-        {
-            if (this.minecartContainerItems[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.minecartContainerItems[index];
-                this.minecartContainerItems[index] = null;
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.minecartContainerItems[index].splitStack(count);
-
-                if (this.minecartContainerItems[index].stackSize == 0)
-                {
-                    this.minecartContainerItems[index] = null;
-                }
-
-                return itemstack;
-            }
-        }
-        else
-        {
-            return null;
-        }
+        this.addLoot((EntityPlayer)null);
+        return ItemStackHelper.getAndSplit(this.minecartContainerItems, index, count);
     }
 
     /**
@@ -85,15 +92,17 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
      */
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.minecartContainerItems[index] != null)
+        this.addLoot((EntityPlayer)null);
+        ItemStack itemstack = this.minecartContainerItems.get(index);
+
+        if (itemstack.func_190926_b())
         {
-            ItemStack itemstack = this.minecartContainerItems[index];
-            this.minecartContainerItems[index] = null;
-            return itemstack;
+            return ItemStack.field_190927_a;
         }
         else
         {
-            return null;
+            this.minecartContainerItems.set(index, ItemStack.field_190927_a);
+            return itemstack;
         }
     }
 
@@ -102,11 +111,12 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
      */
     public void setInventorySlotContents(int index, ItemStack stack)
     {
-        this.minecartContainerItems[index] = stack;
+        this.addLoot((EntityPlayer)null);
+        this.minecartContainerItems.set(index, stack);
 
-        if (stack != null && stack.stackSize > this.getInventoryStackLimit())
+        if (!stack.func_190926_b() && stack.func_190916_E() > this.getInventoryStackLimit())
         {
-            stack.stackSize = this.getInventoryStackLimit();
+            stack.func_190920_e(this.getInventoryStackLimit());
         }
     }
 
@@ -119,11 +129,18 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
-        return this.isDead ? false : player.getDistanceSqToEntity(this) <= 64.0D;
+        if (this.isDead)
+        {
+            return false;
+        }
+        else
+        {
+            return player.getDistanceSqToEntity(this) <= 64.0D;
+        }
     }
 
     public void openInventory(EntityPlayer player)
@@ -135,19 +152,12 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
     }
 
     /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
      */
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {
         return true;
-    }
-
-    /**
-     * Get the name of this object. For players this returns their username
-     */
-    public String getName()
-    {
-        return this.hasCustomName() ? this.getCustomNameTag() : "container.minecart";
     }
 
     /**
@@ -158,13 +168,11 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
         return 64;
     }
 
-    /**
-     * Teleports the entity to another dimension. Params: Dimension number to teleport to
-     */
-    public void travelToDimension(int dimensionId)
+    @Nullable
+    public Entity changeDimension(int dimensionIn)
     {
         this.dropContentsWhenDead = false;
-        super.travelToDimension(dimensionId);
+        return super.changeDimension(dimensionIn);
     }
 
     /**
@@ -174,63 +182,72 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
     {
         if (this.dropContentsWhenDead)
         {
-            InventoryHelper.dropInventoryItems(this.worldObj, this, this);
+            InventoryHelper.dropInventoryItems(this.world, this, this);
         }
 
         super.setDead();
     }
 
     /**
+     * Sets whether this entity should drop its items when setDead() is called. This applies to container minecarts.
+     */
+    public void setDropItemsWhenDead(boolean dropWhenDead)
+    {
+        this.dropContentsWhenDead = dropWhenDead;
+    }
+
+    public static void func_190574_b(DataFixer p_190574_0_, Class<?> p_190574_1_)
+    {
+        EntityMinecart.registerFixesMinecart(p_190574_0_, p_190574_1_);
+        p_190574_0_.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(p_190574_1_, new String[] {"Items"}));
+    }
+
+    /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound tagCompound)
+    protected void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        NBTTagList nbttaglist = new NBTTagList();
+        super.writeEntityToNBT(compound);
 
-        for (int i = 0; i < this.minecartContainerItems.length; ++i)
+        if (this.lootTable != null)
         {
-            if (this.minecartContainerItems[i] != null)
+            compound.setString("LootTable", this.lootTable.toString());
+
+            if (this.lootTableSeed != 0L)
             {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte)i);
-                this.minecartContainerItems[i].writeToNBT(nbttagcompound);
-                nbttaglist.appendTag(nbttagcompound);
+                compound.setLong("LootTableSeed", this.lootTableSeed);
             }
         }
-
-        tagCompound.setTag("Items", nbttaglist);
+        else
+        {
+            ItemStackHelper.func_191282_a(compound, this.minecartContainerItems);
+        }
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound tagCompund)
+    protected void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        NBTTagList nbttaglist = tagCompund.getTagList("Items", 10);
-        this.minecartContainerItems = new ItemStack[this.getSizeInventory()];
+        super.readEntityFromNBT(compound);
+        this.minecartContainerItems = NonNullList.<ItemStack>func_191197_a(this.getSizeInventory(), ItemStack.field_190927_a);
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        if (compound.hasKey("LootTable", 8))
         {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
-
-            if (j >= 0 && j < this.minecartContainerItems.length)
-            {
-                this.minecartContainerItems[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
-            }
+            this.lootTable = new ResourceLocation(compound.getString("LootTable"));
+            this.lootTableSeed = compound.getLong("LootTableSeed");
+        }
+        else
+        {
+            ItemStackHelper.func_191283_b(compound, this.minecartContainerItems);
         }
     }
 
-    /**
-     * First layer of player interaction
-     */
-    public boolean interactFirst(EntityPlayer playerIn)
+    public boolean processInitialInteract(EntityPlayer player, EnumHand stack)
     {
-        if (!this.worldObj.isRemote)
+        if (!this.world.isRemote)
         {
-            playerIn.displayGUIChest(this);
+            player.displayGUIChest(this);
         }
 
         return true;
@@ -238,8 +255,14 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
 
     protected void applyDrag()
     {
-        int i = 15 - Container.calcRedstoneFromInventory(this);
-        float f = 0.98F + (float)i * 0.001F;
+        float f = 0.98F;
+
+        if (this.lootTable == null)
+        {
+            int i = 15 - Container.calcRedstoneFromInventory(this);
+            f += (float)i * 0.001F;
+        }
+
         this.motionX *= (double)f;
         this.motionY *= 0.0D;
         this.motionZ *= (double)f;
@@ -273,11 +296,51 @@ public abstract class EntityMinecartContainer extends EntityMinecart implements 
         return LockCode.EMPTY_CODE;
     }
 
+    /**
+     * Adds loot to the minecart's contents.
+     */
+    public void addLoot(@Nullable EntityPlayer player)
+    {
+        if (this.lootTable != null)
+        {
+            LootTable loottable = this.world.getLootTableManager().getLootTableFromLocation(this.lootTable);
+            this.lootTable = null;
+            Random random;
+
+            if (this.lootTableSeed == 0L)
+            {
+                random = new Random();
+            }
+            else
+            {
+                random = new Random(this.lootTableSeed);
+            }
+
+            LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
+
+            if (player != null)
+            {
+                lootcontext$builder.withLuck(player.getLuck());
+            }
+
+            loottable.fillInventory(this, random, lootcontext$builder.build());
+        }
+    }
+
     public void clear()
     {
-        for (int i = 0; i < this.minecartContainerItems.length; ++i)
-        {
-            this.minecartContainerItems[i] = null;
-        }
+        this.addLoot((EntityPlayer)null);
+        this.minecartContainerItems.clear();
+    }
+
+    public void setLootTable(ResourceLocation lootTableIn, long lootTableSeedIn)
+    {
+        this.lootTable = lootTableIn;
+        this.lootTableSeed = lootTableSeedIn;
+    }
+
+    public ResourceLocation getLootTable()
+    {
+        return this.lootTable;
     }
 }

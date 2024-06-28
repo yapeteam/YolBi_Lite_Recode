@@ -5,7 +5,7 @@ import com.mojang.authlib.GameProfile;
 import java.util.Date;
 import java.util.UUID;
 
-public class UserListBansEntry extends BanEntry<GameProfile>
+public class UserListBansEntry extends UserListEntryBan<GameProfile>
 {
     public UserListBansEntry(GameProfile profile)
     {

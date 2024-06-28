@@ -5,7 +5,7 @@ import net.minecraft.network.handshake.INetHandlerHandshakeServer;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerLoginServer;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class NetHandlerHandshakeMemory implements INetHandlerHandshakeServer
 {
@@ -32,7 +32,7 @@ public class NetHandlerHandshakeMemory implements INetHandlerHandshakeServer
     /**
      * Invoked when disconnecting, the parameter is a ChatComponent describing the reason for termination
      */
-    public void onDisconnect(IChatComponent reason)
+    public void onDisconnect(ITextComponent reason)
     {
     }
 }

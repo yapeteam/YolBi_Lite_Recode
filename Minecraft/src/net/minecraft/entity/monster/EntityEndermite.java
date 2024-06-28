@@ -1,35 +1,46 @@
 package net.minecraft.entity.monster;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityEndermite extends EntityMob
 {
-    private int lifetime = 0;
-    private boolean playerSpawned = false;
+    private int lifetime;
+    private boolean playerSpawned;
 
     public EntityEndermite(World worldIn)
     {
         super(worldIn);
         this.experienceValue = 3;
         this.setSize(0.4F, 0.3F);
+    }
+
+    protected void initEntityAI()
+    {
         this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
-        this.tasks.addTask(3, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(2, new EntityAIAttackMelee(this, 1.0D, false));
+        this.tasks.addTask(3, new EntityAIWanderAvoidWater(this, 1.0D));
         this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
         this.tasks.addTask(8, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
@@ -44,9 +55,9 @@ public class EntityEndermite extends EntityMob
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(2.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0D);
     }
 
     /**
@@ -58,58 +69,55 @@ public class EntityEndermite extends EntityMob
         return false;
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    protected SoundEvent getAmbientSound()
     {
-        return "mob.silverfish.say";
+        return SoundEvents.ENTITY_ENDERMITE_AMBIENT;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
     {
-        return "mob.silverfish.hit";
+        return SoundEvents.ENTITY_ENDERMITE_HURT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getDeathSound()
     {
-        return "mob.silverfish.kill";
+        return SoundEvents.ENTITY_ENDERMITE_DEATH;
     }
 
     protected void playStepSound(BlockPos pos, Block blockIn)
     {
-        this.playSound("mob.silverfish.step", 0.15F, 1.0F);
+        this.playSound(SoundEvents.ENTITY_ENDERMITE_STEP, 0.15F, 1.0F);
     }
 
-    protected Item getDropItem()
+    @Nullable
+    protected ResourceLocation getLootTable()
     {
-        return null;
+        return LootTableList.ENTITIES_ENDERMITE;
+    }
+
+    public static void registerFixesEndermite(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityEndermite.class);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        this.lifetime = tagCompund.getInteger("Lifetime");
-        this.playerSpawned = tagCompund.getBoolean("PlayerSpawned");
+        super.readEntityFromNBT(compound);
+        this.lifetime = compound.getInteger("Lifetime");
+        this.playerSpawned = compound.getBoolean("PlayerSpawned");
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("Lifetime", this.lifetime);
-        tagCompound.setBoolean("PlayerSpawned", this.playerSpawned);
+        super.writeEntityToNBT(compound);
+        compound.setInteger("Lifetime", this.lifetime);
+        compound.setBoolean("PlayerSpawned", this.playerSpawned);
     }
 
     /**
@@ -119,6 +127,23 @@ public class EntityEndermite extends EntityMob
     {
         this.renderYawOffset = this.rotationYaw;
         super.onUpdate();
+    }
+
+    /**
+     * Set the render yaw offset
+     */
+    public void setRenderYawOffset(float offset)
+    {
+        this.rotationYaw = offset;
+        super.setRenderYawOffset(offset);
+    }
+
+    /**
+     * Returns the Y Offset of this entity.
+     */
+    public double getYOffset()
+    {
+        return 0.1D;
     }
 
     public boolean isSpawnedByPlayer()
@@ -142,11 +167,11 @@ public class EntityEndermite extends EntityMob
     {
         super.onLivingUpdate();
 
-        if (this.worldObj.isRemote)
+        if (this.world.isRemote)
         {
             for (int i = 0; i < 2; ++i)
             {
-                this.worldObj.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D, new int[0]);
+                this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
             }
         }
         else
@@ -178,7 +203,7 @@ public class EntityEndermite extends EntityMob
     {
         if (super.getCanSpawnHere())
         {
-            EntityPlayer entityplayer = this.worldObj.getClosestPlayerToEntity(this, 5.0D);
+            EntityPlayer entityplayer = this.world.getClosestPlayerToEntity(this, 5.0D);
             return entityplayer == null;
         }
         else

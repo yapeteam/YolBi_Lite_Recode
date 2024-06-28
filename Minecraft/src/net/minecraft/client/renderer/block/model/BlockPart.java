@@ -8,11 +8,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.JsonUtils;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.util.vector.Vector3f;
 
 public class BlockPart
@@ -23,7 +25,7 @@ public class BlockPart
     public final BlockPartRotation partRotation;
     public final boolean shade;
 
-    public BlockPart(Vector3f positionFromIn, Vector3f positionToIn, Map<EnumFacing, BlockPartFace> mapFacesIn, BlockPartRotation partRotationIn, boolean shadeIn)
+    public BlockPart(Vector3f positionFromIn, Vector3f positionToIn, Map<EnumFacing, BlockPartFace> mapFacesIn, @Nullable BlockPartRotation partRotationIn, boolean shadeIn)
     {
         this.positionFrom = positionFromIn;
         this.positionTo = positionToIn;
@@ -37,34 +39,29 @@ public class BlockPart
     {
         for (Entry<EnumFacing, BlockPartFace> entry : this.mapFaces.entrySet())
         {
-            float[] afloat = this.getFaceUvs((EnumFacing)entry.getKey());
-            ((BlockPartFace)entry.getValue()).blockFaceUV.setUvs(afloat);
+            float[] afloat = this.getFaceUvs(entry.getKey());
+            (entry.getValue()).blockFaceUV.setUvs(afloat);
         }
     }
 
-    private float[] getFaceUvs(EnumFacing p_178236_1_)
+    private float[] getFaceUvs(EnumFacing facing)
     {
-        float[] afloat;
-
-        switch (p_178236_1_)
+        switch (facing)
         {
             case DOWN:
+                return new float[] {this.positionFrom.x, 16.0F - this.positionTo.z, this.positionTo.x, 16.0F - this.positionFrom.z};
             case UP:
-                afloat = new float[] {this.positionFrom.x, this.positionFrom.z, this.positionTo.x, this.positionTo.z};
-                break;
+                return new float[] {this.positionFrom.x, this.positionFrom.z, this.positionTo.x, this.positionTo.z};
             case NORTH:
-            case SOUTH:
-                afloat = new float[] {this.positionFrom.x, 16.0F - this.positionTo.y, this.positionTo.x, 16.0F - this.positionFrom.y};
-                break;
-            case WEST:
-            case EAST:
-                afloat = new float[] {this.positionFrom.z, 16.0F - this.positionTo.y, this.positionTo.z, 16.0F - this.positionFrom.y};
-                break;
             default:
-                throw new NullPointerException();
+                return new float[] {16.0F - this.positionTo.x, 16.0F - this.positionTo.y, 16.0F - this.positionFrom.x, 16.0F - this.positionFrom.y};
+            case SOUTH:
+                return new float[] {this.positionFrom.x, 16.0F - this.positionTo.y, this.positionTo.x, 16.0F - this.positionFrom.y};
+            case WEST:
+                return new float[] {this.positionFrom.z, 16.0F - this.positionTo.y, this.positionTo.z, 16.0F - this.positionFrom.y};
+            case EAST:
+                return new float[] {16.0F - this.positionTo.z, 16.0F - this.positionTo.y, 16.0F - this.positionFrom.z, 16.0F - this.positionFrom.y};
         }
-
-        return afloat;
     }
 
     static class Deserializer implements JsonDeserializer<BlockPart>
@@ -88,13 +85,14 @@ public class BlockPart
             }
         }
 
-        private BlockPartRotation parseRotation(JsonObject p_178256_1_)
+        @Nullable
+        private BlockPartRotation parseRotation(JsonObject object)
         {
             BlockPartRotation blockpartrotation = null;
 
-            if (p_178256_1_.has("rotation"))
+            if (object.has("rotation"))
             {
-                JsonObject jsonobject = JsonUtils.getJsonObject(p_178256_1_, "rotation");
+                JsonObject jsonobject = JsonUtils.getJsonObject(object, "rotation");
                 Vector3f vector3f = this.parsePosition(jsonobject, "origin");
                 vector3f.scale(0.0625F);
                 EnumFacing.Axis enumfacing$axis = this.parseAxis(jsonobject);
@@ -106,9 +104,9 @@ public class BlockPart
             return blockpartrotation;
         }
 
-        private float parseAngle(JsonObject p_178255_1_)
+        private float parseAngle(JsonObject object)
         {
-            float f = JsonUtils.getFloat(p_178255_1_, "angle");
+            float f = JsonUtils.getFloat(object, "angle");
 
             if (f != 0.0F && MathHelper.abs(f) != 22.5F && MathHelper.abs(f) != 45.0F)
             {
@@ -120,10 +118,10 @@ public class BlockPart
             }
         }
 
-        private EnumFacing.Axis parseAxis(JsonObject p_178252_1_)
+        private EnumFacing.Axis parseAxis(JsonObject object)
         {
-            String s = JsonUtils.getString(p_178252_1_, "axis");
-            EnumFacing.Axis enumfacing$axis = EnumFacing.Axis.byName(s.toLowerCase());
+            String s = JsonUtils.getString(object, "axis");
+            EnumFacing.Axis enumfacing$axis = EnumFacing.Axis.byName(s.toLowerCase(Locale.ROOT));
 
             if (enumfacing$axis == null)
             {
@@ -135,9 +133,9 @@ public class BlockPart
             }
         }
 
-        private Map<EnumFacing, BlockPartFace> parseFacesCheck(JsonDeserializationContext p_178250_1_, JsonObject p_178250_2_)
+        private Map<EnumFacing, BlockPartFace> parseFacesCheck(JsonDeserializationContext deserializationContext, JsonObject object)
         {
-            Map<EnumFacing, BlockPartFace> map = this.parseFaces(p_178250_1_, p_178250_2_);
+            Map<EnumFacing, BlockPartFace> map = this.parseFaces(deserializationContext, object);
 
             if (map.isEmpty())
             {
@@ -149,15 +147,15 @@ public class BlockPart
             }
         }
 
-        private Map<EnumFacing, BlockPartFace> parseFaces(JsonDeserializationContext p_178253_1_, JsonObject p_178253_2_)
+        private Map<EnumFacing, BlockPartFace> parseFaces(JsonDeserializationContext deserializationContext, JsonObject object)
         {
             Map<EnumFacing, BlockPartFace> map = Maps.newEnumMap(EnumFacing.class);
-            JsonObject jsonobject = JsonUtils.getJsonObject(p_178253_2_, "faces");
+            JsonObject jsonobject = JsonUtils.getJsonObject(object, "faces");
 
             for (Entry<String, JsonElement> entry : jsonobject.entrySet())
             {
-                EnumFacing enumfacing = this.parseEnumFacing((String)entry.getKey());
-                map.put(enumfacing, (BlockPartFace)p_178253_1_.deserialize((JsonElement)entry.getValue(), BlockPartFace.class));
+                EnumFacing enumfacing = this.parseEnumFacing(entry.getKey());
+                map.put(enumfacing, (BlockPartFace)deserializationContext.deserialize(entry.getValue(), BlockPartFace.class));
             }
 
             return map;
@@ -177,9 +175,9 @@ public class BlockPart
             }
         }
 
-        private Vector3f parsePositionTo(JsonObject p_178247_1_)
+        private Vector3f parsePositionTo(JsonObject object)
         {
-            Vector3f vector3f = this.parsePosition(p_178247_1_, "to");
+            Vector3f vector3f = this.parsePosition(object, "to");
 
             if (vector3f.x >= -16.0F && vector3f.y >= -16.0F && vector3f.z >= -16.0F && vector3f.x <= 32.0F && vector3f.y <= 32.0F && vector3f.z <= 32.0F)
             {
@@ -187,13 +185,13 @@ public class BlockPart
             }
             else
             {
-                throw new JsonParseException("\'to\' specifier exceeds the allowed boundaries: " + vector3f);
+                throw new JsonParseException("'to' specifier exceeds the allowed boundaries: " + vector3f);
             }
         }
 
-        private Vector3f parsePositionFrom(JsonObject p_178249_1_)
+        private Vector3f parsePositionFrom(JsonObject object)
         {
-            Vector3f vector3f = this.parsePosition(p_178249_1_, "from");
+            Vector3f vector3f = this.parsePosition(object, "from");
 
             if (vector3f.x >= -16.0F && vector3f.y >= -16.0F && vector3f.z >= -16.0F && vector3f.x <= 32.0F && vector3f.y <= 32.0F && vector3f.z <= 32.0F)
             {
@@ -201,17 +199,17 @@ public class BlockPart
             }
             else
             {
-                throw new JsonParseException("\'from\' specifier exceeds the allowed boundaries: " + vector3f);
+                throw new JsonParseException("'from' specifier exceeds the allowed boundaries: " + vector3f);
             }
         }
 
-        private Vector3f parsePosition(JsonObject p_178251_1_, String p_178251_2_)
+        private Vector3f parsePosition(JsonObject object, String memberName)
         {
-            JsonArray jsonarray = JsonUtils.getJsonArray(p_178251_1_, p_178251_2_);
+            JsonArray jsonarray = JsonUtils.getJsonArray(object, memberName);
 
             if (jsonarray.size() != 3)
             {
-                throw new JsonParseException("Expected 3 " + p_178251_2_ + " values, found: " + jsonarray.size());
+                throw new JsonParseException("Expected 3 " + memberName + " values, found: " + jsonarray.size());
             }
             else
             {
@@ -219,7 +217,7 @@ public class BlockPart
 
                 for (int i = 0; i < afloat.length; ++i)
                 {
-                    afloat[i] = JsonUtils.getFloat(jsonarray.get(i), p_178251_2_ + "[" + i + "]");
+                    afloat[i] = JsonUtils.getFloat(jsonarray.get(i), memberName + "[" + i + "]");
                 }
 
                 return new Vector3f(afloat[0], afloat[1], afloat[2]);

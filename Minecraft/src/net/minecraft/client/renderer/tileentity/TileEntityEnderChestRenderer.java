@@ -8,20 +8,20 @@ import net.minecraft.util.ResourceLocation;
 public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<TileEntityEnderChest>
 {
     private static final ResourceLocation ENDER_CHEST_TEXTURE = new ResourceLocation("textures/entity/chest/ender.png");
-    private ModelChest field_147521_c = new ModelChest();
+    private final ModelChest modelChest = new ModelChest();
 
-    public void renderTileEntityAt(TileEntityEnderChest te, double x, double y, double z, float partialTicks, int destroyStage)
+    public void func_192841_a(TileEntityEnderChest p_192841_1_, double p_192841_2_, double p_192841_4_, double p_192841_6_, float p_192841_8_, int p_192841_9_, float p_192841_10_)
     {
         int i = 0;
 
-        if (te.hasWorldObj())
+        if (p_192841_1_.hasWorldObj())
         {
-            i = te.getBlockMetadata();
+            i = p_192841_1_.getBlockMetadata();
         }
 
-        if (destroyStage >= 0)
+        if (p_192841_9_ >= 0)
         {
-            this.bindTexture(DESTROY_STAGES[destroyStage]);
+            this.bindTexture(DESTROY_STAGES[p_192841_9_]);
             GlStateManager.matrixMode(5890);
             GlStateManager.pushMatrix();
             GlStateManager.scale(4.0F, 4.0F, 1.0F);
@@ -35,8 +35,8 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
 
         GlStateManager.pushMatrix();
         GlStateManager.enableRescaleNormal();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.translate((float)x, (float)y + 1.0F, (float)z + 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, p_192841_10_);
+        GlStateManager.translate((float)p_192841_2_, (float)p_192841_4_ + 1.0F, (float)p_192841_6_ + 1.0F);
         GlStateManager.scale(1.0F, -1.0F, -1.0F);
         GlStateManager.translate(0.5F, 0.5F, 0.5F);
         int j = 0;
@@ -63,16 +63,16 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer<Tile
 
         GlStateManager.rotate((float)j, 0.0F, 1.0F, 0.0F);
         GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-        float f = te.prevLidAngle + (te.lidAngle - te.prevLidAngle) * partialTicks;
+        float f = p_192841_1_.prevLidAngle + (p_192841_1_.lidAngle - p_192841_1_.prevLidAngle) * p_192841_8_;
         f = 1.0F - f;
         f = 1.0F - f * f * f;
-        this.field_147521_c.chestLid.rotateAngleX = -(f * (float)Math.PI / 2.0F);
-        this.field_147521_c.renderAll();
+        this.modelChest.chestLid.rotateAngleX = -(f * ((float)Math.PI / 2F));
+        this.modelChest.renderAll();
         GlStateManager.disableRescaleNormal();
         GlStateManager.popMatrix();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        if (destroyStage >= 0)
+        if (p_192841_9_ >= 0)
         {
             GlStateManager.matrixMode(5890);
             GlStateManager.popMatrix();

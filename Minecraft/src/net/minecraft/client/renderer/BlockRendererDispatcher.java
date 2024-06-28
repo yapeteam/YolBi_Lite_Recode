@@ -1,34 +1,32 @@
 package net.minecraft.client.renderer;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.SimpleBakedModel;
+import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.client.resources.model.WeightedBakedModel;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldType;
 
 public class BlockRendererDispatcher implements IResourceManagerReloadListener
 {
-    private BlockModelShapes blockModelShapes;
-    private final GameSettings gameSettings;
-    private final BlockModelRenderer blockModelRenderer = new BlockModelRenderer();
+    private final BlockModelShapes blockModelShapes;
+    private final BlockModelRenderer blockModelRenderer;
     private final ChestRenderer chestRenderer = new ChestRenderer();
-    private final BlockFluidRenderer fluidRenderer = new BlockFluidRenderer();
+    private final BlockFluidRenderer fluidRenderer;
 
-    public BlockRendererDispatcher(BlockModelShapes blockModelShapesIn, GameSettings gameSettingsIn)
+    public BlockRendererDispatcher(BlockModelShapes p_i46577_1_, BlockColors p_i46577_2_)
     {
-        this.blockModelShapes = blockModelShapesIn;
-        this.gameSettings = gameSettingsIn;
+        this.blockModelShapes = p_i46577_1_;
+        this.blockModelRenderer = new BlockModelRenderer(p_i46577_2_);
+        this.fluidRenderer = new BlockFluidRenderer(p_i46577_2_);
     }
 
     public BlockModelShapes getBlockModelShapes()
@@ -38,41 +36,49 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener
 
     public void renderBlockDamage(IBlockState state, BlockPos pos, TextureAtlasSprite texture, IBlockAccess blockAccess)
     {
-        Block block = state.getBlock();
-        int i = block.getRenderType();
-
-        if (i == 3)
+        if (state.getRenderType() == EnumBlockRenderType.MODEL)
         {
-            state = block.getActualState(state, blockAccess, pos);
+            state = state.getActualState(blockAccess, pos);
             IBakedModel ibakedmodel = this.blockModelShapes.getModelForState(state);
-            IBakedModel ibakedmodel1 = (new SimpleBakedModel.Builder(ibakedmodel, texture)).makeBakedModel();
-            this.blockModelRenderer.renderModel(blockAccess, ibakedmodel1, state, pos, Tessellator.getInstance().getWorldRenderer());
+            IBakedModel ibakedmodel1 = (new SimpleBakedModel.Builder(state, ibakedmodel, texture, pos)).makeBakedModel();
+            this.blockModelRenderer.renderModel(blockAccess, ibakedmodel1, state, pos, Tessellator.getInstance().getBuffer(), true);
         }
     }
 
-    public boolean renderBlock(IBlockState state, BlockPos pos, IBlockAccess blockAccess, WorldRenderer worldRendererIn)
+    public boolean renderBlock(IBlockState state, BlockPos pos, IBlockAccess blockAccess, BufferBuilder worldRendererIn)
     {
         try
         {
-            int i = state.getBlock().getRenderType();
+            EnumBlockRenderType enumblockrendertype = state.getRenderType();
 
-            if (i == -1)
+            if (enumblockrendertype == EnumBlockRenderType.INVISIBLE)
             {
                 return false;
             }
             else
             {
-                switch (i)
+                if (blockAccess.getWorldType() != WorldType.DEBUG_WORLD)
                 {
-                    case 1:
-                        return this.fluidRenderer.renderFluid(blockAccess, state, pos, worldRendererIn);
+                    try
+                    {
+                        state = state.getActualState(blockAccess, pos);
+                    }
+                    catch (Exception var8)
+                    {
+                        ;
+                    }
+                }
 
-                    case 2:
+                switch (enumblockrendertype)
+                {
+                    case MODEL:
+                        return this.blockModelRenderer.renderModel(blockAccess, this.getModelForState(state), state, pos, worldRendererIn, true);
+
+                    case ENTITYBLOCK_ANIMATED:
                         return false;
 
-                    case 3:
-                        IBakedModel ibakedmodel = this.getModelFromBlockState(state, blockAccess, pos);
-                        return this.blockModelRenderer.renderModel(blockAccess, ibakedmodel, state, pos, worldRendererIn);
+                    case LIQUID:
+                        return this.fluidRenderer.renderFluid(blockAccess, state, pos, worldRendererIn);
 
                     default:
                         return false;
@@ -93,77 +99,30 @@ public class BlockRendererDispatcher implements IResourceManagerReloadListener
         return this.blockModelRenderer;
     }
 
-    private IBakedModel getBakedModel(IBlockState state, BlockPos pos)
+    public IBakedModel getModelForState(IBlockState state)
     {
-        IBakedModel ibakedmodel = this.blockModelShapes.getModelForState(state);
-
-        if (pos != null && this.gameSettings.allowBlockAlternatives && ibakedmodel instanceof WeightedBakedModel)
-        {
-            ibakedmodel = ((WeightedBakedModel)ibakedmodel).getAlternativeModel(MathHelper.getPositionRandom(pos));
-        }
-
-        return ibakedmodel;
+        return this.blockModelShapes.getModelForState(state);
     }
 
-    public IBakedModel getModelFromBlockState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
-    {
-        Block block = state.getBlock();
-
-        if (worldIn.getWorldType() != WorldType.DEBUG_WORLD)
-        {
-            try
-            {
-                state = block.getActualState(state, worldIn, pos);
-            }
-            catch (Exception var6)
-            {
-                ;
-            }
-        }
-
-        IBakedModel ibakedmodel = this.blockModelShapes.getModelForState(state);
-
-        if (pos != null && this.gameSettings.allowBlockAlternatives && ibakedmodel instanceof WeightedBakedModel)
-        {
-            ibakedmodel = ((WeightedBakedModel)ibakedmodel).getAlternativeModel(MathHelper.getPositionRandom(pos));
-        }
-
-        return ibakedmodel;
-    }
-
+    @SuppressWarnings("incomplete-switch")
     public void renderBlockBrightness(IBlockState state, float brightness)
     {
-        int i = state.getBlock().getRenderType();
+        EnumBlockRenderType enumblockrendertype = state.getRenderType();
 
-        if (i != -1)
+        if (enumblockrendertype != EnumBlockRenderType.INVISIBLE)
         {
-            switch (i)
+            switch (enumblockrendertype)
             {
-                case 1:
-                default:
-                    break;
-
-                case 2:
-                    this.chestRenderer.renderChestBrightness(state.getBlock(), brightness);
-                    break;
-
-                case 3:
-                    IBakedModel ibakedmodel = this.getBakedModel(state, (BlockPos)null);
+                case MODEL:
+                    IBakedModel ibakedmodel = this.getModelForState(state);
                     this.blockModelRenderer.renderModelBrightness(ibakedmodel, state, brightness, true);
-            }
-        }
-    }
+                    break;
 
-    public boolean isRenderTypeChest(Block p_175021_1_, int p_175021_2_)
-    {
-        if (p_175021_1_ == null)
-        {
-            return false;
-        }
-        else
-        {
-            int i = p_175021_1_.getRenderType();
-            return i == 3 ? false : i == 2;
+                case ENTITYBLOCK_ANIMATED:
+                    this.chestRenderer.renderChestBrightness(state.getBlock(), brightness);
+
+                case LIQUID:
+            }
         }
     }
 

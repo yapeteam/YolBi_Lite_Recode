@@ -1,49 +1,47 @@
 package net.minecraft.block;
 
 import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public abstract class BlockBasePressurePlate extends Block
 {
+    /** The bounding box for the pressure plate pressed state */
+    protected static final AxisAlignedBB PRESSED_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.03125D, 0.9375D);
+    protected static final AxisAlignedBB UNPRESSED_AABB = new AxisAlignedBB(0.0625D, 0.0D, 0.0625D, 0.9375D, 0.0625D, 0.9375D);
+
+    /**
+     * This bounding box is used to check for entities in a certain area and then determine the pressed state.
+     */
+    protected static final AxisAlignedBB PRESSURE_AABB = new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.25D, 0.875D);
+
     protected BlockBasePressurePlate(Material materialIn)
     {
         this(materialIn, materialIn.getMaterialMapColor());
     }
 
-    protected BlockBasePressurePlate(Material p_i46401_1_, MapColor p_i46401_2_)
+    protected BlockBasePressurePlate(Material materialIn, MapColor mapColorIn)
     {
-        super(p_i46401_1_, p_i46401_2_);
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        super(materialIn, mapColorIn);
+        this.setCreativeTab(CreativeTabs.REDSTONE);
         this.setTickRandomly(true);
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        this.setBlockBoundsBasedOnState0(worldIn.getBlockState(pos));
-    }
-
-    protected void setBlockBoundsBasedOnState0(IBlockState state)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
         boolean flag = this.getRedstoneStrength(state) > 0;
-        float f = 0.0625F;
-
-        if (flag)
-        {
-            this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.03125F, 0.9375F);
-        }
-        else
-        {
-            this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.0625F, 0.9375F);
-        }
+        return flag ? PRESSED_AABB : UNPRESSED_AABB;
     }
 
     /**
@@ -54,20 +52,21 @@ public abstract class BlockBasePressurePlate extends Block
         return 20;
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -91,9 +90,11 @@ public abstract class BlockBasePressurePlate extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         if (!this.canBePlacedOn(worldIn, pos.down()))
         {
@@ -104,7 +105,7 @@ public abstract class BlockBasePressurePlate extends Block
 
     private boolean canBePlacedOn(World worldIn, BlockPos pos)
     {
-        return World.doesBlockHaveSolidTopSurface(worldIn, pos) || worldIn.getBlockState(pos).getBlock() instanceof BlockFence;
+        return worldIn.getBlockState(pos).isFullyOpaque() || worldIn.getBlockState(pos).getBlock() instanceof BlockFence;
     }
 
     /**
@@ -162,28 +163,26 @@ public abstract class BlockBasePressurePlate extends Block
 
         if (!flag1 && flag)
         {
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.1D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.5F);
+            this.playClickOffSound(worldIn, pos);
         }
         else if (flag1 && !flag)
         {
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.1D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, 0.6F);
+            this.playClickOnSound(worldIn, pos);
         }
 
         if (flag1)
         {
-            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            worldIn.scheduleUpdate(new BlockPos(pos), this, this.tickRate(worldIn));
         }
     }
 
-    /**
-     * Returns the cubic AABB inset by 1/8 on all sides
-     */
-    protected AxisAlignedBB getSensitiveAABB(BlockPos pos)
-    {
-        float f = 0.125F;
-        return new AxisAlignedBB((double)((float)pos.getX() + 0.125F), (double)pos.getY(), (double)((float)pos.getZ() + 0.125F), (double)((float)(pos.getX() + 1) - 0.125F), (double)pos.getY() + 0.25D, (double)((float)(pos.getZ() + 1) - 0.125F));
-    }
+    protected abstract void playClickOnSound(World worldIn, BlockPos color);
 
+    protected abstract void playClickOffSound(World worldIn, BlockPos pos);
+
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         if (this.getRedstoneStrength(state) > 0)
@@ -199,42 +198,31 @@ public abstract class BlockBasePressurePlate extends Block
      */
     protected void updateNeighbors(World worldIn, BlockPos pos)
     {
-        worldIn.notifyNeighborsOfStateChange(pos, this);
-        worldIn.notifyNeighborsOfStateChange(pos.down(), this);
+        worldIn.notifyNeighborsOfStateChange(pos, this, false);
+        worldIn.notifyNeighborsOfStateChange(pos.down(), this, false);
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return this.getRedstoneStrength(state);
+        return this.getRedstoneStrength(blockState);
     }
 
-    public int getStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.UP ? this.getRedstoneStrength(state) : 0;
+        return side == EnumFacing.UP ? this.getRedstoneStrength(blockState) : 0;
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return true;
     }
 
-    /**
-     * Sets the block's bounds for rendering it as an item
-     */
-    public void setBlockBoundsForItemRender()
+    public EnumPushReaction getMobilityFlag(IBlockState state)
     {
-        float f = 0.5F;
-        float f1 = 0.125F;
-        float f2 = 0.5F;
-        this.setBlockBounds(0.0F, 0.375F, 0.0F, 1.0F, 0.625F, 1.0F);
-    }
-
-    public int getMobilityFlag()
-    {
-        return 1;
+        return EnumPushReaction.DESTROY;
     }
 
     protected abstract int computeRedstoneStrength(World worldIn, BlockPos pos);
@@ -242,4 +230,9 @@ public abstract class BlockBasePressurePlate extends Block
     protected abstract int getRedstoneStrength(IBlockState state);
 
     protected abstract IBlockState setRedstoneStrength(IBlockState state, int strength);
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
+    }
 }

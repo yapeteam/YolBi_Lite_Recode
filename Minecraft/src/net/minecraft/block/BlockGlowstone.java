@@ -7,14 +7,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockAccess;
 
 public class BlockGlowstone extends Block
 {
     public BlockGlowstone(Material materialIn)
     {
         super(materialIn);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**
@@ -22,7 +24,7 @@ public class BlockGlowstone extends Block
      */
     public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        return MathHelper.clamp_int(this.quantityDropped(random) + random.nextInt(fortune + 1), 1, 4);
+        return MathHelper.clamp(this.quantityDropped(random) + random.nextInt(fortune + 1), 1, 4);
     }
 
     /**
@@ -38,14 +40,14 @@ public class BlockGlowstone extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.glowstone_dust;
+        return Items.GLOWSTONE_DUST;
     }
 
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
-        return MapColor.sandColor;
+        return MapColor.SAND;
     }
 }

@@ -1,16 +1,13 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.util.IProgressUpdate;
-import net.optifine.CustomLoadingScreen;
-import net.optifine.CustomLoadingScreens;
 
 public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
 {
-    private String field_146591_a = "";
-    private String field_146589_f = "";
+    private String title = "";
+    private String stage = "";
     private int progress;
     private boolean doneWorking;
-    private CustomLoadingScreen customLoadingScreen = CustomLoadingScreens.getCustomLoadingScreen();
 
     /**
      * Shows the 'Saving level' string.
@@ -26,7 +23,7 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
      */
     public void resetProgressAndMessage(String message)
     {
-        this.field_146591_a = message;
+        this.title = message;
         this.displayLoadingString("Working...");
     }
 
@@ -35,12 +32,12 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
      */
     public void displayLoadingString(String message)
     {
-        this.field_146589_f = message;
+        this.stage = message;
         this.setLoadingProgress(0);
     }
 
     /**
-     * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress
+     * Updates the progress bar on the loading screen to the specified amount.
      */
     public void setLoadingProgress(int progress)
     {
@@ -53,7 +50,7 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
     }
 
     /**
-     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     * Draws the screen and all the components in it.
      */
     public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
@@ -66,21 +63,9 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
         }
         else
         {
-            if (this.customLoadingScreen != null && this.mc.theWorld == null)
-            {
-                this.customLoadingScreen.drawBackground(this.width, this.height);
-            }
-            else
-            {
-                this.drawDefaultBackground();
-            }
-
-            if (this.progress > 0)
-            {
-                this.drawCenteredString(this.fontRendererObj, this.field_146591_a, this.width / 2, 70, 16777215);
-                this.drawCenteredString(this.fontRendererObj, this.field_146589_f + " " + this.progress + "%", this.width / 2, 90, 16777215);
-            }
-
+            this.drawDefaultBackground();
+            this.drawCenteredString(this.fontRendererObj, this.title, this.width / 2, 70, 16777215);
+            this.drawCenteredString(this.fontRendererObj, this.stage + " " + this.progress + "%", this.width / 2, 90, 16777215);
             super.drawScreen(mouseX, mouseY, partialTicks);
         }
     }

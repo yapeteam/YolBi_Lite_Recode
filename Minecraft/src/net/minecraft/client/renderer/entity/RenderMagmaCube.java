@@ -7,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderMagmaCube extends RenderLiving<EntityMagmaCube>
 {
-    private static final ResourceLocation magmaCubeTextures = new ResourceLocation("textures/entity/slime/magmacube.png");
+    private static final ResourceLocation MAGMA_CUBE_TEXTURES = new ResourceLocation("textures/entity/slime/magmacube.png");
 
     public RenderMagmaCube(RenderManager renderManagerIn)
     {
@@ -19,19 +19,17 @@ public class RenderMagmaCube extends RenderLiving<EntityMagmaCube>
      */
     protected ResourceLocation getEntityTexture(EntityMagmaCube entity)
     {
-        return magmaCubeTextures;
+        return MAGMA_CUBE_TEXTURES;
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityMagmaCube entitylivingbaseIn, float partialTickTime)
     {
         int i = entitylivingbaseIn.getSlimeSize();
         float f = (entitylivingbaseIn.prevSquishFactor + (entitylivingbaseIn.squishFactor - entitylivingbaseIn.prevSquishFactor) * partialTickTime) / ((float)i * 0.5F + 1.0F);
         float f1 = 1.0F / (f + 1.0F);
-        float f2 = (float)i;
-        GlStateManager.scale(f1 * f2, 1.0F / f1 * f2, f1 * f2);
+        GlStateManager.scale(f1 * (float)i, 1.0F / f1 * (float)i, f1 * (float)i);
     }
 }

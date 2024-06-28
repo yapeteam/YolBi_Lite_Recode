@@ -1,5 +1,7 @@
 package net.minecraft.util;
 
+import javax.annotation.Nullable;
+
 public class IntHashMap<V>
 {
     private transient IntHashMap.Entry<V>[] slots = new IntHashMap.Entry[16];
@@ -30,16 +32,18 @@ public class IntHashMap<V>
         return hash & slotCount - 1;
     }
 
+    @Nullable
+
     /**
      * Returns the object associated to a key
      */
-    public V lookup(int p_76041_1_)
+    public V lookup(int hashEntry)
     {
-        int i = computeHash(p_76041_1_);
+        int i = computeHash(hashEntry);
 
         for (IntHashMap.Entry<V> entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry)
         {
-            if (entry.hashEntry == p_76041_1_)
+            if (entry.hashEntry == hashEntry)
             {
                 return entry.valueEntry;
             }
@@ -51,18 +55,19 @@ public class IntHashMap<V>
     /**
      * Returns true if this hash table contains the specified item.
      */
-    public boolean containsItem(int p_76037_1_)
+    public boolean containsItem(int hashEntry)
     {
-        return this.lookupEntry(p_76037_1_) != null;
+        return this.lookupEntry(hashEntry) != null;
     }
 
-    final IntHashMap.Entry<V> lookupEntry(int p_76045_1_)
+    @Nullable
+    final IntHashMap.Entry<V> lookupEntry(int hashEntry)
     {
-        int i = computeHash(p_76045_1_);
+        int i = computeHash(hashEntry);
 
         for (IntHashMap.Entry<V> entry = this.slots[getSlotIndex(i, this.slots.length)]; entry != null; entry = entry.nextEntry)
         {
-            if (entry.hashEntry == p_76045_1_)
+            if (entry.hashEntry == hashEntry)
             {
                 return entry;
             }
@@ -74,21 +79,21 @@ public class IntHashMap<V>
     /**
      * Adds a key and associated value to this map
      */
-    public void addKey(int p_76038_1_, V p_76038_2_)
+    public void addKey(int hashEntry, V valueEntry)
     {
-        int i = computeHash(p_76038_1_);
+        int i = computeHash(hashEntry);
         int j = getSlotIndex(i, this.slots.length);
 
         for (IntHashMap.Entry<V> entry = this.slots[j]; entry != null; entry = entry.nextEntry)
         {
-            if (entry.hashEntry == p_76038_1_)
+            if (entry.hashEntry == hashEntry)
             {
-                entry.valueEntry = p_76038_2_;
+                entry.valueEntry = valueEntry;
                 return;
             }
         }
 
-        this.insert(i, p_76038_1_, p_76038_2_, j);
+        this.insert(i, hashEntry, valueEntry, j);
     }
 
     /**
@@ -145,6 +150,8 @@ public class IntHashMap<V>
         }
     }
 
+    @Nullable
+
     /**
      * Removes the specified object from the map and returns it
      */
@@ -154,6 +161,7 @@ public class IntHashMap<V>
         return (V)(entry == null ? null : entry.valueEntry);
     }
 
+    @Nullable
     final IntHashMap.Entry<V> removeEntry(int p_76036_1_)
     {
         int i = computeHash(p_76036_1_);
@@ -251,15 +259,13 @@ public class IntHashMap<V>
             else
             {
                 IntHashMap.Entry<V> entry = (IntHashMap.Entry)p_equals_1_;
-                Object object = Integer.valueOf(this.getHash());
-                Object object1 = Integer.valueOf(entry.getHash());
 
-                if (object == object1 || object != null && object.equals(object1))
+                if (this.hashEntry == entry.hashEntry)
                 {
-                    Object object2 = this.getValue();
-                    Object object3 = entry.getValue();
+                    Object object = this.getValue();
+                    Object object1 = entry.getValue();
 
-                    if (object2 == object3 || object2 != null && object2.equals(object3))
+                    if (object == object1 || object != null && object.equals(object1))
                     {
                         return true;
                     }

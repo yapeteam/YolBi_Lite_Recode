@@ -1,16 +1,16 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class EntityAIMoveTowardsRestriction extends EntityAIBase
 {
-    private EntityCreature theEntity;
+    private final EntityCreature theEntity;
     private double movePosX;
     private double movePosY;
     private double movePosZ;
-    private double movementSpeed;
+    private final double movementSpeed;
 
     public EntityAIMoveTowardsRestriction(EntityCreature creatureIn, double speedIn)
     {
@@ -31,17 +31,17 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
         else
         {
             BlockPos blockpos = this.theEntity.getHomePosition();
-            Vec3 vec3 = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, new Vec3((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()));
+            Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, new Vec3d((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ()));
 
-            if (vec3 == null)
+            if (vec3d == null)
             {
                 return false;
             }
             else
             {
-                this.movePosX = vec3.xCoord;
-                this.movePosY = vec3.yCoord;
-                this.movePosZ = vec3.zCoord;
+                this.movePosX = vec3d.xCoord;
+                this.movePosY = vec3d.yCoord;
+                this.movePosZ = vec3d.zCoord;
                 return true;
             }
         }

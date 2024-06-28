@@ -8,7 +8,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderWitch extends RenderLiving<EntityWitch>
 {
-    private static final ResourceLocation witchTextures = new ResourceLocation("textures/entity/witch.png");
+    private static final ResourceLocation WITCH_TEXTURES = new ResourceLocation("textures/entity/witch.png");
 
     public RenderWitch(RenderManager renderManagerIn)
     {
@@ -16,12 +16,17 @@ public class RenderWitch extends RenderLiving<EntityWitch>
         this.addLayer(new LayerHeldItemWitch(this));
     }
 
+    public ModelWitch getMainModel()
+    {
+        return (ModelWitch)super.getMainModel();
+    }
+
     /**
      * Renders the desired {@code T} type Entity.
      */
     public void doRender(EntityWitch entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
-        ((ModelWitch)this.mainModel).field_82900_g = entity.getHeldItem() != null;
+        ((ModelWitch)this.mainModel).holdingItem = !entity.getHeldItemMainhand().func_190926_b();
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
 
@@ -30,7 +35,7 @@ public class RenderWitch extends RenderLiving<EntityWitch>
      */
     protected ResourceLocation getEntityTexture(EntityWitch entity)
     {
-        return witchTextures;
+        return WITCH_TEXTURES;
     }
 
     public void transformHeldFull3DItemLayer()
@@ -39,12 +44,11 @@ public class RenderWitch extends RenderLiving<EntityWitch>
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityWitch entitylivingbaseIn, float partialTickTime)
     {
         float f = 0.9375F;
-        GlStateManager.scale(f, f, f);
+        GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
     }
 }

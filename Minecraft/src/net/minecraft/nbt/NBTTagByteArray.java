@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class NBTTagByteArray extends NBTBase
 {
@@ -17,6 +18,24 @@ public class NBTTagByteArray extends NBTBase
     public NBTTagByteArray(byte[] data)
     {
         this.data = data;
+    }
+
+    public NBTTagByteArray(List<Byte> p_i47529_1_)
+    {
+        this(func_193589_a(p_i47529_1_));
+    }
+
+    private static byte[] func_193589_a(List<Byte> p_193589_0_)
+    {
+        byte[] abyte = new byte[p_193589_0_.size()];
+
+        for (int i = 0; i < p_193589_0_.size(); ++i)
+        {
+            Byte obyte = p_193589_0_.get(i);
+            abyte[i] = obyte == null ? 0 : obyte.byteValue();
+        }
+
+        return abyte;
     }
 
     /**
@@ -42,12 +61,24 @@ public class NBTTagByteArray extends NBTBase
      */
     public byte getId()
     {
-        return (byte)7;
+        return 7;
     }
 
     public String toString()
     {
-        return "[" + this.data.length + " bytes]";
+        StringBuilder stringbuilder = new StringBuilder("[B;");
+
+        for (int i = 0; i < this.data.length; ++i)
+        {
+            if (i != 0)
+            {
+                stringbuilder.append(',');
+            }
+
+            stringbuilder.append((int)this.data[i]).append('B');
+        }
+
+        return stringbuilder.append(']').toString();
     }
 
     /**
@@ -62,7 +93,7 @@ public class NBTTagByteArray extends NBTBase
 
     public boolean equals(Object p_equals_1_)
     {
-        return super.equals(p_equals_1_) ? Arrays.equals(this.data, ((NBTTagByteArray)p_equals_1_).data) : false;
+        return super.equals(p_equals_1_) && Arrays.equals(this.data, ((NBTTagByteArray)p_equals_1_).data);
     }
 
     public int hashCode()

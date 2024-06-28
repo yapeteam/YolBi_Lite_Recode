@@ -3,31 +3,31 @@ package net.minecraft.client.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class GuiOptionSlider extends GuiButton
 {
     private float sliderValue;
     public boolean dragging;
-    private GameSettings.Options options;
-    private final float field_146132_r;
-    private final float field_146131_s;
+    private final GameSettings.Options options;
+    private final float minValue;
+    private final float maxValue;
 
-    public GuiOptionSlider(int p_i45016_1_, int p_i45016_2_, int p_i45016_3_, GameSettings.Options p_i45016_4_)
+    public GuiOptionSlider(int buttonId, int x, int y, GameSettings.Options optionIn)
     {
-        this(p_i45016_1_, p_i45016_2_, p_i45016_3_, p_i45016_4_, 0.0F, 1.0F);
+        this(buttonId, x, y, optionIn, 0.0F, 1.0F);
     }
 
-    public GuiOptionSlider(int p_i45017_1_, int p_i45017_2_, int p_i45017_3_, GameSettings.Options p_i45017_4_, float p_i45017_5_, float p_i45017_6_)
+    public GuiOptionSlider(int buttonId, int x, int y, GameSettings.Options optionIn, float minValueIn, float maxValue)
     {
-        super(p_i45017_1_, p_i45017_2_, p_i45017_3_, 150, 20, "");
+        super(buttonId, x, y, 150, 20, "");
         this.sliderValue = 1.0F;
-        this.options = p_i45017_4_;
-        this.field_146132_r = p_i45017_5_;
-        this.field_146131_s = p_i45017_6_;
+        this.options = optionIn;
+        this.minValue = minValueIn;
+        this.maxValue = maxValue;
         Minecraft minecraft = Minecraft.getMinecraft();
-        this.sliderValue = p_i45017_4_.normalizeValue(minecraft.gameSettings.getOptionFloatValue(p_i45017_4_));
-        this.displayString = minecraft.gameSettings.getKeyBinding(p_i45017_4_);
+        this.sliderValue = optionIn.normalizeValue(minecraft.gameSettings.getOptionFloatValue(optionIn));
+        this.displayString = minecraft.gameSettings.getKeyBinding(optionIn);
     }
 
     /**
@@ -49,14 +49,14 @@ public class GuiOptionSlider extends GuiButton
             if (this.dragging)
             {
                 this.sliderValue = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
-                this.sliderValue = MathHelper.clamp_float(this.sliderValue, 0.0F, 1.0F);
+                this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0F, 1.0F);
                 float f = this.options.denormalizeValue(this.sliderValue);
                 mc.gameSettings.setOptionFloatValue(this.options, f);
                 this.sliderValue = this.options.normalizeValue(f);
                 this.displayString = mc.gameSettings.getKeyBinding(this.options);
             }
 
-            mc.getTextureManager().bindTexture(buttonTextures);
+            mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.drawTexturedModalRect(this.xPosition + (int)(this.sliderValue * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
             this.drawTexturedModalRect(this.xPosition + (int)(this.sliderValue * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
@@ -72,7 +72,7 @@ public class GuiOptionSlider extends GuiButton
         if (super.mousePressed(mc, mouseX, mouseY))
         {
             this.sliderValue = (float)(mouseX - (this.xPosition + 4)) / (float)(this.width - 8);
-            this.sliderValue = MathHelper.clamp_float(this.sliderValue, 0.0F, 1.0F);
+            this.sliderValue = MathHelper.clamp(this.sliderValue, 0.0F, 1.0F);
             mc.gameSettings.setOptionFloatValue(this.options, this.options.denormalizeValue(this.sliderValue));
             this.displayString = mc.gameSettings.getKeyBinding(this.options);
             this.dragging = true;

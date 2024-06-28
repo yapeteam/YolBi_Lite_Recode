@@ -6,7 +6,8 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class EntityEgg extends EntityThrowable
@@ -26,43 +27,55 @@ public class EntityEgg extends EntityThrowable
         super(worldIn, x, y, z);
     }
 
+    public static void registerFixesEgg(DataFixer fixer)
+    {
+        EntityThrowable.registerFixesThrowable(fixer, "ThrownEgg");
+    }
+
+    public void handleStatusUpdate(byte id)
+    {
+        if (id == 3)
+        {
+            double d0 = 0.08D;
+
+            for (int i = 0; i < 8; ++i)
+            {
+                this.world.spawnParticle(EnumParticleTypes.ITEM_CRACK, this.posX, this.posY, this.posZ, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, Item.getIdFromItem(Items.EGG));
+            }
+        }
+    }
+
     /**
      * Called when this EntityThrowable hits a block or entity.
      */
-    protected void onImpact(MovingObjectPosition p_70184_1_)
+    protected void onImpact(RayTraceResult result)
     {
-        if (p_70184_1_.entityHit != null)
+        if (result.entityHit != null)
         {
-            p_70184_1_.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 0.0F);
+            result.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.getThrower()), 0.0F);
         }
 
-        if (!this.worldObj.isRemote && this.rand.nextInt(8) == 0)
+        if (!this.world.isRemote)
         {
-            int i = 1;
-
-            if (this.rand.nextInt(32) == 0)
+            if (this.rand.nextInt(8) == 0)
             {
-                i = 4;
+                int i = 1;
+
+                if (this.rand.nextInt(32) == 0)
+                {
+                    i = 4;
+                }
+
+                for (int j = 0; j < i; ++j)
+                {
+                    EntityChicken entitychicken = new EntityChicken(this.world);
+                    entitychicken.setGrowingAge(-24000);
+                    entitychicken.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+                    this.world.spawnEntityInWorld(entitychicken);
+                }
             }
 
-            for (int j = 0; j < i; ++j)
-            {
-                EntityChicken entitychicken = new EntityChicken(this.worldObj);
-                entitychicken.setGrowingAge(-24000);
-                entitychicken.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-                this.worldObj.spawnEntityInWorld(entitychicken);
-            }
-        }
-
-        double d0 = 0.08D;
-
-        for (int k = 0; k < 8; ++k)
-        {
-            this.worldObj.spawnParticle(EnumParticleTypes.ITEM_CRACK, this.posX, this.posY, this.posZ, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, ((double)this.rand.nextFloat() - 0.5D) * 0.08D, new int[] {Item.getIdFromItem(Items.egg)});
-        }
-
-        if (!this.worldObj.isRemote)
-        {
+            this.world.setEntityState(this, (byte)3);
             this.setDead();
         }
     }

@@ -35,9 +35,9 @@ public class ContainerFurnace extends Container
         }
     }
 
-    public void onCraftGuiOpened(ICrafting listener)
+    public void addListener(IContainerListener listener)
     {
-        super.onCraftGuiOpened(listener);
+        super.addListener(listener);
         listener.sendAllWindowProperties(this, this.tileFurnace);
     }
 
@@ -48,28 +48,28 @@ public class ContainerFurnace extends Container
     {
         super.detectAndSendChanges();
 
-        for (int i = 0; i < this.crafters.size(); ++i)
+        for (int i = 0; i < this.listeners.size(); ++i)
         {
-            ICrafting icrafting = (ICrafting)this.crafters.get(i);
+            IContainerListener icontainerlistener = this.listeners.get(i);
 
             if (this.cookTime != this.tileFurnace.getField(2))
             {
-                icrafting.sendProgressBarUpdate(this, 2, this.tileFurnace.getField(2));
+                icontainerlistener.sendProgressBarUpdate(this, 2, this.tileFurnace.getField(2));
             }
 
             if (this.furnaceBurnTime != this.tileFurnace.getField(0))
             {
-                icrafting.sendProgressBarUpdate(this, 0, this.tileFurnace.getField(0));
+                icontainerlistener.sendProgressBarUpdate(this, 0, this.tileFurnace.getField(0));
             }
 
             if (this.currentItemBurnTime != this.tileFurnace.getField(1))
             {
-                icrafting.sendProgressBarUpdate(this, 1, this.tileFurnace.getField(1));
+                icontainerlistener.sendProgressBarUpdate(this, 1, this.tileFurnace.getField(1));
             }
 
             if (this.totalCookTime != this.tileFurnace.getField(3))
             {
-                icrafting.sendProgressBarUpdate(this, 3, this.tileFurnace.getField(3));
+                icontainerlistener.sendProgressBarUpdate(this, 3, this.tileFurnace.getField(3));
             }
         }
 
@@ -84,9 +84,12 @@ public class ContainerFurnace extends Container
         this.tileFurnace.setField(id, data);
     }
 
+    /**
+     * Determines whether supplied player can use this container
+     */
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.tileFurnace.isUseableByPlayer(playerIn);
+        return this.tileFurnace.isUsableByPlayer(playerIn);
     }
 
     /**
@@ -94,8 +97,8 @@ public class ContainerFurnace extends Container
      */
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
-        ItemStack itemstack = null;
-        Slot slot = (Slot)this.inventorySlots.get(index);
+        ItemStack itemstack = ItemStack.field_190927_a;
+        Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
         {
@@ -106,59 +109,59 @@ public class ContainerFurnace extends Container
             {
                 if (!this.mergeItemStack(itemstack1, 3, 39, true))
                 {
-                    return null;
+                    return ItemStack.field_190927_a;
                 }
 
                 slot.onSlotChange(itemstack1, itemstack);
             }
             else if (index != 1 && index != 0)
             {
-                if (FurnaceRecipes.instance().getSmeltingResult(itemstack1) != null)
+                if (!FurnaceRecipes.instance().getSmeltingResult(itemstack1).func_190926_b())
                 {
                     if (!this.mergeItemStack(itemstack1, 0, 1, false))
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
                 }
                 else if (TileEntityFurnace.isItemFuel(itemstack1))
                 {
                     if (!this.mergeItemStack(itemstack1, 1, 2, false))
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
                 }
                 else if (index >= 3 && index < 30)
                 {
                     if (!this.mergeItemStack(itemstack1, 30, 39, false))
                     {
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
                 }
                 else if (index >= 30 && index < 39 && !this.mergeItemStack(itemstack1, 3, 30, false))
                 {
-                    return null;
+                    return ItemStack.field_190927_a;
                 }
             }
             else if (!this.mergeItemStack(itemstack1, 3, 39, false))
             {
-                return null;
+                return ItemStack.field_190927_a;
             }
 
-            if (itemstack1.stackSize == 0)
+            if (itemstack1.func_190926_b())
             {
-                slot.putStack((ItemStack)null);
+                slot.putStack(ItemStack.field_190927_a);
             }
             else
             {
                 slot.onSlotChanged();
             }
 
-            if (itemstack1.stackSize == itemstack.stackSize)
+            if (itemstack1.func_190916_E() == itemstack.func_190916_E())
             {
-                return null;
+                return ItemStack.field_190927_a;
             }
 
-            slot.onPickupFromSlot(playerIn, itemstack1);
+            slot.func_190901_a(playerIn, itemstack1);
         }
 
         return itemstack;

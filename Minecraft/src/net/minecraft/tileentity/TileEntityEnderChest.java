@@ -2,7 +2,9 @@ package net.minecraft.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 
 public class TileEntityEnderChest extends TileEntity implements ITickable
 {
@@ -20,7 +22,7 @@ public class TileEntityEnderChest extends TileEntity implements ITickable
     {
         if (++this.ticksSinceSync % 20 * 4 == 0)
         {
-            this.worldObj.addBlockEvent(this.pos, Blocks.ender_chest, 1, this.numPlayersUsing);
+            this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
         }
 
         this.prevLidAngle = this.lidAngle;
@@ -33,7 +35,7 @@ public class TileEntityEnderChest extends TileEntity implements ITickable
         {
             double d0 = (double)i + 0.5D;
             double d1 = (double)k + 0.5D;
-            this.worldObj.playSoundEffect(d0, (double)j + 0.5D, d1, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound((EntityPlayer)null, d0, (double)j + 0.5D, d1, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
 
         if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F)
@@ -42,11 +44,11 @@ public class TileEntityEnderChest extends TileEntity implements ITickable
 
             if (this.numPlayersUsing > 0)
             {
-                this.lidAngle += f;
+                this.lidAngle += 0.1F;
             }
             else
             {
-                this.lidAngle -= f;
+                this.lidAngle -= 0.1F;
             }
 
             if (this.lidAngle > 1.0F)
@@ -56,11 +58,11 @@ public class TileEntityEnderChest extends TileEntity implements ITickable
 
             float f1 = 0.5F;
 
-            if (this.lidAngle < f1 && f2 >= f1)
+            if (this.lidAngle < 0.5F && f2 >= 0.5F)
             {
                 double d3 = (double)i + 0.5D;
                 double d2 = (double)k + 0.5D;
-                this.worldObj.playSoundEffect(d3, (double)j + 0.5D, d2, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                this.world.playSound((EntityPlayer)null, d3, (double)j + 0.5D, d2, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
             }
 
             if (this.lidAngle < 0.0F)
@@ -95,17 +97,24 @@ public class TileEntityEnderChest extends TileEntity implements ITickable
     public void openChest()
     {
         ++this.numPlayersUsing;
-        this.worldObj.addBlockEvent(this.pos, Blocks.ender_chest, 1, this.numPlayersUsing);
+        this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
     }
 
     public void closeChest()
     {
         --this.numPlayersUsing;
-        this.worldObj.addBlockEvent(this.pos, Blocks.ender_chest, 1, this.numPlayersUsing);
+        this.world.addBlockEvent(this.pos, Blocks.ENDER_CHEST, 1, this.numPlayersUsing);
     }
 
-    public boolean canBeUsed(EntityPlayer p_145971_1_)
+    public boolean canBeUsed(EntityPlayer player)
     {
-        return this.worldObj.getTileEntity(this.pos) != this ? false : p_145971_1_.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+        if (this.world.getTileEntity(this.pos) != this)
+        {
+            return false;
+        }
+        else
+        {
+            return player.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
+        }
     }
 }

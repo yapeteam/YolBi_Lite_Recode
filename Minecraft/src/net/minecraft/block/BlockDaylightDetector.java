@@ -1,11 +1,11 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,9 +14,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityDaylightDetector;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -24,46 +28,51 @@ import net.minecraft.world.World;
 public class BlockDaylightDetector extends BlockContainer
 {
     public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
+    protected static final AxisAlignedBB DAYLIGHT_DETECTOR_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D);
     private final boolean inverted;
 
     public BlockDaylightDetector(boolean inverted)
     {
-        super(Material.wood);
+        super(Material.WOOD);
         this.inverted = inverted;
         this.setDefaultState(this.blockState.getBaseState().withProperty(POWER, Integer.valueOf(0)));
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.375F, 1.0F);
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        this.setCreativeTab(CreativeTabs.REDSTONE);
         this.setHardness(0.2F);
-        this.setStepSound(soundTypeWood);
+        this.setSoundType(SoundType.WOOD);
         this.setUnlocalizedName("daylightDetector");
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.375F, 1.0F);
+        return DAYLIGHT_DETECTOR_AABB;
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return ((Integer)state.getValue(POWER)).intValue();
+        return ((Integer)blockState.getValue(POWER)).intValue();
     }
 
     public void updatePower(World worldIn, BlockPos pos)
     {
-        if (!worldIn.provider.getHasNoSky())
+        if (worldIn.provider.func_191066_m())
         {
             IBlockState iblockstate = worldIn.getBlockState(pos);
             int i = worldIn.getLightFor(EnumSkyBlock.SKY, pos) - worldIn.getSkylightSubtracted();
             float f = worldIn.getCelestialAngleRadians(1.0F);
-            float f1 = f < (float)Math.PI ? 0.0F : ((float)Math.PI * 2F);
-            f = f + (f1 - f) * 0.2F;
-            i = Math.round((float)i * MathHelper.cos(f));
-            i = MathHelper.clamp_int(i, 0, 15);
 
             if (this.inverted)
             {
                 i = 15 - i;
             }
+
+            if (i > 0 && !this.inverted)
+            {
+                float f1 = f < (float)Math.PI ? 0.0F : ((float)Math.PI * 2F);
+                f = f + (f1 - f) * 0.2F;
+                i = Math.round((float)i * MathHelper.cos(f));
+            }
+
+            i = MathHelper.clamp(i, 0, 15);
 
             if (((Integer)iblockstate.getValue(POWER)).intValue() != i)
             {
@@ -72,7 +81,7 @@ public class BlockDaylightDetector extends BlockContainer
         }
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (playerIn.isAllowEdit())
         {
@@ -84,13 +93,13 @@ public class BlockDaylightDetector extends BlockContainer
             {
                 if (this.inverted)
                 {
-                    worldIn.setBlockState(pos, Blocks.daylight_detector.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-                    Blocks.daylight_detector.updatePower(worldIn, pos);
+                    worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
+                    Blocks.DAYLIGHT_DETECTOR.updatePower(worldIn, pos);
                 }
                 else
                 {
-                    worldIn.setBlockState(pos, Blocks.daylight_detector_inverted.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
-                    Blocks.daylight_detector_inverted.updatePower(worldIn, pos);
+                    worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
+                    Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(worldIn, pos);
                 }
 
                 return true;
@@ -98,7 +107,7 @@ public class BlockDaylightDetector extends BlockContainer
         }
         else
         {
-            return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
+            return super.onBlockActivated(worldIn, pos, state, playerIn, hand, heldItem, side, hitX, hitY);
         }
     }
 
@@ -107,15 +116,15 @@ public class BlockDaylightDetector extends BlockContainer
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Item.getItemFromBlock(Blocks.daylight_detector);
+        return Item.getItemFromBlock(Blocks.DAYLIGHT_DETECTOR);
     }
 
-    public Item getItem(World worldIn, BlockPos pos)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return Item.getItemFromBlock(Blocks.daylight_detector);
+        return new ItemStack(Blocks.DAYLIGHT_DETECTOR);
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -123,23 +132,24 @@ public class BlockDaylightDetector extends BlockContainer
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
     /**
-     * The type of render function called. 3 for standard block models, 2 for TESR's, 1 for liquids, -1 is no render
+     * The type of render function called. MODEL for mixed tesr and static model, MODELBLOCK_ANIMATED for TESR-only,
+     * LIQUID for vanilla liquids, INVISIBLE to skip all rendering
      */
-    public int getRenderType()
+    public EnumBlockRenderType getRenderType(IBlockState state)
     {
-        return 3;
+        return EnumBlockRenderType.MODEL;
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return true;
     }
@@ -168,19 +178,24 @@ public class BlockDaylightDetector extends BlockContainer
         return ((Integer)state.getValue(POWER)).intValue();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {POWER});
+        return new BlockStateContainer(this, new IProperty[] {POWER});
     }
 
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         if (!this.inverted)
         {
-            super.getSubBlocks(itemIn, tab, list);
+            super.getSubBlocks(itemIn, tab);
         }
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }
 }

@@ -18,17 +18,17 @@ public class RealmsClickableScrolledSelectionList
 
     public int width()
     {
-        return this.proxy.func_178044_e();
+        return this.proxy.width();
     }
 
     public int ym()
     {
-        return this.proxy.func_178042_f();
+        return this.proxy.mouseY();
     }
 
     public int xm()
     {
-        return this.proxy.func_178045_g();
+        return this.proxy.mouseX();
     }
 
     protected void renderItem(int p_renderItem_1_, int p_renderItem_2_, int p_renderItem_3_, int p_renderItem_4_, Tezzelator p_renderItem_5_, int p_renderItem_6_, int p_renderItem_7_)
@@ -65,7 +65,7 @@ public class RealmsClickableScrolledSelectionList
 
     public int getScrollbarPosition()
     {
-        return this.proxy.func_178044_e() / 2 + 124;
+        return this.proxy.width() / 2 + 124;
     }
 
     public void mouseEvent()

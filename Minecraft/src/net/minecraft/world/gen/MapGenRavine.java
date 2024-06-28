@@ -3,16 +3,18 @@ package net.minecraft.world.gen;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 
 public class MapGenRavine extends MapGenBase
 {
-    private float[] field_75046_d = new float[1024];
+    protected static final IBlockState FLOWING_LAVA = Blocks.FLOWING_LAVA.getDefaultState();
+    protected static final IBlockState AIR = Blocks.AIR.getDefaultState();
+    private final float[] rs = new float[1024];
 
-    protected void func_180707_a(long p_180707_1_, int p_180707_3_, int p_180707_4_, ChunkPrimer p_180707_5_, double p_180707_6_, double p_180707_8_, double p_180707_10_, float p_180707_12_, float p_180707_13_, float p_180707_14_, int p_180707_15_, int p_180707_16_, double p_180707_17_)
+    protected void addTunnel(long p_180707_1_, int p_180707_3_, int p_180707_4_, ChunkPrimer p_180707_5_, double p_180707_6_, double p_180707_8_, double p_180707_10_, float p_180707_12_, float p_180707_13_, float p_180707_14_, int p_180707_15_, int p_180707_16_, double p_180707_17_)
     {
         Random random = new Random(p_180707_1_);
         double d0 = (double)(p_180707_3_ * 16 + 8);
@@ -40,15 +42,15 @@ public class MapGenRavine extends MapGenBase
         {
             if (j == 0 || random.nextInt(3) == 0)
             {
-                f2 = 1.0F + random.nextFloat() * random.nextFloat() * 1.0F;
+                f2 = 1.0F + random.nextFloat() * random.nextFloat();
             }
 
-            this.field_75046_d[j] = f2 * f2;
+            this.rs[j] = f2 * f2;
         }
 
         for (; p_180707_15_ < p_180707_16_; ++p_180707_15_)
         {
-            double d9 = 1.5D + (double)(MathHelper.sin((float)p_180707_15_ * (float)Math.PI / (float)p_180707_16_) * p_180707_12_ * 1.0F);
+            double d9 = 1.5D + (double)(MathHelper.sin((float)p_180707_15_ * (float)Math.PI / (float)p_180707_16_) * p_180707_12_);
             double d2 = d9 * p_180707_17_;
             d9 = d9 * ((double)random.nextFloat() * 0.25D + 0.75D);
             d2 = d2 * ((double)random.nextFloat() * 0.25D + 0.75D);
@@ -79,12 +81,12 @@ public class MapGenRavine extends MapGenBase
 
                 if (p_180707_6_ >= d0 - 16.0D - d9 * 2.0D && p_180707_10_ >= d1 - 16.0D - d9 * 2.0D && p_180707_6_ <= d0 + 16.0D + d9 * 2.0D && p_180707_10_ <= d1 + 16.0D + d9 * 2.0D)
                 {
-                    int k2 = MathHelper.floor_double(p_180707_6_ - d9) - p_180707_3_ * 16 - 1;
-                    int k = MathHelper.floor_double(p_180707_6_ + d9) - p_180707_3_ * 16 + 1;
-                    int l2 = MathHelper.floor_double(p_180707_8_ - d2) - 1;
-                    int l = MathHelper.floor_double(p_180707_8_ + d2) + 1;
-                    int i3 = MathHelper.floor_double(p_180707_10_ - d9) - p_180707_4_ * 16 - 1;
-                    int i1 = MathHelper.floor_double(p_180707_10_ + d9) - p_180707_4_ * 16 + 1;
+                    int k2 = MathHelper.floor(p_180707_6_ - d9) - p_180707_3_ * 16 - 1;
+                    int k = MathHelper.floor(p_180707_6_ + d9) - p_180707_3_ * 16 + 1;
+                    int l2 = MathHelper.floor(p_180707_8_ - d2) - 1;
+                    int l = MathHelper.floor(p_180707_8_ + d2) + 1;
+                    int i3 = MathHelper.floor(p_180707_10_ - d9) - p_180707_4_ * 16 - 1;
+                    int i1 = MathHelper.floor(p_180707_10_ + d9) - p_180707_4_ * 16 + 1;
 
                     if (k2 < 0)
                     {
@@ -128,7 +130,7 @@ public class MapGenRavine extends MapGenBase
                                 {
                                     IBlockState iblockstate = p_180707_5_.getBlockState(j1, l1, k1);
 
-                                    if (iblockstate.getBlock() == Blocks.flowing_water || iblockstate.getBlock() == Blocks.water)
+                                    if (iblockstate.getBlock() == Blocks.FLOWING_WATER || iblockstate.getBlock() == Blocks.WATER)
                                     {
                                         flag2 = true;
                                     }
@@ -161,29 +163,29 @@ public class MapGenRavine extends MapGenBase
                                     {
                                         double d8 = ((double)(j2 - 1) + 0.5D - p_180707_8_) / d2;
 
-                                        if ((d10 * d10 + d7 * d7) * (double)this.field_75046_d[j2 - 1] + d8 * d8 / 6.0D < 1.0D)
+                                        if ((d10 * d10 + d7 * d7) * (double)this.rs[j2 - 1] + d8 * d8 / 6.0D < 1.0D)
                                         {
                                             IBlockState iblockstate1 = p_180707_5_.getBlockState(j3, j2, i2);
 
-                                            if (iblockstate1.getBlock() == Blocks.grass)
+                                            if (iblockstate1.getBlock() == Blocks.GRASS)
                                             {
                                                 flag = true;
                                             }
 
-                                            if (iblockstate1.getBlock() == Blocks.stone || iblockstate1.getBlock() == Blocks.dirt || iblockstate1.getBlock() == Blocks.grass)
+                                            if (iblockstate1.getBlock() == Blocks.STONE || iblockstate1.getBlock() == Blocks.DIRT || iblockstate1.getBlock() == Blocks.GRASS)
                                             {
                                                 if (j2 - 1 < 10)
                                                 {
-                                                    p_180707_5_.setBlockState(j3, j2, i2, Blocks.flowing_lava.getDefaultState());
+                                                    p_180707_5_.setBlockState(j3, j2, i2, FLOWING_LAVA);
                                                 }
                                                 else
                                                 {
-                                                    p_180707_5_.setBlockState(j3, j2, i2, Blocks.air.getDefaultState());
+                                                    p_180707_5_.setBlockState(j3, j2, i2, AIR);
 
-                                                    if (flag && p_180707_5_.getBlockState(j3, j2 - 1, i2).getBlock() == Blocks.dirt)
+                                                    if (flag && p_180707_5_.getBlockState(j3, j2 - 1, i2).getBlock() == Blocks.DIRT)
                                                     {
-                                                        blockpos$mutableblockpos.set(j3 + p_180707_3_ * 16, 0, i2 + p_180707_4_ * 16);
-                                                        p_180707_5_.setBlockState(j3, j2 - 1, i2, this.worldObj.getBiomeGenForCoords(blockpos$mutableblockpos).topBlock);
+                                                        blockpos$mutableblockpos.setPos(j3 + p_180707_3_ * 16, 0, i2 + p_180707_4_ * 16);
+                                                        p_180707_5_.setBlockState(j3, j2 - 1, i2, this.worldObj.getBiome(blockpos$mutableblockpos).topBlock);
                                                     }
                                                 }
                                             }
@@ -215,12 +217,12 @@ public class MapGenRavine extends MapGenBase
             double d2 = (double)(chunkZ * 16 + this.rand.nextInt(16));
             int i = 1;
 
-            for (int j = 0; j < i; ++j)
+            for (int j = 0; j < 1; ++j)
             {
-                float f = this.rand.nextFloat() * (float)Math.PI * 2.0F;
+                float f = this.rand.nextFloat() * ((float)Math.PI * 2F);
                 float f1 = (this.rand.nextFloat() - 0.5F) * 2.0F / 8.0F;
                 float f2 = (this.rand.nextFloat() * 2.0F + this.rand.nextFloat()) * 2.0F;
-                this.func_180707_a(this.rand.nextLong(), p_180701_4_, p_180701_5_, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 3.0D);
+                this.addTunnel(this.rand.nextLong(), p_180701_4_, p_180701_5_, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 3.0D);
             }
         }
     }

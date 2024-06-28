@@ -23,9 +23,13 @@ public class FactoryBlockPattern
 
     private FactoryBlockPattern()
     {
-        this.symbolMap.put(' ', Predicates.<BlockWorldState>alwaysTrue());
+        this.symbolMap.put(' ', Predicates.alwaysTrue());
     }
 
+    /**
+     * Adds a single aisle to this pattern, going in the z axis. (so multiple calls to this will increase the z-size by
+     * 1)
+     */
     public FactoryBlockPattern aisle(String... aisle)
     {
         if (!ArrayUtils.isEmpty((Object[])aisle) && !StringUtils.isEmpty(aisle[0]))
@@ -53,7 +57,7 @@ public class FactoryBlockPattern
                     {
                         if (!this.symbolMap.containsKey(Character.valueOf(c0)))
                         {
-                            this.symbolMap.put(Character.valueOf(c0), (Predicate<BlockWorldState>)null);
+                            this.symbolMap.put(Character.valueOf(c0), null);
                         }
                     }
                 }
@@ -87,7 +91,7 @@ public class FactoryBlockPattern
     private Predicate<BlockWorldState>[][][] makePredicateArray()
     {
         this.checkMissingPredicates();
-        Predicate<BlockWorldState>[][][] predicate = (Predicate[][][])((Predicate[][][])Array.newInstance(Predicate.class, new int[] {this.depth.size(), this.aisleHeight, this.rowWidth}));
+        Predicate<BlockWorldState>[][][] predicate = (Predicate[][][])((Predicate[][][])Array.newInstance(Predicate.class, this.depth.size(), this.aisleHeight, this.rowWidth));
 
         for (int i = 0; i < this.depth.size(); ++i)
         {
@@ -95,7 +99,7 @@ public class FactoryBlockPattern
             {
                 for (int k = 0; k < this.rowWidth; ++k)
                 {
-                    predicate[i][j][k] = (Predicate)this.symbolMap.get(Character.valueOf(((String[])this.depth.get(i))[j].charAt(k)));
+                    predicate[i][j][k] = this.symbolMap.get(Character.valueOf(((String[])this.depth.get(i))[j].charAt(k)));
                 }
             }
         }

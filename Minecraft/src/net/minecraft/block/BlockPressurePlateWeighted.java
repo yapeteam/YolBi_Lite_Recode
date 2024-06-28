@@ -4,43 +4,56 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class BlockPressurePlateWeighted extends BlockBasePressurePlate
 {
     public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
-    private final int field_150068_a;
+    private final int maxWeight;
 
-    protected BlockPressurePlateWeighted(Material p_i46379_1_, int p_i46379_2_)
+    protected BlockPressurePlateWeighted(Material materialIn, int p_i46379_2_)
     {
-        this(p_i46379_1_, p_i46379_2_, p_i46379_1_.getMaterialMapColor());
+        this(materialIn, p_i46379_2_, materialIn.getMaterialMapColor());
     }
 
-    protected BlockPressurePlateWeighted(Material p_i46380_1_, int p_i46380_2_, MapColor p_i46380_3_)
+    protected BlockPressurePlateWeighted(Material materialIn, int p_i46380_2_, MapColor color)
     {
-        super(p_i46380_1_, p_i46380_3_);
+        super(materialIn, color);
         this.setDefaultState(this.blockState.getBaseState().withProperty(POWER, Integer.valueOf(0)));
-        this.field_150068_a = p_i46380_2_;
+        this.maxWeight = p_i46380_2_;
     }
 
     protected int computeRedstoneStrength(World worldIn, BlockPos pos)
     {
-        int i = Math.min(worldIn.getEntitiesWithinAABB(Entity.class, this.getSensitiveAABB(pos)).size(), this.field_150068_a);
+        int i = Math.min(worldIn.getEntitiesWithinAABB(Entity.class, PRESSURE_AABB.offset(pos)).size(), this.maxWeight);
 
         if (i > 0)
         {
-            float f = (float)Math.min(this.field_150068_a, i) / (float)this.field_150068_a;
-            return MathHelper.ceiling_float_int(f * 15.0F);
+            float f = (float)Math.min(this.maxWeight, i) / (float)this.maxWeight;
+            return MathHelper.ceil(f * 15.0F);
         }
         else
         {
             return 0;
         }
+    }
+
+    protected void playClickOnSound(World worldIn, BlockPos color)
+    {
+        worldIn.playSound((EntityPlayer)null, color, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_ON, SoundCategory.BLOCKS, 0.3F, 0.90000004F);
+    }
+
+    protected void playClickOffSound(World worldIn, BlockPos pos)
+    {
+        worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_METAL_PRESSPLATE_CLICK_OFF, SoundCategory.BLOCKS, 0.3F, 0.75F);
     }
 
     protected int getRedstoneStrength(IBlockState state)
@@ -77,8 +90,8 @@ public class BlockPressurePlateWeighted extends BlockBasePressurePlate
         return ((Integer)state.getValue(POWER)).intValue();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {POWER});
+        return new BlockStateContainer(this, new IProperty[] {POWER});
     }
 }

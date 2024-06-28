@@ -1,15 +1,15 @@
 package net.minecraft.world.gen;
 
 import java.util.Random;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class NoiseGeneratorOctaves extends NoiseGenerator
 {
     /**
      * Collection of noise generation functions.  Output is combined to produce different octaves of noise.
      */
-    private NoiseGeneratorImproved[] generatorCollection;
-    private int octaves;
+    private final NoiseGeneratorImproved[] generatorCollection;
+    private final int octaves;
 
     public NoiseGeneratorOctaves(Random seed, int octavesIn)
     {
@@ -47,8 +47,8 @@ public class NoiseGeneratorOctaves extends NoiseGenerator
             double d0 = (double)xOffset * d3 * xScale;
             double d1 = (double)yOffset * d3 * yScale;
             double d2 = (double)zOffset * d3 * zScale;
-            long k = MathHelper.floor_double_long(d0);
-            long l = MathHelper.floor_double_long(d2);
+            long k = MathHelper.lFloor(d0);
+            long l = MathHelper.lFloor(d2);
             d0 = d0 - (double)k;
             d2 = d2 - (double)l;
             k = k % 16777216L;

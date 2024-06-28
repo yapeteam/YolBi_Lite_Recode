@@ -6,51 +6,22 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ThreadLanServerPing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LanServerDetector
 {
-    private static final AtomicInteger field_148551_a = new AtomicInteger(0);
-    private static final Logger logger = LogManager.getLogger();
-
-    public static class LanServer
-    {
-        private String lanServerMotd;
-        private String lanServerIpPort;
-        private long timeLastSeen;
-
-        public LanServer(String motd, String address)
-        {
-            this.lanServerMotd = motd;
-            this.lanServerIpPort = address;
-            this.timeLastSeen = Minecraft.getSystemTime();
-        }
-
-        public String getServerMotd()
-        {
-            return this.lanServerMotd;
-        }
-
-        public String getServerIpPort()
-        {
-            return this.lanServerIpPort;
-        }
-
-        public void updateLastSeen()
-        {
-            this.timeLastSeen = Minecraft.getSystemTime();
-        }
-    }
+    private static final AtomicInteger ATOMIC_COUNTER = new AtomicInteger(0);
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static class LanServerList
     {
-        private List<LanServerDetector.LanServer> listOfLanServers = Lists.<LanServerDetector.LanServer>newArrayList();
+        private final List<LanServerInfo> listOfLanServers = Lists.<LanServerInfo>newArrayList();
         boolean wasUpdated;
 
         public synchronized boolean getWasUpdated()
@@ -63,26 +34,26 @@ public class LanServerDetector
             this.wasUpdated = false;
         }
 
-        public synchronized List<LanServerDetector.LanServer> getLanServers()
+        public synchronized List<LanServerInfo> getLanServers()
         {
-            return Collections.<LanServerDetector.LanServer>unmodifiableList(this.listOfLanServers);
+            return Collections.<LanServerInfo>unmodifiableList(this.listOfLanServers);
         }
 
-        public synchronized void func_77551_a(String p_77551_1_, InetAddress p_77551_2_)
+        public synchronized void addServer(String pingResponse, InetAddress ipAddress)
         {
-            String s = ThreadLanServerPing.getMotdFromPingResponse(p_77551_1_);
-            String s1 = ThreadLanServerPing.getAdFromPingResponse(p_77551_1_);
+            String s = ThreadLanServerPing.getMotdFromPingResponse(pingResponse);
+            String s1 = ThreadLanServerPing.getAdFromPingResponse(pingResponse);
 
             if (s1 != null)
             {
-                s1 = p_77551_2_.getHostAddress() + ":" + s1;
+                s1 = ipAddress.getHostAddress() + ":" + s1;
                 boolean flag = false;
 
-                for (LanServerDetector.LanServer lanserverdetector$lanserver : this.listOfLanServers)
+                for (LanServerInfo lanserverinfo : this.listOfLanServers)
                 {
-                    if (lanserverdetector$lanserver.getServerIpPort().equals(s1))
+                    if (lanserverinfo.getServerIpPort().equals(s1))
                     {
-                        lanserverdetector$lanserver.updateLastSeen();
+                        lanserverinfo.updateLastSeen();
                         flag = true;
                         break;
                     }
@@ -90,7 +61,7 @@ public class LanServerDetector
 
                 if (!flag)
                 {
-                    this.listOfLanServers.add(new LanServerDetector.LanServer(s, s1));
+                    this.listOfLanServers.add(new LanServerInfo(s, s1));
                     this.wasUpdated = true;
                 }
             }
@@ -103,10 +74,10 @@ public class LanServerDetector
         private final InetAddress broadcastAddress;
         private final MulticastSocket socket;
 
-        public ThreadLanServerFind(LanServerDetector.LanServerList p_i1320_1_) throws IOException
+        public ThreadLanServerFind(LanServerDetector.LanServerList list) throws IOException
         {
-            super("LanServerDetector #" + LanServerDetector.field_148551_a.incrementAndGet());
-            this.localServerList = p_i1320_1_;
+            super("LanServerDetector #" + LanServerDetector.ATOMIC_COUNTER.incrementAndGet());
+            this.localServerList = list;
             this.setDaemon(true);
             this.socket = new MulticastSocket(4445);
             this.broadcastAddress = InetAddress.getByName("224.0.2.60");
@@ -132,13 +103,13 @@ public class LanServerDetector
                 }
                 catch (IOException ioexception)
                 {
-                    LanServerDetector.logger.error((String)"Couldn\'t ping server", (Throwable)ioexception);
+                    LanServerDetector.LOGGER.error("Couldn't ping server", (Throwable)ioexception);
                     break;
                 }
 
-                String s = new String(datagrampacket.getData(), datagrampacket.getOffset(), datagrampacket.getLength());
-                LanServerDetector.logger.debug(datagrampacket.getAddress() + ": " + s);
-                this.localServerList.func_77551_a(s, datagrampacket.getAddress());
+                String s = new String(datagrampacket.getData(), datagrampacket.getOffset(), datagrampacket.getLength(), StandardCharsets.UTF_8);
+                LanServerDetector.LOGGER.debug("{}: {}", datagrampacket.getAddress(), s);
+                this.localServerList.addServer(s, datagrampacket.getAddress());
             }
 
             try

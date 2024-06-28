@@ -1,19 +1,19 @@
 package net.minecraft.realms;
 
 import java.nio.ByteBuffer;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public class RealmsBufferBuilder
 {
-    private WorldRenderer b;
+    private BufferBuilder b;
 
-    public RealmsBufferBuilder(WorldRenderer p_i46442_1_)
+    public RealmsBufferBuilder(BufferBuilder p_i46442_1_)
     {
         this.b = p_i46442_1_;
     }
 
-    public RealmsBufferBuilder from(WorldRenderer p_from_1_)
+    public RealmsBufferBuilder from(BufferBuilder p_from_1_)
     {
         this.b = p_from_1_;
         return this;
@@ -49,7 +49,7 @@ public class RealmsBufferBuilder
         this.b.setTranslation(p_offset_1_, p_offset_3_, p_offset_5_);
     }
 
-    public void restoreState(WorldRenderer.State p_restoreState_1_)
+    public void restoreState(BufferBuilder.State p_restoreState_1_)
     {
         this.b.setVertexState(p_restoreState_1_);
     }

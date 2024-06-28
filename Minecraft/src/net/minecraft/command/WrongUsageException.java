@@ -6,4 +6,9 @@ public class WrongUsageException extends SyntaxErrorException
     {
         super(message, replacements);
     }
+
+    public synchronized Throwable fillInStackTrace()
+    {
+        return this;
+    }
 }

@@ -5,13 +5,16 @@ import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public class ItemCarrotOnAStick extends Item
 {
     public ItemCarrotOnAStick()
     {
-        this.setCreativeTab(CreativeTabs.tabTransport);
+        this.setCreativeTab(CreativeTabs.TRANSPORTATION);
         this.setMaxStackSize(1);
         this.setMaxDamage(25);
     }
@@ -33,30 +36,37 @@ public class ItemCarrotOnAStick extends Item
         return true;
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
     {
-        if (playerIn.isRiding() && playerIn.ridingEntity instanceof EntityPig)
+        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+
+        if (itemStackIn.isRemote)
         {
-            EntityPig entitypig = (EntityPig)playerIn.ridingEntity;
-
-            if (entitypig.getAIControlledByPlayer().isControlledByPlayer() && itemStackIn.getMaxDamage() - itemStackIn.getMetadata() >= 7)
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+        }
+        else
+        {
+            if (worldIn.isRiding() && worldIn.getRidingEntity() instanceof EntityPig)
             {
-                entitypig.getAIControlledByPlayer().boostSpeed();
-                itemStackIn.damageItem(7, playerIn);
+                EntityPig entitypig = (EntityPig)worldIn.getRidingEntity();
 
-                if (itemStackIn.stackSize == 0)
+                if (itemstack.getMaxDamage() - itemstack.getMetadata() >= 7 && entitypig.boost())
                 {
-                    ItemStack itemstack = new ItemStack(Items.fishing_rod);
-                    itemstack.setTagCompound(itemStackIn.getTagCompound());
-                    return itemstack;
+                    itemstack.damageItem(7, worldIn);
+
+                    if (itemstack.func_190926_b())
+                    {
+                        ItemStack itemstack1 = new ItemStack(Items.FISHING_ROD);
+                        itemstack1.setTagCompound(itemstack.getTagCompound());
+                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack1);
+                    }
+
+                    return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
                 }
             }
-        }
 
-        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-        return itemStackIn;
+            worldIn.addStat(StatList.getObjectUseStats(this));
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+        }
     }
 }

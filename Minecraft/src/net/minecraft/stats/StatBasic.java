@@ -1,15 +1,15 @@
 package net.minecraft.stats;
 
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 
 public class StatBasic extends StatBase
 {
-    public StatBasic(String statIdIn, IChatComponent statNameIn, IStatType typeIn)
+    public StatBasic(String statIdIn, ITextComponent statNameIn, IStatType typeIn)
     {
         super(statIdIn, statNameIn, typeIn);
     }
 
-    public StatBasic(String statIdIn, IChatComponent statNameIn)
+    public StatBasic(String statIdIn, ITextComponent statNameIn)
     {
         super(statIdIn, statNameIn);
     }
@@ -20,7 +20,7 @@ public class StatBasic extends StatBase
     public StatBase registerStat()
     {
         super.registerStat();
-        StatList.generalStats.add(this);
+        StatList.BASIC_STATS.add(this);
         return this;
     }
 }

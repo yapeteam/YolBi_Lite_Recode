@@ -4,48 +4,53 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemFireball extends Item
 {
     public ItemFireball()
     {
-        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setCreativeTab(CreativeTabs.MISC);
     }
 
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (worldIn.isRemote)
+        if (playerIn.isRemote)
         {
-            return true;
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            pos = pos.offset(side);
+            worldIn = worldIn.offset(hand);
+            ItemStack itemstack = stack.getHeldItem(pos);
 
-            if (!playerIn.canPlayerEdit(pos, side, stack))
+            if (!stack.canPlayerEdit(worldIn, hand, itemstack))
             {
-                return false;
+                return EnumActionResult.FAIL;
             }
             else
             {
-                if (worldIn.getBlockState(pos).getBlock().getMaterial() == Material.air)
+                if (playerIn.getBlockState(worldIn).getMaterial() == Material.AIR)
                 {
-                    worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "item.fireCharge.use", 1.0F, (itemRand.nextFloat() - itemRand.nextFloat()) * 0.2F + 1.0F);
-                    worldIn.setBlockState(pos, Blocks.fire.getDefaultState());
+                    playerIn.playSound((EntityPlayer)null, worldIn, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1.0F, (itemRand.nextFloat() - itemRand.nextFloat()) * 0.2F + 1.0F);
+                    playerIn.setBlockState(worldIn, Blocks.FIRE.getDefaultState());
                 }
 
-                if (!playerIn.capabilities.isCreativeMode)
+                if (!stack.capabilities.isCreativeMode)
                 {
-                    --stack.stackSize;
+                    itemstack.func_190918_g(1);
                 }
 
-                return true;
+                return EnumActionResult.SUCCESS;
             }
         }
     }

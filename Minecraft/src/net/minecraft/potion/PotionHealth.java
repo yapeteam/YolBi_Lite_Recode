@@ -1,12 +1,10 @@
 package net.minecraft.potion;
 
-import net.minecraft.util.ResourceLocation;
-
 public class PotionHealth extends Potion
 {
-    public PotionHealth(int potionID, ResourceLocation location, boolean badEffect, int potionColor)
+    public PotionHealth(boolean isBadEffectIn, int liquidColorIn)
     {
-        super(potionID, location, badEffect, potionColor);
+        super(isBadEffectIn, liquidColorIn);
     }
 
     /**
@@ -20,8 +18,8 @@ public class PotionHealth extends Potion
     /**
      * checks if Potion effect is ready to be applied this tick.
      */
-    public boolean isReady(int p_76397_1_, int p_76397_2_)
+    public boolean isReady(int duration, int amplifier)
     {
-        return p_76397_1_ >= 1;
+        return duration >= 1;
     }
 }

@@ -4,16 +4,17 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class InventoryBasic implements IInventory
 {
     private String inventoryTitle;
-    private int slotsCount;
-    private ItemStack[] inventoryContents;
-    private List<IInvBasic> changeListeners;
+    private final int slotsCount;
+    private final NonNullList<ItemStack> inventoryContents;
+    private List<IInventoryChangedListener> changeListeners;
     private boolean hasCustomName;
 
     public InventoryBasic(String title, boolean customName, int slotCount)
@@ -21,24 +22,22 @@ public class InventoryBasic implements IInventory
         this.inventoryTitle = title;
         this.hasCustomName = customName;
         this.slotsCount = slotCount;
-        this.inventoryContents = new ItemStack[slotCount];
+        this.inventoryContents = NonNullList.<ItemStack>func_191197_a(slotCount, ItemStack.field_190927_a);
     }
 
-    public InventoryBasic(IChatComponent title, int slotCount)
+    public InventoryBasic(ITextComponent title, int slotCount)
     {
         this(title.getUnformattedText(), true, slotCount);
     }
 
     /**
      * Add a listener that will be notified when any item in this inventory is modified.
-     *  
-     * @param listener the listener to add
      */
-    public void addInventoryChangeListener(IInvBasic listener)
+    public void addInventoryChangeListener(IInventoryChangedListener listener)
     {
         if (this.changeListeners == null)
         {
-            this.changeListeners = Lists.<IInvBasic>newArrayList();
+            this.changeListeners = Lists.<IInventoryChangedListener>newArrayList();
         }
 
         this.changeListeners.add(listener);
@@ -46,10 +45,8 @@ public class InventoryBasic implements IInventory
 
     /**
      * removes the specified IInvBasic from receiving further change notices
-     *  
-     * @param listener the listener to remove
      */
-    public void removeInventoryChangeListener(IInvBasic listener)
+    public void removeInventoryChangeListener(IInventoryChangedListener listener)
     {
         this.changeListeners.remove(listener);
     }
@@ -59,7 +56,7 @@ public class InventoryBasic implements IInventory
      */
     public ItemStack getStackInSlot(int index)
     {
-        return index >= 0 && index < this.inventoryContents.length ? this.inventoryContents[index] : null;
+        return index >= 0 && index < this.inventoryContents.size() ? (ItemStack)this.inventoryContents.get(index) : ItemStack.field_190927_a;
     }
 
     /**
@@ -67,35 +64,17 @@ public class InventoryBasic implements IInventory
      */
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.inventoryContents[index] != null)
-        {
-            if (this.inventoryContents[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.inventoryContents[index];
-                this.inventoryContents[index] = null;
-                this.markDirty();
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.inventoryContents[index].splitStack(count);
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.inventoryContents, index, count);
 
-                if (this.inventoryContents[index].stackSize == 0)
-                {
-                    this.inventoryContents[index] = null;
-                }
-
-                this.markDirty();
-                return itemstack;
-            }
-        }
-        else
+        if (!itemstack.func_190926_b())
         {
-            return null;
+            this.markDirty();
         }
+
+        return itemstack;
     }
 
-    public ItemStack func_174894_a(ItemStack stack)
+    public ItemStack addItem(ItemStack stack)
     {
         ItemStack itemstack = stack.copy();
 
@@ -103,33 +82,33 @@ public class InventoryBasic implements IInventory
         {
             ItemStack itemstack1 = this.getStackInSlot(i);
 
-            if (itemstack1 == null)
+            if (itemstack1.func_190926_b())
             {
                 this.setInventorySlotContents(i, itemstack);
                 this.markDirty();
-                return null;
+                return ItemStack.field_190927_a;
             }
 
             if (ItemStack.areItemsEqual(itemstack1, itemstack))
             {
                 int j = Math.min(this.getInventoryStackLimit(), itemstack1.getMaxStackSize());
-                int k = Math.min(itemstack.stackSize, j - itemstack1.stackSize);
+                int k = Math.min(itemstack.func_190916_E(), j - itemstack1.func_190916_E());
 
                 if (k > 0)
                 {
-                    itemstack1.stackSize += k;
-                    itemstack.stackSize -= k;
+                    itemstack1.func_190917_f(k);
+                    itemstack.func_190918_g(k);
 
-                    if (itemstack.stackSize <= 0)
+                    if (itemstack.func_190926_b())
                     {
                         this.markDirty();
-                        return null;
+                        return ItemStack.field_190927_a;
                     }
                 }
             }
         }
 
-        if (itemstack.stackSize != stack.stackSize)
+        if (itemstack.func_190916_E() != stack.func_190916_E())
         {
             this.markDirty();
         }
@@ -142,15 +121,16 @@ public class InventoryBasic implements IInventory
      */
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.inventoryContents[index] != null)
+        ItemStack itemstack = this.inventoryContents.get(index);
+
+        if (itemstack.func_190926_b())
         {
-            ItemStack itemstack = this.inventoryContents[index];
-            this.inventoryContents[index] = null;
-            return itemstack;
+            return ItemStack.field_190927_a;
         }
         else
         {
-            return null;
+            this.inventoryContents.set(index, ItemStack.field_190927_a);
+            return itemstack;
         }
     }
 
@@ -159,11 +139,11 @@ public class InventoryBasic implements IInventory
      */
     public void setInventorySlotContents(int index, ItemStack stack)
     {
-        this.inventoryContents[index] = stack;
+        this.inventoryContents.set(index, stack);
 
-        if (stack != null && stack.stackSize > this.getInventoryStackLimit())
+        if (!stack.func_190926_b() && stack.func_190916_E() > this.getInventoryStackLimit())
         {
-            stack.stackSize = this.getInventoryStackLimit();
+            stack.func_190920_e(this.getInventoryStackLimit());
         }
 
         this.markDirty();
@@ -175,6 +155,19 @@ public class InventoryBasic implements IInventory
     public int getSizeInventory()
     {
         return this.slotsCount;
+    }
+
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.inventoryContents)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -205,9 +198,9 @@ public class InventoryBasic implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
@@ -228,15 +221,15 @@ public class InventoryBasic implements IInventory
         {
             for (int i = 0; i < this.changeListeners.size(); ++i)
             {
-                ((IInvBasic)this.changeListeners.get(i)).onInventoryChanged(this);
+                ((IInventoryChangedListener)this.changeListeners.get(i)).onInventoryChanged(this);
             }
         }
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
         return true;
     }
@@ -250,7 +243,8 @@ public class InventoryBasic implements IInventory
     }
 
     /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
      */
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {
@@ -273,9 +267,6 @@ public class InventoryBasic implements IInventory
 
     public void clear()
     {
-        for (int i = 0; i < this.inventoryContents.length; ++i)
-        {
-            this.inventoryContents[i] = null;
-        }
+        this.inventoryContents.clear();
     }
 }

@@ -1,18 +1,25 @@
 package net.minecraft.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -20,28 +27,35 @@ public class BlockLever extends Block
 {
     public static final PropertyEnum<BlockLever.EnumOrientation> FACING = PropertyEnum.<BlockLever.EnumOrientation>create("facing", BlockLever.EnumOrientation.class);
     public static final PropertyBool POWERED = PropertyBool.create("powered");
+    protected static final AxisAlignedBB LEVER_NORTH_AABB = new AxisAlignedBB(0.3125D, 0.20000000298023224D, 0.625D, 0.6875D, 0.800000011920929D, 1.0D);
+    protected static final AxisAlignedBB LEVER_SOUTH_AABB = new AxisAlignedBB(0.3125D, 0.20000000298023224D, 0.0D, 0.6875D, 0.800000011920929D, 0.375D);
+    protected static final AxisAlignedBB LEVER_WEST_AABB = new AxisAlignedBB(0.625D, 0.20000000298023224D, 0.3125D, 1.0D, 0.800000011920929D, 0.6875D);
+    protected static final AxisAlignedBB LEVER_EAST_AABB = new AxisAlignedBB(0.0D, 0.20000000298023224D, 0.3125D, 0.375D, 0.800000011920929D, 0.6875D);
+    protected static final AxisAlignedBB LEVER_UP_AABB = new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 0.6000000238418579D, 0.75D);
+    protected static final AxisAlignedBB LEVER_DOWN_AABB = new AxisAlignedBB(0.25D, 0.4000000059604645D, 0.25D, 0.75D, 1.0D, 0.75D);
 
     protected BlockLever()
     {
-        super(Material.circuits);
+        super(Material.CIRCUITS);
         this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, BlockLever.EnumOrientation.NORTH).withProperty(POWERED, Boolean.valueOf(false)));
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+        this.setCreativeTab(CreativeTabs.REDSTONE);
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -51,14 +65,14 @@ public class BlockLever extends Block
      */
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
-        return func_181090_a(worldIn, pos, side.getOpposite());
+        return canAttachTo(worldIn, pos, side);
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
         for (EnumFacing enumfacing : EnumFacing.values())
         {
-            if (func_181090_a(worldIn, pos, enumfacing))
+            if (canAttachTo(worldIn, pos, enumfacing))
             {
                 return true;
             }
@@ -67,9 +81,9 @@ public class BlockLever extends Block
         return false;
     }
 
-    protected static boolean func_181090_a(World p_181090_0_, BlockPos p_181090_1_, EnumFacing p_181090_2_)
+    protected static boolean canAttachTo(World p_181090_0_, BlockPos p_181090_1_, EnumFacing p_181090_2_)
     {
-        return BlockButton.func_181088_a(p_181090_0_, p_181090_1_, p_181090_2_);
+        return BlockButton.canPlaceBlock(p_181090_0_, p_181090_1_, p_181090_2_);
     }
 
     /**
@@ -80,7 +94,7 @@ public class BlockLever extends Block
     {
         IBlockState iblockstate = this.getDefaultState().withProperty(POWERED, Boolean.valueOf(false));
 
-        if (func_181090_a(worldIn, pos, facing.getOpposite()))
+        if (canAttachTo(worldIn, pos, facing))
         {
             return iblockstate.withProperty(FACING, BlockLever.EnumOrientation.forFacings(facing, placer.getHorizontalFacing()));
         }
@@ -88,13 +102,13 @@ public class BlockLever extends Block
         {
             for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
             {
-                if (enumfacing != facing && func_181090_a(worldIn, pos, enumfacing.getOpposite()))
+                if (enumfacing != facing && canAttachTo(worldIn, pos, enumfacing))
                 {
                     return iblockstate.withProperty(FACING, BlockLever.EnumOrientation.forFacings(enumfacing, placer.getHorizontalFacing()));
                 }
             }
 
-            if (World.doesBlockHaveSolidTopSurface(worldIn, pos.down()))
+            if (worldIn.getBlockState(pos.down()).isFullyOpaque())
             {
                 return iblockstate.withProperty(FACING, BlockLever.EnumOrientation.forFacings(EnumFacing.UP, placer.getHorizontalFacing()));
             }
@@ -105,46 +119,21 @@ public class BlockLever extends Block
         }
     }
 
-    public static int getMetadataForFacing(EnumFacing facing)
-    {
-        switch (facing)
-        {
-            case DOWN:
-                return 0;
-
-            case UP:
-                return 5;
-
-            case NORTH:
-                return 4;
-
-            case SOUTH:
-                return 3;
-
-            case WEST:
-                return 2;
-
-            case EAST:
-                return 1;
-
-            default:
-                return -1;
-        }
-    }
-
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
-        if (this.func_181091_e(worldIn, pos, state) && !func_181090_a(worldIn, pos, ((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing().getOpposite()))
+        if (this.checkCanSurvive(worldIn, pos, state) && !canAttachTo(worldIn, pos, ((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing()))
         {
             this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);
         }
     }
 
-    private boolean func_181091_e(World p_181091_1_, BlockPos p_181091_2_, IBlockState p_181091_3_)
+    private boolean checkCanSurvive(World p_181091_1_, BlockPos p_181091_2_, IBlockState p_181091_3_)
     {
         if (this.canPlaceBlockAt(p_181091_1_, p_181091_2_))
         {
@@ -158,42 +147,34 @@ public class BlockLever extends Block
         }
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        float f = 0.1875F;
-
-        switch ((BlockLever.EnumOrientation)worldIn.getBlockState(pos).getValue(FACING))
+        switch ((BlockLever.EnumOrientation)state.getValue(FACING))
         {
             case EAST:
-                this.setBlockBounds(0.0F, 0.2F, 0.5F - f, f * 2.0F, 0.8F, 0.5F + f);
-                break;
+            default:
+                return LEVER_EAST_AABB;
 
             case WEST:
-                this.setBlockBounds(1.0F - f * 2.0F, 0.2F, 0.5F - f, 1.0F, 0.8F, 0.5F + f);
-                break;
+                return LEVER_WEST_AABB;
 
             case SOUTH:
-                this.setBlockBounds(0.5F - f, 0.2F, 0.0F, 0.5F + f, 0.8F, f * 2.0F);
-                break;
+                return LEVER_SOUTH_AABB;
 
             case NORTH:
-                this.setBlockBounds(0.5F - f, 0.2F, 1.0F - f * 2.0F, 0.5F + f, 0.8F, 1.0F);
-                break;
+                return LEVER_NORTH_AABB;
 
             case UP_Z:
             case UP_X:
-                f = 0.25F;
-                this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, 0.6F, 0.5F + f);
-                break;
+                return LEVER_UP_AABB;
 
             case DOWN_X:
             case DOWN_Z:
-                f = 0.25F;
-                this.setBlockBounds(0.5F - f, 0.4F, 0.5F - f, 0.5F + f, 1.0F, 0.5F + f);
+                return LEVER_DOWN_AABB;
         }
     }
 
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing heldItem, float side, float hitX, float hitY)
     {
         if (worldIn.isRemote)
         {
@@ -203,40 +184,51 @@ public class BlockLever extends Block
         {
             state = state.cycleProperty(POWERED);
             worldIn.setBlockState(pos, state, 3);
-            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, ((Boolean)state.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F);
-            worldIn.notifyNeighborsOfStateChange(pos, this);
+            float f = ((Boolean)state.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F;
+            worldIn.playSound((EntityPlayer)null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, f);
+            worldIn.notifyNeighborsOfStateChange(pos, this, false);
             EnumFacing enumfacing = ((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing();
-            worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing.getOpposite()), this);
+            worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing.getOpposite()), this, false);
             return true;
         }
     }
 
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         if (((Boolean)state.getValue(POWERED)).booleanValue())
         {
-            worldIn.notifyNeighborsOfStateChange(pos, this);
+            worldIn.notifyNeighborsOfStateChange(pos, this, false);
             EnumFacing enumfacing = ((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing();
-            worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing.getOpposite()), this);
+            worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing.getOpposite()), this, false);
         }
 
         super.breakBlock(worldIn, pos, state);
     }
 
-    public int getWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 15 : 0;
+        return ((Boolean)blockState.getValue(POWERED)).booleanValue() ? 15 : 0;
     }
 
-    public int getStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return !((Boolean)state.getValue(POWERED)).booleanValue() ? 0 : (((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing() == side ? 15 : 0);
+        if (!((Boolean)blockState.getValue(POWERED)).booleanValue())
+        {
+            return 0;
+        }
+        else
+        {
+            return ((BlockLever.EnumOrientation)blockState.getValue(FACING)).getFacing() == side ? 15 : 0;
+        }
     }
 
     /**
      * Can this block provide power. Only wire currently seems to have this change based on its state.
      */
-    public boolean canProvidePower()
+    public boolean canProvidePower(IBlockState state)
     {
         return true;
     }
@@ -265,9 +257,111 @@ public class BlockLever extends Block
         return i;
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {FACING, POWERED});
+        switch (rot)
+        {
+            case CLOCKWISE_180:
+                switch ((BlockLever.EnumOrientation)state.getValue(FACING))
+                {
+                    case EAST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.WEST);
+
+                    case WEST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.EAST);
+
+                    case SOUTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
+
+                    case NORTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
+
+                    default:
+                        return state;
+                }
+
+            case COUNTERCLOCKWISE_90:
+                switch ((BlockLever.EnumOrientation)state.getValue(FACING))
+                {
+                    case EAST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
+
+                    case WEST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
+
+                    case SOUTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.EAST);
+
+                    case NORTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.WEST);
+
+                    case UP_Z:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.UP_X);
+
+                    case UP_X:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.UP_Z);
+
+                    case DOWN_X:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.DOWN_Z);
+
+                    case DOWN_Z:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.DOWN_X);
+                }
+
+            case CLOCKWISE_90:
+                switch ((BlockLever.EnumOrientation)state.getValue(FACING))
+                {
+                    case EAST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.SOUTH);
+
+                    case WEST:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.NORTH);
+
+                    case SOUTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.WEST);
+
+                    case NORTH:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.EAST);
+
+                    case UP_Z:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.UP_X);
+
+                    case UP_X:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.UP_Z);
+
+                    case DOWN_X:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.DOWN_Z);
+
+                    case DOWN_Z:
+                        return state.withProperty(FACING, BlockLever.EnumOrientation.DOWN_X);
+                }
+
+            default:
+                return state;
+        }
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        return state.withRotation(mirrorIn.toRotation(((BlockLever.EnumOrientation)state.getValue(FACING)).getFacing()));
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {FACING, POWERED});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
     }
 
     public static enum EnumOrientation implements IStringSerializable

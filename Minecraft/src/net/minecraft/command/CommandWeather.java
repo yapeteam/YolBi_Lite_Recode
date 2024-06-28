@@ -1,9 +1,11 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 
@@ -34,9 +36,9 @@ public class CommandWeather extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length >= 1 && args.length <= 2)
         {
@@ -47,7 +49,7 @@ public class CommandWeather extends CommandBase
                 i = parseInt(args[1], 1, 1000000) * 20;
             }
 
-            World world = MinecraftServer.getServer().worldServers[0];
+            World world = server.worldServers[0];
             WorldInfo worldinfo = world.getWorldInfo();
 
             if ("clear".equalsIgnoreCase(args[0]))
@@ -57,7 +59,7 @@ public class CommandWeather extends CommandBase
                 worldinfo.setThunderTime(0);
                 worldinfo.setRaining(false);
                 worldinfo.setThundering(false);
-                notifyOperators(sender, this, "commands.weather.clear", new Object[0]);
+                notifyCommandListener(sender, this, "commands.weather.clear", new Object[0]);
             }
             else if ("rain".equalsIgnoreCase(args[0]))
             {
@@ -66,7 +68,7 @@ public class CommandWeather extends CommandBase
                 worldinfo.setThunderTime(i);
                 worldinfo.setRaining(true);
                 worldinfo.setThundering(false);
-                notifyOperators(sender, this, "commands.weather.rain", new Object[0]);
+                notifyCommandListener(sender, this, "commands.weather.rain", new Object[0]);
             }
             else
             {
@@ -80,7 +82,7 @@ public class CommandWeather extends CommandBase
                 worldinfo.setThunderTime(i);
                 worldinfo.setRaining(true);
                 worldinfo.setThundering(true);
-                notifyOperators(sender, this, "commands.weather.thunder", new Object[0]);
+                notifyCommandListener(sender, this, "commands.weather.thunder", new Object[0]);
             }
         }
         else
@@ -89,8 +91,8 @@ public class CommandWeather extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"clear", "rain", "thunder"}): null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"clear", "rain", "thunder"}) : Collections.emptyList();
     }
 }

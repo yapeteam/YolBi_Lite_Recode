@@ -30,20 +30,17 @@ public class CommandToggleDownfall extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
-        this.toggleDownfall();
-        notifyOperators(sender, this, "commands.downfall.success", new Object[0]);
+        this.toggleRainfall(server);
+        notifyCommandListener(sender, this, "commands.downfall.success", new Object[0]);
     }
 
-    /**
-     * Toggle rain and enable thundering.
-     */
-    protected void toggleDownfall()
+    protected void toggleRainfall(MinecraftServer server)
     {
-        WorldInfo worldinfo = MinecraftServer.getServer().worldServers[0].getWorldInfo();
+        WorldInfo worldinfo = server.worldServers[0].getWorldInfo();
         worldinfo.setRaining(!worldinfo.isRaining());
     }
 }

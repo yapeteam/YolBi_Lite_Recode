@@ -1,14 +1,14 @@
 package net.minecraft.enchantment;
 
 import net.minecraft.init.Items;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentDigging extends Enchantment
 {
-    protected EnchantmentDigging(int enchID, ResourceLocation enchName, int enchWeight)
+    protected EnchantmentDigging(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, EnumEnchantmentType.DIGGER);
+        super(rarityIn, EnumEnchantmentType.DIGGER, slots);
         this.setName("digging");
     }
 
@@ -41,6 +41,6 @@ public class EnchantmentDigging extends Enchantment
      */
     public boolean canApply(ItemStack stack)
     {
-        return stack.getItem() == Items.shears ? true : super.canApply(stack);
+        return stack.getItem() == Items.SHEARS ? true : super.canApply(stack);
     }
 }

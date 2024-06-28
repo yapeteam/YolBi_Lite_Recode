@@ -1,7 +1,7 @@
 package net.minecraft.item;
 
-import java.util.List;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.util.NonNullList;
 
 public class ItemCoal extends Item
 {
@@ -9,7 +9,7 @@ public class ItemCoal extends Item
     {
         this.setHasSubtypes(true);
         this.setMaxDamage(0);
-        this.setCreativeTab(CreativeTabs.tabMaterials);
+        this.setCreativeTab(CreativeTabs.MATERIALS);
     }
 
     /**
@@ -24,9 +24,12 @@ public class ItemCoal extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        subItems.add(new ItemStack(itemIn, 1, 0));
-        subItems.add(new ItemStack(itemIn, 1, 1));
+        if (this.func_194125_a(itemIn))
+        {
+            tab.add(new ItemStack(this, 1, 0));
+            tab.add(new ItemStack(this, 1, 1));
+        }
     }
 }

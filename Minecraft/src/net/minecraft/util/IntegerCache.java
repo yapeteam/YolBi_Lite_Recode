@@ -9,7 +9,7 @@ public class IntegerCache
      */
     public static Integer getInteger(int value)
     {
-        return value >= 0 && value < CACHE.length ? CACHE[value] : new Integer(value);
+        return value > 0 && value < CACHE.length ? CACHE[value] : value;
     }
 
     static
@@ -18,7 +18,7 @@ public class IntegerCache
 
         for (int j = CACHE.length; i < j; ++i)
         {
-            CACHE[i] = Integer.valueOf(i);
+            CACHE[i] = i;
         }
     }
 }

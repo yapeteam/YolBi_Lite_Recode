@@ -5,36 +5,36 @@ import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.util.MathHelper;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.util.math.MathHelper;
 
 public class LayerArrow implements LayerRenderer<EntityLivingBase>
 {
-    private final RendererLivingEntity field_177168_a;
+    private final RenderLivingBase<?> renderer;
 
-    public LayerArrow(RendererLivingEntity p_i46124_1_)
+    public LayerArrow(RenderLivingBase<?> rendererIn)
     {
-        this.field_177168_a = p_i46124_1_;
+        this.renderer = rendererIn;
     }
 
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
+    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
         int i = entitylivingbaseIn.getArrowCountInEntity();
 
         if (i > 0)
         {
-            Entity entity = new EntityArrow(entitylivingbaseIn.worldObj, entitylivingbaseIn.posX, entitylivingbaseIn.posY, entitylivingbaseIn.posZ);
+            Entity entity = new EntityTippedArrow(entitylivingbaseIn.world, entitylivingbaseIn.posX, entitylivingbaseIn.posY, entitylivingbaseIn.posZ);
             Random random = new Random((long)entitylivingbaseIn.getEntityId());
             RenderHelper.disableStandardItemLighting();
 
             for (int j = 0; j < i; ++j)
             {
                 GlStateManager.pushMatrix();
-                ModelRenderer modelrenderer = this.field_177168_a.getMainModel().getRandomModelBox(random);
-                ModelBox modelbox = (ModelBox)modelrenderer.cubeList.get(random.nextInt(modelrenderer.cubeList.size()));
+                ModelRenderer modelrenderer = this.renderer.getMainModel().getRandomModelBox(random);
+                ModelBox modelbox = modelrenderer.cubeList.get(random.nextInt(modelrenderer.cubeList.size()));
                 modelrenderer.postRender(0.0625F);
                 float f = random.nextFloat();
                 float f1 = random.nextFloat();
@@ -49,13 +49,15 @@ public class LayerArrow implements LayerRenderer<EntityLivingBase>
                 f = f * -1.0F;
                 f1 = f1 * -1.0F;
                 f2 = f2 * -1.0F;
-                float f6 = MathHelper.sqrt_float(f * f + f2 * f2);
-                entity.prevRotationYaw = entity.rotationYaw = (float)(Math.atan2((double)f, (double)f2) * 180.0D / Math.PI);
-                entity.prevRotationPitch = entity.rotationPitch = (float)(Math.atan2((double)f1, (double)f6) * 180.0D / Math.PI);
+                float f6 = MathHelper.sqrt(f * f + f2 * f2);
+                entity.rotationYaw = (float)(Math.atan2((double)f, (double)f2) * (180D / Math.PI));
+                entity.rotationPitch = (float)(Math.atan2((double)f1, (double)f6) * (180D / Math.PI));
+                entity.prevRotationYaw = entity.rotationYaw;
+                entity.prevRotationPitch = entity.rotationPitch;
                 double d0 = 0.0D;
                 double d1 = 0.0D;
                 double d2 = 0.0D;
-                this.field_177168_a.getRenderManager().renderEntityWithPosYaw(entity, d0, d1, d2, 0.0F, partialTicks);
+                this.renderer.getRenderManager().doRenderEntity(entity, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks, false);
                 GlStateManager.popMatrix();
             }
 

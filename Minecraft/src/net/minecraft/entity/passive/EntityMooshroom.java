@@ -1,53 +1,62 @@
 package net.minecraft.entity.passive;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityMooshroom extends EntityCow
 {
     public EntityMooshroom(World worldIn)
     {
         super(worldIn);
-        this.setSize(0.9F, 1.3F);
-        this.spawnableBlock = Blocks.mycelium;
+        this.setSize(0.9F, 1.4F);
+        this.spawnableBlock = Blocks.MYCELIUM;
     }
 
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    public boolean interact(EntityPlayer player)
+    public static void registerFixesMooshroom(DataFixer fixer)
     {
-        ItemStack itemstack = player.inventory.getCurrentItem();
+        EntityLiving.registerFixesMob(fixer, EntityMooshroom.class);
+    }
 
-        if (itemstack != null && itemstack.getItem() == Items.bowl && this.getGrowingAge() >= 0)
+    public boolean processInteract(EntityPlayer player, EnumHand hand)
+    {
+        ItemStack itemstack = player.getHeldItem(hand);
+
+        if (itemstack.getItem() == Items.BOWL && this.getGrowingAge() >= 0 && !player.capabilities.isCreativeMode)
         {
-            if (itemstack.stackSize == 1)
+            itemstack.func_190918_g(1);
+
+            if (itemstack.func_190926_b())
             {
-                player.inventory.setInventorySlotContents(player.inventory.currentItem, new ItemStack(Items.mushroom_stew));
-                return true;
+                player.setHeldItem(hand, new ItemStack(Items.MUSHROOM_STEW));
+            }
+            else if (!player.inventory.addItemStackToInventory(new ItemStack(Items.MUSHROOM_STEW)))
+            {
+                player.dropItem(new ItemStack(Items.MUSHROOM_STEW), false);
             }
 
-            if (player.inventory.addItemStackToInventory(new ItemStack(Items.mushroom_stew)) && !player.capabilities.isCreativeMode)
-            {
-                player.inventory.decrStackSize(player.inventory.currentItem, 1);
-                return true;
-            }
+            return true;
         }
-
-        if (itemstack != null && itemstack.getItem() == Items.shears && this.getGrowingAge() >= 0)
+        else if (itemstack.getItem() == Items.SHEARS && this.getGrowingAge() >= 0)
         {
             this.setDead();
-            this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX, this.posY + (double)(this.height / 2.0F), this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
+            this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX, this.posY + (double)(this.height / 2.0F), this.posZ, 0.0D, 0.0D, 0.0D);
 
-            if (!this.worldObj.isRemote)
+            if (!this.world.isRemote)
             {
-                EntityCow entitycow = new EntityCow(this.worldObj);
+                EntityCow entitycow = new EntityCow(this.world);
                 entitycow.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
                 entitycow.setHealth(this.getHealth());
                 entitycow.renderYawOffset = this.renderYawOffset;
@@ -57,27 +66,33 @@ public class EntityMooshroom extends EntityCow
                     entitycow.setCustomNameTag(this.getCustomNameTag());
                 }
 
-                this.worldObj.spawnEntityInWorld(entitycow);
+                this.world.spawnEntityInWorld(entitycow);
 
                 for (int i = 0; i < 5; ++i)
                 {
-                    this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY + (double)this.height, this.posZ, new ItemStack(Blocks.red_mushroom)));
+                    this.world.spawnEntityInWorld(new EntityItem(this.world, this.posX, this.posY + (double)this.height, this.posZ, new ItemStack(Blocks.RED_MUSHROOM)));
                 }
 
                 itemstack.damageItem(1, player);
-                this.playSound("mob.sheep.shear", 1.0F, 1.0F);
+                this.playSound(SoundEvents.ENTITY_MOOSHROOM_SHEAR, 1.0F, 1.0F);
             }
 
             return true;
         }
         else
         {
-            return super.interact(player);
+            return super.processInteract(player, hand);
         }
     }
 
     public EntityMooshroom createChild(EntityAgeable ageable)
     {
-        return new EntityMooshroom(this.worldObj);
+        return new EntityMooshroom(this.world);
+    }
+
+    @Nullable
+    protected ResourceLocation getLootTable()
+    {
+        return LootTableList.ENTITIES_MUSHROOM_COW;
     }
 }

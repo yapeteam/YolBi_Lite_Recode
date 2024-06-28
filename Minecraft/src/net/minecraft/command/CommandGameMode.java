@@ -1,11 +1,14 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 
 public class CommandGameMode extends CommandBase
@@ -35,9 +38,9 @@ public class CommandGameMode extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length <= 0)
         {
@@ -45,25 +48,23 @@ public class CommandGameMode extends CommandBase
         }
         else
         {
-            WorldSettings.GameType worldsettings$gametype = this.getGameModeFromCommand(sender, args[0]);
-            EntityPlayer entityplayer = args.length >= 2 ? getPlayer(sender, args[1]) : getCommandSenderAsPlayer(sender);
-            entityplayer.setGameType(worldsettings$gametype);
-            entityplayer.fallDistance = 0.0F;
+            GameType gametype = this.getGameModeFromCommand(sender, args[0]);
+            EntityPlayer entityplayer = args.length >= 2 ? getPlayer(server, sender, args[1]) : getCommandSenderAsPlayer(sender);
+            entityplayer.setGameType(gametype);
+            ITextComponent itextcomponent = new TextComponentTranslation("gameMode." + gametype.getName(), new Object[0]);
 
             if (sender.getEntityWorld().getGameRules().getBoolean("sendCommandFeedback"))
             {
-                entityplayer.addChatMessage(new ChatComponentTranslation("gameMode.changed", new Object[0]));
+                entityplayer.addChatMessage(new TextComponentTranslation("gameMode.changed", new Object[] {itextcomponent}));
             }
 
-            IChatComponent ichatcomponent = new ChatComponentTranslation("gameMode." + worldsettings$gametype.getName(), new Object[0]);
-
-            if (entityplayer != sender)
+            if (entityplayer == sender)
             {
-                notifyOperators(sender, this, 1, "commands.gamemode.success.other", new Object[] {entityplayer.getName(), ichatcomponent});
+                notifyCommandListener(sender, this, 1, "commands.gamemode.success.self", new Object[] {itextcomponent});
             }
             else
             {
-                notifyOperators(sender, this, 1, "commands.gamemode.success.self", new Object[] {ichatcomponent});
+                notifyCommandListener(sender, this, 1, "commands.gamemode.success.other", new Object[] {entityplayer.getName(), itextcomponent});
             }
         }
     }
@@ -71,22 +72,22 @@ public class CommandGameMode extends CommandBase
     /**
      * Gets the Game Mode specified in the command.
      */
-    protected WorldSettings.GameType getGameModeFromCommand(ICommandSender p_71539_1_, String p_71539_2_) throws CommandException, NumberInvalidException
+    protected GameType getGameModeFromCommand(ICommandSender sender, String gameModeString) throws CommandException, NumberInvalidException
     {
-        return !p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.SURVIVAL.getName()) && !p_71539_2_.equalsIgnoreCase("s") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.CREATIVE.getName()) && !p_71539_2_.equalsIgnoreCase("c") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.ADVENTURE.getName()) && !p_71539_2_.equalsIgnoreCase("a") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.SPECTATOR.getName()) && !p_71539_2_.equalsIgnoreCase("sp") ? WorldSettings.getGameTypeById(parseInt(p_71539_2_, 0, WorldSettings.GameType.values().length - 2)) : WorldSettings.GameType.SPECTATOR) : WorldSettings.GameType.ADVENTURE) : WorldSettings.GameType.CREATIVE) : WorldSettings.GameType.SURVIVAL;
+        GameType gametype = GameType.parseGameTypeWithDefault(gameModeString, GameType.NOT_SET);
+        return gametype == GameType.NOT_SET ? WorldSettings.getGameTypeById(parseInt(gameModeString, 0, GameType.values().length - 2)) : gametype;
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"survival", "creative", "adventure", "spectator"}): (args.length == 2 ? getListOfStringsMatchingLastWord(args, this.getListOfPlayerUsernames()) : null);
-    }
-
-    /**
-     * Returns String array containing all player usernames in the server.
-     */
-    protected String[] getListOfPlayerUsernames()
-    {
-        return MinecraftServer.getServer().getAllUsernames();
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, new String[] {"survival", "creative", "adventure", "spectator"});
+        }
+        else
+        {
+            return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
+        }
     }
 
     /**

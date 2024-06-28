@@ -1,22 +1,24 @@
 package net.minecraft.entity.ai;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
 import net.minecraft.profiler.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class EntityAITasks
 {
-    private static final Logger logger = LogManager.getLogger();
-    private List<EntityAITasks.EntityAITaskEntry> taskEntries = Lists.<EntityAITasks.EntityAITaskEntry>newArrayList();
-    private List<EntityAITasks.EntityAITaskEntry> executingTaskEntries = Lists.<EntityAITasks.EntityAITaskEntry>newArrayList();
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Set<EntityAITasks.EntityAITaskEntry> taskEntries = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
+    private final Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries = Sets.<EntityAITasks.EntityAITaskEntry>newLinkedHashSet();
 
     /** Instance of Profiler. */
     private final Profiler theProfiler;
     private int tickCount;
     private int tickRate = 3;
+    private int disabledControlFlags;
 
     public EntityAITasks(Profiler profilerIn)
     {
@@ -40,18 +42,20 @@ public class EntityAITasks
 
         while (iterator.hasNext())
         {
-            EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
+            EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry = iterator.next();
             EntityAIBase entityaibase = entityaitasks$entityaitaskentry.action;
 
             if (entityaibase == task)
             {
-                if (this.executingTaskEntries.contains(entityaitasks$entityaitaskentry))
+                if (entityaitasks$entityaitaskentry.using)
                 {
-                    entityaibase.resetTask();
+                    entityaitasks$entityaitaskentry.using = false;
+                    entityaitasks$entityaitaskentry.action.resetTask();
                     this.executingTaskEntries.remove(entityaitasks$entityaitaskentry);
                 }
 
                 iterator.remove();
+                return;
             }
         }
     }
@@ -62,38 +66,20 @@ public class EntityAITasks
 
         if (this.tickCount++ % this.tickRate == 0)
         {
-            Iterator iterator = this.taskEntries.iterator();
-            label38:
-
-            while (true)
+            for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.taskEntries)
             {
-                EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry;
-
-                while (true)
+                if (entityaitasks$entityaitaskentry.using)
                 {
-                    if (!iterator.hasNext())
-                    {
-                        break label38;
-                    }
-
-                    entityaitasks$entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
-                    boolean flag = this.executingTaskEntries.contains(entityaitasks$entityaitaskentry);
-
-                    if (!flag)
-                    {
-                        break;
-                    }
-
                     if (!this.canUse(entityaitasks$entityaitaskentry) || !this.canContinue(entityaitasks$entityaitaskentry))
                     {
+                        entityaitasks$entityaitaskentry.using = false;
                         entityaitasks$entityaitaskentry.action.resetTask();
                         this.executingTaskEntries.remove(entityaitasks$entityaitaskentry);
-                        break;
                     }
                 }
-
-                if (this.canUse(entityaitasks$entityaitaskentry) && entityaitasks$entityaitaskentry.action.shouldExecute())
+                else if (this.canUse(entityaitasks$entityaitaskentry) && entityaitasks$entityaitaskentry.action.shouldExecute())
                 {
+                    entityaitasks$entityaitaskentry.using = true;
                     entityaitasks$entityaitaskentry.action.startExecuting();
                     this.executingTaskEntries.add(entityaitasks$entityaitaskentry);
                 }
@@ -101,29 +87,34 @@ public class EntityAITasks
         }
         else
         {
-            Iterator<EntityAITasks.EntityAITaskEntry> iterator1 = this.executingTaskEntries.iterator();
+            Iterator<EntityAITasks.EntityAITaskEntry> iterator = this.executingTaskEntries.iterator();
 
-            while (iterator1.hasNext())
+            while (iterator.hasNext())
             {
-                EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry1 = (EntityAITasks.EntityAITaskEntry)iterator1.next();
+                EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry1 = iterator.next();
 
                 if (!this.canContinue(entityaitasks$entityaitaskentry1))
                 {
+                    entityaitasks$entityaitaskentry1.using = false;
                     entityaitasks$entityaitaskentry1.action.resetTask();
-                    iterator1.remove();
+                    iterator.remove();
                 }
             }
         }
 
         this.theProfiler.endSection();
-        this.theProfiler.startSection("goalTick");
 
-        for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry2 : this.executingTaskEntries)
+        if (!this.executingTaskEntries.isEmpty())
         {
-            entityaitasks$entityaitaskentry2.action.updateTask();
-        }
+            this.theProfiler.startSection("goalTick");
 
-        this.theProfiler.endSection();
+            for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry2 : this.executingTaskEntries)
+            {
+                entityaitasks$entityaitaskentry2.action.updateTask();
+            }
+
+            this.theProfiler.endSection();
+        }
     }
 
     /**
@@ -131,8 +122,7 @@ public class EntityAITasks
      */
     private boolean canContinue(EntityAITasks.EntityAITaskEntry taskEntry)
     {
-        boolean flag = taskEntry.action.continueExecuting();
-        return flag;
+        return taskEntry.action.continueExecuting();
     }
 
     /**
@@ -141,25 +131,36 @@ public class EntityAITasks
      */
     private boolean canUse(EntityAITasks.EntityAITaskEntry taskEntry)
     {
-        for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.taskEntries)
+        if (this.executingTaskEntries.isEmpty())
         {
-            if (entityaitasks$entityaitaskentry != taskEntry)
+            return true;
+        }
+        else if (this.isControlFlagDisabled(taskEntry.action.getMutexBits()))
+        {
+            return false;
+        }
+        else
+        {
+            for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.executingTaskEntries)
             {
-                if (taskEntry.priority >= entityaitasks$entityaitaskentry.priority)
+                if (entityaitasks$entityaitaskentry != taskEntry)
                 {
-                    if (!this.areTasksCompatible(taskEntry, entityaitasks$entityaitaskentry) && this.executingTaskEntries.contains(entityaitasks$entityaitaskentry))
+                    if (taskEntry.priority >= entityaitasks$entityaitaskentry.priority)
+                    {
+                        if (!this.areTasksCompatible(taskEntry, entityaitasks$entityaitaskentry))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (!entityaitasks$entityaitaskentry.action.isInterruptible())
                     {
                         return false;
                     }
                 }
-                else if (!entityaitasks$entityaitaskentry.action.isInterruptible() && this.executingTaskEntries.contains(entityaitasks$entityaitaskentry))
-                {
-                    return false;
-                }
             }
-        }
 
-        return true;
+            return true;
+        }
     }
 
     /**
@@ -170,15 +171,60 @@ public class EntityAITasks
         return (taskEntry1.action.getMutexBits() & taskEntry2.action.getMutexBits()) == 0;
     }
 
+    public boolean isControlFlagDisabled(int p_188528_1_)
+    {
+        return (this.disabledControlFlags & p_188528_1_) > 0;
+    }
+
+    public void disableControlFlag(int p_188526_1_)
+    {
+        this.disabledControlFlags |= p_188526_1_;
+    }
+
+    public void enableControlFlag(int p_188525_1_)
+    {
+        this.disabledControlFlags &= ~p_188525_1_;
+    }
+
+    public void setControlFlag(int p_188527_1_, boolean p_188527_2_)
+    {
+        if (p_188527_2_)
+        {
+            this.enableControlFlag(p_188527_1_);
+        }
+        else
+        {
+            this.disableControlFlag(p_188527_1_);
+        }
+    }
+
     class EntityAITaskEntry
     {
-        public EntityAIBase action;
-        public int priority;
+        public final EntityAIBase action;
+        public final int priority;
+        public boolean using;
 
         public EntityAITaskEntry(int priorityIn, EntityAIBase task)
         {
             this.priority = priorityIn;
             this.action = task;
+        }
+
+        public boolean equals(@Nullable Object p_equals_1_)
+        {
+            if (this == p_equals_1_)
+            {
+                return true;
+            }
+            else
+            {
+                return p_equals_1_ != null && this.getClass() == p_equals_1_.getClass() ? this.action.equals(((EntityAITasks.EntityAITaskEntry)p_equals_1_).action) : false;
+            }
+        }
+
+        public int hashCode()
+        {
+            return this.action.hashCode();
         }
     }
 }

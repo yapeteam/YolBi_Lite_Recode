@@ -3,15 +3,15 @@ package net.minecraft.client.player.inventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
 
 public class LocalBlockIntercommunication implements IInteractionObject
 {
-    private String guiID;
-    private IChatComponent displayName;
+    private final String guiID;
+    private final ITextComponent displayName;
 
-    public LocalBlockIntercommunication(String guiIdIn, IChatComponent displayNameIn)
+    public LocalBlockIntercommunication(String guiIdIn, ITextComponent displayNameIn)
     {
         this.guiID = guiIdIn;
         this.displayName = displayNameIn;
@@ -46,7 +46,7 @@ public class LocalBlockIntercommunication implements IInteractionObject
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
         return this.displayName;
     }

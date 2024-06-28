@@ -4,16 +4,19 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 
 public abstract class BlockFlower extends BlockBush
 {
@@ -22,6 +25,11 @@ public abstract class BlockFlower extends BlockBush
     protected BlockFlower()
     {
         this.setDefaultState(this.blockState.getBaseState().withProperty(this.getTypeProperty(), this.getBlockType() == BlockFlower.EnumFlowerColor.RED ? BlockFlower.EnumFlowerType.POPPY : BlockFlower.EnumFlowerType.DANDELION));
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return super.getBoundingBox(state, source, pos).func_191194_a(state.func_191059_e(source, pos));
     }
 
     /**
@@ -36,11 +44,11 @@ public abstract class BlockFlower extends BlockBush
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockFlower.EnumFlowerType blockflower$enumflowertype : BlockFlower.EnumFlowerType.getTypes(this.getBlockType()))
         {
-            list.add(new ItemStack(itemIn, 1, blockflower$enumflowertype.getMeta()));
+            tab.add(new ItemStack(this, 1, blockflower$enumflowertype.getMeta()));
         }
     }
 
@@ -63,7 +71,7 @@ public abstract class BlockFlower extends BlockBush
         {
             this.type = PropertyEnum.<BlockFlower.EnumFlowerType>create("type", BlockFlower.EnumFlowerType.class, new Predicate<BlockFlower.EnumFlowerType>()
             {
-                public boolean apply(BlockFlower.EnumFlowerType p_apply_1_)
+                public boolean apply(@Nullable BlockFlower.EnumFlowerType p_apply_1_)
                 {
                     return p_apply_1_.getBlockType() == BlockFlower.this.getBlockType();
                 }
@@ -81,9 +89,9 @@ public abstract class BlockFlower extends BlockBush
         return ((BlockFlower.EnumFlowerType)state.getValue(this.getTypeProperty())).getMeta();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {this.getTypeProperty()});
+        return new BlockStateContainer(this, new IProperty[] {this.getTypeProperty()});
     }
 
     /**
@@ -101,7 +109,7 @@ public abstract class BlockFlower extends BlockBush
 
         public BlockFlower getBlock()
         {
-            return this == YELLOW ? Blocks.yellow_flower : Blocks.red_flower;
+            return this == YELLOW ? Blocks.YELLOW_FLOWER : Blocks.RED_FLOWER;
         }
     }
 
@@ -184,7 +192,7 @@ public abstract class BlockFlower extends BlockBush
             {
                 Collection<BlockFlower.EnumFlowerType> collection = Collections2.<BlockFlower.EnumFlowerType>filter(Lists.newArrayList(values()), new Predicate<BlockFlower.EnumFlowerType>()
                 {
-                    public boolean apply(BlockFlower.EnumFlowerType p_apply_1_)
+                    public boolean apply(@Nullable BlockFlower.EnumFlowerType p_apply_1_)
                     {
                         return p_apply_1_.getBlockType() == blockflower$enumflowercolor;
                     }

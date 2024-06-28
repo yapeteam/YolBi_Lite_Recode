@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentFireAspect extends Enchantment
 {
-    protected EnchantmentFireAspect(int enchID, ResourceLocation enchName, int enchWeight)
+    protected EnchantmentFireAspect(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, EnumEnchantmentType.WEAPON);
+        super(rarityIn, EnumEnchantmentType.WEAPON, slots);
         this.setName("fire");
     }
 

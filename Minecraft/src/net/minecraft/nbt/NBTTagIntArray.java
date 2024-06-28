@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class NBTTagIntArray extends NBTBase
 {
@@ -19,6 +20,24 @@ public class NBTTagIntArray extends NBTBase
         this.intArray = p_i45132_1_;
     }
 
+    public NBTTagIntArray(List<Integer> p_i47528_1_)
+    {
+        this(func_193584_a(p_i47528_1_));
+    }
+
+    private static int[] func_193584_a(List<Integer> p_193584_0_)
+    {
+        int[] aint = new int[p_193584_0_.size()];
+
+        for (int i = 0; i < p_193584_0_.size(); ++i)
+        {
+            Integer integer = p_193584_0_.get(i);
+            aint[i] = integer == null ? 0 : integer.intValue();
+        }
+
+        return aint;
+    }
+
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
@@ -26,9 +45,9 @@ public class NBTTagIntArray extends NBTBase
     {
         output.writeInt(this.intArray.length);
 
-        for (int i = 0; i < this.intArray.length; ++i)
+        for (int i : this.intArray)
         {
-            output.writeInt(this.intArray[i]);
+            output.writeInt(i);
         }
     }
 
@@ -50,25 +69,30 @@ public class NBTTagIntArray extends NBTBase
      */
     public byte getId()
     {
-        return (byte)11;
+        return 11;
     }
 
     public String toString()
     {
-        String s = "[";
+        StringBuilder stringbuilder = new StringBuilder("[I;");
 
-        for (int i : this.intArray)
+        for (int i = 0; i < this.intArray.length; ++i)
         {
-            s = s + i + ",";
+            if (i != 0)
+            {
+                stringbuilder.append(',');
+            }
+
+            stringbuilder.append(this.intArray[i]);
         }
 
-        return s + "]";
+        return stringbuilder.append(']').toString();
     }
 
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagIntArray copy()
     {
         int[] aint = new int[this.intArray.length];
         System.arraycopy(this.intArray, 0, aint, 0, this.intArray.length);
@@ -77,7 +101,7 @@ public class NBTTagIntArray extends NBTBase
 
     public boolean equals(Object p_equals_1_)
     {
-        return super.equals(p_equals_1_) ? Arrays.equals(this.intArray, ((NBTTagIntArray)p_equals_1_).intArray) : false;
+        return super.equals(p_equals_1_) && Arrays.equals(this.intArray, ((NBTTagIntArray)p_equals_1_).intArray);
     }
 
     public int hashCode()

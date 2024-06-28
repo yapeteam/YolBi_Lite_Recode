@@ -12,13 +12,13 @@ public class AnimationMetadataSection implements IMetadataSection
     private final int frameTime;
     private final boolean interpolate;
 
-    public AnimationMetadataSection(List<AnimationFrame> p_i46088_1_, int p_i46088_2_, int p_i46088_3_, int p_i46088_4_, boolean p_i46088_5_)
+    public AnimationMetadataSection(List<AnimationFrame> animationFramesIn, int frameWidthIn, int frameHeightIn, int frameTimeIn, boolean interpolateIn)
     {
-        this.animationFrames = p_i46088_1_;
-        this.frameWidth = p_i46088_2_;
-        this.frameHeight = p_i46088_3_;
-        this.frameTime = p_i46088_4_;
-        this.interpolate = p_i46088_5_;
+        this.animationFrames = animationFramesIn;
+        this.frameWidth = frameWidthIn;
+        this.frameHeight = frameHeightIn;
+        this.frameTime = frameTimeIn;
+        this.interpolate = interpolateIn;
     }
 
     public int getFrameHeight()
@@ -46,25 +46,25 @@ public class AnimationMetadataSection implements IMetadataSection
         return this.interpolate;
     }
 
-    private AnimationFrame getAnimationFrame(int p_130072_1_)
+    private AnimationFrame getAnimationFrame(int frame)
     {
-        return (AnimationFrame)this.animationFrames.get(p_130072_1_);
+        return this.animationFrames.get(frame);
     }
 
-    public int getFrameTimeSingle(int p_110472_1_)
+    public int getFrameTimeSingle(int frame)
     {
-        AnimationFrame animationframe = this.getAnimationFrame(p_110472_1_);
+        AnimationFrame animationframe = this.getAnimationFrame(frame);
         return animationframe.hasNoTime() ? this.frameTime : animationframe.getFrameTime();
     }
 
-    public boolean frameHasTime(int p_110470_1_)
+    public boolean frameHasTime(int frame)
     {
-        return !((AnimationFrame)this.animationFrames.get(p_110470_1_)).hasNoTime();
+        return !((AnimationFrame)this.animationFrames.get(frame)).hasNoTime();
     }
 
-    public int getFrameIndex(int p_110468_1_)
+    public int getFrameIndex(int frame)
     {
-        return ((AnimationFrame)this.animationFrames.get(p_110468_1_)).getFrameIndex();
+        return ((AnimationFrame)this.animationFrames.get(frame)).getFrameIndex();
     }
 
     public Set<Integer> getFrameIndexSet()

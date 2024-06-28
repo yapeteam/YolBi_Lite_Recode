@@ -2,40 +2,50 @@ package net.minecraft.block;
 
 import java.util.List;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockTripWire extends Block
 {
     public static final PropertyBool POWERED = PropertyBool.create("powered");
-    public static final PropertyBool SUSPENDED = PropertyBool.create("suspended");
     public static final PropertyBool ATTACHED = PropertyBool.create("attached");
     public static final PropertyBool DISARMED = PropertyBool.create("disarmed");
     public static final PropertyBool NORTH = PropertyBool.create("north");
     public static final PropertyBool EAST = PropertyBool.create("east");
     public static final PropertyBool SOUTH = PropertyBool.create("south");
     public static final PropertyBool WEST = PropertyBool.create("west");
+    protected static final AxisAlignedBB AABB = new AxisAlignedBB(0.0D, 0.0625D, 0.0D, 1.0D, 0.15625D, 1.0D);
+    protected static final AxisAlignedBB TRIP_WRITE_ATTACHED_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D);
 
     public BlockTripWire()
     {
-        super(Material.circuits);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(POWERED, Boolean.valueOf(false)).withProperty(SUSPENDED, Boolean.valueOf(false)).withProperty(ATTACHED, Boolean.valueOf(false)).withProperty(DISARMED, Boolean.valueOf(false)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)));
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.15625F, 1.0F);
+        super(Material.CIRCUITS);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(POWERED, Boolean.valueOf(false)).withProperty(ATTACHED, Boolean.valueOf(false)).withProperty(DISARMED, Boolean.valueOf(false)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)));
         this.setTickRandomly(true);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return !((Boolean)state.getValue(ATTACHED)).booleanValue() ? TRIP_WRITE_ATTACHED_AABB : AABB;
     }
 
     /**
@@ -47,27 +57,28 @@ public class BlockTripWire extends Block
         return state.withProperty(NORTH, Boolean.valueOf(isConnectedTo(worldIn, pos, state, EnumFacing.NORTH))).withProperty(EAST, Boolean.valueOf(isConnectedTo(worldIn, pos, state, EnumFacing.EAST))).withProperty(SOUTH, Boolean.valueOf(isConnectedTo(worldIn, pos, state, EnumFacing.SOUTH))).withProperty(WEST, Boolean.valueOf(isConnectedTo(worldIn, pos, state, EnumFacing.WEST)));
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.TRANSLUCENT;
+        return BlockRenderLayer.TRANSLUCENT;
     }
 
     /**
@@ -75,56 +86,26 @@ public class BlockTripWire extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.string;
+        return Items.STRING;
     }
 
-    public Item getItem(World worldIn, BlockPos pos)
+    public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state)
     {
-        return Items.string;
+        return new ItemStack(Items.STRING);
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
-    {
-        boolean flag = ((Boolean)state.getValue(SUSPENDED)).booleanValue();
-        boolean flag1 = !World.doesBlockHaveSolidTopSurface(worldIn, pos.down());
-
-        if (flag != flag1)
-        {
-            this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockToAir(pos);
-        }
-    }
-
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        boolean flag = ((Boolean)iblockstate.getValue(ATTACHED)).booleanValue();
-        boolean flag1 = ((Boolean)iblockstate.getValue(SUSPENDED)).booleanValue();
-
-        if (!flag1)
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.09375F, 1.0F);
-        }
-        else if (!flag)
-        {
-            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.5F, 1.0F);
-        }
-        else
-        {
-            this.setBlockBounds(0.0F, 0.0625F, 0.0F, 1.0F, 0.15625F, 1.0F);
-        }
-    }
-
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        state = state.withProperty(SUSPENDED, Boolean.valueOf(!World.doesBlockHaveSolidTopSurface(worldIn, pos.down())));
         worldIn.setBlockState(pos, state, 3);
         this.notifyHook(worldIn, pos, state);
     }
 
+    /**
+     * Called serverside after this block is replaced with another in Chunk, but before the Tile Entity is updated
+     */
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         this.notifyHook(worldIn, pos, state.withProperty(POWERED, Boolean.valueOf(true)));
@@ -134,7 +115,7 @@ public class BlockTripWire extends Block
     {
         if (!worldIn.isRemote)
         {
-            if (player.getCurrentEquippedItem() != null && player.getCurrentEquippedItem().getItem() == Items.shears)
+            if (!player.getHeldItemMainhand().func_190926_b() && player.getHeldItemMainhand().getItem() == Items.SHEARS)
             {
                 worldIn.setBlockState(pos, state.withProperty(DISARMED, Boolean.valueOf(true)), 4);
             }
@@ -150,17 +131,17 @@ public class BlockTripWire extends Block
                 BlockPos blockpos = pos.offset(enumfacing, i);
                 IBlockState iblockstate = worldIn.getBlockState(blockpos);
 
-                if (iblockstate.getBlock() == Blocks.tripwire_hook)
+                if (iblockstate.getBlock() == Blocks.TRIPWIRE_HOOK)
                 {
                     if (iblockstate.getValue(BlockTripWireHook.FACING) == enumfacing.getOpposite())
                     {
-                        Blocks.tripwire_hook.func_176260_a(worldIn, blockpos, iblockstate, false, true, i, state);
+                        Blocks.TRIPWIRE_HOOK.calculateState(worldIn, blockpos, iblockstate, false, true, i, state);
                     }
 
                     break;
                 }
 
-                if (iblockstate.getBlock() != Blocks.tripwire)
+                if (iblockstate.getBlock() != Blocks.TRIPWIRE)
                 {
                     break;
                 }
@@ -205,7 +186,7 @@ public class BlockTripWire extends Block
         IBlockState iblockstate = worldIn.getBlockState(pos);
         boolean flag = ((Boolean)iblockstate.getValue(POWERED)).booleanValue();
         boolean flag1 = false;
-        List <? extends Entity > list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ));
+        List <? extends Entity > list = worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, iblockstate.getBoundingBox(worldIn, pos).offset(pos));
 
         if (!list.isEmpty())
         {
@@ -228,7 +209,7 @@ public class BlockTripWire extends Block
 
         if (flag1)
         {
-            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+            worldIn.scheduleUpdate(new BlockPos(pos), this, this.tickRate(worldIn));
         }
     }
 
@@ -238,20 +219,14 @@ public class BlockTripWire extends Block
         IBlockState iblockstate = worldIn.getBlockState(blockpos);
         Block block = iblockstate.getBlock();
 
-        if (block == Blocks.tripwire_hook)
+        if (block == Blocks.TRIPWIRE_HOOK)
         {
             EnumFacing enumfacing = direction.getOpposite();
             return iblockstate.getValue(BlockTripWireHook.FACING) == enumfacing;
         }
-        else if (block == Blocks.tripwire)
-        {
-            boolean flag = ((Boolean)state.getValue(SUSPENDED)).booleanValue();
-            boolean flag1 = ((Boolean)iblockstate.getValue(SUSPENDED)).booleanValue();
-            return flag == flag1;
-        }
         else
         {
-            return false;
+            return block == Blocks.TRIPWIRE;
         }
     }
 
@@ -260,7 +235,7 @@ public class BlockTripWire extends Block
      */
     public IBlockState getStateFromMeta(int meta)
     {
-        return this.getDefaultState().withProperty(POWERED, Boolean.valueOf((meta & 1) > 0)).withProperty(SUSPENDED, Boolean.valueOf((meta & 2) > 0)).withProperty(ATTACHED, Boolean.valueOf((meta & 4) > 0)).withProperty(DISARMED, Boolean.valueOf((meta & 8) > 0));
+        return this.getDefaultState().withProperty(POWERED, Boolean.valueOf((meta & 1) > 0)).withProperty(ATTACHED, Boolean.valueOf((meta & 4) > 0)).withProperty(DISARMED, Boolean.valueOf((meta & 8) > 0));
     }
 
     /**
@@ -273,11 +248,6 @@ public class BlockTripWire extends Block
         if (((Boolean)state.getValue(POWERED)).booleanValue())
         {
             i |= 1;
-        }
-
-        if (((Boolean)state.getValue(SUSPENDED)).booleanValue())
-        {
-            i |= 2;
         }
 
         if (((Boolean)state.getValue(ATTACHED)).booleanValue())
@@ -293,8 +263,54 @@ public class BlockTripWire extends Block
         return i;
     }
 
-    protected BlockState createBlockState()
+    /**
+     * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withRotation(IBlockState state, Rotation rot)
     {
-        return new BlockState(this, new IProperty[] {POWERED, SUSPENDED, ATTACHED, DISARMED, NORTH, EAST, WEST, SOUTH});
+        switch (rot)
+        {
+            case CLOCKWISE_180:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(EAST, state.getValue(WEST)).withProperty(SOUTH, state.getValue(NORTH)).withProperty(WEST, state.getValue(EAST));
+
+            case COUNTERCLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(EAST)).withProperty(EAST, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(WEST)).withProperty(WEST, state.getValue(NORTH));
+
+            case CLOCKWISE_90:
+                return state.withProperty(NORTH, state.getValue(WEST)).withProperty(EAST, state.getValue(NORTH)).withProperty(SOUTH, state.getValue(EAST)).withProperty(WEST, state.getValue(SOUTH));
+
+            default:
+                return state;
+        }
+    }
+
+    /**
+     * Returns the blockstate with the given mirror of the passed blockstate. If inapplicable, returns the passed
+     * blockstate.
+     */
+    public IBlockState withMirror(IBlockState state, Mirror mirrorIn)
+    {
+        switch (mirrorIn)
+        {
+            case LEFT_RIGHT:
+                return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
+
+            case FRONT_BACK:
+                return state.withProperty(EAST, state.getValue(WEST)).withProperty(WEST, state.getValue(EAST));
+
+            default:
+                return super.withMirror(state, mirrorIn);
+        }
+    }
+
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(this, new IProperty[] {POWERED, ATTACHED, DISARMED, NORTH, EAST, WEST, SOUTH});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
     }
 }

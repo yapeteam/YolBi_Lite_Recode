@@ -3,19 +3,23 @@ package net.minecraft.block;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderEnd;
@@ -23,13 +27,11 @@ import net.minecraft.world.WorldProviderEnd;
 public class BlockFire extends Block
 {
     public static final PropertyInteger AGE = PropertyInteger.create("age", 0, 15);
-    public static final PropertyBool FLIP = PropertyBool.create("flip");
-    public static final PropertyBool ALT = PropertyBool.create("alt");
     public static final PropertyBool NORTH = PropertyBool.create("north");
     public static final PropertyBool EAST = PropertyBool.create("east");
     public static final PropertyBool SOUTH = PropertyBool.create("south");
     public static final PropertyBool WEST = PropertyBool.create("west");
-    public static final PropertyInteger UPPER = PropertyInteger.create("upper", 0, 2);
+    public static final PropertyBool UPPER = PropertyBool.create("up");
     private final Map<Block, Integer> encouragements = Maps.<Block, Integer>newIdentityHashMap();
     private final Map<Block, Integer> flammabilities = Maps.<Block, Integer>newIdentityHashMap();
 
@@ -39,73 +41,55 @@ public class BlockFire extends Block
      */
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        int i = pos.getX();
-        int j = pos.getY();
-        int k = pos.getZ();
-
-        if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && !Blocks.fire.canCatchFire(worldIn, pos.down()))
-        {
-            boolean flag = (i + j + k & 1) == 1;
-            boolean flag1 = (i / 2 + j / 2 + k / 2 & 1) == 1;
-            int l = 0;
-
-            if (this.canCatchFire(worldIn, pos.up()))
-            {
-                l = flag ? 1 : 2;
-            }
-
-            return state.withProperty(NORTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.north()))).withProperty(EAST, Boolean.valueOf(this.canCatchFire(worldIn, pos.east()))).withProperty(SOUTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.south()))).withProperty(WEST, Boolean.valueOf(this.canCatchFire(worldIn, pos.west()))).withProperty(UPPER, Integer.valueOf(l)).withProperty(FLIP, Boolean.valueOf(flag1)).withProperty(ALT, Boolean.valueOf(flag));
-        }
-        else
-        {
-            return this.getDefaultState();
-        }
+        return !worldIn.getBlockState(pos.down()).isFullyOpaque() && !Blocks.FIRE.canCatchFire(worldIn, pos.down()) ? state.withProperty(NORTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.north()))).withProperty(EAST, Boolean.valueOf(this.canCatchFire(worldIn, pos.east()))).withProperty(SOUTH, Boolean.valueOf(this.canCatchFire(worldIn, pos.south()))).withProperty(WEST, Boolean.valueOf(this.canCatchFire(worldIn, pos.west()))).withProperty(UPPER, Boolean.valueOf(this.canCatchFire(worldIn, pos.up()))) : this.getDefaultState();
     }
 
     protected BlockFire()
     {
-        super(Material.fire);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, Integer.valueOf(0)).withProperty(FLIP, Boolean.valueOf(false)).withProperty(ALT, Boolean.valueOf(false)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)).withProperty(UPPER, Integer.valueOf(0)));
+        super(Material.FIRE);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, Integer.valueOf(0)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)).withProperty(UPPER, Boolean.valueOf(false)));
         this.setTickRandomly(true);
     }
 
     public static void init()
     {
-        Blocks.fire.setFireInfo(Blocks.planks, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.double_wooden_slab, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.wooden_slab, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.oak_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.spruce_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.birch_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.jungle_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.dark_oak_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.acacia_fence_gate, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.oak_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.spruce_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.birch_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.jungle_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.dark_oak_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.acacia_fence, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.oak_stairs, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.birch_stairs, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.spruce_stairs, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.jungle_stairs, 5, 20);
-        Blocks.fire.setFireInfo(Blocks.log, 5, 5);
-        Blocks.fire.setFireInfo(Blocks.log2, 5, 5);
-        Blocks.fire.setFireInfo(Blocks.leaves, 30, 60);
-        Blocks.fire.setFireInfo(Blocks.leaves2, 30, 60);
-        Blocks.fire.setFireInfo(Blocks.bookshelf, 30, 20);
-        Blocks.fire.setFireInfo(Blocks.tnt, 15, 100);
-        Blocks.fire.setFireInfo(Blocks.tallgrass, 60, 100);
-        Blocks.fire.setFireInfo(Blocks.double_plant, 60, 100);
-        Blocks.fire.setFireInfo(Blocks.yellow_flower, 60, 100);
-        Blocks.fire.setFireInfo(Blocks.red_flower, 60, 100);
-        Blocks.fire.setFireInfo(Blocks.deadbush, 60, 100);
-        Blocks.fire.setFireInfo(Blocks.wool, 30, 60);
-        Blocks.fire.setFireInfo(Blocks.vine, 15, 100);
-        Blocks.fire.setFireInfo(Blocks.coal_block, 5, 5);
-        Blocks.fire.setFireInfo(Blocks.hay_block, 60, 20);
-        Blocks.fire.setFireInfo(Blocks.carpet, 60, 20);
+        Blocks.FIRE.setFireInfo(Blocks.PLANKS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.DOUBLE_WOODEN_SLAB, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.WOODEN_SLAB, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.OAK_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.BIRCH_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.ACACIA_FENCE_GATE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.OAK_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.BIRCH_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.ACACIA_FENCE, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.OAK_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.BIRCH_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.SPRUCE_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.JUNGLE_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.ACACIA_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.DARK_OAK_STAIRS, 5, 20);
+        Blocks.FIRE.setFireInfo(Blocks.LOG, 5, 5);
+        Blocks.FIRE.setFireInfo(Blocks.LOG2, 5, 5);
+        Blocks.FIRE.setFireInfo(Blocks.LEAVES, 30, 60);
+        Blocks.FIRE.setFireInfo(Blocks.LEAVES2, 30, 60);
+        Blocks.FIRE.setFireInfo(Blocks.BOOKSHELF, 30, 20);
+        Blocks.FIRE.setFireInfo(Blocks.TNT, 15, 100);
+        Blocks.FIRE.setFireInfo(Blocks.TALLGRASS, 60, 100);
+        Blocks.FIRE.setFireInfo(Blocks.DOUBLE_PLANT, 60, 100);
+        Blocks.FIRE.setFireInfo(Blocks.YELLOW_FLOWER, 60, 100);
+        Blocks.FIRE.setFireInfo(Blocks.RED_FLOWER, 60, 100);
+        Blocks.FIRE.setFireInfo(Blocks.DEADBUSH, 60, 100);
+        Blocks.FIRE.setFireInfo(Blocks.WOOL, 30, 60);
+        Blocks.FIRE.setFireInfo(Blocks.VINE, 15, 100);
+        Blocks.FIRE.setFireInfo(Blocks.COAL_BLOCK, 5, 5);
+        Blocks.FIRE.setFireInfo(Blocks.HAY_BLOCK, 60, 20);
+        Blocks.FIRE.setFireInfo(Blocks.CARPET, 60, 20);
     }
 
     public void setFireInfo(Block blockIn, int encouragement, int flammability)
@@ -114,20 +98,21 @@ public class BlockFire extends Block
         this.flammabilities.put(blockIn, Integer.valueOf(flammability));
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
     {
-        return null;
+        return NULL_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -158,21 +143,21 @@ public class BlockFire extends Block
             }
 
             Block block = worldIn.getBlockState(pos.down()).getBlock();
-            boolean flag = block == Blocks.netherrack;
+            boolean flag = block == Blocks.NETHERRACK || block == Blocks.MAGMA;
 
-            if (worldIn.provider instanceof WorldProviderEnd && block == Blocks.bedrock)
+            if (worldIn.provider instanceof WorldProviderEnd && block == Blocks.BEDROCK)
             {
                 flag = true;
             }
 
-            if (!flag && worldIn.isRaining() && this.canDie(worldIn, pos))
+            int i = ((Integer)state.getValue(AGE)).intValue();
+
+            if (!flag && worldIn.isRaining() && this.canDie(worldIn, pos) && rand.nextFloat() < 0.2F + (float)i * 0.03F)
             {
                 worldIn.setBlockToAir(pos);
             }
             else
             {
-                int i = ((Integer)state.getValue(AGE)).intValue();
-
                 if (i < 15)
                 {
                     state = state.withProperty(AGE, Integer.valueOf(i + rand.nextInt(3) / 2));
@@ -185,7 +170,7 @@ public class BlockFire extends Block
                 {
                     if (!this.canNeighborCatchFire(worldIn, pos))
                     {
-                        if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) || i > 3)
+                        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() || i > 3)
                         {
                             worldIn.setBlockToAir(pos);
                         }
@@ -274,13 +259,13 @@ public class BlockFire extends Block
 
     private int getFlammability(Block blockIn)
     {
-        Integer integer = (Integer)this.flammabilities.get(blockIn);
+        Integer integer = this.flammabilities.get(blockIn);
         return integer == null ? 0 : integer.intValue();
     }
 
     private int getEncouragement(Block blockIn)
     {
-        Integer integer = (Integer)this.encouragements.get(blockIn);
+        Integer integer = this.encouragements.get(blockIn);
         return integer == null ? 0 : integer.intValue();
     }
 
@@ -308,9 +293,9 @@ public class BlockFire extends Block
                 worldIn.setBlockToAir(pos);
             }
 
-            if (iblockstate.getBlock() == Blocks.tnt)
+            if (iblockstate.getBlock() == Blocks.TNT)
             {
-                Blocks.tnt.onBlockDestroyedByPlayer(worldIn, pos, iblockstate.withProperty(BlockTNT.EXPLODE, Boolean.valueOf(true)));
+                Blocks.TNT.onBlockDestroyedByPlayer(worldIn, pos, iblockstate.withProperty(BlockTNT.EXPLODE, Boolean.valueOf(true)));
             }
         }
     }
@@ -348,7 +333,8 @@ public class BlockFire extends Block
     }
 
     /**
-     * Returns if this block is collidable (only used by Fire). Args: x, y, z
+     * Returns if this block is collidable. Only used by fire, although stairs return that of the block that the stair
+     * is made of (though nobody's going to make fire stairs, right?)
      */
     public boolean isCollidable()
     {
@@ -365,25 +351,30 @@ public class BlockFire extends Block
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) || this.canNeighborCatchFire(worldIn, pos);
+        return worldIn.getBlockState(pos.down()).isFullyOpaque() || this.canNeighborCatchFire(worldIn, pos);
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
-        if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && !this.canNeighborCatchFire(worldIn, pos))
+        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !this.canNeighborCatchFire(worldIn, pos))
         {
             worldIn.setBlockToAir(pos);
         }
     }
 
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        if (worldIn.provider.getDimensionId() > 0 || !Blocks.portal.func_176548_d(worldIn, pos))
+        if (worldIn.provider.getDimensionType().getId() > 0 || !Blocks.PORTAL.trySpawnPortal(worldIn, pos))
         {
-            if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && !this.canNeighborCatchFire(worldIn, pos))
+            if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !this.canNeighborCatchFire(worldIn, pos))
             {
                 worldIn.setBlockToAir(pos);
             }
@@ -394,67 +385,67 @@ public class BlockFire extends Block
         }
     }
 
-    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
         if (rand.nextInt(24) == 0)
         {
-            worldIn.playSound((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), "fire.fire", 1.0F + rand.nextFloat(), rand.nextFloat() * 0.7F + 0.3F, false);
+            worldIn.playSound((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 1.0F + rand.nextFloat(), rand.nextFloat() * 0.7F + 0.3F, false);
         }
 
-        if (!World.doesBlockHaveSolidTopSurface(worldIn, pos.down()) && !Blocks.fire.canCatchFire(worldIn, pos.down()))
+        if (!worldIn.getBlockState(pos.down()).isFullyOpaque() && !Blocks.FIRE.canCatchFire(worldIn, pos.down()))
         {
-            if (Blocks.fire.canCatchFire(worldIn, pos.west()))
+            if (Blocks.FIRE.canCatchFire(worldIn, pos.west()))
             {
                 for (int j = 0; j < 2; ++j)
                 {
                     double d3 = (double)pos.getX() + rand.nextDouble() * 0.10000000149011612D;
                     double d8 = (double)pos.getY() + rand.nextDouble();
                     double d13 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d3, d8, d13, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d3, d8, d13, 0.0D, 0.0D, 0.0D);
                 }
             }
 
-            if (Blocks.fire.canCatchFire(worldIn, pos.east()))
+            if (Blocks.FIRE.canCatchFire(worldIn, pos.east()))
             {
                 for (int k = 0; k < 2; ++k)
                 {
                     double d4 = (double)(pos.getX() + 1) - rand.nextDouble() * 0.10000000149011612D;
                     double d9 = (double)pos.getY() + rand.nextDouble();
                     double d14 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d4, d9, d14, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d4, d9, d14, 0.0D, 0.0D, 0.0D);
                 }
             }
 
-            if (Blocks.fire.canCatchFire(worldIn, pos.north()))
+            if (Blocks.FIRE.canCatchFire(worldIn, pos.north()))
             {
                 for (int l = 0; l < 2; ++l)
                 {
                     double d5 = (double)pos.getX() + rand.nextDouble();
                     double d10 = (double)pos.getY() + rand.nextDouble();
                     double d15 = (double)pos.getZ() + rand.nextDouble() * 0.10000000149011612D;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d5, d10, d15, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d5, d10, d15, 0.0D, 0.0D, 0.0D);
                 }
             }
 
-            if (Blocks.fire.canCatchFire(worldIn, pos.south()))
+            if (Blocks.FIRE.canCatchFire(worldIn, pos.south()))
             {
                 for (int i1 = 0; i1 < 2; ++i1)
                 {
                     double d6 = (double)pos.getX() + rand.nextDouble();
                     double d11 = (double)pos.getY() + rand.nextDouble();
                     double d16 = (double)(pos.getZ() + 1) - rand.nextDouble() * 0.10000000149011612D;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d6, d11, d16, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d6, d11, d16, 0.0D, 0.0D, 0.0D);
                 }
             }
 
-            if (Blocks.fire.canCatchFire(worldIn, pos.up()))
+            if (Blocks.FIRE.canCatchFire(worldIn, pos.up()))
             {
                 for (int j1 = 0; j1 < 2; ++j1)
                 {
                     double d7 = (double)pos.getX() + rand.nextDouble();
                     double d12 = (double)(pos.getY() + 1) - rand.nextDouble() * 0.10000000149011612D;
                     double d17 = (double)pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d7, d12, d17, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d7, d12, d17, 0.0D, 0.0D, 0.0D);
                 }
             }
         }
@@ -465,7 +456,7 @@ public class BlockFire extends Block
                 double d0 = (double)pos.getX() + rand.nextDouble();
                 double d1 = (double)pos.getY() + rand.nextDouble() * 0.5D + 0.5D;
                 double d2 = (double)pos.getZ() + rand.nextDouble();
-                worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d0, d1, d2, 0.0D, 0.0D, 0.0D, new int[0]);
+                worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d0, d1, d2, 0.0D, 0.0D, 0.0D);
             }
         }
     }
@@ -473,14 +464,14 @@ public class BlockFire extends Block
     /**
      * Get the MapColor for this Block and the given BlockState
      */
-    public MapColor getMapColor(IBlockState state)
+    public MapColor getMapColor(IBlockState state, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
     {
-        return MapColor.tntColor;
+        return MapColor.TNT;
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT;
+        return BlockRenderLayer.CUTOUT;
     }
 
     /**
@@ -499,8 +490,13 @@ public class BlockFire extends Block
         return ((Integer)state.getValue(AGE)).intValue();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {AGE, NORTH, EAST, SOUTH, WEST, UPPER, FLIP, ALT});
+        return new BlockStateContainer(this, new IProperty[] {AGE, NORTH, EAST, SOUTH, WEST, UPPER});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return BlockFaceShape.UNDEFINED;
     }
 }

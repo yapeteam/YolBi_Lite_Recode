@@ -20,25 +20,31 @@ public class LanguageMetadataSectionSerializer extends BaseMetadataSectionSerial
 
         for (Entry<String, JsonElement> entry : jsonobject.entrySet())
         {
-            String s = (String)entry.getKey();
-            JsonObject jsonobject1 = JsonUtils.getJsonObject((JsonElement)entry.getValue(), "language");
+            String s = entry.getKey();
+
+            if (s.length() > 16)
+            {
+                throw new JsonParseException("Invalid language->'" + s + "': language code must not be more than " + 16 + " characters long");
+            }
+
+            JsonObject jsonobject1 = JsonUtils.getJsonObject(entry.getValue(), "language");
             String s1 = JsonUtils.getString(jsonobject1, "region");
             String s2 = JsonUtils.getString(jsonobject1, "name");
             boolean flag = JsonUtils.getBoolean(jsonobject1, "bidirectional", false);
 
             if (s1.isEmpty())
             {
-                throw new JsonParseException("Invalid language->\'" + s + "\'->region: empty value");
+                throw new JsonParseException("Invalid language->'" + s + "'->region: empty value");
             }
 
             if (s2.isEmpty())
             {
-                throw new JsonParseException("Invalid language->\'" + s + "\'->name: empty value");
+                throw new JsonParseException("Invalid language->'" + s + "'->name: empty value");
             }
 
             if (!set.add(new Language(s, s1, s2, flag)))
             {
-                throw new JsonParseException("Duplicate language->\'" + s + "\' defined");
+                throw new JsonParseException("Duplicate language->'" + s + "' defined");
             }
         }
 

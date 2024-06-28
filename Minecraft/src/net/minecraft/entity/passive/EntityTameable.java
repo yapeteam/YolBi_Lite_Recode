@@ -1,11 +1,19 @@
 package net.minecraft.entity.passive;
 
+import com.google.common.base.Optional;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.ai.EntityAISit;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.management.PreYggdrasilConverter;
 import net.minecraft.util.DamageSource;
@@ -14,7 +22,9 @@ import net.minecraft.world.World;
 
 public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable
 {
-    protected EntityAISit aiSit = new EntityAISit(this);
+    protected static final DataParameter<Byte> TAMED = EntityDataManager.<Byte>createKey(EntityTameable.class, DataSerializers.BYTE);
+    protected static final DataParameter<Optional<UUID>> OWNER_UNIQUE_ID = EntityDataManager.<Optional<UUID>>createKey(EntityTameable.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+    protected EntityAISit aiSit;
 
     public EntityTameable(World worldIn)
     {
@@ -25,55 +35,71 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(16, Byte.valueOf((byte)0));
-        this.dataWatcher.addObject(17, "");
+        this.dataManager.register(TAMED, Byte.valueOf((byte)0));
+        this.dataManager.register(OWNER_UNIQUE_ID, Optional.absent());
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
+        super.writeEntityToNBT(compound);
 
         if (this.getOwnerId() == null)
         {
-            tagCompound.setString("OwnerUUID", "");
+            compound.setString("OwnerUUID", "");
         }
         else
         {
-            tagCompound.setString("OwnerUUID", this.getOwnerId());
+            compound.setString("OwnerUUID", this.getOwnerId().toString());
         }
 
-        tagCompound.setBoolean("Sitting", this.isSitting());
+        compound.setBoolean("Sitting", this.isSitting());
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
-        String s = "";
+        super.readEntityFromNBT(compound);
+        String s;
 
-        if (tagCompund.hasKey("OwnerUUID", 8))
+        if (compound.hasKey("OwnerUUID", 8))
         {
-            s = tagCompund.getString("OwnerUUID");
+            s = compound.getString("OwnerUUID");
         }
         else
         {
-            String s1 = tagCompund.getString("Owner");
-            s = PreYggdrasilConverter.getStringUUIDFromName(s1);
+            String s1 = compound.getString("Owner");
+            s = PreYggdrasilConverter.convertMobOwnerIfNeeded(this.getServer(), s1);
         }
 
-        if (s.length() > 0)
+        if (!s.isEmpty())
         {
-            this.setOwnerId(s);
-            this.setTamed(true);
+            try
+            {
+                this.setOwnerId(UUID.fromString(s));
+                this.setTamed(true);
+            }
+            catch (Throwable var4)
+            {
+                this.setTamed(false);
+            }
         }
 
-        this.aiSit.setSitting(tagCompund.getBoolean("Sitting"));
-        this.setSitting(tagCompund.getBoolean("Sitting"));
+        if (this.aiSit != null)
+        {
+            this.aiSit.setSitting(compound.getBoolean("Sitting"));
+        }
+
+        this.setSitting(compound.getBoolean("Sitting"));
+    }
+
+    public boolean canBeLeashedTo(EntityPlayer player)
+    {
+        return !this.getLeashed();
     }
 
     /**
@@ -93,7 +119,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
             double d0 = this.rand.nextGaussian() * 0.02D;
             double d1 = this.rand.nextGaussian() * 0.02D;
             double d2 = this.rand.nextGaussian() * 0.02D;
-            this.worldObj.spawnParticle(enumparticletypes, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2, new int[0]);
+            this.world.spawnParticle(enumparticletypes, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
         }
     }
 
@@ -115,20 +141,20 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 
     public boolean isTamed()
     {
-        return (this.dataWatcher.getWatchableObjectByte(16) & 4) != 0;
+        return (((Byte)this.dataManager.get(TAMED)).byteValue() & 4) != 0;
     }
 
     public void setTamed(boolean tamed)
     {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
+        byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
 
         if (tamed)
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 | 4)));
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 4)));
         }
         else
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 & -5)));
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -5)));
         }
 
         this.setupTamedAI();
@@ -140,39 +166,52 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 
     public boolean isSitting()
     {
-        return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
+        return (((Byte)this.dataManager.get(TAMED)).byteValue() & 1) != 0;
     }
 
     public void setSitting(boolean sitting)
     {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(16);
+        byte b0 = ((Byte)this.dataManager.get(TAMED)).byteValue();
 
         if (sitting)
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 | 1)));
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 | 1)));
         }
         else
         {
-            this.dataWatcher.updateObject(16, Byte.valueOf((byte)(b0 & -2)));
+            this.dataManager.set(TAMED, Byte.valueOf((byte)(b0 & -2)));
         }
     }
 
-    public String getOwnerId()
+    @Nullable
+    public UUID getOwnerId()
     {
-        return this.dataWatcher.getWatchableObjectString(17);
+        return (UUID)((Optional)this.dataManager.get(OWNER_UNIQUE_ID)).orNull();
     }
 
-    public void setOwnerId(String ownerUuid)
+    public void setOwnerId(@Nullable UUID p_184754_1_)
     {
-        this.dataWatcher.updateObject(17, ownerUuid);
+        this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(p_184754_1_));
     }
 
+    public void func_193101_c(EntityPlayer p_193101_1_)
+    {
+        this.setTamed(true);
+        this.setOwnerId(p_193101_1_.getUniqueID());
+
+        if (p_193101_1_ instanceof EntityPlayerMP)
+        {
+            CriteriaTriggers.field_193136_w.func_193178_a((EntityPlayerMP)p_193101_1_, this);
+        }
+    }
+
+    @Nullable
     public EntityLivingBase getOwner()
     {
         try
         {
-            UUID uuid = UUID.fromString(this.getOwnerId());
-            return uuid == null ? null : this.worldObj.getPlayerEntityByUUID(uuid);
+            UUID uuid = this.getOwnerId();
+            return uuid == null ? null : this.world.getPlayerEntityByUUID(uuid);
         }
         catch (IllegalArgumentException var2)
         {
@@ -213,24 +252,27 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         return super.getTeam();
     }
 
-    public boolean isOnSameTeam(EntityLivingBase otherEntity)
+    /**
+     * Returns whether this Entity is on the same team as the given Entity.
+     */
+    public boolean isOnSameTeam(Entity entityIn)
     {
         if (this.isTamed())
         {
             EntityLivingBase entitylivingbase = this.getOwner();
 
-            if (otherEntity == entitylivingbase)
+            if (entityIn == entitylivingbase)
             {
                 return true;
             }
 
             if (entitylivingbase != null)
             {
-                return entitylivingbase.isOnSameTeam(otherEntity);
+                return entitylivingbase.isOnSameTeam(entityIn);
             }
         }
 
-        return super.isOnSameTeam(otherEntity);
+        return super.isOnSameTeam(entityIn);
     }
 
     /**
@@ -238,9 +280,9 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
      */
     public void onDeath(DamageSource cause)
     {
-        if (!this.worldObj.isRemote && this.worldObj.getGameRules().getBoolean("showDeathMessages") && this.hasCustomName() && this.getOwner() instanceof EntityPlayerMP)
+        if (!this.world.isRemote && this.world.getGameRules().getBoolean("showDeathMessages") && this.getOwner() instanceof EntityPlayerMP)
         {
-            ((EntityPlayerMP)this.getOwner()).addChatMessage(this.getCombatTracker().getDeathMessage());
+            this.getOwner().addChatMessage(this.getCombatTracker().getDeathMessage());
         }
 
         super.onDeath(cause);

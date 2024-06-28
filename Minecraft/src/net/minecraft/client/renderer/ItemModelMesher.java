@@ -3,17 +3,13 @@ package net.minecraft.client.renderer;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelManager;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.src.Config;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ISmartItemModel;
-import net.optifine.CustomItems;
-import net.optifine.reflect.Reflector;
 
 public class ItemModelMesher
 {
@@ -44,7 +40,7 @@ public class ItemModelMesher
 
         if (ibakedmodel == null)
         {
-            ItemMeshDefinition itemmeshdefinition = (ItemMeshDefinition)this.shapers.get(item);
+            ItemMeshDefinition itemmeshdefinition = this.shapers.get(item);
 
             if (itemmeshdefinition != null)
             {
@@ -52,19 +48,9 @@ public class ItemModelMesher
             }
         }
 
-        if (Reflector.ForgeHooksClient.exists() && ibakedmodel instanceof ISmartItemModel)
-        {
-            ibakedmodel = ((ISmartItemModel)ibakedmodel).handleItemState(stack);
-        }
-
         if (ibakedmodel == null)
         {
             ibakedmodel = this.modelManager.getMissingModel();
-        }
-
-        if (Config.isCustomItems())
-        {
-            ibakedmodel = CustomItems.getCustomItemModel(stack, ibakedmodel, (ResourceLocation)null, true);
         }
 
         return ibakedmodel;
@@ -72,12 +58,13 @@ public class ItemModelMesher
 
     protected int getMetadata(ItemStack stack)
     {
-        return stack.isItemStackDamageable() ? 0 : stack.getMetadata();
+        return stack.getMaxDamage() > 0 ? 0 : stack.getMetadata();
     }
 
+    @Nullable
     protected IBakedModel getItemModel(Item item, int meta)
     {
-        return (IBakedModel)this.simpleShapesCache.get(Integer.valueOf(this.getIndex(item, meta)));
+        return this.simpleShapesCache.get(Integer.valueOf(this.getIndex(item, meta)));
     }
 
     private int getIndex(Item item, int meta)
@@ -107,7 +94,7 @@ public class ItemModelMesher
 
         for (Entry<Integer, ModelResourceLocation> entry : this.simpleShapes.entrySet())
         {
-            this.simpleShapesCache.put(entry.getKey(), this.modelManager.getModel((ModelResourceLocation)entry.getValue()));
+            this.simpleShapesCache.put(entry.getKey(), this.modelManager.getModel(entry.getValue()));
         }
     }
 }

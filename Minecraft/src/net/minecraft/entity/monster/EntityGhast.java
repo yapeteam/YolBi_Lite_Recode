@@ -1,7 +1,9 @@
 package net.minecraft.entity.monster;
 
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.entity.EntityFlying;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -9,20 +11,28 @@ import net.minecraft.entity.ai.EntityAIFindEntityNearestPlayer;
 import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityLargeFireball;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.stats.AchievementList;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTableList;
 
 public class EntityGhast extends EntityFlying implements IMob
 {
+    private static final DataParameter<Boolean> ATTACKING = EntityDataManager.<Boolean>createKey(EntityGhast.class, DataSerializers.BOOLEAN);
+
     /** The explosion radius of spawned fireballs. */
     private int explosionStrength = 1;
 
@@ -33,6 +43,10 @@ public class EntityGhast extends EntityFlying implements IMob
         this.isImmuneToFire = true;
         this.experienceValue = 5;
         this.moveHelper = new EntityGhast.GhastMoveHelper(this);
+    }
+
+    protected void initEntityAI()
+    {
         this.tasks.addTask(5, new EntityGhast.AIRandomFly(this));
         this.tasks.addTask(7, new EntityGhast.AILookAround(this));
         this.tasks.addTask(7, new EntityGhast.AIFireballAttack(this));
@@ -41,12 +55,12 @@ public class EntityGhast extends EntityFlying implements IMob
 
     public boolean isAttacking()
     {
-        return this.dataWatcher.getWatchableObjectByte(16) != 0;
+        return ((Boolean)this.dataManager.get(ATTACKING)).booleanValue();
     }
 
     public void setAttacking(boolean attacking)
     {
-        this.dataWatcher.updateObject(16, Byte.valueOf((byte)(attacking ? 1 : 0)));
+        this.dataManager.set(ATTACKING, Boolean.valueOf(attacking));
     }
 
     public int getFireballStrength()
@@ -61,7 +75,7 @@ public class EntityGhast extends EntityFlying implements IMob
     {
         super.onUpdate();
 
-        if (!this.worldObj.isRemote && this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL)
+        if (!this.world.isRemote && this.world.getDifficulty() == EnumDifficulty.PEACEFUL)
         {
             this.setDead();
         }
@@ -76,10 +90,9 @@ public class EntityGhast extends EntityFlying implements IMob
         {
             return false;
         }
-        else if ("fireball".equals(source.getDamageType()) && source.getEntity() instanceof EntityPlayer)
+        else if (source.getSourceOfDamage() instanceof EntityLargeFireball && source.getEntity() instanceof EntityPlayer)
         {
             super.attackEntityFrom(source, 1000.0F);
-            ((EntityPlayer)source.getEntity()).triggerAchievement(AchievementList.ghast);
             return true;
         }
         else
@@ -91,67 +104,40 @@ public class EntityGhast extends EntityFlying implements IMob
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(16, Byte.valueOf((byte)0));
+        this.dataManager.register(ATTACKING, Boolean.valueOf(false));
     }
 
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(100.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(100.0D);
     }
 
-    /**
-     * Returns the sound this mob makes while it's alive.
-     */
-    protected String getLivingSound()
+    public SoundCategory getSoundCategory()
     {
-        return "mob.ghast.moan";
+        return SoundCategory.HOSTILE;
     }
 
-    /**
-     * Returns the sound this mob makes when it is hurt.
-     */
-    protected String getHurtSound()
+    protected SoundEvent getAmbientSound()
     {
-        return "mob.ghast.scream";
+        return SoundEvents.ENTITY_GHAST_AMBIENT;
     }
 
-    /**
-     * Returns the sound this mob makes on death.
-     */
-    protected String getDeathSound()
+    protected SoundEvent getHurtSound(DamageSource p_184601_1_)
     {
-        return "mob.ghast.death";
+        return SoundEvents.ENTITY_GHAST_HURT;
     }
 
-    protected Item getDropItem()
+    protected SoundEvent getDeathSound()
     {
-        return Items.gunpowder;
+        return SoundEvents.ENTITY_GHAST_DEATH;
     }
 
-    /**
-     * Drop 0-2 items of this living's type
-     *  
-     * @param wasRecentlyHit true if this this entity was recently hit by appropriate entity (generally only if player
-     * or tameable)
-     * @param lootingModifier level of enchanment to be applied to this drop
-     */
-    protected void dropFewItems(boolean wasRecentlyHit, int lootingModifier)
+    @Nullable
+    protected ResourceLocation getLootTable()
     {
-        int i = this.rand.nextInt(2) + this.rand.nextInt(1 + lootingModifier);
-
-        for (int j = 0; j < i; ++j)
-        {
-            this.dropItem(Items.ghast_tear, 1);
-        }
-
-        i = this.rand.nextInt(3) + this.rand.nextInt(1 + lootingModifier);
-
-        for (int k = 0; k < i; ++k)
-        {
-            this.dropItem(Items.gunpowder, 1);
-        }
+        return LootTableList.ENTITIES_GHAST;
     }
 
     /**
@@ -167,7 +153,7 @@ public class EntityGhast extends EntityFlying implements IMob
      */
     public boolean getCanSpawnHere()
     {
-        return this.rand.nextInt(20) == 0 && super.getCanSpawnHere() && this.worldObj.getDifficulty() != EnumDifficulty.PEACEFUL;
+        return this.rand.nextInt(20) == 0 && super.getCanSpawnHere() && this.world.getDifficulty() != EnumDifficulty.PEACEFUL;
     }
 
     /**
@@ -178,25 +164,30 @@ public class EntityGhast extends EntityFlying implements IMob
         return 1;
     }
 
+    public static void registerFixesGhast(DataFixer fixer)
+    {
+        EntityLiving.registerFixesMob(fixer, EntityGhast.class);
+    }
+
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        super.writeEntityToNBT(tagCompound);
-        tagCompound.setInteger("ExplosionPower", this.explosionStrength);
+        super.writeEntityToNBT(compound);
+        compound.setInteger("ExplosionPower", this.explosionStrength);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        super.readEntityFromNBT(tagCompund);
+        super.readEntityFromNBT(compound);
 
-        if (tagCompund.hasKey("ExplosionPower", 99))
+        if (compound.hasKey("ExplosionPower", 99))
         {
-            this.explosionStrength = tagCompund.getInteger("ExplosionPower");
+            this.explosionStrength = compound.getInteger("ExplosionPower");
         }
     }
 
@@ -207,7 +198,7 @@ public class EntityGhast extends EntityFlying implements IMob
 
     static class AIFireballAttack extends EntityAIBase
     {
-        private EntityGhast parentEntity;
+        private final EntityGhast parentEntity;
         public int attackTimer;
 
         public AIFireballAttack(EntityGhast ghast)
@@ -235,29 +226,29 @@ public class EntityGhast extends EntityFlying implements IMob
             EntityLivingBase entitylivingbase = this.parentEntity.getAttackTarget();
             double d0 = 64.0D;
 
-            if (entitylivingbase.getDistanceSqToEntity(this.parentEntity) < d0 * d0 && this.parentEntity.canEntityBeSeen(entitylivingbase))
+            if (entitylivingbase.getDistanceSqToEntity(this.parentEntity) < 4096.0D && this.parentEntity.canEntityBeSeen(entitylivingbase))
             {
-                World world = this.parentEntity.worldObj;
+                World world = this.parentEntity.world;
                 ++this.attackTimer;
 
                 if (this.attackTimer == 10)
                 {
-                    world.playAuxSFXAtEntity((EntityPlayer)null, 1007, new BlockPos(this.parentEntity), 0);
+                    world.playEvent((EntityPlayer)null, 1015, new BlockPos(this.parentEntity), 0);
                 }
 
                 if (this.attackTimer == 20)
                 {
                     double d1 = 4.0D;
-                    Vec3 vec3 = this.parentEntity.getLook(1.0F);
-                    double d2 = entitylivingbase.posX - (this.parentEntity.posX + vec3.xCoord * d1);
+                    Vec3d vec3d = this.parentEntity.getLook(1.0F);
+                    double d2 = entitylivingbase.posX - (this.parentEntity.posX + vec3d.xCoord * 4.0D);
                     double d3 = entitylivingbase.getEntityBoundingBox().minY + (double)(entitylivingbase.height / 2.0F) - (0.5D + this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F));
-                    double d4 = entitylivingbase.posZ - (this.parentEntity.posZ + vec3.zCoord * d1);
-                    world.playAuxSFXAtEntity((EntityPlayer)null, 1008, new BlockPos(this.parentEntity), 0);
+                    double d4 = entitylivingbase.posZ - (this.parentEntity.posZ + vec3d.zCoord * 4.0D);
+                    world.playEvent((EntityPlayer)null, 1016, new BlockPos(this.parentEntity), 0);
                     EntityLargeFireball entitylargefireball = new EntityLargeFireball(world, this.parentEntity, d2, d3, d4);
                     entitylargefireball.explosionPower = this.parentEntity.getFireballStrength();
-                    entitylargefireball.posX = this.parentEntity.posX + vec3.xCoord * d1;
+                    entitylargefireball.posX = this.parentEntity.posX + vec3d.xCoord * 4.0D;
                     entitylargefireball.posY = this.parentEntity.posY + (double)(this.parentEntity.height / 2.0F) + 0.5D;
-                    entitylargefireball.posZ = this.parentEntity.posZ + vec3.zCoord * d1;
+                    entitylargefireball.posZ = this.parentEntity.posZ + vec3d.zCoord * 4.0D;
                     world.spawnEntityInWorld(entitylargefireball);
                     this.attackTimer = -40;
                 }
@@ -273,7 +264,7 @@ public class EntityGhast extends EntityFlying implements IMob
 
     static class AILookAround extends EntityAIBase
     {
-        private EntityGhast parentEntity;
+        private final EntityGhast parentEntity;
 
         public AILookAround(EntityGhast ghast)
         {
@@ -290,18 +281,20 @@ public class EntityGhast extends EntityFlying implements IMob
         {
             if (this.parentEntity.getAttackTarget() == null)
             {
-                this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.atan2(this.parentEntity.motionX, this.parentEntity.motionZ)) * 180.0F / (float)Math.PI;
+                this.parentEntity.rotationYaw = -((float)MathHelper.atan2(this.parentEntity.motionX, this.parentEntity.motionZ)) * (180F / (float)Math.PI);
+                this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw;
             }
             else
             {
                 EntityLivingBase entitylivingbase = this.parentEntity.getAttackTarget();
                 double d0 = 64.0D;
 
-                if (entitylivingbase.getDistanceSqToEntity(this.parentEntity) < d0 * d0)
+                if (entitylivingbase.getDistanceSqToEntity(this.parentEntity) < 4096.0D)
                 {
                     double d1 = entitylivingbase.posX - this.parentEntity.posX;
                     double d2 = entitylivingbase.posZ - this.parentEntity.posZ;
-                    this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw = -((float)MathHelper.atan2(d1, d2)) * 180.0F / (float)Math.PI;
+                    this.parentEntity.rotationYaw = -((float)MathHelper.atan2(d1, d2)) * (180F / (float)Math.PI);
+                    this.parentEntity.renderYawOffset = this.parentEntity.rotationYaw;
                 }
             }
         }
@@ -309,7 +302,7 @@ public class EntityGhast extends EntityFlying implements IMob
 
     static class AIRandomFly extends EntityAIBase
     {
-        private EntityGhast parentEntity;
+        private final EntityGhast parentEntity;
 
         public AIRandomFly(EntityGhast ghast)
         {
@@ -352,7 +345,7 @@ public class EntityGhast extends EntityFlying implements IMob
 
     static class GhastMoveHelper extends EntityMoveHelper
     {
-        private EntityGhast parentEntity;
+        private final EntityGhast parentEntity;
         private int courseChangeCooldown;
 
         public GhastMoveHelper(EntityGhast ghast)
@@ -363,7 +356,7 @@ public class EntityGhast extends EntityFlying implements IMob
 
         public void onUpdateMoveHelper()
         {
-            if (this.update)
+            if (this.action == EntityMoveHelper.Action.MOVE_TO)
             {
                 double d0 = this.posX - this.parentEntity.posX;
                 double d1 = this.posY - this.parentEntity.posY;
@@ -373,7 +366,7 @@ public class EntityGhast extends EntityFlying implements IMob
                 if (this.courseChangeCooldown-- <= 0)
                 {
                     this.courseChangeCooldown += this.parentEntity.getRNG().nextInt(5) + 2;
-                    d3 = (double)MathHelper.sqrt_double(d3);
+                    d3 = (double)MathHelper.sqrt(d3);
 
                     if (this.isNotColliding(this.posX, this.posY, this.posZ, d3))
                     {
@@ -383,7 +376,7 @@ public class EntityGhast extends EntityFlying implements IMob
                     }
                     else
                     {
-                        this.update = false;
+                        this.action = EntityMoveHelper.Action.WAIT;
                     }
                 }
             }
@@ -400,7 +393,7 @@ public class EntityGhast extends EntityFlying implements IMob
             {
                 axisalignedbb = axisalignedbb.offset(d0, d1, d2);
 
-                if (!this.parentEntity.worldObj.getCollidingBoundingBoxes(this.parentEntity, axisalignedbb).isEmpty())
+                if (!this.parentEntity.world.getCollisionBoxes(this.parentEntity, axisalignedbb).isEmpty())
                 {
                     return false;
                 }

@@ -5,16 +5,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerDispenser;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 
-public class TileEntityDispenser extends TileEntityLockable implements IInventory
+public class TileEntityDispenser extends TileEntityLockableLoot
 {
     private static final Random RNG = new Random();
-    private ItemStack[] stacks = new ItemStack[9];
-    protected String customName;
+    private NonNullList<ItemStack> stacks = NonNullList.<ItemStack>func_191197_a(9, ItemStack.field_190927_a);
 
     /**
      * Returns the number of slots in the inventory.
@@ -24,72 +26,28 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
         return 9;
     }
 
-    /**
-     * Returns the stack in the given slot.
-     */
-    public ItemStack getStackInSlot(int index)
+    public boolean func_191420_l()
     {
-        return this.stacks[index];
-    }
-
-    /**
-     * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
-     */
-    public ItemStack decrStackSize(int index, int count)
-    {
-        if (this.stacks[index] != null)
+        for (ItemStack itemstack : this.stacks)
         {
-            if (this.stacks[index].stackSize <= count)
+            if (!itemstack.func_190926_b())
             {
-                ItemStack itemstack1 = this.stacks[index];
-                this.stacks[index] = null;
-                this.markDirty();
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.stacks[index].splitStack(count);
-
-                if (this.stacks[index].stackSize == 0)
-                {
-                    this.stacks[index] = null;
-                }
-
-                this.markDirty();
-                return itemstack;
+                return false;
             }
         }
-        else
-        {
-            return null;
-        }
-    }
 
-    /**
-     * Removes a stack from the given slot and returns it.
-     */
-    public ItemStack removeStackFromSlot(int index)
-    {
-        if (this.stacks[index] != null)
-        {
-            ItemStack itemstack = this.stacks[index];
-            this.stacks[index] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return true;
     }
 
     public int getDispenseSlot()
     {
+        this.fillWithLoot((EntityPlayer)null);
         int i = -1;
         int j = 1;
 
-        for (int k = 0; k < this.stacks.length; ++k)
+        for (int k = 0; k < this.stacks.size(); ++k)
         {
-            if (this.stacks[k] != null && RNG.nextInt(j++) == 0)
+            if (!((ItemStack)this.stacks.get(k)).func_190926_b() && RNG.nextInt(j++) == 0)
             {
                 i = k;
             }
@@ -99,29 +57,14 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
     }
 
     /**
-     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
-     */
-    public void setInventorySlotContents(int index, ItemStack stack)
-    {
-        this.stacks[index] = stack;
-
-        if (stack != null && stack.stackSize > this.getInventoryStackLimit())
-        {
-            stack.stackSize = this.getInventoryStackLimit();
-        }
-
-        this.markDirty();
-    }
-
-    /**
      * Add the given ItemStack to this Dispenser. Return the Slot the Item was placed in or -1 if no free slot is
      * available.
      */
     public int addItemStack(ItemStack stack)
     {
-        for (int i = 0; i < this.stacks.length; ++i)
+        for (int i = 0; i < this.stacks.size(); ++i)
         {
-            if (this.stacks[i] == null || this.stacks[i].getItem() == null)
+            if (((ItemStack)this.stacks.get(i)).func_190926_b())
             {
                 this.setInventorySlotContents(i, stack);
                 return i;
@@ -136,67 +79,45 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
      */
     public String getName()
     {
-        return this.hasCustomName() ? this.customName : "container.dispenser";
+        return this.hasCustomName() ? this.field_190577_o : "container.dispenser";
     }
 
-    public void setCustomName(String customName)
+    public static void registerFixes(DataFixer fixer)
     {
-        this.customName = customName;
-    }
-
-    /**
-     * Returns true if this thing is named
-     */
-    public boolean hasCustomName()
-    {
-        return this.customName != null;
+        fixer.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityDispenser.class, new String[] {"Items"}));
     }
 
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-        NBTTagList nbttaglist = compound.getTagList("Items", 10);
-        this.stacks = new ItemStack[this.getSizeInventory()];
+        this.stacks = NonNullList.<ItemStack>func_191197_a(this.getSizeInventory(), ItemStack.field_190927_a);
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        if (!this.checkLootAndRead(compound))
         {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
-
-            if (j >= 0 && j < this.stacks.length)
-            {
-                this.stacks[j] = ItemStack.loadItemStackFromNBT(nbttagcompound);
-            }
+            ItemStackHelper.func_191283_b(compound, this.stacks);
         }
 
         if (compound.hasKey("CustomName", 8))
         {
-            this.customName = compound.getString("CustomName");
+            this.field_190577_o = compound.getString("CustomName");
         }
     }
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
-        NBTTagList nbttaglist = new NBTTagList();
 
-        for (int i = 0; i < this.stacks.length; ++i)
+        if (!this.checkLootAndWrite(compound))
         {
-            if (this.stacks[i] != null)
-            {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte)i);
-                this.stacks[i].writeToNBT(nbttagcompound);
-                nbttaglist.appendTag(nbttagcompound);
-            }
+            ItemStackHelper.func_191282_a(compound, this.stacks);
         }
-
-        compound.setTag("Items", nbttaglist);
 
         if (this.hasCustomName())
         {
-            compound.setString("CustomName", this.customName);
+            compound.setString("CustomName", this.field_190577_o);
         }
+
+        return compound;
     }
 
     /**
@@ -207,30 +128,6 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
         return 64;
     }
 
-    /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
-     */
-    public boolean isUseableByPlayer(EntityPlayer player)
-    {
-        return this.worldObj.getTileEntity(this.pos) != this ? false : player.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
-    }
-
-    public void openInventory(EntityPlayer player)
-    {
-    }
-
-    public void closeInventory(EntityPlayer player)
-    {
-    }
-
-    /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
-     */
-    public boolean isItemValidForSlot(int index, ItemStack stack)
-    {
-        return true;
-    }
-
     public String getGuiID()
     {
         return "minecraft:dispenser";
@@ -238,28 +135,12 @@ public class TileEntityDispenser extends TileEntityLockable implements IInventor
 
     public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
     {
+        this.fillWithLoot(playerIn);
         return new ContainerDispenser(playerInventory, this);
     }
 
-    public int getField(int id)
+    protected NonNullList<ItemStack> func_190576_q()
     {
-        return 0;
-    }
-
-    public void setField(int id, int value)
-    {
-    }
-
-    public int getFieldCount()
-    {
-        return 0;
-    }
-
-    public void clear()
-    {
-        for (int i = 0; i < this.stacks.length; ++i)
-        {
-            this.stacks[i] = null;
-        }
+        return this.stacks;
     }
 }

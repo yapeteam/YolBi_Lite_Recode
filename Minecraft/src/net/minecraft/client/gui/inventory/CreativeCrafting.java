@@ -1,13 +1,13 @@
 package net.minecraft.client.gui.inventory;
 
-import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 
-public class CreativeCrafting implements ICrafting
+public class CreativeCrafting implements IContainerListener
 {
     private final Minecraft mc;
 
@@ -19,13 +19,13 @@ public class CreativeCrafting implements ICrafting
     /**
      * update the crafting window inventory with the items in the list
      */
-    public void updateCraftingInventory(Container containerToSend, List<ItemStack> itemsList)
+    public void updateCraftingInventory(Container containerToSend, NonNullList<ItemStack> itemsList)
     {
     }
 
     /**
      * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
-     * contents of that slot. Args: Container, slot number, slot contents
+     * contents of that slot.
      */
     public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack)
     {
@@ -41,7 +41,7 @@ public class CreativeCrafting implements ICrafting
     {
     }
 
-    public void sendAllWindowProperties(Container p_175173_1_, IInventory p_175173_2_)
+    public void sendAllWindowProperties(Container containerIn, IInventory inventory)
     {
     }
 }

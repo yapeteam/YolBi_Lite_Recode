@@ -10,15 +10,15 @@ public class NoiseGeneratorImproved extends NoiseGenerator
      *  
      * Effectively a shuffled 0..255 that wraps once.
      */
-    private int[] permutations;
+    private final int[] permutations;
     public double xCoord;
     public double yCoord;
     public double zCoord;
-    private static final double[] field_152381_e = new double[] {1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D, -1.0D, 0.0D};
-    private static final double[] field_152382_f = new double[] {1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D};
-    private static final double[] field_152383_g = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 1.0D, -1.0D, -1.0D, 1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 1.0D, 0.0D, -1.0D};
-    private static final double[] field_152384_h = new double[] {1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D, -1.0D, 0.0D};
-    private static final double[] field_152385_i = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 1.0D, -1.0D, -1.0D, 1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 1.0D, 0.0D, -1.0D};
+    private static final double[] GRAD_X = new double[] {1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D, -1.0D, 0.0D};
+    private static final double[] GRAD_Y = new double[] {1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D};
+    private static final double[] GRAD_Z = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 1.0D, -1.0D, -1.0D, 1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 1.0D, 0.0D, -1.0D};
+    private static final double[] GRAD_2X = new double[] {1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 1.0D, -1.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D, -1.0D, 0.0D};
+    private static final double[] GRAD_2Z = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 1.0D, -1.0D, -1.0D, 1.0D, 1.0D, -1.0D, -1.0D, 0.0D, 1.0D, 0.0D, -1.0D};
 
     public NoiseGeneratorImproved()
     {
@@ -52,16 +52,16 @@ public class NoiseGeneratorImproved extends NoiseGenerator
         return p_76311_3_ + p_76311_1_ * (p_76311_5_ - p_76311_3_);
     }
 
-    public final double func_76309_a(int p_76309_1_, double p_76309_2_, double p_76309_4_)
+    public final double grad2(int p_76309_1_, double p_76309_2_, double p_76309_4_)
     {
         int i = p_76309_1_ & 15;
-        return field_152384_h[i] * p_76309_2_ + field_152385_i[i] * p_76309_4_;
+        return GRAD_2X[i] * p_76309_2_ + GRAD_2Z[i] * p_76309_4_;
     }
 
     public final double grad(int p_76310_1_, double p_76310_2_, double p_76310_4_, double p_76310_6_)
     {
         int i = p_76310_1_ & 15;
-        return field_152381_e[i] * p_76310_2_ + field_152382_f[i] * p_76310_4_ + field_152383_g[i] * p_76310_6_;
+        return GRAD_X[i] * p_76310_2_ + GRAD_Y[i] * p_76310_4_ + GRAD_Z[i] * p_76310_6_;
     }
 
     /**
@@ -111,7 +111,7 @@ public class NoiseGeneratorImproved extends NoiseGenerator
                     j5 = this.permutations[i5] + l6;
                     j = this.permutations[k2 + 1] + 0;
                     k5 = this.permutations[j] + l6;
-                    d14 = this.lerp(d18, this.func_76309_a(this.permutations[j5], d17, d19), this.grad(this.permutations[k5], d17 - 1.0D, 0.0D, d19));
+                    d14 = this.lerp(d18, this.grad2(this.permutations[j5], d17, d19), this.grad(this.permutations[k5], d17 - 1.0D, 0.0D, d19));
                     d15 = this.lerp(d18, this.grad(this.permutations[j5 + 1], d17, 0.0D, d19 - 1.0D), this.grad(this.permutations[k5 + 1], d17 - 1.0D, 0.0D, d19 - 1.0D));
                     double d21 = this.lerp(d20, d14, d15);
                     int i7 = l5++;

@@ -1,8 +1,10 @@
 package net.minecraft.command.server;
 
 import com.mojang.authlib.GameProfile;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -10,7 +12,8 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListBansEntry;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class CommandBanPlayer extends CommandBase
 {
@@ -39,22 +42,21 @@ public class CommandBanPlayer extends CommandBase
     }
 
     /**
-     * Returns true if the given command sender is allowed to use this command.
+     * Check if the given ICommandSender has permission to execute this command
      */
-    public boolean canCommandSenderUseCommand(ICommandSender sender)
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender)
     {
-        return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().isLanServer() && super.canCommandSenderUseCommand(sender);
+        return server.getPlayerList().getBannedPlayers().isLanServer() && super.checkPermission(server, sender);
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length >= 1 && args[0].length() > 0)
         {
-            MinecraftServer minecraftserver = MinecraftServer.getServer();
-            GameProfile gameprofile = minecraftserver.getPlayerProfileCache().getGameProfileForUsername(args[0]);
+            GameProfile gameprofile = server.getPlayerProfileCache().getGameProfileForUsername(args[0]);
 
             if (gameprofile == null)
             {
@@ -70,15 +72,15 @@ public class CommandBanPlayer extends CommandBase
                 }
 
                 UserListBansEntry userlistbansentry = new UserListBansEntry(gameprofile, (Date)null, sender.getName(), (Date)null, s);
-                minecraftserver.getConfigurationManager().getBannedPlayers().addEntry(userlistbansentry);
-                EntityPlayerMP entityplayermp = minecraftserver.getConfigurationManager().getPlayerByUsername(args[0]);
+                server.getPlayerList().getBannedPlayers().addEntry(userlistbansentry);
+                EntityPlayerMP entityplayermp = server.getPlayerList().getPlayerByUsername(args[0]);
 
                 if (entityplayermp != null)
                 {
-                    entityplayermp.playerNetServerHandler.kickPlayerFromServer("You are banned from this server.");
+                    entityplayermp.connection.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
                 }
 
-                notifyOperators(sender, this, "commands.ban.success", new Object[] {args[0]});
+                notifyCommandListener(sender, this, "commands.ban.success", new Object[] {args[0]});
             }
         }
         else
@@ -87,8 +89,8 @@ public class CommandBanPlayer extends CommandBase
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
     }
 }

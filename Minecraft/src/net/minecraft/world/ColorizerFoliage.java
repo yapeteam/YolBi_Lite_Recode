@@ -5,19 +5,19 @@ public class ColorizerFoliage
     /** Color buffer for foliage */
     private static int[] foliageBuffer = new int[65536];
 
-    public static void setFoliageBiomeColorizer(int[] p_77467_0_)
+    public static void setFoliageBiomeColorizer(int[] foliageBufferIn)
     {
-        foliageBuffer = p_77467_0_;
+        foliageBuffer = foliageBufferIn;
     }
 
     /**
-     * Gets foliage color from temperature and humidity. Args: temperature, humidity
+     * Gets the color modifier to use for foliage.
      */
-    public static int getFoliageColor(double p_77470_0_, double p_77470_2_)
+    public static int getFoliageColor(double temperature, double humidity)
     {
-        p_77470_2_ = p_77470_2_ * p_77470_0_;
-        int i = (int)((1.0D - p_77470_0_) * 255.0D);
-        int j = (int)((1.0D - p_77470_2_) * 255.0D);
+        humidity = humidity * temperature;
+        int i = (int)((1.0D - temperature) * 255.0D);
+        int j = (int)((1.0D - humidity) * 255.0D);
         return foliageBuffer[j << 8 | i];
     }
 

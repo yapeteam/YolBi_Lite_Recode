@@ -4,24 +4,17 @@ import net.minecraft.block.Block;
 
 public class ItemColored extends ItemBlock
 {
-    private final Block coloredBlock;
     private String[] subtypeNames;
 
     public ItemColored(Block block, boolean hasSubtypes)
     {
         super(block);
-        this.coloredBlock = block;
 
         if (hasSubtypes)
         {
             this.setMaxDamage(0);
             this.setHasSubtypes(true);
         }
-    }
-
-    public int getColorFromItemStack(ItemStack stack, int renderPass)
-    {
-        return this.coloredBlock.getRenderColor(this.coloredBlock.getStateFromMeta(stack.getMetadata()));
     }
 
     /**

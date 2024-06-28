@@ -4,20 +4,21 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 
 public class EntityAIBeg extends EntityAIBase
 {
-    private EntityWolf theWolf;
+    private final EntityWolf theWolf;
     private EntityPlayer thePlayer;
-    private World worldObject;
-    private float minPlayerDistance;
+    private final World worldObject;
+    private final float minPlayerDistance;
     private int timeoutCounter;
 
     public EntityAIBeg(EntityWolf wolf, float minDistance)
     {
         this.theWolf = wolf;
-        this.worldObject = wolf.worldObj;
+        this.worldObject = wolf.world;
         this.minPlayerDistance = minDistance;
         this.setMutexBits(2);
     }
@@ -36,7 +37,18 @@ public class EntityAIBeg extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        return !this.thePlayer.isEntityAlive() ? false : (this.theWolf.getDistanceSqToEntity(this.thePlayer) > (double)(this.minPlayerDistance * this.minPlayerDistance) ? false : this.timeoutCounter > 0 && this.hasPlayerGotBoneInHand(this.thePlayer));
+        if (!this.thePlayer.isEntityAlive())
+        {
+            return false;
+        }
+        else if (this.theWolf.getDistanceSqToEntity(this.thePlayer) > (double)(this.minPlayerDistance * this.minPlayerDistance))
+        {
+            return false;
+        }
+        else
+        {
+            return this.timeoutCounter > 0 && this.hasPlayerGotBoneInHand(this.thePlayer);
+        }
     }
 
     /**
@@ -71,7 +83,21 @@ public class EntityAIBeg extends EntityAIBase
      */
     private boolean hasPlayerGotBoneInHand(EntityPlayer player)
     {
-        ItemStack itemstack = player.inventory.getCurrentItem();
-        return itemstack == null ? false : (!this.theWolf.isTamed() && itemstack.getItem() == Items.bone ? true : this.theWolf.isBreedingItem(itemstack));
+        for (EnumHand enumhand : EnumHand.values())
+        {
+            ItemStack itemstack = player.getHeldItem(enumhand);
+
+            if (this.theWolf.isTamed() && itemstack.getItem() == Items.BONE)
+            {
+                return true;
+            }
+
+            if (this.theWolf.isBreedingItem(itemstack))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

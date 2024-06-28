@@ -1,8 +1,10 @@
 package net.minecraft.entity.ai;
 
+import com.google.common.base.Predicates;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntitySelectors;
 
 public class EntityAIWatchClosest extends EntityAIBase
 {
@@ -14,7 +16,7 @@ public class EntityAIWatchClosest extends EntityAIBase
     /** This is the Maximum distance that the AI will look for the Entity */
     protected float maxDistanceForPlayer;
     private int lookTime;
-    private float chance;
+    private final float chance;
     protected Class <? extends Entity > watchedClass;
 
     public EntityAIWatchClosest(EntityLiving entitylivingIn, Class <? extends Entity > watchTargetClass, float maxDistance)
@@ -53,11 +55,11 @@ public class EntityAIWatchClosest extends EntityAIBase
 
             if (this.watchedClass == EntityPlayer.class)
             {
-                this.closestEntity = this.theWatcher.worldObj.getClosestPlayerToEntity(this.theWatcher, (double)this.maxDistanceForPlayer);
+                this.closestEntity = this.theWatcher.world.func_190525_a(this.theWatcher.posX, this.theWatcher.posY, this.theWatcher.posZ, (double)this.maxDistanceForPlayer, Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.func_191324_b(this.theWatcher)));
             }
             else
             {
-                this.closestEntity = this.theWatcher.worldObj.findNearestEntityWithinAABB(this.watchedClass, this.theWatcher.getEntityBoundingBox().expand((double)this.maxDistanceForPlayer, 3.0D, (double)this.maxDistanceForPlayer), this.theWatcher);
+                this.closestEntity = this.theWatcher.world.findNearestEntityWithinAABB(this.watchedClass, this.theWatcher.getEntityBoundingBox().expand((double)this.maxDistanceForPlayer, 3.0D, (double)this.maxDistanceForPlayer), this.theWatcher);
             }
 
             return this.closestEntity != null;
@@ -69,7 +71,18 @@ public class EntityAIWatchClosest extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        return !this.closestEntity.isEntityAlive() ? false : (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer) ? false : this.lookTime > 0);
+        if (!this.closestEntity.isEntityAlive())
+        {
+            return false;
+        }
+        else if (this.theWatcher.getDistanceSqToEntity(this.closestEntity) > (double)(this.maxDistanceForPlayer * this.maxDistanceForPlayer))
+        {
+            return false;
+        }
+        else
+        {
+            return this.lookTime > 0;
+        }
     }
 
     /**
@@ -93,7 +106,7 @@ public class EntityAIWatchClosest extends EntityAIBase
      */
     public void updateTask()
     {
-        this.theWatcher.getLookHelper().setLookPosition(this.closestEntity.posX, this.closestEntity.posY + (double)this.closestEntity.getEyeHeight(), this.closestEntity.posZ, 10.0F, (float)this.theWatcher.getVerticalFaceSpeed());
+        this.theWatcher.getLookHelper().setLookPosition(this.closestEntity.posX, this.closestEntity.posY + (double)this.closestEntity.getEyeHeight(), this.closestEntity.posZ, (float)this.theWatcher.getHorizontalFaceSpeed(), (float)this.theWatcher.getVerticalFaceSpeed());
         --this.lookTime;
     }
 }

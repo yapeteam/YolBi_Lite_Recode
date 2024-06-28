@@ -7,8 +7,8 @@ import net.minecraft.util.ResourceLocation;
 
 public class RenderGhast extends RenderLiving<EntityGhast>
 {
-    private static final ResourceLocation ghastTextures = new ResourceLocation("textures/entity/ghast/ghast.png");
-    private static final ResourceLocation ghastShootingTextures = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
+    private static final ResourceLocation GHAST_TEXTURES = new ResourceLocation("textures/entity/ghast/ghast.png");
+    private static final ResourceLocation GHAST_SHOOTING_TEXTURES = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
 
     public RenderGhast(RenderManager renderManagerIn)
     {
@@ -20,19 +20,18 @@ public class RenderGhast extends RenderLiving<EntityGhast>
      */
     protected ResourceLocation getEntityTexture(EntityGhast entity)
     {
-        return entity.isAttacking() ? ghastShootingTextures : ghastTextures;
+        return entity.isAttacking() ? GHAST_SHOOTING_TEXTURES : GHAST_TEXTURES;
     }
 
     /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
+     * Allows the render to do state modifications necessary before the model is rendered.
      */
     protected void preRenderCallback(EntityGhast entitylivingbaseIn, float partialTickTime)
     {
         float f = 1.0F;
-        float f1 = (8.0F + f) / 2.0F;
-        float f2 = (8.0F + 1.0F / f) / 2.0F;
-        GlStateManager.scale(f2, f1, f2);
+        float f1 = 4.5F;
+        float f2 = 4.5F;
+        GlStateManager.scale(4.5F, 4.5F, 4.5F);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

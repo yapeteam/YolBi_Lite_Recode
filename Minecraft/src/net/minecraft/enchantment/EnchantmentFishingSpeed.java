@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentFishingSpeed extends Enchantment
 {
-    protected EnchantmentFishingSpeed(int enchID, ResourceLocation enchName, int enchWeight, EnumEnchantmentType enchType)
+    protected EnchantmentFishingSpeed(Enchantment.Rarity rarityIn, EnumEnchantmentType typeIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, enchType);
+        super(rarityIn, typeIn, slots);
         this.setName("fishingSpeed");
     }
 

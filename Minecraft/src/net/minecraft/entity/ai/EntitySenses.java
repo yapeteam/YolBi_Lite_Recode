@@ -40,9 +40,9 @@ public class EntitySenses
         }
         else
         {
-            this.entityObj.worldObj.theProfiler.startSection("canSee");
+            this.entityObj.world.theProfiler.startSection("canSee");
             boolean flag = this.entityObj.canEntityBeSeen(entityIn);
-            this.entityObj.worldObj.theProfiler.endSection();
+            this.entityObj.world.theProfiler.endSection();
 
             if (flag)
             {

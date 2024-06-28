@@ -2,22 +2,16 @@ package net.minecraft.pathfinding;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.pathfinder.WalkNodeProcessor;
-
-import pisi.unitedmeows.meowlib.math.MeowMath;
-
 
 public class PathNavigateGround extends PathNavigate
 {
-    protected WalkNodeProcessor nodeProcessor;
     private boolean shouldAvoidSun;
 
     public PathNavigateGround(EntityLiving entitylivingIn, World worldIn)
@@ -28,7 +22,7 @@ public class PathNavigateGround extends PathNavigate
     protected PathFinder getPathFinder()
     {
         this.nodeProcessor = new WalkNodeProcessor();
-        this.nodeProcessor.setEnterDoors(true);
+        this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
     }
 
@@ -37,12 +31,64 @@ public class PathNavigateGround extends PathNavigate
      */
     protected boolean canNavigate()
     {
-        return this.theEntity.onGround || this.getCanSwim() && this.isInLiquid() || this.theEntity.isRiding() && this.theEntity instanceof EntityZombie && this.theEntity.ridingEntity instanceof EntityChicken;
+        return this.theEntity.onGround || this.getCanSwim() && this.isInLiquid() || this.theEntity.isRiding();
     }
 
-    protected Vec3 getEntityPosition()
+    protected Vec3d getEntityPosition()
     {
-        return new Vec3(this.theEntity.posX, (double)this.getPathablePosY(), this.theEntity.posZ);
+        return new Vec3d(this.theEntity.posX, (double)this.getPathablePosY(), this.theEntity.posZ);
+    }
+
+    /**
+     * Returns path to given BlockPos
+     */
+    public Path getPathToPos(BlockPos pos)
+    {
+        if (this.worldObj.getBlockState(pos).getMaterial() == Material.AIR)
+        {
+            BlockPos blockpos;
+
+            for (blockpos = pos.down(); blockpos.getY() > 0 && this.worldObj.getBlockState(blockpos).getMaterial() == Material.AIR; blockpos = blockpos.down())
+            {
+                ;
+            }
+
+            if (blockpos.getY() > 0)
+            {
+                return super.getPathToPos(blockpos.up());
+            }
+
+            while (blockpos.getY() < this.worldObj.getHeight() && this.worldObj.getBlockState(blockpos).getMaterial() == Material.AIR)
+            {
+                blockpos = blockpos.up();
+            }
+
+            pos = blockpos;
+        }
+
+        if (!this.worldObj.getBlockState(pos).getMaterial().isSolid())
+        {
+            return super.getPathToPos(pos);
+        }
+        else
+        {
+            BlockPos blockpos1;
+
+            for (blockpos1 = pos.up(); blockpos1.getY() < this.worldObj.getHeight() && this.worldObj.getBlockState(blockpos1).getMaterial().isSolid(); blockpos1 = blockpos1.up())
+            {
+                ;
+            }
+
+            return super.getPathToPos(blockpos1);
+        }
+    }
+
+    /**
+     * Returns the path to the given EntityLiving. Args : entity
+     */
+    public Path getPathToEntityLiving(Entity entityIn)
+    {
+        return this.getPathToPos(new BlockPos(entityIn));
     }
 
     /**
@@ -53,13 +99,13 @@ public class PathNavigateGround extends PathNavigate
         if (this.theEntity.isInWater() && this.getCanSwim())
         {
             int i = (int)this.theEntity.getEntityBoundingBox().minY;
-            Block block = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.theEntity.posX), i, MathHelper.floor_double(this.theEntity.posZ))).getBlock();
+            Block block = this.worldObj.getBlockState(new BlockPos(MathHelper.floor(this.theEntity.posX), i, MathHelper.floor(this.theEntity.posZ))).getBlock();
             int j = 0;
 
-            while (block == Blocks.flowing_water || block == Blocks.water)
+            while (block == Blocks.FLOWING_WATER || block == Blocks.WATER)
             {
                 ++i;
-                block = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.theEntity.posX), i, MathHelper.floor_double(this.theEntity.posZ))).getBlock();
+                block = this.worldObj.getBlockState(new BlockPos(MathHelper.floor(this.theEntity.posX), i, MathHelper.floor(this.theEntity.posZ))).getBlock();
                 ++j;
 
                 if (j > 16)
@@ -85,7 +131,7 @@ public class PathNavigateGround extends PathNavigate
 
         if (this.shouldAvoidSun)
         {
-            if (this.worldObj.canSeeSky(new BlockPos(MathHelper.floor_double(this.theEntity.posX), (int)(this.theEntity.getEntityBoundingBox().minY + 0.5D), MathHelper.floor_double(this.theEntity.posZ))))
+            if (this.worldObj.canSeeSky(new BlockPos(MathHelper.floor(this.theEntity.posX), (int)(this.theEntity.getEntityBoundingBox().minY + 0.5D), MathHelper.floor(this.theEntity.posZ))))
             {
                 return;
             }
@@ -104,13 +150,12 @@ public class PathNavigateGround extends PathNavigate
     }
 
     /**
-     * Returns true when an entity of specified size could safely walk in a straight line between the two points. Args:
-     * pos1, pos2, entityXSize, entityYSize, entityZSize
+     * Checks if the specified entity can safely walk to the specified location.
      */
-    protected boolean isDirectPathBetweenPoints(Vec3 posVec31, Vec3 posVec32, int sizeX, int sizeY, int sizeZ)
+    protected boolean isDirectPathBetweenPoints(Vec3d posVec31, Vec3d posVec32, int sizeX, int sizeY, int sizeZ)
     {
-        int i = MathHelper.floor_double(posVec31.xCoord);
-        int j = MathHelper.floor_double(posVec31.zCoord);
+        int i = MathHelper.floor(posVec31.xCoord);
+        int j = MathHelper.floor(posVec31.zCoord);
         double d0 = posVec32.xCoord - posVec31.xCoord;
         double d1 = posVec32.zCoord - posVec31.zCoord;
         double d2 = d0 * d0 + d1 * d1;
@@ -121,8 +166,7 @@ public class PathNavigateGround extends PathNavigate
         }
         else
         {
-            double d3 = 1.0D / MeowMath.sqrt(d2);
-
+            double d3 = 1.0D / Math.sqrt(d2);
             d0 = d0 * d3;
             d1 = d1 * d3;
             sizeX = sizeX + 2;
@@ -138,8 +182,8 @@ public class PathNavigateGround extends PathNavigate
                 sizeZ = sizeZ - 2;
                 double d4 = 1.0D / Math.abs(d0);
                 double d5 = 1.0D / Math.abs(d1);
-                double d6 = (double)(i * 1) - posVec31.xCoord;
-                double d7 = (double)(j * 1) - posVec31.zCoord;
+                double d6 = (double)i - posVec31.xCoord;
+                double d7 = (double)j - posVec31.zCoord;
 
                 if (d0 >= 0.0D)
                 {
@@ -155,8 +199,8 @@ public class PathNavigateGround extends PathNavigate
                 d7 = d7 / d1;
                 int k = d0 < 0.0D ? -1 : 1;
                 int l = d1 < 0.0D ? -1 : 1;
-                int i1 = MathHelper.floor_double(posVec32.xCoord);
-                int j1 = MathHelper.floor_double(posVec32.zCoord);
+                int i1 = MathHelper.floor(posVec32.xCoord);
+                int j1 = MathHelper.floor(posVec32.zCoord);
                 int k1 = i1 - i;
                 int l1 = j1 - j;
 
@@ -189,7 +233,7 @@ public class PathNavigateGround extends PathNavigate
     /**
      * Returns true when an entity could stand at a position, including solid blocks under the entire entity.
      */
-    private boolean isSafeToStandAt(int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3 vec31, double p_179683_8_, double p_179683_10_)
+    private boolean isSafeToStandAt(int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec31, double p_179683_8_, double p_179683_10_)
     {
         int i = x - sizeX / 2;
         int j = z - sizeZ / 2;
@@ -209,20 +253,32 @@ public class PathNavigateGround extends PathNavigate
 
                     if (d0 * p_179683_8_ + d1 * p_179683_10_ >= 0.0D)
                     {
-                        Block block = this.worldObj.getBlockState(new BlockPos(k, y - 1, l)).getBlock();
-                        Material material = block.getMaterial();
+                        PathNodeType pathnodetype = this.nodeProcessor.getPathNodeType(this.worldObj, k, y - 1, l, this.theEntity, sizeX, sizeY, sizeZ, true, true);
 
-                        if (material == Material.air)
+                        if (pathnodetype == PathNodeType.WATER)
                         {
                             return false;
                         }
 
-                        if (material == Material.water && !this.theEntity.isInWater())
+                        if (pathnodetype == PathNodeType.LAVA)
                         {
                             return false;
                         }
 
-                        if (material == Material.lava)
+                        if (pathnodetype == PathNodeType.OPEN)
+                        {
+                            return false;
+                        }
+
+                        pathnodetype = this.nodeProcessor.getPathNodeType(this.worldObj, k, y, l, this.theEntity, sizeX, sizeY, sizeZ, true, true);
+                        float f = this.theEntity.getPathPriority(pathnodetype);
+
+                        if (f < 0.0F || f >= 8.0F)
+                        {
+                            return false;
+                        }
+
+                        if (pathnodetype == PathNodeType.DAMAGE_FIRE || pathnodetype == PathNodeType.DANGER_FIRE || pathnodetype == PathNodeType.DAMAGE_OTHER)
                         {
                             return false;
                         }
@@ -237,7 +293,7 @@ public class PathNavigateGround extends PathNavigate
     /**
      * Returns true if an entity does not collide with any solid blocks at the position.
      */
-    private boolean isPositionClear(int p_179692_1_, int p_179692_2_, int p_179692_3_, int p_179692_4_, int p_179692_5_, int p_179692_6_, Vec3 p_179692_7_, double p_179692_8_, double p_179692_10_)
+    private boolean isPositionClear(int p_179692_1_, int p_179692_2_, int p_179692_3_, int p_179692_4_, int p_179692_5_, int p_179692_6_, Vec3d p_179692_7_, double p_179692_8_, double p_179692_10_)
     {
         for (BlockPos blockpos : BlockPos.getAllInBox(new BlockPos(p_179692_1_, p_179692_2_, p_179692_3_), new BlockPos(p_179692_1_ + p_179692_4_ - 1, p_179692_2_ + p_179692_5_ - 1, p_179692_3_ + p_179692_6_ - 1)))
         {
@@ -258,29 +314,19 @@ public class PathNavigateGround extends PathNavigate
         return true;
     }
 
-    public void setAvoidsWater(boolean avoidsWater)
-    {
-        this.nodeProcessor.setAvoidsWater(avoidsWater);
-    }
-
-    public boolean getAvoidsWater()
-    {
-        return this.nodeProcessor.getAvoidsWater();
-    }
-
     public void setBreakDoors(boolean canBreakDoors)
     {
-        this.nodeProcessor.setBreakDoors(canBreakDoors);
+        this.nodeProcessor.setCanBreakDoors(canBreakDoors);
     }
 
-    public void setEnterDoors(boolean par1)
+    public void setEnterDoors(boolean enterDoors)
     {
-        this.nodeProcessor.setEnterDoors(par1);
+        this.nodeProcessor.setCanEnterDoors(enterDoors);
     }
 
     public boolean getEnterDoors()
     {
-        return this.nodeProcessor.getEnterDoors();
+        return this.nodeProcessor.getCanEnterDoors();
     }
 
     public void setCanSwim(boolean canSwim)
@@ -293,8 +339,8 @@ public class PathNavigateGround extends PathNavigate
         return this.nodeProcessor.getCanSwim();
     }
 
-    public void setAvoidSun(boolean par1)
+    public void setAvoidSun(boolean avoidSun)
     {
-        this.shouldAvoidSun = par1;
+        this.shouldAvoidSun = avoidSun;
     }
 }

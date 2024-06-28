@@ -4,46 +4,48 @@ import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockFarmland extends Block
 {
     public static final PropertyInteger MOISTURE = PropertyInteger.create("moisture", 0, 7);
+    protected static final AxisAlignedBB FARMLAND_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.9375D, 1.0D);
+    protected static final AxisAlignedBB field_194405_c = new AxisAlignedBB(0.0D, 0.9375D, 0.0D, 1.0D, 1.0D, 1.0D);
 
     protected BlockFarmland()
     {
-        super(Material.ground);
+        super(Material.GROUND);
         this.setDefaultState(this.blockState.getBaseState().withProperty(MOISTURE, Integer.valueOf(0)));
         this.setTickRandomly(true);
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.9375F, 1.0F);
         this.setLightOpacity(255);
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
     {
-        return new AxisAlignedBB((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), (double)(pos.getX() + 1), (double)(pos.getY() + 1), (double)(pos.getZ() + 1));
+        return FARMLAND_AABB;
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -60,7 +62,7 @@ public class BlockFarmland extends Block
             }
             else if (!this.hasCrops(worldIn, pos))
             {
-                worldIn.setBlockState(pos, Blocks.dirt.getDefaultState());
+                func_190970_b(worldIn, pos);
             }
         }
         else if (i < 7)
@@ -74,19 +76,23 @@ public class BlockFarmland extends Block
      */
     public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance)
     {
-        if (entityIn instanceof EntityLivingBase)
+        if (!worldIn.isRemote && worldIn.rand.nextFloat() < fallDistance - 0.5F && entityIn instanceof EntityLivingBase && (entityIn instanceof EntityPlayer || worldIn.getGameRules().getBoolean("mobGriefing")) && entityIn.width * entityIn.width * entityIn.height > 0.512F)
         {
-            if (!worldIn.isRemote && worldIn.rand.nextFloat() < fallDistance - 0.5F)
-            {
-                if (!(entityIn instanceof EntityPlayer) && !worldIn.getGameRules().getBoolean("mobGriefing"))
-                {
-                    return;
-                }
+            func_190970_b(worldIn, pos);
+        }
 
-                worldIn.setBlockState(pos, Blocks.dirt.getDefaultState());
-            }
+        super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
+    }
 
-            super.onFallenUpon(worldIn, pos, entityIn, fallDistance);
+    protected static void func_190970_b(World p_190970_0_, BlockPos p_190970_1_)
+    {
+        p_190970_0_.setBlockState(p_190970_1_, Blocks.DIRT.getDefaultState());
+        AxisAlignedBB axisalignedbb = field_194405_c.offset(p_190970_1_);
+
+        for (Entity entity : p_190970_0_.getEntitiesWithinAABBExcludingEntity((Entity)null, axisalignedbb))
+        {
+            double d0 = Math.min(axisalignedbb.maxY - axisalignedbb.minY, axisalignedbb.maxY - entity.getEntityBoundingBox().minY);
+            entity.setPositionAndUpdate(entity.posX, entity.posY + d0 + 0.001D, entity.posZ);
         }
     }
 
@@ -100,7 +106,7 @@ public class BlockFarmland extends Block
     {
         for (BlockPos.MutableBlockPos blockpos$mutableblockpos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4), pos.add(4, 1, 4)))
         {
-            if (worldIn.getBlockState(blockpos$mutableblockpos).getBlock().getMaterial() == Material.water)
+            if (worldIn.getBlockState(blockpos$mutableblockpos).getMaterial() == Material.WATER)
             {
                 return true;
             }
@@ -110,19 +116,34 @@ public class BlockFarmland extends Block
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
-        super.onNeighborBlockChange(worldIn, pos, state, neighborBlock);
+        super.neighborChanged(state, worldIn, pos, blockIn, p_189540_5_);
 
-        if (worldIn.getBlockState(pos.up()).getBlock().getMaterial().isSolid())
+        if (worldIn.getBlockState(pos.up()).getMaterial().isSolid())
         {
-            worldIn.setBlockState(pos, Blocks.dirt.getDefaultState());
+            func_190970_b(worldIn, pos);
         }
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    /**
+     * Called after the block is set in the Chunk data, but before the Tile Entity is set
+     */
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.onBlockAdded(worldIn, pos, state);
+
+        if (worldIn.getBlockState(pos.up()).getMaterial().isSolid())
+        {
+            func_190970_b(worldIn, pos);
+        }
+    }
+
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         switch (side)
         {
@@ -133,11 +154,12 @@ public class BlockFarmland extends Block
             case SOUTH:
             case WEST:
             case EAST:
-                Block block = worldIn.getBlockState(pos).getBlock();
-                return !block.isOpaqueCube() && block != Blocks.farmland;
+                IBlockState iblockstate = blockAccess.getBlockState(pos.offset(side));
+                Block block = iblockstate.getBlock();
+                return !iblockstate.isOpaqueCube() && block != Blocks.FARMLAND && block != Blocks.GRASS_PATH;
 
             default:
-                return super.shouldSideBeRendered(worldIn, pos, side);
+                return super.shouldSideBeRendered(blockState, blockAccess, pos, side);
         }
     }
 
@@ -146,12 +168,7 @@ public class BlockFarmland extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Blocks.dirt.getItemDropped(Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
-    }
-
-    public Item getItem(World worldIn, BlockPos pos)
-    {
-        return Item.getItemFromBlock(Blocks.dirt);
+        return Blocks.DIRT.getItemDropped(Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT), rand, fortune);
     }
 
     /**
@@ -170,8 +187,13 @@ public class BlockFarmland extends Block
         return ((Integer)state.getValue(MOISTURE)).intValue();
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {MOISTURE});
+        return new BlockStateContainer(this, new IProperty[] {MOISTURE});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
     }
 }

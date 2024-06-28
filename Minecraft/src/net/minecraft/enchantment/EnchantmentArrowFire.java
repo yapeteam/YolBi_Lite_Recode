@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentArrowFire extends Enchantment
 {
-    public EnchantmentArrowFire(int enchID, ResourceLocation enchName, int enchWeight)
+    public EnchantmentArrowFire(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(enchID, enchName, enchWeight, EnumEnchantmentType.BOW);
+        super(rarityIn, EnumEnchantmentType.BOW, slots);
         this.setName("arrowFire");
     }
 

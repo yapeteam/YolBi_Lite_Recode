@@ -9,13 +9,13 @@ import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenTaiga2 extends WorldGenAbstractTree
 {
-    private static final IBlockState field_181645_a = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
-    private static final IBlockState field_181646_b = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+    private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
+    private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
 
     public WorldGenTaiga2(boolean p_i2025_1_)
     {
@@ -34,7 +34,7 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree
         {
             for (int i1 = position.getY(); i1 <= position.getY() + 1 + i && flag; ++i1)
             {
-                int j1 = 1;
+                int j1;
 
                 if (i1 - position.getY() < j)
                 {
@@ -53,9 +53,9 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree
                     {
                         if (i1 >= 0 && i1 < 256)
                         {
-                            Block block = worldIn.getBlockState(blockpos$mutableblockpos.set(k1, i1, l1)).getBlock();
+                            Material material = worldIn.getBlockState(blockpos$mutableblockpos.setPos(k1, i1, l1)).getMaterial();
 
-                            if (block.getMaterial() != Material.air && block.getMaterial() != Material.leaves)
+                            if (material != Material.AIR && material != Material.LEAVES)
                             {
                                 flag = false;
                             }
@@ -74,11 +74,11 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree
             }
             else
             {
-                Block block1 = worldIn.getBlockState(position.down()).getBlock();
+                Block block = worldIn.getBlockState(position.down()).getBlock();
 
-                if ((block1 == Blocks.grass || block1 == Blocks.dirt || block1 == Blocks.farmland) && position.getY() < 256 - i - 1)
+                if ((block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.FARMLAND) && position.getY() < 256 - i - 1)
                 {
-                    this.func_175921_a(worldIn, position.down());
+                    this.setDirtAt(worldIn, position.down());
                     int i3 = rand.nextInt(2);
                     int j3 = 1;
                     int k3 = 0;
@@ -99,9 +99,9 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree
                                 {
                                     BlockPos blockpos = new BlockPos(i2, j4, k2);
 
-                                    if (!worldIn.getBlockState(blockpos).getBlock().isFullBlock())
+                                    if (!worldIn.getBlockState(blockpos).isFullBlock())
                                     {
-                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, field_181646_b);
+                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, LEAF);
                                     }
                                 }
                             }
@@ -128,11 +128,11 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree
 
                     for (int k4 = 0; k4 < i - i4; ++k4)
                     {
-                        Block block2 = worldIn.getBlockState(position.up(k4)).getBlock();
+                        Material material1 = worldIn.getBlockState(position.up(k4)).getMaterial();
 
-                        if (block2.getMaterial() == Material.air || block2.getMaterial() == Material.leaves)
+                        if (material1 == Material.AIR || material1 == Material.LEAVES)
                         {
-                            this.setBlockAndNotifyAdequately(worldIn, position.up(k4), field_181645_a);
+                            this.setBlockAndNotifyAdequately(worldIn, position.up(k4), TRUNK);
                         }
                     }
 

@@ -1,12 +1,30 @@
 package net.minecraft.nbt;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.util.UUID;
+import java.util.Map.Entry;
+import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.math.BlockPos;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class NBTUtil
 {
+    private static final Logger field_193591_a = LogManager.getLogger();
+
+    @Nullable
+
     /**
      * Reads and returns a GameProfile that has been saved to the passed in NBTTagCompound
      */
@@ -25,11 +43,7 @@ public final class NBTUtil
             s1 = compound.getString("Id");
         }
 
-        if (StringUtils.isNullOrEmpty(s) && StringUtils.isNullOrEmpty(s1))
-        {
-            return null;
-        }
-        else
+        try
         {
             UUID uuid;
 
@@ -70,6 +84,10 @@ public final class NBTUtil
             }
 
             return gameprofile;
+        }
+        catch (Throwable var13)
+        {
+            return null;
         }
     }
 
@@ -118,34 +136,35 @@ public final class NBTUtil
         return tagCompound;
     }
 
-    public static boolean func_181123_a(NBTBase p_181123_0_, NBTBase p_181123_1_, boolean p_181123_2_)
+    @VisibleForTesting
+    public static boolean areNBTEquals(NBTBase nbt1, NBTBase nbt2, boolean compareTagList)
     {
-        if (p_181123_0_ == p_181123_1_)
+        if (nbt1 == nbt2)
         {
             return true;
         }
-        else if (p_181123_0_ == null)
+        else if (nbt1 == null)
         {
             return true;
         }
-        else if (p_181123_1_ == null)
+        else if (nbt2 == null)
         {
             return false;
         }
-        else if (!p_181123_0_.getClass().equals(p_181123_1_.getClass()))
+        else if (!nbt1.getClass().equals(nbt2.getClass()))
         {
             return false;
         }
-        else if (p_181123_0_ instanceof NBTTagCompound)
+        else if (nbt1 instanceof NBTTagCompound)
         {
-            NBTTagCompound nbttagcompound = (NBTTagCompound)p_181123_0_;
-            NBTTagCompound nbttagcompound1 = (NBTTagCompound)p_181123_1_;
+            NBTTagCompound nbttagcompound = (NBTTagCompound)nbt1;
+            NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbt2;
 
             for (String s : nbttagcompound.getKeySet())
             {
                 NBTBase nbtbase1 = nbttagcompound.getTag(s);
 
-                if (!func_181123_a(nbtbase1, nbttagcompound1.getTag(s), p_181123_2_))
+                if (!areNBTEquals(nbtbase1, nbttagcompound1.getTag(s), compareTagList))
                 {
                     return false;
                 }
@@ -153,14 +172,14 @@ public final class NBTUtil
 
             return true;
         }
-        else if (p_181123_0_ instanceof NBTTagList && p_181123_2_)
+        else if (nbt1 instanceof NBTTagList && compareTagList)
         {
-            NBTTagList nbttaglist = (NBTTagList)p_181123_0_;
-            NBTTagList nbttaglist1 = (NBTTagList)p_181123_1_;
+            NBTTagList nbttaglist = (NBTTagList)nbt1;
+            NBTTagList nbttaglist1 = (NBTTagList)nbt2;
 
-            if (nbttaglist.tagCount() == 0)
+            if (nbttaglist.hasNoTags())
             {
-                return nbttaglist1.tagCount() == 0;
+                return nbttaglist1.hasNoTags();
             }
             else
             {
@@ -171,7 +190,7 @@ public final class NBTUtil
 
                     for (int j = 0; j < nbttaglist1.tagCount(); ++j)
                     {
-                        if (func_181123_a(nbtbase, nbttaglist1.get(j), p_181123_2_))
+                        if (areNBTEquals(nbtbase, nbttaglist1.get(j), compareTagList))
                         {
                             flag = true;
                             break;
@@ -189,7 +208,131 @@ public final class NBTUtil
         }
         else
         {
-            return p_181123_0_.equals(p_181123_1_);
+            return nbt1.equals(nbt2);
         }
+    }
+
+    /**
+     * Creates a new NBTTagCompound which stores a UUID.
+     */
+    public static NBTTagCompound createUUIDTag(UUID uuid)
+    {
+        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        nbttagcompound.setLong("M", uuid.getMostSignificantBits());
+        nbttagcompound.setLong("L", uuid.getLeastSignificantBits());
+        return nbttagcompound;
+    }
+
+    /**
+     * Reads a UUID from the passed NBTTagCompound.
+     */
+    public static UUID getUUIDFromTag(NBTTagCompound tag)
+    {
+        return new UUID(tag.getLong("M"), tag.getLong("L"));
+    }
+
+    /**
+     * Creates a BlockPos object from the data stored in the passed NBTTagCompound.
+     */
+    public static BlockPos getPosFromTag(NBTTagCompound tag)
+    {
+        return new BlockPos(tag.getInteger("X"), tag.getInteger("Y"), tag.getInteger("Z"));
+    }
+
+    /**
+     * Creates a new NBTTagCompound from a BlockPos.
+     */
+    public static NBTTagCompound createPosTag(BlockPos pos)
+    {
+        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        nbttagcompound.setInteger("X", pos.getX());
+        nbttagcompound.setInteger("Y", pos.getY());
+        nbttagcompound.setInteger("Z", pos.getZ());
+        return nbttagcompound;
+    }
+
+    /**
+     * Reads a blockstate from the given tag.
+     *  
+     * @param tag The tag the blockstate is to be read from
+     */
+    public static IBlockState readBlockState(NBTTagCompound tag)
+    {
+        if (!tag.hasKey("Name", 8))
+        {
+            return Blocks.AIR.getDefaultState();
+        }
+        else
+        {
+            Block block = Block.REGISTRY.getObject(new ResourceLocation(tag.getString("Name")));
+            IBlockState iblockstate = block.getDefaultState();
+
+            if (tag.hasKey("Properties", 10))
+            {
+                NBTTagCompound nbttagcompound = tag.getCompoundTag("Properties");
+                BlockStateContainer blockstatecontainer = block.getBlockState();
+
+                for (String s : nbttagcompound.getKeySet())
+                {
+                    IProperty<?> iproperty = blockstatecontainer.getProperty(s);
+
+                    if (iproperty != null)
+                    {
+                        iblockstate = func_193590_a(iblockstate, iproperty, s, nbttagcompound, tag);
+                    }
+                }
+            }
+
+            return iblockstate;
+        }
+    }
+
+    private static <T extends Comparable<T>> IBlockState func_193590_a(IBlockState p_193590_0_, IProperty<T> p_193590_1_, String p_193590_2_, NBTTagCompound p_193590_3_, NBTTagCompound p_193590_4_)
+    {
+        Optional<T> optional = p_193590_1_.parseValue(p_193590_3_.getString(p_193590_2_));
+
+        if (optional.isPresent())
+        {
+            return p_193590_0_.withProperty(p_193590_1_, optional.get());
+        }
+        else
+        {
+            field_193591_a.warn("Unable to read property: {} with value: {} for blockstate: {}", p_193590_2_, p_193590_3_.getString(p_193590_2_), p_193590_4_.toString());
+            return p_193590_0_;
+        }
+    }
+
+    /**
+     * Writes the given blockstate to the given tag.
+     *  
+     * @param tag The tag to write to
+     * @param state The blockstate to be written
+     */
+    public static NBTTagCompound writeBlockState(NBTTagCompound tag, IBlockState state)
+    {
+        tag.setString("Name", ((ResourceLocation)Block.REGISTRY.getNameForObject(state.getBlock())).toString());
+
+        if (!state.getProperties().isEmpty())
+        {
+            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            UnmodifiableIterator unmodifiableiterator = state.getProperties().entrySet().iterator();
+
+            while (unmodifiableiterator.hasNext())
+            {
+                Entry < IProperty<?>, Comparable<? >> entry = (Entry)unmodifiableiterator.next();
+                IProperty<?> iproperty = (IProperty)entry.getKey();
+                nbttagcompound.setString(iproperty.getName(), getName(iproperty, entry.getValue()));
+            }
+
+            tag.setTag("Properties", nbttagcompound);
+        }
+
+        return tag;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Comparable<T>> String getName(IProperty<T> p_190010_0_, Comparable<?> p_190010_1_)
+    {
+        return p_190010_0_.getName((T)p_190010_1_);
     }
 }

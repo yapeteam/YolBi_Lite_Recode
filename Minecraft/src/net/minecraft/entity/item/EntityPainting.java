@@ -1,15 +1,18 @@
 package net.minecraft.entity.item;
 
 import com.google.common.collect.Lists;
+import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityPainting extends EntityHanging
@@ -25,6 +28,7 @@ public class EntityPainting extends EntityHanging
     {
         super(worldIn, pos);
         List<EntityPainting.EnumArt> list = Lists.<EntityPainting.EnumArt>newArrayList();
+        int i = 0;
 
         for (EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values())
         {
@@ -34,12 +38,30 @@ public class EntityPainting extends EntityHanging
             if (this.onValidSurface())
             {
                 list.add(entitypainting$enumart);
+                int j = entitypainting$enumart.sizeX * entitypainting$enumart.sizeY;
+
+                if (j > i)
+                {
+                    i = j;
+                }
             }
         }
 
         if (!list.isEmpty())
         {
-            this.art = (EntityPainting.EnumArt)list.get(this.rand.nextInt(list.size()));
+            Iterator<EntityPainting.EnumArt> iterator = list.iterator();
+
+            while (iterator.hasNext())
+            {
+                EntityPainting.EnumArt entitypainting$enumart1 = iterator.next();
+
+                if (entitypainting$enumart1.sizeX * entitypainting$enumart1.sizeY < i)
+                {
+                    iterator.remove();
+                }
+            }
+
+            this.art = list.get(this.rand.nextInt(list.size()));
         }
 
         this.updateFacingWithBoundingBox(facing);
@@ -64,18 +86,18 @@ public class EntityPainting extends EntityHanging
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound tagCompound)
+    public void writeEntityToNBT(NBTTagCompound compound)
     {
-        tagCompound.setString("Motive", this.art.title);
-        super.writeEntityToNBT(tagCompound);
+        compound.setString("Motive", this.art.title);
+        super.writeEntityToNBT(compound);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound tagCompund)
+    public void readEntityFromNBT(NBTTagCompound compound)
     {
-        String s = tagCompund.getString("Motive");
+        String s = compound.getString("Motive");
 
         for (EntityPainting.EnumArt entitypainting$enumart : EntityPainting.EnumArt.values())
         {
@@ -90,7 +112,7 @@ public class EntityPainting extends EntityHanging
             this.art = EntityPainting.EnumArt.KEBAB;
         }
 
-        super.readEntityFromNBT(tagCompund);
+        super.readEntityFromNBT(compound);
     }
 
     public int getWidthPixels()
@@ -106,10 +128,12 @@ public class EntityPainting extends EntityHanging
     /**
      * Called when this entity is broken. Entity parameter may be null.
      */
-    public void onBroken(Entity brokenEntity)
+    public void onBroken(@Nullable Entity brokenEntity)
     {
-        if (this.worldObj.getGameRules().getBoolean("doEntityDrops"))
+        if (this.world.getGameRules().getBoolean("doEntityDrops"))
         {
+            this.playSound(SoundEvents.ENTITY_PAINTING_BREAK, 1.0F, 1.0F);
+
             if (brokenEntity instanceof EntityPlayer)
             {
                 EntityPlayer entityplayer = (EntityPlayer)brokenEntity;
@@ -120,8 +144,13 @@ public class EntityPainting extends EntityHanging
                 }
             }
 
-            this.entityDropItem(new ItemStack(Items.painting), 0.0F);
+            this.entityDropItem(new ItemStack(Items.PAINTING), 0.0F);
         }
+    }
+
+    public void playPlaceSound()
+    {
+        this.playSound(SoundEvents.ENTITY_PAINTING_PLACE, 1.0F, 1.0F);
     }
 
     /**
@@ -129,11 +158,13 @@ public class EntityPainting extends EntityHanging
      */
     public void setLocationAndAngles(double x, double y, double z, float yaw, float pitch)
     {
-        BlockPos blockpos = this.hangingPosition.add(x - this.posX, y - this.posY, z - this.posZ);
-        this.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
+        this.setPosition(x, y, z);
     }
 
-    public void setPositionAndRotation2(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean p_180426_10_)
+    /**
+     * Set the position and rotation values directly without any clamping.
+     */
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
         BlockPos blockpos = this.hangingPosition.add(x - this.posX, y - this.posY, z - this.posZ);
         this.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
@@ -168,7 +199,7 @@ public class EntityPainting extends EntityHanging
         SKELETON("Skeleton", 64, 48, 192, 64),
         DONKEY_KONG("DonkeyKong", 64, 48, 192, 112);
 
-        public static final int field_180001_A = "SkullAndRoses".length();
+        public static final int MAX_NAME_LENGTH = "SkullAndRoses".length();
         public final String title;
         public final int sizeX;
         public final int sizeY;

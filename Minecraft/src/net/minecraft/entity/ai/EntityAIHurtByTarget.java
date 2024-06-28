@@ -2,19 +2,20 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.util.math.AxisAlignedBB;
 
 public class EntityAIHurtByTarget extends EntityAITarget
 {
-    private boolean entityCallsForHelp;
+    private final boolean entityCallsForHelp;
 
     /** Store the previous revengeTimer value */
     private int revengeTimerOld;
-    private final Class[] targetClasses;
+    private final Class<?>[] targetClasses;
 
-    public EntityAIHurtByTarget(EntityCreature creatureIn, boolean entityCallsForHelpIn, Class... targetClassesIn)
+    public EntityAIHurtByTarget(EntityCreature creatureIn, boolean entityCallsForHelpIn, Class<?>... targetClassesIn)
     {
-        super(creatureIn, false);
+        super(creatureIn, true);
         this.entityCallsForHelp = entityCallsForHelpIn;
         this.targetClasses = targetClassesIn;
         this.setMutexBits(1);
@@ -26,7 +27,8 @@ public class EntityAIHurtByTarget extends EntityAITarget
     public boolean shouldExecute()
     {
         int i = this.taskOwner.getRevengeTimer();
-        return i != this.revengeTimerOld && this.isSuitableTarget(this.taskOwner.getAITarget(), false);
+        EntityLivingBase entitylivingbase = this.taskOwner.getAITarget();
+        return i != this.revengeTimerOld && entitylivingbase != null && this.isSuitableTarget(entitylivingbase, false);
     }
 
     /**
@@ -35,36 +37,43 @@ public class EntityAIHurtByTarget extends EntityAITarget
     public void startExecuting()
     {
         this.taskOwner.setAttackTarget(this.taskOwner.getAITarget());
+        this.target = this.taskOwner.getAttackTarget();
         this.revengeTimerOld = this.taskOwner.getRevengeTimer();
+        this.unseenMemoryTicks = 300;
 
         if (this.entityCallsForHelp)
         {
-            double d0 = this.getTargetDistance();
-
-            for (EntityCreature entitycreature : this.taskOwner.worldObj.getEntitiesWithinAABB(this.taskOwner.getClass(), (new AxisAlignedBB(this.taskOwner.posX, this.taskOwner.posY, this.taskOwner.posZ, this.taskOwner.posX + 1.0D, this.taskOwner.posY + 1.0D, this.taskOwner.posZ + 1.0D)).expand(d0, 10.0D, d0)))
-            {
-                if (this.taskOwner != entitycreature && entitycreature.getAttackTarget() == null && !entitycreature.isOnSameTeam(this.taskOwner.getAITarget()))
-                {
-                    boolean flag = false;
-
-                    for (Class oclass : this.targetClasses)
-                    {
-                        if (entitycreature.getClass() == oclass)
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
-
-                    if (!flag)
-                    {
-                        this.setEntityAttackTarget(entitycreature, this.taskOwner.getAITarget());
-                    }
-                }
-            }
+            this.alertOthers();
         }
 
         super.startExecuting();
+    }
+
+    protected void alertOthers()
+    {
+        double d0 = this.getTargetDistance();
+
+        for (EntityCreature entitycreature : this.taskOwner.world.getEntitiesWithinAABB(this.taskOwner.getClass(), (new AxisAlignedBB(this.taskOwner.posX, this.taskOwner.posY, this.taskOwner.posZ, this.taskOwner.posX + 1.0D, this.taskOwner.posY + 1.0D, this.taskOwner.posZ + 1.0D)).expand(d0, 10.0D, d0)))
+        {
+            if (this.taskOwner != entitycreature && entitycreature.getAttackTarget() == null && (!(this.taskOwner instanceof EntityTameable) || ((EntityTameable)this.taskOwner).getOwner() == ((EntityTameable)entitycreature).getOwner()) && !entitycreature.isOnSameTeam(this.taskOwner.getAITarget()))
+            {
+                boolean flag = false;
+
+                for (Class<?> oclass : this.targetClasses)
+                {
+                    if (entitycreature.getClass() == oclass)
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (!flag)
+                {
+                    this.setEntityAttackTarget(entitycreature, this.taskOwner.getAITarget());
+                }
+            }
+        }
     }
 
     protected void setEntityAttackTarget(EntityCreature creatureIn, EntityLivingBase entityLivingBaseIn)

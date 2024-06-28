@@ -29,6 +29,15 @@ public class UserListOps extends UserList<GameProfile, UserListOpsEntry>
         return astring;
     }
 
+    /**
+     * Get the OP permission level this player has
+     */
+    public int getPermissionLevel(GameProfile profile)
+    {
+        UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);
+        return userlistopsentry != null ? userlistopsentry.getPermissionLevel() : 0;
+    }
+
     public boolean bypassesPlayerLimit(GameProfile profile)
     {
         UserListOpsEntry userlistopsentry = (UserListOpsEntry)this.getEntry(profile);

@@ -24,14 +24,14 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
         {
             return false;
         }
-        else if (!this.theEntity.worldObj.getGameRules().getBoolean("mobGriefing"))
+        else if (!this.theEntity.world.getGameRules().getBoolean("mobGriefing"))
         {
             return false;
         }
         else
         {
             BlockDoor blockdoor = this.doorBlock;
-            return !BlockDoor.isOpen(this.theEntity.worldObj, this.doorPosition);
+            return !BlockDoor.isOpen(this.theEntity.world, this.doorPosition);
         }
     }
 
@@ -56,7 +56,7 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
         {
             BlockDoor blockdoor = this.doorBlock;
 
-            if (!BlockDoor.isOpen(this.theEntity.worldObj, this.doorPosition) && d0 < 4.0D)
+            if (!BlockDoor.isOpen(this.theEntity.world, this.doorPosition) && d0 < 4.0D)
             {
                 flag = true;
                 return flag;
@@ -73,7 +73,7 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
     public void resetTask()
     {
         super.resetTask();
-        this.theEntity.worldObj.sendBlockBreakProgress(this.theEntity.getEntityId(), this.doorPosition, -1);
+        this.theEntity.world.sendBlockBreakProgress(this.theEntity.getEntityId(), this.doorPosition, -1);
     }
 
     /**
@@ -85,7 +85,7 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
 
         if (this.theEntity.getRNG().nextInt(20) == 0)
         {
-            this.theEntity.worldObj.playAuxSFX(1010, this.doorPosition, 0);
+            this.theEntity.world.playEvent(1019, this.doorPosition, 0);
         }
 
         ++this.breakingTime;
@@ -93,15 +93,15 @@ public class EntityAIBreakDoor extends EntityAIDoorInteract
 
         if (i != this.previousBreakProgress)
         {
-            this.theEntity.worldObj.sendBlockBreakProgress(this.theEntity.getEntityId(), this.doorPosition, i);
+            this.theEntity.world.sendBlockBreakProgress(this.theEntity.getEntityId(), this.doorPosition, i);
             this.previousBreakProgress = i;
         }
 
-        if (this.breakingTime == 240 && this.theEntity.worldObj.getDifficulty() == EnumDifficulty.HARD)
+        if (this.breakingTime == 240 && this.theEntity.world.getDifficulty() == EnumDifficulty.HARD)
         {
-            this.theEntity.worldObj.setBlockToAir(this.doorPosition);
-            this.theEntity.worldObj.playAuxSFX(1012, this.doorPosition, 0);
-            this.theEntity.worldObj.playAuxSFX(2001, this.doorPosition, Block.getIdFromBlock(this.doorBlock));
+            this.theEntity.world.setBlockToAir(this.doorPosition);
+            this.theEntity.world.playEvent(1021, this.doorPosition, 0);
+            this.theEntity.world.playEvent(2001, this.doorPosition, Block.getIdFromBlock(this.doorBlock));
         }
     }
 }

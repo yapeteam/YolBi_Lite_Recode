@@ -1,10 +1,12 @@
 package net.minecraft.block;
 
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,9 +16,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -24,15 +26,19 @@ import net.minecraft.world.World;
 public class BlockSnow extends Block
 {
     public static final PropertyInteger LAYERS = PropertyInteger.create("layers", 1, 8);
+    protected static final AxisAlignedBB[] SNOW_AABB = new AxisAlignedBB[] {new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.625D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
 
     protected BlockSnow()
     {
-        super(Material.snow);
+        super(Material.SNOW);
         this.setDefaultState(this.blockState.getBaseState().withProperty(LAYERS, Integer.valueOf(1)));
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
-        this.setBlockBoundsForItemRender();
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return SNOW_AABB[((Integer)state.getValue(LAYERS)).intValue()];
     }
 
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos)
@@ -40,56 +46,63 @@ public class BlockSnow extends Block
         return ((Integer)worldIn.getBlockState(pos).getValue(LAYERS)).intValue() < 5;
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    /**
+     * Checks if an IBlockState represents a block that is opaque and a full cube.
+     */
+    public boolean isFullyOpaque(IBlockState state)
     {
-        int i = ((Integer)state.getValue(LAYERS)).intValue() - 1;
+        return ((Integer)state.getValue(LAYERS)).intValue() == 8;
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return p_193383_4_ == EnumFacing.DOWN ? BlockFaceShape.SOLID : BlockFaceShape.UNDEFINED;
+    }
+
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
+    {
+        int i = ((Integer)blockState.getValue(LAYERS)).intValue() - 1;
         float f = 0.125F;
-        return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)((float)pos.getY() + (float)i * f), (double)pos.getZ() + this.maxZ);
+        AxisAlignedBB axisalignedbb = blockState.getBoundingBox(worldIn, pos);
+        return new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.maxX, (double)((float)i * 0.125F), axisalignedbb.maxZ);
     }
 
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
-    }
-
-    /**
-     * Sets the block's bounds for rendering it as an item
-     */
-    public void setBlockBoundsForItemRender()
-    {
-        this.getBoundsForLayers(0);
-    }
-
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        this.getBoundsForLayers(((Integer)iblockstate.getValue(LAYERS)).intValue());
-    }
-
-    protected void getBoundsForLayers(int p_150154_1_)
-    {
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, (float)p_150154_1_ / 8.0F, 1.0F);
     }
 
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
         IBlockState iblockstate = worldIn.getBlockState(pos.down());
         Block block = iblockstate.getBlock();
-        return block != Blocks.ice && block != Blocks.packed_ice ? (block.getMaterial() == Material.leaves ? true : (block == this && ((Integer)iblockstate.getValue(LAYERS)).intValue() >= 7 ? true : block.isOpaqueCube() && block.blockMaterial.blocksMovement())) : false;
+
+        if (block != Blocks.ICE && block != Blocks.PACKED_ICE && block != Blocks.BARRIER)
+        {
+            BlockFaceShape blockfaceshape = iblockstate.func_193401_d(worldIn, pos.down(), EnumFacing.UP);
+            return blockfaceshape == BlockFaceShape.SOLID || iblockstate.getMaterial() == Material.LEAVES || block == this && ((Integer)iblockstate.getValue(LAYERS)).intValue() == 8;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /**
-     * Called when a neighboring block changes.
+     * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor
+     * change. Cases may include when redstone power is updated, cactus blocks popping off due to a neighboring solid
+     * block, etc.
      */
-    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos p_189540_5_)
     {
         this.checkAndDropBlock(worldIn, pos, state);
     }
@@ -108,11 +121,11 @@ public class BlockSnow extends Block
         }
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
-        spawnAsEntity(worldIn, pos, new ItemStack(Items.snowball, ((Integer)state.getValue(LAYERS)).intValue() + 1, 0));
+        spawnAsEntity(worldIn, pos, new ItemStack(Items.SNOWBALL, ((Integer)state.getValue(LAYERS)).intValue() + 1, 0));
         worldIn.setBlockToAir(pos);
-        player.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+        player.addStat(StatList.getBlockStats(this));
     }
 
     /**
@@ -120,7 +133,7 @@ public class BlockSnow extends Block
      */
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
-        return Items.snowball;
+        return Items.SNOWBALL;
     }
 
     /**
@@ -140,9 +153,17 @@ public class BlockSnow extends Block
         }
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.UP ? true : super.shouldSideBeRendered(worldIn, pos, side);
+        if (side == EnumFacing.UP)
+        {
+            return true;
+        }
+        else
+        {
+            IBlockState iblockstate = blockAccess.getBlockState(pos.offset(side));
+            return iblockstate.getBlock() == this && ((Integer)iblockstate.getValue(LAYERS)).intValue() >= ((Integer)blockState.getValue(LAYERS)).intValue() ? false : super.shouldSideBeRendered(blockState, blockAccess, pos, side);
+        }
     }
 
     /**
@@ -156,7 +177,7 @@ public class BlockSnow extends Block
     /**
      * Whether this Block can be replaced directly by other blocks (true for e.g. tall grass)
      */
-    public boolean isReplaceable(World worldIn, BlockPos pos)
+    public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
     {
         return ((Integer)worldIn.getBlockState(pos).getValue(LAYERS)).intValue() == 1;
     }
@@ -169,8 +190,8 @@ public class BlockSnow extends Block
         return ((Integer)state.getValue(LAYERS)).intValue() - 1;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {LAYERS});
+        return new BlockStateContainer(this, new IProperty[] {LAYERS});
     }
 }

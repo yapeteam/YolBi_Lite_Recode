@@ -23,7 +23,7 @@ public class NBTTagEnd extends NBTBase
      */
     public byte getId()
     {
-        return (byte)0;
+        return 0;
     }
 
     public String toString()
@@ -34,7 +34,7 @@ public class NBTTagEnd extends NBTBase
     /**
      * Creates a clone of the tag.
      */
-    public NBTBase copy()
+    public NBTTagEnd copy()
     {
         return new NBTTagEnd();
     }

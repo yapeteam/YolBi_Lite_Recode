@@ -1,101 +1,118 @@
 package net.minecraft.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class ItemBucket extends Item
 {
     /** field for checking if the bucket has been filled. */
-    private Block isFull;
+    private final Block containedBlock;
 
-    public ItemBucket(Block containedBlock)
+    public ItemBucket(Block containedBlockIn)
     {
         this.maxStackSize = 1;
-        this.isFull = containedBlock;
-        this.setCreativeTab(CreativeTabs.tabMisc);
+        this.containedBlock = containedBlockIn;
+        this.setCreativeTab(CreativeTabs.MISC);
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
     {
-        boolean flag = this.isFull == Blocks.air;
-        MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(worldIn, playerIn, flag);
+        boolean flag = this.containedBlock == Blocks.AIR;
+        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+        RayTraceResult raytraceresult = this.rayTrace(itemStackIn, worldIn, flag);
 
-        if (movingobjectposition == null)
+        if (raytraceresult == null)
         {
-            return itemStackIn;
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
+        }
+        else if (raytraceresult.typeOfHit != RayTraceResult.Type.BLOCK)
+        {
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, itemstack);
         }
         else
         {
-            if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
+            BlockPos blockpos = raytraceresult.getBlockPos();
+
+            if (!itemStackIn.isBlockModifiable(worldIn, blockpos))
             {
-                BlockPos blockpos = movingobjectposition.getBlockPos();
-
-                if (!worldIn.isBlockModifiable(playerIn, blockpos))
+                return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
+            }
+            else if (flag)
+            {
+                if (!worldIn.canPlayerEdit(blockpos.offset(raytraceresult.sideHit), raytraceresult.sideHit, itemstack))
                 {
-                    return itemStackIn;
-                }
-
-                if (flag)
-                {
-                    if (!playerIn.canPlayerEdit(blockpos.offset(movingobjectposition.sideHit), movingobjectposition.sideHit, itemStackIn))
-                    {
-                        return itemStackIn;
-                    }
-
-                    IBlockState iblockstate = worldIn.getBlockState(blockpos);
-                    Material material = iblockstate.getBlock().getMaterial();
-
-                    if (material == Material.water && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0)
-                    {
-                        worldIn.setBlockToAir(blockpos);
-                        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-                        return this.fillBucket(itemStackIn, playerIn, Items.water_bucket);
-                    }
-
-                    if (material == Material.lava && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0)
-                    {
-                        worldIn.setBlockToAir(blockpos);
-                        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-                        return this.fillBucket(itemStackIn, playerIn, Items.lava_bucket);
-                    }
+                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
                 }
                 else
                 {
-                    if (this.isFull == Blocks.air)
+                    IBlockState iblockstate = itemStackIn.getBlockState(blockpos);
+                    Material material = iblockstate.getMaterial();
+
+                    if (material == Material.WATER && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0)
                     {
-                        return new ItemStack(Items.bucket);
+                        itemStackIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 11);
+                        worldIn.addStat(StatList.getObjectUseStats(this));
+                        worldIn.playSound(SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.fillBucket(itemstack, worldIn, Items.WATER_BUCKET));
                     }
-
-                    BlockPos blockpos1 = blockpos.offset(movingobjectposition.sideHit);
-
-                    if (!playerIn.canPlayerEdit(blockpos1, movingobjectposition.sideHit, itemStackIn))
+                    else if (material == Material.LAVA && ((Integer)iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0)
                     {
-                        return itemStackIn;
+                        worldIn.playSound(SoundEvents.ITEM_BUCKET_FILL_LAVA, 1.0F, 1.0F);
+                        itemStackIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 11);
+                        worldIn.addStat(StatList.getObjectUseStats(this));
+                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.fillBucket(itemstack, worldIn, Items.LAVA_BUCKET));
                     }
-
-                    if (this.tryPlaceContainedLiquid(worldIn, blockpos1) && !playerIn.capabilities.isCreativeMode)
+                    else
                     {
-                        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
-                        return new ItemStack(Items.bucket);
+                        return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
                     }
                 }
             }
+            else
+            {
+                boolean flag1 = itemStackIn.getBlockState(blockpos).getBlock().isReplaceable(itemStackIn, blockpos);
+                BlockPos blockpos1 = flag1 && raytraceresult.sideHit == EnumFacing.UP ? blockpos : blockpos.offset(raytraceresult.sideHit);
 
-            return itemStackIn;
+                if (!worldIn.canPlayerEdit(blockpos1, raytraceresult.sideHit, itemstack))
+                {
+                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
+                }
+                else if (this.tryPlaceContainedLiquid(worldIn, itemStackIn, blockpos1))
+                {
+                    if (worldIn instanceof EntityPlayerMP)
+                    {
+                        CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)worldIn, blockpos1, itemstack);
+                    }
+
+                    worldIn.addStat(StatList.getObjectUseStats(this));
+                    return !worldIn.capabilities.isCreativeMode ? new ActionResult(EnumActionResult.SUCCESS, new ItemStack(Items.BUCKET)) : new ActionResult(EnumActionResult.SUCCESS, itemstack);
+                }
+                else
+                {
+                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
+                }
+            }
         }
     }
 
@@ -105,58 +122,67 @@ public class ItemBucket extends Item
         {
             return emptyBuckets;
         }
-        else if (--emptyBuckets.stackSize <= 0)
-        {
-            return new ItemStack(fullBucket);
-        }
         else
         {
-            if (!player.inventory.addItemStackToInventory(new ItemStack(fullBucket)))
-            {
-                player.dropPlayerItemWithRandomChoice(new ItemStack(fullBucket, 1, 0), false);
-            }
+            emptyBuckets.func_190918_g(1);
 
-            return emptyBuckets;
+            if (emptyBuckets.func_190926_b())
+            {
+                return new ItemStack(fullBucket);
+            }
+            else
+            {
+                if (!player.inventory.addItemStackToInventory(new ItemStack(fullBucket)))
+                {
+                    player.dropItem(new ItemStack(fullBucket), false);
+                }
+
+                return emptyBuckets;
+            }
         }
     }
 
-    public boolean tryPlaceContainedLiquid(World worldIn, BlockPos pos)
+    public boolean tryPlaceContainedLiquid(@Nullable EntityPlayer player, World worldIn, BlockPos posIn)
     {
-        if (this.isFull == Blocks.air)
+        if (this.containedBlock == Blocks.AIR)
         {
             return false;
         }
         else
         {
-            Material material = worldIn.getBlockState(pos).getBlock().getMaterial();
+            IBlockState iblockstate = worldIn.getBlockState(posIn);
+            Material material = iblockstate.getMaterial();
             boolean flag = !material.isSolid();
+            boolean flag1 = iblockstate.getBlock().isReplaceable(worldIn, posIn);
 
-            if (!worldIn.isAirBlock(pos) && !flag)
+            if (!worldIn.isAirBlock(posIn) && !flag && !flag1)
             {
                 return false;
             }
             else
             {
-                if (worldIn.provider.doesWaterVaporize() && this.isFull == Blocks.flowing_water)
+                if (worldIn.provider.doesWaterVaporize() && this.containedBlock == Blocks.FLOWING_WATER)
                 {
-                    int i = pos.getX();
-                    int j = pos.getY();
-                    int k = pos.getZ();
-                    worldIn.playSoundEffect((double)((float)i + 0.5F), (double)((float)j + 0.5F), (double)((float)k + 0.5F), "random.fizz", 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
+                    int l = posIn.getX();
+                    int i = posIn.getY();
+                    int j = posIn.getZ();
+                    worldIn.playSound(player, posIn, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
 
-                    for (int l = 0; l < 8; ++l)
+                    for (int k = 0; k < 8; ++k)
                     {
-                        worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0D, 0.0D, 0.0D, new int[0]);
+                        worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0D, 0.0D, 0.0D);
                     }
                 }
                 else
                 {
-                    if (!worldIn.isRemote && flag && !material.isLiquid())
+                    if (!worldIn.isRemote && (flag || flag1) && !material.isLiquid())
                     {
-                        worldIn.destroyBlock(pos, true);
+                        worldIn.destroyBlock(posIn, true);
                     }
 
-                    worldIn.setBlockState(pos, this.isFull.getDefaultState(), 3);
+                    SoundEvent soundevent = this.containedBlock == Blocks.FLOWING_LAVA ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
+                    worldIn.playSound(player, posIn, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    worldIn.setBlockState(posIn, this.containedBlock.getDefaultState(), 11);
                 }
 
                 return true;

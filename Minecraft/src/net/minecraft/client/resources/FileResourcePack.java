@@ -16,7 +16,7 @@ import java.util.zip.ZipFile;
 
 public class FileResourcePack extends AbstractResourcePack implements Closeable
 {
-    public static final Splitter entryNameSplitter = Splitter.on('/').omitEmptyStrings().limit(3);
+    public static final Splitter ENTRY_NAME_SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
     private ZipFile resourcePackZipFile;
 
     public FileResourcePack(File resourcePackFileIn)
@@ -79,24 +79,24 @@ public class FileResourcePack extends AbstractResourcePack implements Closeable
 
         while (enumeration.hasMoreElements())
         {
-            ZipEntry zipentry = (ZipEntry)enumeration.nextElement();
+            ZipEntry zipentry = enumeration.nextElement();
             String s = zipentry.getName();
 
             if (s.startsWith("assets/"))
             {
-                List<String> list = Lists.newArrayList(entryNameSplitter.split(s));
+                List<String> list = Lists.newArrayList(ENTRY_NAME_SPLITTER.split(s));
 
                 if (list.size() > 1)
                 {
-                    String s1 = (String)list.get(1);
+                    String s1 = list.get(1);
 
-                    if (!s1.equals(s1.toLowerCase()))
+                    if (s1.equals(s1.toLowerCase(java.util.Locale.ROOT)))
                     {
-                        this.logNameNotLowercase(s1);
+                        set.add(s1);
                     }
                     else
                     {
-                        set.add(s1);
+                        this.logNameNotLowercase(s1);
                     }
                 }
             }

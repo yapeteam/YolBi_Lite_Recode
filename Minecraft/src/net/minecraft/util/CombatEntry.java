@@ -1,23 +1,25 @@
 package net.minecraft.util;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.text.ITextComponent;
 
 public class CombatEntry
 {
     private final DamageSource damageSrc;
-    private final int field_94567_b;
+    private final int time;
     private final float damage;
     private final float health;
-    private final String field_94566_e;
+    private final String fallSuffix;
     private final float fallDistance;
 
-    public CombatEntry(DamageSource damageSrcIn, int p_i1564_2_, float healthAmount, float damageAmount, String p_i1564_5_, float fallDistanceIn)
+    public CombatEntry(DamageSource damageSrcIn, int p_i1564_2_, float healthAmount, float damageAmount, String fallSuffixIn, float fallDistanceIn)
     {
         this.damageSrc = damageSrcIn;
-        this.field_94567_b = p_i1564_2_;
+        this.time = p_i1564_2_;
         this.damage = damageAmount;
         this.health = healthAmount;
-        this.field_94566_e = p_i1564_5_;
+        this.fallSuffix = fallSuffixIn;
         this.fallDistance = fallDistanceIn;
     }
 
@@ -29,7 +31,7 @@ public class CombatEntry
         return this.damageSrc;
     }
 
-    public float func_94563_c()
+    public float getDamage()
     {
         return this.damage;
     }
@@ -42,12 +44,14 @@ public class CombatEntry
         return this.damageSrc.getEntity() instanceof EntityLivingBase;
     }
 
-    public String func_94562_g()
+    @Nullable
+    public String getFallSuffix()
     {
-        return this.field_94566_e;
+        return this.fallSuffix;
     }
 
-    public IChatComponent getDamageSrcDisplayName()
+    @Nullable
+    public ITextComponent getDamageSrcDisplayName()
     {
         return this.getDamageSrc().getEntity() == null ? null : this.getDamageSrc().getEntity().getDisplayName();
     }

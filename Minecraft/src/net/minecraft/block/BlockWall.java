@@ -1,21 +1,23 @@
 package net.minecraft.block;
 
 import java.util.List;
-import net.minecraft.block.material.Material;
+import javax.annotation.Nullable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -27,6 +29,8 @@ public class BlockWall extends Block
     public static final PropertyBool SOUTH = PropertyBool.create("south");
     public static final PropertyBool WEST = PropertyBool.create("west");
     public static final PropertyEnum<BlockWall.EnumType> VARIANT = PropertyEnum.<BlockWall.EnumType>create("variant", BlockWall.EnumType.class);
+    protected static final AxisAlignedBB[] AABB_BY_INDEX = new AxisAlignedBB[] {new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D), new AxisAlignedBB(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D), new AxisAlignedBB(0.0D, 0.0D, 0.25D, 0.75D, 1.0D, 1.0D), new AxisAlignedBB(0.25D, 0.0D, 0.0D, 0.75D, 1.0D, 0.75D), new AxisAlignedBB(0.3125D, 0.0D, 0.0D, 0.6875D, 0.875D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.75D, 1.0D, 0.75D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.75D, 1.0D, 1.0D), new AxisAlignedBB(0.25D, 0.0D, 0.25D, 1.0D, 1.0D, 0.75D), new AxisAlignedBB(0.25D, 0.0D, 0.25D, 1.0D, 1.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.3125D, 1.0D, 0.875D, 0.6875D), new AxisAlignedBB(0.0D, 0.0D, 0.25D, 1.0D, 1.0D, 1.0D), new AxisAlignedBB(0.25D, 0.0D, 0.0D, 1.0D, 1.0D, 0.75D), new AxisAlignedBB(0.25D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.75D), new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D)};
+    protected static final AxisAlignedBB[] CLIP_AABB_BY_INDEX = new AxisAlignedBB[] {AABB_BY_INDEX[0].setMaxY(1.5D), AABB_BY_INDEX[1].setMaxY(1.5D), AABB_BY_INDEX[2].setMaxY(1.5D), AABB_BY_INDEX[3].setMaxY(1.5D), AABB_BY_INDEX[4].setMaxY(1.5D), AABB_BY_INDEX[5].setMaxY(1.5D), AABB_BY_INDEX[6].setMaxY(1.5D), AABB_BY_INDEX[7].setMaxY(1.5D), AABB_BY_INDEX[8].setMaxY(1.5D), AABB_BY_INDEX[9].setMaxY(1.5D), AABB_BY_INDEX[10].setMaxY(1.5D), AABB_BY_INDEX[11].setMaxY(1.5D), AABB_BY_INDEX[12].setMaxY(1.5D), AABB_BY_INDEX[13].setMaxY(1.5D), AABB_BY_INDEX[14].setMaxY(1.5D), AABB_BY_INDEX[15].setMaxY(1.5D)};
 
     public BlockWall(Block modelBlock)
     {
@@ -34,8 +38,58 @@ public class BlockWall extends Block
         this.setDefaultState(this.blockState.getBaseState().withProperty(UP, Boolean.valueOf(false)).withProperty(NORTH, Boolean.valueOf(false)).withProperty(EAST, Boolean.valueOf(false)).withProperty(SOUTH, Boolean.valueOf(false)).withProperty(WEST, Boolean.valueOf(false)).withProperty(VARIANT, BlockWall.EnumType.NORMAL));
         this.setHardness(modelBlock.blockHardness);
         this.setResistance(modelBlock.blockResistance / 3.0F);
-        this.setStepSound(modelBlock.stepSound);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setSoundType(modelBlock.blockSoundType);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        state = this.getActualState(state, source, pos);
+        return AABB_BY_INDEX[getAABBIndex(state)];
+    }
+
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185477_7_)
+    {
+        if (!p_185477_7_)
+        {
+            state = this.getActualState(state, worldIn, pos);
+        }
+
+        addCollisionBoxToList(pos, entityBox, collidingBoxes, CLIP_AABB_BY_INDEX[getAABBIndex(state)]);
+    }
+
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
+    {
+        blockState = this.getActualState(blockState, worldIn, pos);
+        return CLIP_AABB_BY_INDEX[getAABBIndex(blockState)];
+    }
+
+    private static int getAABBIndex(IBlockState state)
+    {
+        int i = 0;
+
+        if (((Boolean)state.getValue(NORTH)).booleanValue())
+        {
+            i |= 1 << EnumFacing.NORTH.getHorizontalIndex();
+        }
+
+        if (((Boolean)state.getValue(EAST)).booleanValue())
+        {
+            i |= 1 << EnumFacing.EAST.getHorizontalIndex();
+        }
+
+        if (((Boolean)state.getValue(SOUTH)).booleanValue())
+        {
+            i |= 1 << EnumFacing.SOUTH.getHorizontalIndex();
+        }
+
+        if (((Boolean)state.getValue(WEST)).booleanValue())
+        {
+            i |= 1 << EnumFacing.WEST.getHorizontalIndex();
+        }
+
+        return i;
     }
 
     /**
@@ -43,10 +97,10 @@ public class BlockWall extends Block
      */
     public String getLocalizedName()
     {
-        return StatCollector.translateToLocal(this.getUnlocalizedName() + "." + BlockWall.EnumType.NORMAL.getUnlocalizedName() + ".name");
+        return I18n.translateToLocal(this.getUnlocalizedName() + "." + BlockWall.EnumType.NORMAL.getUnlocalizedName() + ".name");
     }
 
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
@@ -59,80 +113,33 @@ public class BlockWall extends Block
     /**
      * Used to determine ambient occlusion and culling when rebuilding chunks for render
      */
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
+    private boolean canConnectTo(IBlockAccess worldIn, BlockPos pos, EnumFacing p_176253_3_)
     {
-        boolean flag = this.canConnectTo(worldIn, pos.north());
-        boolean flag1 = this.canConnectTo(worldIn, pos.south());
-        boolean flag2 = this.canConnectTo(worldIn, pos.west());
-        boolean flag3 = this.canConnectTo(worldIn, pos.east());
-        float f = 0.25F;
-        float f1 = 0.75F;
-        float f2 = 0.25F;
-        float f3 = 0.75F;
-        float f4 = 1.0F;
-
-        if (flag)
-        {
-            f2 = 0.0F;
-        }
-
-        if (flag1)
-        {
-            f3 = 1.0F;
-        }
-
-        if (flag2)
-        {
-            f = 0.0F;
-        }
-
-        if (flag3)
-        {
-            f1 = 1.0F;
-        }
-
-        if (flag && flag1 && !flag2 && !flag3)
-        {
-            f4 = 0.8125F;
-            f = 0.3125F;
-            f1 = 0.6875F;
-        }
-        else if (!flag && !flag1 && flag2 && flag3)
-        {
-            f4 = 0.8125F;
-            f2 = 0.3125F;
-            f3 = 0.6875F;
-        }
-
-        this.setBlockBounds(f, 0.0F, f2, f1, f4, f3);
+        IBlockState iblockstate = worldIn.getBlockState(pos);
+        Block block = iblockstate.getBlock();
+        BlockFaceShape blockfaceshape = iblockstate.func_193401_d(worldIn, pos, p_176253_3_);
+        boolean flag = blockfaceshape == BlockFaceShape.MIDDLE_POLE_THICK || blockfaceshape == BlockFaceShape.MIDDLE_POLE && block instanceof BlockFenceGate;
+        return !func_194143_e(block) && blockfaceshape == BlockFaceShape.SOLID || flag;
     }
 
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    protected static boolean func_194143_e(Block p_194143_0_)
     {
-        this.setBlockBoundsBasedOnState(worldIn, pos);
-        this.maxY = 1.5D;
-        return super.getCollisionBoundingBox(worldIn, pos, state);
-    }
-
-    public boolean canConnectTo(IBlockAccess worldIn, BlockPos pos)
-    {
-        Block block = worldIn.getBlockState(pos).getBlock();
-        return block == Blocks.barrier ? false : (block != this && !(block instanceof BlockFenceGate) ? (block.blockMaterial.isOpaque() && block.isFullCube() ? block.blockMaterial != Material.gourd : false) : true);
+        return Block.func_193382_c(p_194143_0_) || p_194143_0_ == Blocks.BARRIER || p_194143_0_ == Blocks.MELON_BLOCK || p_194143_0_ == Blocks.PUMPKIN || p_194143_0_ == Blocks.LIT_PUMPKIN;
     }
 
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockWall.EnumType blockwall$enumtype : BlockWall.EnumType.values())
         {
-            list.add(new ItemStack(itemIn, 1, blockwall$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blockwall$enumtype.getMetadata()));
         }
     }
 
@@ -145,9 +152,9 @@ public class BlockWall extends Block
         return ((BlockWall.EnumType)state.getValue(VARIANT)).getMetadata();
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
-        return side == EnumFacing.DOWN ? super.shouldSideBeRendered(worldIn, pos, side) : true;
+        return side == EnumFacing.DOWN ? super.shouldSideBeRendered(blockState, blockAccess, pos, side) : true;
     }
 
     /**
@@ -172,12 +179,22 @@ public class BlockWall extends Block
      */
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        return state.withProperty(UP, Boolean.valueOf(!worldIn.isAirBlock(pos.up()))).withProperty(NORTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.north()))).withProperty(EAST, Boolean.valueOf(this.canConnectTo(worldIn, pos.east()))).withProperty(SOUTH, Boolean.valueOf(this.canConnectTo(worldIn, pos.south()))).withProperty(WEST, Boolean.valueOf(this.canConnectTo(worldIn, pos.west())));
+        boolean flag = this.canConnectTo(worldIn, pos.north(), EnumFacing.SOUTH);
+        boolean flag1 = this.canConnectTo(worldIn, pos.east(), EnumFacing.WEST);
+        boolean flag2 = this.canConnectTo(worldIn, pos.south(), EnumFacing.NORTH);
+        boolean flag3 = this.canConnectTo(worldIn, pos.west(), EnumFacing.EAST);
+        boolean flag4 = flag && !flag1 && flag2 && !flag3 || !flag && flag1 && !flag2 && flag3;
+        return state.withProperty(UP, Boolean.valueOf(!flag4 || !worldIn.isAirBlock(pos.up()))).withProperty(NORTH, Boolean.valueOf(flag)).withProperty(EAST, Boolean.valueOf(flag1)).withProperty(SOUTH, Boolean.valueOf(flag2)).withProperty(WEST, Boolean.valueOf(flag3));
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {UP, NORTH, EAST, WEST, SOUTH, VARIANT});
+        return new BlockStateContainer(this, new IProperty[] {UP, NORTH, EAST, WEST, SOUTH, VARIANT});
+    }
+
+    public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
+    {
+        return p_193383_4_ != EnumFacing.UP && p_193383_4_ != EnumFacing.DOWN ? BlockFaceShape.MIDDLE_POLE_THICK : BlockFaceShape.CENTER_BIG;
     }
 
     public static enum EnumType implements IStringSerializable
@@ -188,7 +205,7 @@ public class BlockWall extends Block
         private static final BlockWall.EnumType[] META_LOOKUP = new BlockWall.EnumType[values().length];
         private final int meta;
         private final String name;
-        private String unlocalizedName;
+        private final String unlocalizedName;
 
         private EnumType(int meta, String name, String unlocalizedName)
         {

@@ -3,16 +3,18 @@ package net.minecraft.village;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class VillageCollection extends WorldSavedData
 {
@@ -83,7 +85,7 @@ public class VillageCollection extends WorldSavedData
 
         while (iterator.hasNext())
         {
-            Village village = (Village)iterator.next();
+            Village village = iterator.next();
 
             if (village.isAnnihilated())
             {
@@ -126,7 +128,7 @@ public class VillageCollection extends WorldSavedData
     {
         if (!this.villagerPositionsList.isEmpty())
         {
-            this.addDoorsAround((BlockPos)this.villagerPositionsList.remove(0));
+            this.addDoorsAround(this.villagerPositionsList.remove(0));
         }
     }
 
@@ -134,7 +136,7 @@ public class VillageCollection extends WorldSavedData
     {
         for (int i = 0; i < this.newDoors.size(); ++i)
         {
-            VillageDoorInfo villagedoorinfo = (VillageDoorInfo)this.newDoors.get(i);
+            VillageDoorInfo villagedoorinfo = this.newDoors.get(i);
             Village village = this.getNearestVillage(villagedoorinfo.getDoorBlockPos(), 32);
 
             if (village == null)
@@ -156,11 +158,11 @@ public class VillageCollection extends WorldSavedData
         int j = 4;
         int k = 16;
 
-        for (int l = -i; l < i; ++l)
+        for (int l = -16; l < 16; ++l)
         {
-            for (int i1 = -j; i1 < j; ++i1)
+            for (int i1 = -4; i1 < 4; ++i1)
             {
-                for (int j1 = -k; j1 < k; ++j1)
+                for (int j1 = -16; j1 < 16; ++j1)
                 {
                     BlockPos blockpos = central.add(l, i1, j1);
 
@@ -174,13 +176,15 @@ public class VillageCollection extends WorldSavedData
                         }
                         else
                         {
-                            villagedoorinfo.func_179849_a(this.tickCounter);
+                            villagedoorinfo.setLastActivityTimestamp(this.tickCounter);
                         }
                     }
                 }
             }
         }
     }
+
+    @Nullable
 
     /**
      * returns the VillageDoorInfo if it exists in any village or in the newDoor list, otherwise returns null
@@ -259,8 +263,17 @@ public class VillageCollection extends WorldSavedData
 
     private boolean isWoodDoor(BlockPos doorPos)
     {
-        Block block = this.worldObj.getBlockState(doorPos).getBlock();
-        return block instanceof BlockDoor ? block.getMaterial() == Material.wood : false;
+        IBlockState iblockstate = this.worldObj.getBlockState(doorPos);
+        Block block = iblockstate.getBlock();
+
+        if (block instanceof BlockDoor)
+        {
+            return iblockstate.getMaterial() == Material.WOOD;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     /**
@@ -280,12 +293,9 @@ public class VillageCollection extends WorldSavedData
         }
     }
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public void writeToNBT(NBTTagCompound nbt)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        nbt.setInteger("Tick", this.tickCounter);
+        compound.setInteger("Tick", this.tickCounter);
         NBTTagList nbttaglist = new NBTTagList();
 
         for (Village village : this.villageList)
@@ -295,11 +305,12 @@ public class VillageCollection extends WorldSavedData
             nbttaglist.appendTag(nbttagcompound);
         }
 
-        nbt.setTag("Villages", nbttaglist);
+        compound.setTag("Villages", nbttaglist);
+        return compound;
     }
 
     public static String fileNameForProvider(WorldProvider provider)
     {
-        return "villages" + provider.getInternalNameSuffix();
+        return "villages" + provider.getDimensionType().getSuffix();
     }
 }

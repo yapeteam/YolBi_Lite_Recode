@@ -2,17 +2,15 @@ package net.minecraft.inventory;
 
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.stats.AchievementList;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 public class SlotFurnaceOutput extends Slot
 {
     /** The player that is using the GUI where this slot resides. */
-    private EntityPlayer thePlayer;
-    private int field_75228_b;
+    private final EntityPlayer thePlayer;
+    private int removeCount;
 
     public SlotFurnaceOutput(EntityPlayer player, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition)
     {
@@ -21,7 +19,7 @@ public class SlotFurnaceOutput extends Slot
     }
 
     /**
-     * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
+     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
      */
     public boolean isItemValid(ItemStack stack)
     {
@@ -36,16 +34,17 @@ public class SlotFurnaceOutput extends Slot
     {
         if (this.getHasStack())
         {
-            this.field_75228_b += Math.min(amount, this.getStack().stackSize);
+            this.removeCount += Math.min(amount, this.getStack().func_190916_E());
         }
 
         return super.decrStackSize(amount);
     }
 
-    public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack)
+    public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
     {
-        this.onCrafting(stack);
-        super.onPickupFromSlot(playerIn, stack);
+        this.onCrafting(p_190901_2_);
+        super.func_190901_a(p_190901_1_, p_190901_2_);
+        return p_190901_2_;
     }
 
     /**
@@ -54,7 +53,7 @@ public class SlotFurnaceOutput extends Slot
      */
     protected void onCrafting(ItemStack stack, int amount)
     {
-        this.field_75228_b += amount;
+        this.removeCount += amount;
         this.onCrafting(stack);
     }
 
@@ -63,11 +62,11 @@ public class SlotFurnaceOutput extends Slot
      */
     protected void onCrafting(ItemStack stack)
     {
-        stack.onCrafting(this.thePlayer.worldObj, this.thePlayer, this.field_75228_b);
+        stack.onCrafting(this.thePlayer.world, this.thePlayer, this.removeCount);
 
-        if (!this.thePlayer.worldObj.isRemote)
+        if (!this.thePlayer.world.isRemote)
         {
-            int i = this.field_75228_b;
+            int i = this.removeCount;
             float f = FurnaceRecipes.instance().getSmeltingExperience(stack);
 
             if (f == 0.0F)
@@ -76,9 +75,9 @@ public class SlotFurnaceOutput extends Slot
             }
             else if (f < 1.0F)
             {
-                int j = MathHelper.floor_float((float)i * f);
+                int j = MathHelper.floor((float)i * f);
 
-                if (j < MathHelper.ceiling_float_int((float)i * f) && Math.random() < (double)((float)i * f - (float)j))
+                if (j < MathHelper.ceil((float)i * f) && Math.random() < (double)((float)i * f - (float)j))
                 {
                     ++j;
                 }
@@ -90,20 +89,10 @@ public class SlotFurnaceOutput extends Slot
             {
                 int k = EntityXPOrb.getXPSplit(i);
                 i -= k;
-                this.thePlayer.worldObj.spawnEntityInWorld(new EntityXPOrb(this.thePlayer.worldObj, this.thePlayer.posX, this.thePlayer.posY + 0.5D, this.thePlayer.posZ + 0.5D, k));
+                this.thePlayer.world.spawnEntityInWorld(new EntityXPOrb(this.thePlayer.world, this.thePlayer.posX, this.thePlayer.posY + 0.5D, this.thePlayer.posZ + 0.5D, k));
             }
         }
 
-        this.field_75228_b = 0;
-
-        if (stack.getItem() == Items.iron_ingot)
-        {
-            this.thePlayer.triggerAchievement(AchievementList.acquireIron);
-        }
-
-        if (stack.getItem() == Items.cooked_fish)
-        {
-            this.thePlayer.triggerAchievement(AchievementList.cookFish);
-        }
+        this.removeCount = 0;
     }
 }

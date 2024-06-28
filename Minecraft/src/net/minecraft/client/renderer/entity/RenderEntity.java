@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
+import javax.annotation.Nullable;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -21,6 +22,8 @@ public class RenderEntity extends Render<Entity>
         GlStateManager.popMatrix();
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
+
+    @Nullable
 
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.

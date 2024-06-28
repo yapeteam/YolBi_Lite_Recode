@@ -1,12 +1,12 @@
 package net.minecraft.enchantment;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.inventory.EntityEquipmentSlot;
 
 public class EnchantmentKnockback extends Enchantment
 {
-    protected EnchantmentKnockback(int p_i45768_1_, ResourceLocation p_i45768_2_, int p_i45768_3_)
+    protected EnchantmentKnockback(Enchantment.Rarity rarityIn, EntityEquipmentSlot... slots)
     {
-        super(p_i45768_1_, p_i45768_2_, p_i45768_3_, EnumEnchantmentType.WEAPON);
+        super(rarityIn, EnumEnchantmentType.WEAPON, slots);
         this.setName("knockback");
     }
 

@@ -15,56 +15,57 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
 {
-    private final List<ISpectatorMenuObject> field_178672_a = Lists.<ISpectatorMenuObject>newArrayList();
+    private final List<ISpectatorMenuObject> items = Lists.<ISpectatorMenuObject>newArrayList();
 
     public TeleportToTeam()
     {
         Minecraft minecraft = Minecraft.getMinecraft();
 
-        for (ScorePlayerTeam scoreplayerteam : minecraft.theWorld.getScoreboard().getTeams())
+        for (ScorePlayerTeam scoreplayerteam : minecraft.world.getScoreboard().getTeams())
         {
-            this.field_178672_a.add(new TeleportToTeam.TeamSelectionObject(scoreplayerteam));
+            this.items.add(new TeleportToTeam.TeamSelectionObject(scoreplayerteam));
         }
     }
 
-    public List<ISpectatorMenuObject> func_178669_a()
+    public List<ISpectatorMenuObject> getItems()
     {
-        return this.field_178672_a;
+        return this.items;
     }
 
-    public IChatComponent func_178670_b()
+    public ITextComponent getPrompt()
     {
-        return new ChatComponentText("Select a team to teleport to");
+        return new TextComponentTranslation("spectatorMenu.team_teleport.prompt", new Object[0]);
     }
 
-    public void func_178661_a(SpectatorMenu menu)
+    public void selectItem(SpectatorMenu menu)
     {
-        menu.func_178647_a(this);
+        menu.selectCategory(this);
     }
 
-    public IChatComponent getSpectatorName()
+    public ITextComponent getSpectatorName()
     {
-        return new ChatComponentText("Teleport to team member");
+        return new TextComponentTranslation("spectatorMenu.team_teleport", new Object[0]);
     }
 
-    public void func_178663_a(float p_178663_1_, int alpha)
+    public void renderIcon(float p_178663_1_, int alpha)
     {
-        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.field_175269_a);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(GuiSpectator.SPECTATOR_WIDGETS);
         Gui.drawModalRectWithCustomSizedTexture(0, 0, 16.0F, 0.0F, 16, 16, 256.0F, 256.0F);
     }
 
-    public boolean func_178662_A_()
+    public boolean isEnabled()
     {
-        for (ISpectatorMenuObject ispectatormenuobject : this.field_178672_a)
+        for (ISpectatorMenuObject ispectatormenuobject : this.items)
         {
-            if (ispectatormenuobject.func_178662_A_())
+            if (ispectatormenuobject.isEnabled())
             {
                 return true;
             }
@@ -75,51 +76,51 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
 
     class TeamSelectionObject implements ISpectatorMenuObject
     {
-        private final ScorePlayerTeam field_178676_b;
-        private final ResourceLocation field_178677_c;
-        private final List<NetworkPlayerInfo> field_178675_d;
+        private final ScorePlayerTeam team;
+        private final ResourceLocation location;
+        private final List<NetworkPlayerInfo> players;
 
         public TeamSelectionObject(ScorePlayerTeam p_i45492_2_)
         {
-            this.field_178676_b = p_i45492_2_;
-            this.field_178675_d = Lists.<NetworkPlayerInfo>newArrayList();
+            this.team = p_i45492_2_;
+            this.players = Lists.<NetworkPlayerInfo>newArrayList();
 
             for (String s : p_i45492_2_.getMembershipCollection())
             {
-                NetworkPlayerInfo networkplayerinfo = Minecraft.getMinecraft().getNetHandler().getPlayerInfo(s);
+                NetworkPlayerInfo networkplayerinfo = Minecraft.getMinecraft().getConnection().getPlayerInfo(s);
 
                 if (networkplayerinfo != null)
                 {
-                    this.field_178675_d.add(networkplayerinfo);
+                    this.players.add(networkplayerinfo);
                 }
             }
 
-            if (!this.field_178675_d.isEmpty())
+            if (this.players.isEmpty())
             {
-                String s1 = ((NetworkPlayerInfo)this.field_178675_d.get((new Random()).nextInt(this.field_178675_d.size()))).getGameProfile().getName();
-                this.field_178677_c = AbstractClientPlayer.getLocationSkin(s1);
-                AbstractClientPlayer.getDownloadImageSkin(this.field_178677_c, s1);
+                this.location = DefaultPlayerSkin.getDefaultSkinLegacy();
             }
             else
             {
-                this.field_178677_c = DefaultPlayerSkin.getDefaultSkinLegacy();
+                String s1 = ((NetworkPlayerInfo)this.players.get((new Random()).nextInt(this.players.size()))).getGameProfile().getName();
+                this.location = AbstractClientPlayer.getLocationSkin(s1);
+                AbstractClientPlayer.getDownloadImageSkin(this.location, s1);
             }
         }
 
-        public void func_178661_a(SpectatorMenu menu)
+        public void selectItem(SpectatorMenu menu)
         {
-            menu.func_178647_a(new TeleportToPlayer(this.field_178675_d));
+            menu.selectCategory(new TeleportToPlayer(this.players));
         }
 
-        public IChatComponent getSpectatorName()
+        public ITextComponent getSpectatorName()
         {
-            return new ChatComponentText(this.field_178676_b.getTeamName());
+            return new TextComponentString(this.team.getTeamName());
         }
 
-        public void func_178663_a(float p_178663_1_, int alpha)
+        public void renderIcon(float p_178663_1_, int alpha)
         {
             int i = -1;
-            String s = FontRenderer.getFormatFromString(this.field_178676_b.getColorPrefix());
+            String s = FontRenderer.getFormatFromString(this.team.getColorPrefix());
 
             if (s.length() >= 2)
             {
@@ -131,18 +132,18 @@ public class TeleportToTeam implements ISpectatorMenuView, ISpectatorMenuObject
                 float f = (float)(i >> 16 & 255) / 255.0F;
                 float f1 = (float)(i >> 8 & 255) / 255.0F;
                 float f2 = (float)(i & 255) / 255.0F;
-                Gui.drawRect(1, 1, 15, 15, MathHelper.func_180183_b(f * p_178663_1_, f1 * p_178663_1_, f2 * p_178663_1_) | alpha << 24);
+                Gui.drawRect(1, 1, 15, 15, MathHelper.rgb(f * p_178663_1_, f1 * p_178663_1_, f2 * p_178663_1_) | alpha << 24);
             }
 
-            Minecraft.getMinecraft().getTextureManager().bindTexture(this.field_178677_c);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(this.location);
             GlStateManager.color(p_178663_1_, p_178663_1_, p_178663_1_, (float)alpha / 255.0F);
             Gui.drawScaledCustomSizeModalRect(2, 2, 8.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
             Gui.drawScaledCustomSizeModalRect(2, 2, 40.0F, 8.0F, 8, 8, 12, 12, 64.0F, 64.0F);
         }
 
-        public boolean func_178662_A_()
+        public boolean isEnabled()
         {
-            return !this.field_178675_d.isEmpty();
+            return !this.players.isEmpty();
         }
     }
 }

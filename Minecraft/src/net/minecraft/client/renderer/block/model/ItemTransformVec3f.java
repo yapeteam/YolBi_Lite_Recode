@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import net.minecraft.util.JsonUtils;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.util.vector.Vector3f;
 
 public class ItemTransformVec3f
@@ -38,7 +38,7 @@ public class ItemTransformVec3f
         else
         {
             ItemTransformVec3f itemtransformvec3f = (ItemTransformVec3f)p_equals_1_;
-            return !this.rotation.equals(itemtransformvec3f.rotation) ? false : (!this.scale.equals(itemtransformvec3f.scale) ? false : this.translation.equals(itemtransformvec3f.translation));
+            return this.rotation.equals(itemtransformvec3f.rotation) && this.scale.equals(itemtransformvec3f.scale) && this.translation.equals(itemtransformvec3f.translation);
         }
     }
 
@@ -62,13 +62,13 @@ public class ItemTransformVec3f
             Vector3f vector3f = this.parseVector3f(jsonobject, "rotation", ROTATION_DEFAULT);
             Vector3f vector3f1 = this.parseVector3f(jsonobject, "translation", TRANSLATION_DEFAULT);
             vector3f1.scale(0.0625F);
-            vector3f1.x = MathHelper.clamp_float(vector3f1.x, -1.5F, 1.5F);
-            vector3f1.y = MathHelper.clamp_float(vector3f1.y, -1.5F, 1.5F);
-            vector3f1.z = MathHelper.clamp_float(vector3f1.z, -1.5F, 1.5F);
+            vector3f1.x = MathHelper.clamp(vector3f1.x, -5.0F, 5.0F);
+            vector3f1.y = MathHelper.clamp(vector3f1.y, -5.0F, 5.0F);
+            vector3f1.z = MathHelper.clamp(vector3f1.z, -5.0F, 5.0F);
             Vector3f vector3f2 = this.parseVector3f(jsonobject, "scale", SCALE_DEFAULT);
-            vector3f2.x = MathHelper.clamp_float(vector3f2.x, -4.0F, 4.0F);
-            vector3f2.y = MathHelper.clamp_float(vector3f2.y, -4.0F, 4.0F);
-            vector3f2.z = MathHelper.clamp_float(vector3f2.z, -4.0F, 4.0F);
+            vector3f2.x = MathHelper.clamp(vector3f2.x, -4.0F, 4.0F);
+            vector3f2.y = MathHelper.clamp(vector3f2.y, -4.0F, 4.0F);
+            vector3f2.z = MathHelper.clamp(vector3f2.z, -4.0F, 4.0F);
             return new ItemTransformVec3f(vector3f, vector3f1, vector3f2);
         }
 

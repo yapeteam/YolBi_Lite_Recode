@@ -1,8 +1,8 @@
 package net.minecraft.client.multiplayer;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class ServerData
 {
@@ -23,11 +23,11 @@ public class ServerData
 
     /** last server ping that showed up in the server browser */
     public long pingToServer;
-    public int version = 47;
+    public int version = 340;
 
     /** Game version for this server. */
-    public String gameVersion = "1.8.9";
-    public boolean field_78841_f;
+    public String gameVersion = "1.12.2";
+    public boolean pinged;
     public String playerList;
     private ServerData.ServerResourceMode resourceMode = ServerData.ServerResourceMode.PROMPT;
     private String serverIcon;
@@ -145,14 +145,14 @@ public class ServerData
         DISABLED("disabled"),
         PROMPT("prompt");
 
-        private final IChatComponent motd;
+        private final ITextComponent motd;
 
         private ServerResourceMode(String name)
         {
-            this.motd = new ChatComponentTranslation("addServer.resourcePack." + name, new Object[0]);
+            this.motd = new TextComponentTranslation("addServer.resourcePack." + name, new Object[0]);
         }
 
-        public IChatComponent getMotd()
+        public ITextComponent getMotd()
         {
             return this.motd;
         }

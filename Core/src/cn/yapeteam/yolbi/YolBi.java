@@ -9,18 +9,14 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
-import cn.yapeteam.yolbi.managers.RenderManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.notification.NotificationType;
-import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.animation.Easing;
-import cn.yapeteam.yolbi.utils.player.RotationManager;
-import cn.yapeteam.yolbi.utils.render.ESPUtil;
 import lombok.Getter;
 
 import java.io.File;
@@ -40,8 +36,6 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private RenderManager renderManager;
-    private JFrameRenderer jFrameRenderer;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -65,22 +59,16 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.renderManager = new RenderManager();
-        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
         instance.eventManager.register(instance.botManager);
-        instance.eventManager.register(instance.renderManager);
         instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
-        instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(YolBi.class);
-        instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
-        instance.getRenderManager().initwindow();
         try {
             instance.getConfigManager().load();
             WebServer.start();
@@ -104,8 +92,6 @@ public class YolBi {
 
     public void shutdown() {
         try {
-            renderManager.destroywindow();
-            instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
             instance = new YolBi();

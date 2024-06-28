@@ -1,27 +1,35 @@
 package net.minecraft.tileentity;
 
 import io.netty.buffer.ByteBuf;
+import javax.annotation.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockCommandBlock;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class TileEntityCommandBlock extends TileEntity
 {
-    private final CommandBlockLogic commandBlockLogic = new CommandBlockLogic()
+    private boolean powered;
+    private boolean auto;
+    private boolean conditionMet;
+    private boolean sendToClient;
+    private final CommandBlockBaseLogic commandBlockLogic = new CommandBlockBaseLogic()
     {
         public BlockPos getPosition()
         {
             return TileEntityCommandBlock.this.pos;
         }
-        public Vec3 getPositionVector()
+        public Vec3d getPositionVector()
         {
-            return new Vec3((double)TileEntityCommandBlock.this.pos.getX() + 0.5D, (double)TileEntityCommandBlock.this.pos.getY() + 0.5D, (double)TileEntityCommandBlock.this.pos.getZ() + 0.5D);
+            return new Vec3d((double)TileEntityCommandBlock.this.pos.getX() + 0.5D, (double)TileEntityCommandBlock.this.pos.getY() + 0.5D, (double)TileEntityCommandBlock.this.pos.getZ() + 0.5D);
         }
         public World getEntityWorld()
         {
@@ -34,53 +42,65 @@ public class TileEntityCommandBlock extends TileEntity
         }
         public void updateCommand()
         {
-            TileEntityCommandBlock.this.getWorld().markBlockForUpdate(TileEntityCommandBlock.this.pos);
+            IBlockState iblockstate = TileEntityCommandBlock.this.world.getBlockState(TileEntityCommandBlock.this.pos);
+            TileEntityCommandBlock.this.getWorld().notifyBlockUpdate(TileEntityCommandBlock.this.pos, iblockstate, iblockstate, 3);
         }
-        public int func_145751_f()
+        public int getCommandBlockType()
         {
             return 0;
         }
-        public void func_145757_a(ByteBuf p_145757_1_)
+        public void fillInInfo(ByteBuf buf)
         {
-            p_145757_1_.writeInt(TileEntityCommandBlock.this.pos.getX());
-            p_145757_1_.writeInt(TileEntityCommandBlock.this.pos.getY());
-            p_145757_1_.writeInt(TileEntityCommandBlock.this.pos.getZ());
+            buf.writeInt(TileEntityCommandBlock.this.pos.getX());
+            buf.writeInt(TileEntityCommandBlock.this.pos.getY());
+            buf.writeInt(TileEntityCommandBlock.this.pos.getZ());
         }
-        public Entity getCommandSenderEntity()
+        public MinecraftServer getServer()
         {
-            return null;
+            return TileEntityCommandBlock.this.world.getMinecraftServer();
         }
     };
 
-    public void writeToNBT(NBTTagCompound compound)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
-        this.commandBlockLogic.writeDataToNBT(compound);
+        this.commandBlockLogic.writeToNBT(compound);
+        compound.setBoolean("powered", this.isPowered());
+        compound.setBoolean("conditionMet", this.isConditionMet());
+        compound.setBoolean("auto", this.isAuto());
+        return compound;
     }
 
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
         this.commandBlockLogic.readDataFromNBT(compound);
+        this.powered = compound.getBoolean("powered");
+        this.conditionMet = compound.getBoolean("conditionMet");
+        this.setAuto(compound.getBoolean("auto"));
     }
 
-    /**
-     * Allows for a specialized description packet to be created. This is often used to sync tile entity data from the
-     * server to the client easily. For example this is used by signs to synchronise the text to be displayed.
-     */
-    public Packet getDescriptionPacket()
+    @Nullable
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        this.writeToNBT(nbttagcompound);
-        return new S35PacketUpdateTileEntity(this.pos, 2, nbttagcompound);
+        if (this.isSendToClient())
+        {
+            this.setSendToClient(false);
+            NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
+            return new SPacketUpdateTileEntity(this.pos, 2, nbttagcompound);
+        }
+        else
+        {
+            return null;
+        }
     }
 
-    public boolean func_183000_F()
+    public boolean onlyOpsCanSetNbt()
     {
         return true;
     }
 
-    public CommandBlockLogic getCommandBlockLogic()
+    public CommandBlockBaseLogic getCommandBlockLogic()
     {
         return this.commandBlockLogic;
     }
@@ -88,5 +108,114 @@ public class TileEntityCommandBlock extends TileEntity
     public CommandResultStats getCommandResultStats()
     {
         return this.commandBlockLogic.getCommandResultStats();
+    }
+
+    public void setPowered(boolean poweredIn)
+    {
+        this.powered = poweredIn;
+    }
+
+    public boolean isPowered()
+    {
+        return this.powered;
+    }
+
+    public boolean isAuto()
+    {
+        return this.auto;
+    }
+
+    public void setAuto(boolean autoIn)
+    {
+        boolean flag = this.auto;
+        this.auto = autoIn;
+
+        if (!flag && autoIn && !this.powered && this.world != null && this.getMode() != TileEntityCommandBlock.Mode.SEQUENCE)
+        {
+            Block block = this.getBlockType();
+
+            if (block instanceof BlockCommandBlock)
+            {
+                this.setConditionMet();
+                this.world.scheduleUpdate(this.pos, block, block.tickRate(this.world));
+            }
+        }
+    }
+
+    public boolean isConditionMet()
+    {
+        return this.conditionMet;
+    }
+
+    public boolean setConditionMet()
+    {
+        this.conditionMet = true;
+
+        if (this.isConditional())
+        {
+            BlockPos blockpos = this.pos.offset(((EnumFacing)this.world.getBlockState(this.pos).getValue(BlockCommandBlock.FACING)).getOpposite());
+
+            if (this.world.getBlockState(blockpos).getBlock() instanceof BlockCommandBlock)
+            {
+                TileEntity tileentity = this.world.getTileEntity(blockpos);
+                this.conditionMet = tileentity instanceof TileEntityCommandBlock && ((TileEntityCommandBlock)tileentity).getCommandBlockLogic().getSuccessCount() > 0;
+            }
+            else
+            {
+                this.conditionMet = false;
+            }
+        }
+
+        return this.conditionMet;
+    }
+
+    public boolean isSendToClient()
+    {
+        return this.sendToClient;
+    }
+
+    public void setSendToClient(boolean p_184252_1_)
+    {
+        this.sendToClient = p_184252_1_;
+    }
+
+    public TileEntityCommandBlock.Mode getMode()
+    {
+        Block block = this.getBlockType();
+
+        if (block == Blocks.COMMAND_BLOCK)
+        {
+            return TileEntityCommandBlock.Mode.REDSTONE;
+        }
+        else if (block == Blocks.REPEATING_COMMAND_BLOCK)
+        {
+            return TileEntityCommandBlock.Mode.AUTO;
+        }
+        else
+        {
+            return block == Blocks.CHAIN_COMMAND_BLOCK ? TileEntityCommandBlock.Mode.SEQUENCE : TileEntityCommandBlock.Mode.REDSTONE;
+        }
+    }
+
+    public boolean isConditional()
+    {
+        IBlockState iblockstate = this.world.getBlockState(this.getPos());
+        return iblockstate.getBlock() instanceof BlockCommandBlock ? ((Boolean)iblockstate.getValue(BlockCommandBlock.CONDITIONAL)).booleanValue() : false;
+    }
+
+    /**
+     * validates a tile entity
+     */
+    public void validate()
+    {
+        this.blockType = null;
+        super.validate();
+    }
+
+    public static enum Mode
+    {
+        SEQUENCE,
+        AUTO,
+        REDSTONE;
     }
 }

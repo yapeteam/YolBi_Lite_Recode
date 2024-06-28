@@ -1,17 +1,20 @@
 package net.minecraft.block;
 
 import java.util.Random;
+import javax.annotation.Nullable;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -19,30 +22,25 @@ public class BlockIce extends BlockBreakable
 {
     public BlockIce()
     {
-        super(Material.ice, false);
+        super(Material.ICE, false);
         this.slipperiness = 0.98F;
         this.setTickRandomly(true);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.TRANSLUCENT;
+        return BlockRenderLayer.TRANSLUCENT;
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, TileEntity te)
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
     {
-        player.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
-        player.addExhaustion(0.025F);
+        player.addStat(StatList.getBlockStats(this));
+        player.addExhaustion(0.005F);
 
-        if (this.canSilkHarvest() && EnchantmentHelper.getSilkTouchModifier(player))
+        if (this.canSilkHarvest() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0)
         {
-            ItemStack itemstack = this.createStackedBlock(state);
-
-            if (itemstack != null)
-            {
-                spawnAsEntity(worldIn, pos, itemstack);
-            }
+            spawnAsEntity(worldIn, pos, this.getSilkTouchDrop(state));
         }
         else
         {
@@ -52,13 +50,13 @@ public class BlockIce extends BlockBreakable
                 return;
             }
 
-            int i = EnchantmentHelper.getFortuneModifier(player);
+            int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
             this.dropBlockAsItem(worldIn, pos, state, i);
-            Material material = worldIn.getBlockState(pos.down()).getBlock().getMaterial();
+            Material material = worldIn.getBlockState(pos.down()).getMaterial();
 
             if (material.blocksMovement() || material.isLiquid())
             {
-                worldIn.setBlockState(pos, Blocks.flowing_water.getDefaultState());
+                worldIn.setBlockState(pos, Blocks.FLOWING_WATER.getDefaultState());
             }
         }
     }
@@ -73,22 +71,28 @@ public class BlockIce extends BlockBreakable
 
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11 - this.getLightOpacity())
+        if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11 - this.getDefaultState().getLightOpacity())
         {
-            if (worldIn.provider.doesWaterVaporize())
-            {
-                worldIn.setBlockToAir(pos);
-            }
-            else
-            {
-                this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
-                worldIn.setBlockState(pos, Blocks.water.getDefaultState());
-            }
+            this.turnIntoWater(worldIn, pos);
         }
     }
 
-    public int getMobilityFlag()
+    protected void turnIntoWater(World worldIn, BlockPos pos)
     {
-        return 0;
+        if (worldIn.provider.doesWaterVaporize())
+        {
+            worldIn.setBlockToAir(pos);
+        }
+        else
+        {
+            this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+            worldIn.setBlockState(pos, Blocks.WATER.getDefaultState());
+            worldIn.func_190524_a(pos, Blocks.WATER, pos);
+        }
+    }
+
+    public EnumPushReaction getMobilityFlag(IBlockState state)
+    {
+        return EnumPushReaction.NORMAL;
     }
 }

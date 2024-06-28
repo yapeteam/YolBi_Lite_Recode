@@ -4,26 +4,26 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.client.gui.spectator.categories.TeleportToPlayer;
 import net.minecraft.client.gui.spectator.categories.TeleportToTeam;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class BaseSpectatorGroup implements ISpectatorMenuView
 {
-    private final List<ISpectatorMenuObject> field_178671_a = Lists.<ISpectatorMenuObject>newArrayList();
+    private final List<ISpectatorMenuObject> items = Lists.<ISpectatorMenuObject>newArrayList();
 
     public BaseSpectatorGroup()
     {
-        this.field_178671_a.add(new TeleportToPlayer());
-        this.field_178671_a.add(new TeleportToTeam());
+        this.items.add(new TeleportToPlayer());
+        this.items.add(new TeleportToTeam());
     }
 
-    public List<ISpectatorMenuObject> func_178669_a()
+    public List<ISpectatorMenuObject> getItems()
     {
-        return this.field_178671_a;
+        return this.items;
     }
 
-    public IChatComponent func_178670_b()
+    public ITextComponent getPrompt()
     {
-        return new ChatComponentText("Press a key to select a command, and again to use it.");
+        return new TextComponentTranslation("spectatorMenu.root.prompt", new Object[0]);
     }
 }

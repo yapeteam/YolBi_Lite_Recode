@@ -1,7 +1,7 @@
 package net.minecraft.world.gen.structure;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 public class MapGenStructureData extends WorldSavedData
 {
@@ -20,12 +20,10 @@ public class MapGenStructureData extends WorldSavedData
         this.tagCompound = nbt.getCompoundTag("Features");
     }
 
-    /**
-     * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
-     */
-    public void writeToNBT(NBTTagCompound nbt)
+    public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        nbt.setTag("Features", this.tagCompound);
+        compound.setTag("Features", this.tagCompound);
+        return compound;
     }
 
     /**

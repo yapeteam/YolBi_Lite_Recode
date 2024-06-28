@@ -1,71 +1,70 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHandSide;
 
 public class LayerHeldItem implements LayerRenderer<EntityLivingBase>
 {
-    private final RendererLivingEntity<?> livingEntityRenderer;
+    protected final RenderLivingBase<?> livingEntityRenderer;
 
-    public LayerHeldItem(RendererLivingEntity<?> livingEntityRendererIn)
+    public LayerHeldItem(RenderLivingBase<?> livingEntityRendererIn)
     {
         this.livingEntityRenderer = livingEntityRendererIn;
     }
 
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale)
+    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale)
     {
-        ItemStack itemstack = entitylivingbaseIn.getHeldItem();
+        boolean flag = entitylivingbaseIn.getPrimaryHand() == EnumHandSide.RIGHT;
+        ItemStack itemstack = flag ? entitylivingbaseIn.getHeldItemOffhand() : entitylivingbaseIn.getHeldItemMainhand();
+        ItemStack itemstack1 = flag ? entitylivingbaseIn.getHeldItemMainhand() : entitylivingbaseIn.getHeldItemOffhand();
 
-        if (itemstack != null)
+        if (!itemstack.func_190926_b() || !itemstack1.func_190926_b())
         {
             GlStateManager.pushMatrix();
 
             if (this.livingEntityRenderer.getMainModel().isChild)
             {
                 float f = 0.5F;
-                GlStateManager.translate(0.0F, 0.625F, 0.0F);
-                GlStateManager.rotate(-20.0F, -1.0F, 0.0F, 0.0F);
-                GlStateManager.scale(f, f, f);
+                GlStateManager.translate(0.0F, 0.75F, 0.0F);
+                GlStateManager.scale(0.5F, 0.5F, 0.5F);
             }
 
-            ((ModelBiped)this.livingEntityRenderer.getMainModel()).postRenderArm(0.0625F);
-            GlStateManager.translate(-0.0625F, 0.4375F, 0.0625F);
-
-            if (entitylivingbaseIn instanceof EntityPlayer && ((EntityPlayer)entitylivingbaseIn).fishEntity != null)
-            {
-                itemstack = new ItemStack(Items.fishing_rod, 0);
-            }
-
-            Item item = itemstack.getItem();
-            Minecraft minecraft = Minecraft.getMinecraft();
-
-            if (item instanceof ItemBlock && Block.getBlockFromItem(item).getRenderType() == 2)
-            {
-                GlStateManager.translate(0.0F, 0.1875F, -0.3125F);
-                GlStateManager.rotate(20.0F, 1.0F, 0.0F, 0.0F);
-                GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F);
-                float f1 = 0.375F;
-                GlStateManager.scale(-f1, -f1, f1);
-            }
-
-            if (entitylivingbaseIn.isSneaking())
-            {
-                GlStateManager.translate(0.0F, 0.203125F, 0.0F);
-            }
-
-            minecraft.getItemRenderer().renderItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.THIRD_PERSON);
+            this.renderHeldItem(entitylivingbaseIn, itemstack1, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, EnumHandSide.RIGHT);
+            this.renderHeldItem(entitylivingbaseIn, itemstack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, EnumHandSide.LEFT);
             GlStateManager.popMatrix();
         }
+    }
+
+    private void renderHeldItem(EntityLivingBase p_188358_1_, ItemStack p_188358_2_, ItemCameraTransforms.TransformType p_188358_3_, EnumHandSide handSide)
+    {
+        if (!p_188358_2_.func_190926_b())
+        {
+            GlStateManager.pushMatrix();
+            this.func_191361_a(handSide);
+
+            if (p_188358_1_.isSneaking())
+            {
+                GlStateManager.translate(0.0F, 0.2F, 0.0F);
+            }
+
+            GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+            boolean flag = handSide == EnumHandSide.LEFT;
+            GlStateManager.translate((float)(flag ? -1 : 1) / 16.0F, 0.125F, -0.625F);
+            Minecraft.getMinecraft().getItemRenderer().renderItemSide(p_188358_1_, p_188358_2_, p_188358_3_, flag);
+            GlStateManager.popMatrix();
+        }
+    }
+
+    protected void func_191361_a(EnumHandSide p_191361_1_)
+    {
+        ((ModelBiped)this.livingEntityRenderer.getMainModel()).postRenderArm(0.0625F, p_191361_1_);
     }
 
     public boolean shouldCombineTextures()

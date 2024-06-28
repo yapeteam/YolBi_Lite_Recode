@@ -1,10 +1,11 @@
 package net.minecraft.world.chunk.storage;
 
+import net.minecraft.init.Biomes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.NibbleArray;
 
 public class ChunkLoader
@@ -36,20 +37,20 @@ public class ChunkLoader
         return chunkloader$anvilconverterdata;
     }
 
-    public static void convertToAnvilFormat(ChunkLoader.AnvilConverterData p_76690_0_, NBTTagCompound compound, WorldChunkManager p_76690_2_)
+    public static void convertToAnvilFormat(ChunkLoader.AnvilConverterData converterData, NBTTagCompound compound, BiomeProvider provider)
     {
-        compound.setInteger("xPos", p_76690_0_.x);
-        compound.setInteger("zPos", p_76690_0_.z);
-        compound.setLong("LastUpdate", p_76690_0_.lastUpdated);
-        int[] aint = new int[p_76690_0_.heightmap.length];
+        compound.setInteger("xPos", converterData.x);
+        compound.setInteger("zPos", converterData.z);
+        compound.setLong("LastUpdate", converterData.lastUpdated);
+        int[] aint = new int[converterData.heightmap.length];
 
-        for (int i = 0; i < p_76690_0_.heightmap.length; ++i)
+        for (int i = 0; i < converterData.heightmap.length; ++i)
         {
-            aint[i] = p_76690_0_.heightmap[i];
+            aint[i] = converterData.heightmap[i];
         }
 
         compound.setIntArray("HeightMap", aint);
-        compound.setBoolean("TerrainPopulated", p_76690_0_.terrainPopulated);
+        compound.setBoolean("TerrainPopulated", converterData.terrainPopulated);
         NBTTagList nbttaglist = new NBTTagList();
 
         for (int j = 0; j < 8; ++j)
@@ -63,7 +64,7 @@ public class ChunkLoader
                     for (int i1 = 0; i1 < 16; ++i1)
                     {
                         int j1 = k << 11 | i1 << 7 | l + (j << 4);
-                        int k1 = p_76690_0_.blocks[j1];
+                        int k1 = converterData.blocks[j1];
 
                         if (k1 != 0)
                         {
@@ -88,11 +89,11 @@ public class ChunkLoader
                         for (int i2 = 0; i2 < 16; ++i2)
                         {
                             int j2 = j3 << 11 | i2 << 7 | l1 + (j << 4);
-                            int k2 = p_76690_0_.blocks[j2];
+                            int k2 = converterData.blocks[j2];
                             abyte1[l1 << 8 | i2 << 4 | j3] = (byte)(k2 & 255);
-                            nibblearray.set(j3, l1, i2, p_76690_0_.data.get(j3, l1 + (j << 4), i2));
-                            nibblearray1.set(j3, l1, i2, p_76690_0_.skyLight.get(j3, l1 + (j << 4), i2));
-                            nibblearray2.set(j3, l1, i2, p_76690_0_.blockLight.get(j3, l1 + (j << 4), i2));
+                            nibblearray.set(j3, l1, i2, converterData.data.get(j3, l1 + (j << 4), i2));
+                            nibblearray1.set(j3, l1, i2, converterData.skyLight.get(j3, l1 + (j << 4), i2));
+                            nibblearray2.set(j3, l1, i2, converterData.blockLight.get(j3, l1 + (j << 4), i2));
                         }
                     }
                 }
@@ -115,18 +116,18 @@ public class ChunkLoader
         {
             for (int i3 = 0; i3 < 16; ++i3)
             {
-                blockpos$mutableblockpos.set(p_76690_0_.x << 4 | l2, 0, p_76690_0_.z << 4 | i3);
-                abyte[i3 << 4 | l2] = (byte)(p_76690_2_.getBiomeGenerator(blockpos$mutableblockpos, BiomeGenBase.field_180279_ad).biomeID & 255);
+                blockpos$mutableblockpos.setPos(converterData.x << 4 | l2, 0, converterData.z << 4 | i3);
+                abyte[i3 << 4 | l2] = (byte)(Biome.getIdForBiome(provider.getBiome(blockpos$mutableblockpos, Biomes.DEFAULT)) & 255);
             }
         }
 
         compound.setByteArray("Biomes", abyte);
-        compound.setTag("Entities", p_76690_0_.entities);
-        compound.setTag("TileEntities", p_76690_0_.tileEntities);
+        compound.setTag("Entities", converterData.entities);
+        compound.setTag("TileEntities", converterData.tileEntities);
 
-        if (p_76690_0_.tileTicks != null)
+        if (converterData.tileTicks != null)
         {
-            compound.setTag("TileTicks", p_76690_0_.tileTicks);
+            compound.setTag("TileTicks", converterData.tileTicks);
         }
     }
 

@@ -1,13 +1,12 @@
 package net.minecraft.item;
 
 import com.google.common.collect.Maps;
-import java.util.List;
 import java.util.Map;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
+import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionHelper;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 public class ItemFishFood extends ItemFood
@@ -33,20 +32,15 @@ public class ItemFishFood extends ItemFood
         return this.cooked && itemfishfood$fishtype.canCook() ? itemfishfood$fishtype.getCookedSaturationModifier() : itemfishfood$fishtype.getUncookedSaturationModifier();
     }
 
-    public String getPotionEffect(ItemStack stack)
-    {
-        return ItemFishFood.FishType.byItemStack(stack) == ItemFishFood.FishType.PUFFERFISH ? PotionHelper.pufferfishEffect : null;
-    }
-
     protected void onFoodEaten(ItemStack stack, World worldIn, EntityPlayer player)
     {
         ItemFishFood.FishType itemfishfood$fishtype = ItemFishFood.FishType.byItemStack(stack);
 
         if (itemfishfood$fishtype == ItemFishFood.FishType.PUFFERFISH)
         {
-            player.addPotionEffect(new PotionEffect(Potion.poison.id, 1200, 3));
-            player.addPotionEffect(new PotionEffect(Potion.hunger.id, 300, 2));
-            player.addPotionEffect(new PotionEffect(Potion.confusion.id, 300, 1));
+            player.addPotionEffect(new PotionEffect(MobEffects.POISON, 1200, 3));
+            player.addPotionEffect(new PotionEffect(MobEffects.HUNGER, 300, 2));
+            player.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300, 1));
         }
 
         super.onFoodEaten(stack, worldIn, player);
@@ -55,13 +49,16 @@ public class ItemFishFood extends ItemFood
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        for (ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values())
+        if (this.func_194125_a(itemIn))
         {
-            if (!this.cooked || itemfishfood$fishtype.canCook())
+            for (ItemFishFood.FishType itemfishfood$fishtype : ItemFishFood.FishType.values())
             {
-                subItems.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
+                if (!this.cooked || itemfishfood$fishtype.canCook())
+                {
+                    tab.add(new ItemStack(this, 1, itemfishfood$fishtype.getMetadata()));
+                }
             }
         }
     }
@@ -90,7 +87,7 @@ public class ItemFishFood extends ItemFood
         private final float uncookedSaturationModifier;
         private final int cookedHealAmount;
         private final float cookedSaturationModifier;
-        private boolean cookable = false;
+        private final boolean cookable;
 
         private FishType(int meta, String unlocalizedName, int uncookedHeal, float uncookedSaturation, int cookedHeal, float cookedSaturation)
         {
@@ -151,7 +148,7 @@ public class ItemFishFood extends ItemFood
 
         public static ItemFishFood.FishType byMetadata(int meta)
         {
-            ItemFishFood.FishType itemfishfood$fishtype = (ItemFishFood.FishType)META_LOOKUP.get(Integer.valueOf(meta));
+            ItemFishFood.FishType itemfishfood$fishtype = META_LOOKUP.get(Integer.valueOf(meta));
             return itemfishfood$fishtype == null ? COD : itemfishfood$fishtype;
         }
 

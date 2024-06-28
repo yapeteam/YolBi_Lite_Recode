@@ -6,11 +6,23 @@ import com.google.common.collect.Lists;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class ObjectIntIdentityMap<T> implements IObjectIntIterable<T>
 {
-    private final IdentityHashMap<T, Integer> identityMap = new IdentityHashMap(512);
-    private final List<T> objectList = Lists.<T>newArrayList();
+    private final IdentityHashMap<T, Integer> identityMap;
+    private final List<T> objectList;
+
+    public ObjectIntIdentityMap()
+    {
+        this(512);
+    }
+
+    public ObjectIntIdentityMap(int expectedSize)
+    {
+        this.objectList = Lists.<T>newArrayListWithExpectedSize(expectedSize);
+        this.identityMap = new IdentityHashMap<T, Integer>(expectedSize);
+    }
 
     public void put(T key, int value)
     {
@@ -26,10 +38,11 @@ public class ObjectIntIdentityMap<T> implements IObjectIntIterable<T>
 
     public int get(T key)
     {
-        Integer integer = (Integer)this.identityMap.get(key);
+        Integer integer = this.identityMap.get(key);
         return integer == null ? -1 : integer.intValue();
     }
 
+    @Nullable
     public final T getByValue(int value)
     {
         return (T)(value >= 0 && value < this.objectList.size() ? this.objectList.get(value) : null);
@@ -38,5 +51,10 @@ public class ObjectIntIdentityMap<T> implements IObjectIntIterable<T>
     public Iterator<T> iterator()
     {
         return Iterators.filter(this.objectList.iterator(), Predicates.notNull());
+    }
+
+    public int size()
+    {
+        return this.identityMap.size();
     }
 }

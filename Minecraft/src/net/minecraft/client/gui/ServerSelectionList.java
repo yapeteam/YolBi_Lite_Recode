@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerList;
-import net.minecraft.client.network.LanServerDetector;
+import net.minecraft.client.network.LanServerInfo;
 
 public class ServerSelectionList extends GuiListExtended
 {
@@ -27,7 +27,7 @@ public class ServerSelectionList extends GuiListExtended
     {
         if (index < this.serverListInternet.size())
         {
-            return (GuiListExtended.IGuiListEntry)this.serverListInternet.get(index);
+            return this.serverListInternet.get(index);
         }
         else
         {
@@ -40,7 +40,7 @@ public class ServerSelectionList extends GuiListExtended
             else
             {
                 --index;
-                return (GuiListExtended.IGuiListEntry)this.serverListLan.get(index);
+                return this.serverListLan.get(index);
             }
         }
     }
@@ -63,12 +63,12 @@ public class ServerSelectionList extends GuiListExtended
         return slotIndex == this.selectedSlotIndex;
     }
 
-    public int func_148193_k()
+    public int getSelected()
     {
         return this.selectedSlotIndex;
     }
 
-    public void func_148195_a(ServerList p_148195_1_)
+    public void updateOnlineServers(ServerList p_148195_1_)
     {
         this.serverListInternet.clear();
 
@@ -78,13 +78,13 @@ public class ServerSelectionList extends GuiListExtended
         }
     }
 
-    public void func_148194_a(List<LanServerDetector.LanServer> p_148194_1_)
+    public void updateNetworkServers(List<LanServerInfo> p_148194_1_)
     {
         this.serverListLan.clear();
 
-        for (LanServerDetector.LanServer lanserverdetector$lanserver : p_148194_1_)
+        for (LanServerInfo lanserverinfo : p_148194_1_)
         {
-            this.serverListLan.add(new ServerListEntryLanDetected(this.owner, lanserverdetector$lanserver));
+            this.serverListLan.add(new ServerListEntryLanDetected(this.owner, lanserverinfo));
         }
     }
 

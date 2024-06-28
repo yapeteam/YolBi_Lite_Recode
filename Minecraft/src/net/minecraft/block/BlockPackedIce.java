@@ -8,9 +8,9 @@ public class BlockPackedIce extends Block
 {
     public BlockPackedIce()
     {
-        super(Material.packedIce);
+        super(Material.PACKED_ICE);
         this.slipperiness = 0.98F;
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
     /**

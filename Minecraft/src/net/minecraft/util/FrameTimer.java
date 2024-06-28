@@ -16,8 +16,6 @@ public class FrameTimer
 
     /**
      * Add a frame at the next index in the array frames
-     *  
-     * @param runningTime The game's uptime in nanoseconds
      */
     public void addFrame(long runningTime)
     {
@@ -42,9 +40,6 @@ public class FrameTimer
 
     /**
      * Return a value from time and multiplier to display the lagometer
-     *  
-     * @param time The time corresponding to the frame
-     * @param multiplier Use to multiply
      */
     public int getLagometerValue(long time, int multiplier)
     {
@@ -70,8 +65,6 @@ public class FrameTimer
 
     /**
      * Change 240 to 0
-     *  
-     * @param rawIndex The index to parse
      */
     public int parseIndex(int rawIndex)
     {

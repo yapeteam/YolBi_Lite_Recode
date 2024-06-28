@@ -1,17 +1,26 @@
 package net.minecraft.item;
 
 import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemBlock extends Item
@@ -24,65 +33,56 @@ public class ItemBlock extends Item
     }
 
     /**
-     * Sets the unlocalized name of this item to the string passed as the parameter, prefixed by "item."
-     */
-    public ItemBlock setUnlocalizedName(String unlocalizedName)
-    {
-        super.setUnlocalizedName(unlocalizedName);
-        return this;
-    }
-
-    /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
+        IBlockState iblockstate = playerIn.getBlockState(worldIn);
         Block block = iblockstate.getBlock();
 
-        if (!block.isReplaceable(worldIn, pos))
+        if (!block.isReplaceable(playerIn, worldIn))
         {
-            pos = pos.offset(side);
+            worldIn = worldIn.offset(hand);
         }
 
-        if (stack.stackSize == 0)
-        {
-            return false;
-        }
-        else if (!playerIn.canPlayerEdit(pos, side, stack))
-        {
-            return false;
-        }
-        else if (worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack))
-        {
-            int i = this.getMetadata(stack.getMetadata());
-            IBlockState iblockstate1 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, i, playerIn);
+        ItemStack itemstack = stack.getHeldItem(pos);
 
-            if (worldIn.setBlockState(pos, iblockstate1, 3))
+        if (!itemstack.func_190926_b() && stack.canPlayerEdit(worldIn, hand, itemstack) && playerIn.func_190527_a(this.block, worldIn, false, hand, (Entity)null))
+        {
+            int i = this.getMetadata(itemstack.getMetadata());
+            IBlockState iblockstate1 = this.block.onBlockPlaced(playerIn, worldIn, hand, facing, hitX, hitY, i, stack);
+
+            if (playerIn.setBlockState(worldIn, iblockstate1, 11))
             {
-                iblockstate1 = worldIn.getBlockState(pos);
+                iblockstate1 = playerIn.getBlockState(worldIn);
 
                 if (iblockstate1.getBlock() == this.block)
                 {
-                    setTileEntityNBT(worldIn, playerIn, pos, stack);
-                    this.block.onBlockPlacedBy(worldIn, pos, iblockstate1, playerIn, stack);
+                    setTileEntityNBT(playerIn, stack, worldIn, itemstack);
+                    this.block.onBlockPlacedBy(playerIn, worldIn, iblockstate1, stack, itemstack);
+
+                    if (stack instanceof EntityPlayerMP)
+                    {
+                        CriteriaTriggers.field_193137_x.func_193173_a((EntityPlayerMP)stack, worldIn, itemstack);
+                    }
                 }
 
-                worldIn.playSoundEffect((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
-                --stack.stackSize;
+                SoundType soundtype = this.block.getSoundType();
+                playerIn.playSound(stack, worldIn, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                itemstack.func_190918_g(1);
             }
 
-            return true;
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            return false;
+            return EnumActionResult.FAIL;
         }
     }
 
-    public static boolean setTileEntityNBT(World worldIn, EntityPlayer pos, BlockPos stack, ItemStack p_179224_3_)
+    public static boolean setTileEntityNBT(World worldIn, @Nullable EntityPlayer player, BlockPos pos, ItemStack stackIn)
     {
-        MinecraftServer minecraftserver = MinecraftServer.getServer();
+        MinecraftServer minecraftserver = worldIn.getMinecraftServer();
 
         if (minecraftserver == null)
         {
@@ -90,29 +90,29 @@ public class ItemBlock extends Item
         }
         else
         {
-            if (p_179224_3_.hasTagCompound() && p_179224_3_.getTagCompound().hasKey("BlockEntityTag", 10))
+            NBTTagCompound nbttagcompound = stackIn.getSubCompound("BlockEntityTag");
+
+            if (nbttagcompound != null)
             {
-                TileEntity tileentity = worldIn.getTileEntity(stack);
+                TileEntity tileentity = worldIn.getTileEntity(pos);
 
                 if (tileentity != null)
                 {
-                    if (!worldIn.isRemote && tileentity.func_183000_F() && !minecraftserver.getConfigurationManager().canSendCommands(pos.getGameProfile()))
+                    if (!worldIn.isRemote && tileentity.onlyOpsCanSetNbt() && (player == null || !player.canUseCommandBlock()))
                     {
                         return false;
                     }
 
-                    NBTTagCompound nbttagcompound = new NBTTagCompound();
-                    NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttagcompound.copy();
-                    tileentity.writeToNBT(nbttagcompound);
-                    NBTTagCompound nbttagcompound2 = (NBTTagCompound)p_179224_3_.getTagCompound().getTag("BlockEntityTag");
-                    nbttagcompound.merge(nbttagcompound2);
-                    nbttagcompound.setInteger("x", stack.getX());
-                    nbttagcompound.setInteger("y", stack.getY());
-                    nbttagcompound.setInteger("z", stack.getZ());
+                    NBTTagCompound nbttagcompound1 = tileentity.writeToNBT(new NBTTagCompound());
+                    NBTTagCompound nbttagcompound2 = nbttagcompound1.copy();
+                    nbttagcompound1.merge(nbttagcompound);
+                    nbttagcompound1.setInteger("x", pos.getX());
+                    nbttagcompound1.setInteger("y", pos.getY());
+                    nbttagcompound1.setInteger("z", pos.getZ());
 
-                    if (!nbttagcompound.equals(nbttagcompound1))
+                    if (!nbttagcompound1.equals(nbttagcompound2))
                     {
-                        tileentity.readFromNBT(nbttagcompound);
+                        tileentity.readFromNBT(nbttagcompound1);
                         tileentity.markDirty();
                         return true;
                     }
@@ -127,7 +127,7 @@ public class ItemBlock extends Item
     {
         Block block = worldIn.getBlockState(pos).getBlock();
 
-        if (block == Blocks.snow_layer)
+        if (block == Blocks.SNOW_LAYER)
         {
             side = EnumFacing.UP;
         }
@@ -136,7 +136,7 @@ public class ItemBlock extends Item
             pos = pos.offset(side);
         }
 
-        return worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack);
+        return worldIn.func_190527_a(this.block, pos, false, side, (Entity)null);
     }
 
     /**
@@ -167,9 +167,21 @@ public class ItemBlock extends Item
     /**
      * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
      */
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems)
+    public void getSubItems(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
-        this.block.getSubBlocks(itemIn, tab, subItems);
+        if (this.func_194125_a(itemIn))
+        {
+            this.block.getSubBlocks(itemIn, tab);
+        }
+    }
+
+    /**
+     * allows items to add custom lines of information to the mouseover description
+     */
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
+    {
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        this.block.func_190948_a(stack, playerIn, tooltip, advanced);
     }
 
     public Block getBlock()

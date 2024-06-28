@@ -2,7 +2,7 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class WorldGenerator
@@ -25,7 +25,7 @@ public abstract class WorldGenerator
 
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 
-    public void func_175904_e()
+    public void setDecorationDefaults()
     {
     }
 

@@ -3,12 +3,13 @@ package net.minecraft.world.chunk;
 import com.google.common.base.Predicate;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.block.Block;
+import javax.annotation.Nullable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -49,19 +50,14 @@ public class EmptyChunk extends Chunk
     {
     }
 
-    public Block getBlock(BlockPos pos)
+    public IBlockState getBlockState(BlockPos pos)
     {
-        return Blocks.air;
+        return Blocks.AIR.getDefaultState();
     }
 
     public int getBlockLightOpacity(BlockPos pos)
     {
         return 255;
-    }
-
-    public int getBlockMetadata(BlockPos pos)
-    {
-        return 0;
     }
 
     public int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos)
@@ -79,7 +75,7 @@ public class EmptyChunk extends Chunk
     }
 
     /**
-     * Adds an entity to the chunk. Args: entity
+     * Adds an entity to the chunk.
      */
     public void addEntity(Entity entityIn)
     {
@@ -95,7 +91,7 @@ public class EmptyChunk extends Chunk
     /**
      * Removes entity at the specified index from the entity array.
      */
-    public void removeEntityAtIndex(Entity entityIn, int p_76608_2_)
+    public void removeEntityAtIndex(Entity entityIn, int index)
     {
     }
 
@@ -104,6 +100,7 @@ public class EmptyChunk extends Chunk
         return false;
     }
 
+    @Nullable
     public TileEntity getTileEntity(BlockPos pos, Chunk.EnumCreateEntityType p_177424_2_)
     {
         return null;
@@ -145,11 +142,11 @@ public class EmptyChunk extends Chunk
     /**
      * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
      */
-    public void getEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > p_177414_4_)
+    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate <? super Entity > p_177414_4_)
     {
     }
 
-    public <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > p_177430_4_)
+    public <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate <? super T > filter)
     {
     }
 

@@ -5,15 +5,15 @@ public class AnimationFrame
     private final int frameIndex;
     private final int frameTime;
 
-    public AnimationFrame(int p_i1307_1_)
+    public AnimationFrame(int frameIndexIn)
     {
-        this(p_i1307_1_, -1);
+        this(frameIndexIn, -1);
     }
 
-    public AnimationFrame(int p_i1308_1_, int p_i1308_2_)
+    public AnimationFrame(int frameIndexIn, int frameTimeIn)
     {
-        this.frameIndex = p_i1308_1_;
-        this.frameTime = p_i1308_2_;
+        this.frameIndex = frameIndexIn;
+        this.frameTime = frameTimeIn;
     }
 
     public boolean hasNoTime()

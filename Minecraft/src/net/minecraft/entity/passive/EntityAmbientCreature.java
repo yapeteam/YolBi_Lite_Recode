@@ -11,15 +11,7 @@ public abstract class EntityAmbientCreature extends EntityLiving implements IAni
         super(worldIn);
     }
 
-    public boolean allowLeashing()
-    {
-        return false;
-    }
-
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
-    protected boolean interact(EntityPlayer player)
+    public boolean canBeLeashedTo(EntityPlayer player)
     {
         return false;
     }

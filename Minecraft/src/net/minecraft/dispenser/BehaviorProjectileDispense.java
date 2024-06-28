@@ -16,11 +16,11 @@ public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispense
     {
         World world = source.getWorld();
         IPosition iposition = BlockDispenser.getDispensePosition(source);
-        EnumFacing enumfacing = BlockDispenser.getFacing(source.getBlockMetadata());
-        IProjectile iprojectile = this.getProjectileEntity(world, iposition);
-        iprojectile.setThrowableHeading((double)enumfacing.getFrontOffsetX(), (double)((float)enumfacing.getFrontOffsetY() + 0.1F), (double)enumfacing.getFrontOffsetZ(), this.func_82500_b(), this.func_82498_a());
+        EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
+        IProjectile iprojectile = this.getProjectileEntity(world, iposition, stack);
+        iprojectile.setThrowableHeading((double)enumfacing.getFrontOffsetX(), (double)((float)enumfacing.getFrontOffsetY() + 0.1F), (double)enumfacing.getFrontOffsetZ(), this.getProjectileVelocity(), this.getProjectileInaccuracy());
         world.spawnEntityInWorld((Entity)iprojectile);
-        stack.splitStack(1);
+        stack.func_190918_g(1);
         return stack;
     }
 
@@ -29,20 +29,20 @@ public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispense
      */
     protected void playDispenseSound(IBlockSource source)
     {
-        source.getWorld().playAuxSFX(1002, source.getBlockPos(), 0);
+        source.getWorld().playEvent(1002, source.getBlockPos(), 0);
     }
 
     /**
      * Return the projectile entity spawned by this dispense behavior.
      */
-    protected abstract IProjectile getProjectileEntity(World worldIn, IPosition position);
+    protected abstract IProjectile getProjectileEntity(World worldIn, IPosition position, ItemStack stackIn);
 
-    protected float func_82498_a()
+    protected float getProjectileInaccuracy()
     {
         return 6.0F;
     }
 
-    protected float func_82500_b()
+    protected float getProjectileVelocity()
     {
         return 1.1F;
     }

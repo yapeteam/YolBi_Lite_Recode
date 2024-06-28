@@ -3,15 +3,15 @@ package net.minecraft.world.border;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 
 public class WorldBorder
 {
     private final List<IBorderListener> listeners = Lists.<IBorderListener>newArrayList();
-    private double centerX = 0.0D;
-    private double centerZ = 0.0D;
+    private double centerX;
+    private double centerZ;
     private double startDiameter = 6.0E7D;
     private double endDiameter;
     private long endTime;
@@ -37,7 +37,7 @@ public class WorldBorder
         return (double)(pos.getX() + 1) > this.minX() && (double)pos.getX() < this.maxX() && (double)(pos.getZ() + 1) > this.minZ() && (double)pos.getZ() < this.maxZ();
     }
 
-    public boolean contains(ChunkCoordIntPair range)
+    public boolean contains(ChunkPos range)
     {
         return (double)range.getXEnd() > this.minX() && (double)range.getXStart() < this.maxX() && (double)range.getZEnd() > this.minZ() && (double)range.getZStart() < this.maxZ();
     }
@@ -65,7 +65,14 @@ public class WorldBorder
 
     public EnumBorderStatus getStatus()
     {
-        return this.endDiameter < this.startDiameter ? EnumBorderStatus.SHRINKING : (this.endDiameter > this.startDiameter ? EnumBorderStatus.GROWING : EnumBorderStatus.STATIONARY);
+        if (this.endDiameter < this.startDiameter)
+        {
+            return EnumBorderStatus.SHRINKING;
+        }
+        else
+        {
+            return this.endDiameter > this.startDiameter ? EnumBorderStatus.GROWING : EnumBorderStatus.STATIONARY;
+        }
     }
 
     public double minX()
@@ -156,7 +163,7 @@ public class WorldBorder
 
     public long getTimeUntilTarget()
     {
-        return this.getStatus() != EnumBorderStatus.STATIONARY ? this.endTime - System.currentTimeMillis() : 0L;
+        return this.getStatus() == EnumBorderStatus.STATIONARY ? 0L : this.endTime - System.currentTimeMillis();
     }
 
     public double getTargetSize()

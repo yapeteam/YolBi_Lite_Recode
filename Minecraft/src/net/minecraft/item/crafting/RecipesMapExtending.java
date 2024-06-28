@@ -4,14 +4,16 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
+import net.minecraft.world.storage.MapDecoration;
 
 public class RecipesMapExtending extends ShapedRecipes
 {
     public RecipesMapExtending()
     {
-        super(3, 3, new ItemStack[] {new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.filled_map, 0, 32767), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper), new ItemStack(Items.paper)}, new ItemStack(Items.map, 0, 0));
+        super("", 3, 3, NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193367_a(Items.FILLED_MAP), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER), Ingredient.func_193368_a(Items.PAPER)), new ItemStack(Items.MAP));
     }
 
     /**
@@ -25,28 +27,56 @@ public class RecipesMapExtending extends ShapedRecipes
         }
         else
         {
-            ItemStack itemstack = null;
+            ItemStack itemstack = ItemStack.field_190927_a;
 
-            for (int i = 0; i < inv.getSizeInventory() && itemstack == null; ++i)
+            for (int i = 0; i < inv.getSizeInventory() && itemstack.func_190926_b(); ++i)
             {
                 ItemStack itemstack1 = inv.getStackInSlot(i);
 
-                if (itemstack1 != null && itemstack1.getItem() == Items.filled_map)
+                if (itemstack1.getItem() == Items.FILLED_MAP)
                 {
                     itemstack = itemstack1;
                 }
             }
 
-            if (itemstack == null)
+            if (itemstack.func_190926_b())
             {
                 return false;
             }
             else
             {
-                MapData mapdata = Items.filled_map.getMapData(itemstack, worldIn);
-                return mapdata == null ? false : mapdata.scale < 4;
+                MapData mapdata = Items.FILLED_MAP.getMapData(itemstack, worldIn);
+
+                if (mapdata == null)
+                {
+                    return false;
+                }
+                else if (this.func_190934_a(mapdata))
+                {
+                    return false;
+                }
+                else
+                {
+                    return mapdata.scale < 4;
+                }
             }
         }
+    }
+
+    private boolean func_190934_a(MapData p_190934_1_)
+    {
+        if (p_190934_1_.mapDecorations != null)
+        {
+            for (MapDecoration mapdecoration : p_190934_1_.mapDecorations.values())
+            {
+                if (mapdecoration.func_191179_b() == MapDecoration.Type.MANSION || mapdecoration.func_191179_b() == MapDecoration.Type.MONUMENT)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -54,27 +84,32 @@ public class RecipesMapExtending extends ShapedRecipes
      */
     public ItemStack getCraftingResult(InventoryCrafting inv)
     {
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.field_190927_a;
 
-        for (int i = 0; i < inv.getSizeInventory() && itemstack == null; ++i)
+        for (int i = 0; i < inv.getSizeInventory() && itemstack.func_190926_b(); ++i)
         {
             ItemStack itemstack1 = inv.getStackInSlot(i);
 
-            if (itemstack1 != null && itemstack1.getItem() == Items.filled_map)
+            if (itemstack1.getItem() == Items.FILLED_MAP)
             {
                 itemstack = itemstack1;
             }
         }
 
         itemstack = itemstack.copy();
-        itemstack.stackSize = 1;
+        itemstack.func_190920_e(1);
 
         if (itemstack.getTagCompound() == null)
         {
             itemstack.setTagCompound(new NBTTagCompound());
         }
 
-        itemstack.getTagCompound().setBoolean("map_is_scaling", true);
+        itemstack.getTagCompound().setInteger("map_scale_direction", 1);
         return itemstack;
+    }
+
+    public boolean func_192399_d()
+    {
+        return true;
     }
 }

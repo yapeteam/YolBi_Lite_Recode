@@ -40,21 +40,18 @@ public class EntityAIDefendVillage extends EntityAITarget
             {
                 return false;
             }
-            else if (!this.isSuitableTarget(this.villageAgressorTarget, false))
+            else if (this.isSuitableTarget(this.villageAgressorTarget, false))
             {
-                if (this.taskOwner.getRNG().nextInt(20) == 0)
-                {
-                    this.villageAgressorTarget = village.getNearestTargetPlayer(this.irongolem);
-                    return this.isSuitableTarget(this.villageAgressorTarget, false);
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
+            }
+            else if (this.taskOwner.getRNG().nextInt(20) == 0)
+            {
+                this.villageAgressorTarget = village.getNearestTargetPlayer(this.irongolem);
+                return this.isSuitableTarget(this.villageAgressorTarget, false);
             }
             else
             {
-                return true;
+                return false;
             }
         }
     }

@@ -1,13 +1,17 @@
 package net.minecraft.world.storage;
 
 import java.io.File;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.gen.structure.template.TemplateManager;
 
 public interface ISaveHandler
 {
+    @Nullable
+
     /**
      * Loads and returns the world info
      */
@@ -50,8 +54,5 @@ public interface ISaveHandler
      */
     File getMapFileFromName(String mapName);
 
-    /**
-     * Returns the name of the directory where world information is saved.
-     */
-    String getWorldDirectoryName();
+    TemplateManager getStructureTemplateManager();
 }

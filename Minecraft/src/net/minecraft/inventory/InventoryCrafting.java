@@ -1,15 +1,16 @@
 package net.minecraft.inventory;
 
+import net.minecraft.client.util.RecipeItemHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class InventoryCrafting implements IInventory
 {
-    /** List of the stacks in the crafting matrix. */
-    private final ItemStack[] stackList;
+    private final NonNullList<ItemStack> stackList;
 
     /** the width of the crafting inventory */
     private final int inventoryWidth;
@@ -22,8 +23,7 @@ public class InventoryCrafting implements IInventory
 
     public InventoryCrafting(Container eventHandlerIn, int width, int height)
     {
-        int i = width * height;
-        this.stackList = new ItemStack[i];
+        this.stackList = NonNullList.<ItemStack>func_191197_a(width * height, ItemStack.field_190927_a);
         this.eventHandler = eventHandlerIn;
         this.inventoryWidth = width;
         this.inventoryHeight = height;
@@ -34,7 +34,20 @@ public class InventoryCrafting implements IInventory
      */
     public int getSizeInventory()
     {
-        return this.stackList.length;
+        return this.stackList.size();
+    }
+
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.stackList)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -42,15 +55,15 @@ public class InventoryCrafting implements IInventory
      */
     public ItemStack getStackInSlot(int index)
     {
-        return index >= this.getSizeInventory() ? null : this.stackList[index];
+        return index >= this.getSizeInventory() ? ItemStack.field_190927_a : (ItemStack)this.stackList.get(index);
     }
 
     /**
-     * Returns the itemstack in the slot specified (Top left is 0, 0). Args: row, column
+     * Gets the ItemStack in the slot specified.
      */
     public ItemStack getStackInRowAndColumn(int row, int column)
     {
-        return row >= 0 && row < this.inventoryWidth && column >= 0 && column <= this.inventoryHeight ? this.getStackInSlot(row + column * this.inventoryWidth) : null;
+        return row >= 0 && row < this.inventoryWidth && column >= 0 && column <= this.inventoryHeight ? this.getStackInSlot(row + column * this.inventoryWidth) : ItemStack.field_190927_a;
     }
 
     /**
@@ -72,9 +85,9 @@ public class InventoryCrafting implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
@@ -82,16 +95,7 @@ public class InventoryCrafting implements IInventory
      */
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.stackList[index] != null)
-        {
-            ItemStack itemstack = this.stackList[index];
-            this.stackList[index] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return ItemStackHelper.getAndRemove(this.stackList, index);
     }
 
     /**
@@ -99,32 +103,14 @@ public class InventoryCrafting implements IInventory
      */
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.stackList[index] != null)
-        {
-            if (this.stackList[index].stackSize <= count)
-            {
-                ItemStack itemstack1 = this.stackList[index];
-                this.stackList[index] = null;
-                this.eventHandler.onCraftMatrixChanged(this);
-                return itemstack1;
-            }
-            else
-            {
-                ItemStack itemstack = this.stackList[index].splitStack(count);
+        ItemStack itemstack = ItemStackHelper.getAndSplit(this.stackList, index, count);
 
-                if (this.stackList[index].stackSize == 0)
-                {
-                    this.stackList[index] = null;
-                }
-
-                this.eventHandler.onCraftMatrixChanged(this);
-                return itemstack;
-            }
-        }
-        else
+        if (!itemstack.func_190926_b())
         {
-            return null;
+            this.eventHandler.onCraftMatrixChanged(this);
         }
+
+        return itemstack;
     }
 
     /**
@@ -132,7 +118,7 @@ public class InventoryCrafting implements IInventory
      */
     public void setInventorySlotContents(int index, ItemStack stack)
     {
-        this.stackList[index] = stack;
+        this.stackList.set(index, stack);
         this.eventHandler.onCraftMatrixChanged(this);
     }
 
@@ -153,9 +139,9 @@ public class InventoryCrafting implements IInventory
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
         return true;
     }
@@ -169,7 +155,8 @@ public class InventoryCrafting implements IInventory
     }
 
     /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
      */
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {
@@ -192,10 +179,7 @@ public class InventoryCrafting implements IInventory
 
     public void clear()
     {
-        for (int i = 0; i < this.stackList.length; ++i)
-        {
-            this.stackList[i] = null;
-        }
+        this.stackList.clear();
     }
 
     public int getHeight()
@@ -206,5 +190,13 @@ public class InventoryCrafting implements IInventory
     public int getWidth()
     {
         return this.inventoryWidth;
+    }
+
+    public void func_194018_a(RecipeItemHelper p_194018_1_)
+    {
+        for (ItemStack itemstack : this.stackList)
+        {
+            p_194018_1_.func_194112_a(itemstack);
+        }
     }
 }

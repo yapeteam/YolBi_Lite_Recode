@@ -5,19 +5,19 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
 public class Locale
 {
     /** Splits on "=" */
-    private static final Splitter splitter = Splitter.on('=').limit(2);
-    private static final Pattern pattern = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
+    private static final Splitter SPLITTER = Splitter.on('=').limit(2);
+    private static final Pattern PATTERN = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
     Map<String, String> properties = Maps.<String, String>newHashMap();
     private boolean unicode;
 
@@ -30,7 +30,7 @@ public class Locale
 
         for (String s : languageList)
         {
-            String s1 = String.format("lang/%s.lang", new Object[] {s});
+            String s1 = String.format("lang/%s.lang", s);
 
             for (String s2 : resourceManager.getResourceDomains())
             {
@@ -99,16 +99,16 @@ public class Locale
 
     private void loadLocaleData(InputStream inputStreamIn) throws IOException
     {
-        for (String s : IOUtils.readLines(inputStreamIn, Charsets.UTF_8))
+        for (String s : IOUtils.readLines(inputStreamIn, StandardCharsets.UTF_8))
         {
-            if (!s.isEmpty() && s.charAt(0) != 35)
+            if (!s.isEmpty() && s.charAt(0) != '#')
             {
-                String[] astring = (String[])Iterables.toArray(splitter.split(s), String.class);
+                String[] astring = (String[])Iterables.toArray(SPLITTER.split(s), String.class);
 
                 if (astring != null && astring.length == 2)
                 {
                     String s1 = astring[0];
-                    String s2 = pattern.matcher(astring[1]).replaceAll("%$1s");
+                    String s2 = PATTERN.matcher(astring[1]).replaceAll("%$1s");
                     this.properties.put(s1, s2);
                 }
             }
@@ -120,7 +120,7 @@ public class Locale
      */
     private String translateKeyPrivate(String translateKey)
     {
-        String s = (String)this.properties.get(translateKey);
+        String s = this.properties.get(translateKey);
         return s == null ? translateKey : s;
     }
 
@@ -139,5 +139,10 @@ public class Locale
         {
             return "Format error: " + s;
         }
+    }
+
+    public boolean hasKey(String key)
+    {
+        return this.properties.containsKey(key);
     }
 }

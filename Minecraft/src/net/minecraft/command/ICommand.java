@@ -1,7 +1,9 @@
 package net.minecraft.command;
 
 import java.util.List;
-import net.minecraft.util.BlockPos;
+import javax.annotation.Nullable;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 
 public interface ICommand extends Comparable<ICommand>
 {
@@ -18,16 +20,16 @@ public interface ICommand extends Comparable<ICommand>
     List<String> getCommandAliases();
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    void processCommand(ICommandSender sender, String[] args) throws CommandException;
+    void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException;
 
     /**
-     * Returns true if the given command sender is allowed to use this command.
+     * Check if the given ICommandSender has permission to execute this command
      */
-    boolean canCommandSenderUseCommand(ICommandSender sender);
+    boolean checkPermission(MinecraftServer server, ICommandSender sender);
 
-    List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos);
+    List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos);
 
     /**
      * Return whether the specified command parameter index is a username parameter.

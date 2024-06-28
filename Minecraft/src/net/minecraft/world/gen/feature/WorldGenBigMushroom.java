@@ -4,14 +4,15 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHugeMushroom;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenBigMushroom extends WorldGenerator
 {
     /** The mushroom type. 0 for brown, 1 for red. */
-    private Block mushroomType;
+    private final Block mushroomType;
 
     public WorldGenBigMushroom(Block p_i46449_1_)
     {
@@ -22,16 +23,25 @@ public class WorldGenBigMushroom extends WorldGenerator
     public WorldGenBigMushroom()
     {
         super(false);
+        this.mushroomType = null;
     }
 
     public boolean generate(World worldIn, Random rand, BlockPos position)
     {
-        if (this.mushroomType == null)
+        Block block = this.mushroomType;
+
+        if (block == null)
         {
-            this.mushroomType = rand.nextBoolean() ? Blocks.brown_mushroom_block : Blocks.red_mushroom_block;
+            block = rand.nextBoolean() ? Blocks.BROWN_MUSHROOM_BLOCK : Blocks.RED_MUSHROOM_BLOCK;
         }
 
         int i = rand.nextInt(3) + 4;
+
+        if (rand.nextInt(12) == 0)
+        {
+            i *= 2;
+        }
+
         boolean flag = true;
 
         if (position.getY() >= 1 && position.getY() + i + 1 < 256)
@@ -53,9 +63,9 @@ public class WorldGenBigMushroom extends WorldGenerator
                     {
                         if (j >= 0 && j < 256)
                         {
-                            Block block = worldIn.getBlockState(blockpos$mutableblockpos.set(l, j, i1)).getBlock();
+                            Material material = worldIn.getBlockState(blockpos$mutableblockpos.setPos(l, j, i1)).getMaterial();
 
-                            if (block.getMaterial() != Material.air && block.getMaterial() != Material.leaves)
+                            if (material != Material.AIR && material != Material.LEAVES)
                             {
                                 flag = false;
                             }
@@ -76,7 +86,7 @@ public class WorldGenBigMushroom extends WorldGenerator
             {
                 Block block1 = worldIn.getBlockState(position.down()).getBlock();
 
-                if (block1 != Blocks.dirt && block1 != Blocks.grass && block1 != Blocks.mycelium)
+                if (block1 != Blocks.DIRT && block1 != Blocks.GRASS && block1 != Blocks.MYCELIUM)
                 {
                     return false;
                 }
@@ -84,7 +94,7 @@ public class WorldGenBigMushroom extends WorldGenerator
                 {
                     int k2 = position.getY() + i;
 
-                    if (this.mushroomType == Blocks.red_mushroom_block)
+                    if (block == Blocks.RED_MUSHROOM_BLOCK)
                     {
                         k2 = position.getY() + i - 3;
                     }
@@ -98,7 +108,7 @@ public class WorldGenBigMushroom extends WorldGenerator
                             ++j3;
                         }
 
-                        if (this.mushroomType == Blocks.brown_mushroom_block)
+                        if (block == Blocks.BROWN_MUSHROOM_BLOCK)
                         {
                             j3 = 3;
                         }
@@ -134,7 +144,7 @@ public class WorldGenBigMushroom extends WorldGenerator
 
                                 BlockHugeMushroom.EnumType blockhugemushroom$enumtype = BlockHugeMushroom.EnumType.byMetadata(j2);
 
-                                if (this.mushroomType == Blocks.brown_mushroom_block || l2 < position.getY() + i)
+                                if (block == Blocks.BROWN_MUSHROOM_BLOCK || l2 < position.getY() + i)
                                 {
                                     if ((l1 == k3 || l1 == l3) && (i2 == j1 || i2 == k1))
                                     {
@@ -191,9 +201,9 @@ public class WorldGenBigMushroom extends WorldGenerator
                                 {
                                     BlockPos blockpos = new BlockPos(l1, l2, i2);
 
-                                    if (!worldIn.getBlockState(blockpos).getBlock().isFullBlock())
+                                    if (!worldIn.getBlockState(blockpos).isFullBlock())
                                     {
-                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, this.mushroomType.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, blockhugemushroom$enumtype));
+                                        this.setBlockAndNotifyAdequately(worldIn, blockpos, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, blockhugemushroom$enumtype));
                                     }
                                 }
                             }
@@ -202,11 +212,11 @@ public class WorldGenBigMushroom extends WorldGenerator
 
                     for (int i3 = 0; i3 < i; ++i3)
                     {
-                        Block block2 = worldIn.getBlockState(position.up(i3)).getBlock();
+                        IBlockState iblockstate = worldIn.getBlockState(position.up(i3));
 
-                        if (!block2.isFullBlock())
+                        if (!iblockstate.isFullBlock())
                         {
-                            this.setBlockAndNotifyAdequately(worldIn, position.up(i3), this.mushroomType.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
+                            this.setBlockAndNotifyAdequately(worldIn, position.up(i3), block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
                         }
                     }
 

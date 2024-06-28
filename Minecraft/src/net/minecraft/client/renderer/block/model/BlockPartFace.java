@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
+import javax.annotation.Nullable;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.JsonUtils;
 
@@ -17,7 +18,7 @@ public class BlockPartFace
     public final String texture;
     public final BlockFaceUV blockFaceUV;
 
-    public BlockPartFace(EnumFacing cullFaceIn, int tintIndexIn, String textureIn, BlockFaceUV blockFaceUVIn)
+    public BlockPartFace(@Nullable EnumFacing cullFaceIn, int tintIndexIn, String textureIn, BlockFaceUV blockFaceUVIn)
     {
         this.cullFace = cullFaceIn;
         this.tintIndex = tintIndexIn;
@@ -37,19 +38,20 @@ public class BlockPartFace
             return new BlockPartFace(enumfacing, i, s, blockfaceuv);
         }
 
-        protected int parseTintIndex(JsonObject p_178337_1_)
+        protected int parseTintIndex(JsonObject object)
         {
-            return JsonUtils.getInt(p_178337_1_, "tintindex", -1);
+            return JsonUtils.getInt(object, "tintindex", -1);
         }
 
-        private String parseTexture(JsonObject p_178340_1_)
+        private String parseTexture(JsonObject object)
         {
-            return JsonUtils.getString(p_178340_1_, "texture");
+            return JsonUtils.getString(object, "texture");
         }
 
-        private EnumFacing parseCullFace(JsonObject p_178339_1_)
+        @Nullable
+        private EnumFacing parseCullFace(JsonObject object)
         {
-            String s = JsonUtils.getString(p_178339_1_, "cullface", "");
+            String s = JsonUtils.getString(object, "cullface", "");
             return EnumFacing.byName(s);
         }
     }

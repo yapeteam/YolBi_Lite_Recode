@@ -12,7 +12,7 @@ public class SlotFurnaceFuel extends Slot
     }
 
     /**
-     * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
+     * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
      */
     public boolean isItemValid(ItemStack stack)
     {
@@ -26,6 +26,6 @@ public class SlotFurnaceFuel extends Slot
 
     public static boolean isBucket(ItemStack stack)
     {
-        return stack != null && stack.getItem() != null && stack.getItem() == Items.bucket;
+        return stack.getItem() == Items.BUCKET;
     }
 }

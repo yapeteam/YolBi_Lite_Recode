@@ -4,5 +4,6 @@ public enum EnumCreatureAttribute
 {
     UNDEFINED,
     UNDEAD,
-    ARTHROPOD;
+    ARTHROPOD,
+    ILLAGER;
 }

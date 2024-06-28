@@ -1,15 +1,18 @@
 package net.minecraft.inventory;
 
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class InventoryCraftResult implements IInventory
 {
-    /** A list of one item containing the result of the crafting formula */
-    private ItemStack[] stackResult = new ItemStack[1];
+    private final NonNullList<ItemStack> stackResult = NonNullList.<ItemStack>func_191197_a(1, ItemStack.field_190927_a);
+    private IRecipe field_193057_b;
 
     /**
      * Returns the number of slots in the inventory.
@@ -19,12 +22,25 @@ public class InventoryCraftResult implements IInventory
         return 1;
     }
 
+    public boolean func_191420_l()
+    {
+        for (ItemStack itemstack : this.stackResult)
+        {
+            if (!itemstack.func_190926_b())
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Returns the stack in the given slot.
      */
     public ItemStack getStackInSlot(int index)
     {
-        return this.stackResult[0];
+        return this.stackResult.get(0);
     }
 
     /**
@@ -46,9 +62,9 @@ public class InventoryCraftResult implements IInventory
     /**
      * Get the formatted ChatComponent that will be used for the sender's username in chat
      */
-    public IChatComponent getDisplayName()
+    public ITextComponent getDisplayName()
     {
-        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+        return (ITextComponent)(this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]));
     }
 
     /**
@@ -56,16 +72,7 @@ public class InventoryCraftResult implements IInventory
      */
     public ItemStack decrStackSize(int index, int count)
     {
-        if (this.stackResult[0] != null)
-        {
-            ItemStack itemstack = this.stackResult[0];
-            this.stackResult[0] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return ItemStackHelper.getAndRemove(this.stackResult, 0);
     }
 
     /**
@@ -73,16 +80,7 @@ public class InventoryCraftResult implements IInventory
      */
     public ItemStack removeStackFromSlot(int index)
     {
-        if (this.stackResult[0] != null)
-        {
-            ItemStack itemstack = this.stackResult[0];
-            this.stackResult[0] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
+        return ItemStackHelper.getAndRemove(this.stackResult, 0);
     }
 
     /**
@@ -90,7 +88,7 @@ public class InventoryCraftResult implements IInventory
      */
     public void setInventorySlotContents(int index, ItemStack stack)
     {
-        this.stackResult[0] = stack;
+        this.stackResult.set(0, stack);
     }
 
     /**
@@ -110,9 +108,9 @@ public class InventoryCraftResult implements IInventory
     }
 
     /**
-     * Do not make give this method the name canInteractWith because it clashes with Container
+     * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer player)
+    public boolean isUsableByPlayer(EntityPlayer player)
     {
         return true;
     }
@@ -126,7 +124,8 @@ public class InventoryCraftResult implements IInventory
     }
 
     /**
-     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot. For
+     * guis use Slot.isItemValid
      */
     public boolean isItemValidForSlot(int index, ItemStack stack)
     {
@@ -149,9 +148,17 @@ public class InventoryCraftResult implements IInventory
 
     public void clear()
     {
-        for (int i = 0; i < this.stackResult.length; ++i)
-        {
-            this.stackResult[i] = null;
-        }
+        this.stackResult.clear();
+    }
+
+    public void func_193056_a(@Nullable IRecipe p_193056_1_)
+    {
+        this.field_193057_b = p_193056_1_;
+    }
+
+    @Nullable
+    public IRecipe func_193055_i()
+    {
+        return this.field_193057_b;
     }
 }

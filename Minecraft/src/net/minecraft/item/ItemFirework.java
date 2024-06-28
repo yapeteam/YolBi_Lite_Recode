@@ -2,13 +2,18 @@ package net.minecraft.item;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 public class ItemFirework extends Item
@@ -16,61 +21,80 @@ public class ItemFirework extends Item
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (!worldIn.isRemote)
+        if (!playerIn.isRemote)
         {
-            EntityFireworkRocket entityfireworkrocket = new EntityFireworkRocket(worldIn, (double)((float)pos.getX() + hitX), (double)((float)pos.getY() + hitY), (double)((float)pos.getZ() + hitZ), stack);
-            worldIn.spawnEntityInWorld(entityfireworkrocket);
+            ItemStack itemstack = stack.getHeldItem(pos);
+            EntityFireworkRocket entityfireworkrocket = new EntityFireworkRocket(playerIn, (double)((float)worldIn.getX() + facing), (double)((float)worldIn.getY() + hitX), (double)((float)worldIn.getZ() + hitY), itemstack);
+            playerIn.spawnEntityInWorld(entityfireworkrocket);
 
-            if (!playerIn.capabilities.isCreativeMode)
+            if (!stack.capabilities.isCreativeMode)
             {
-                --stack.stackSize;
+                itemstack.func_190918_g(1);
+            }
+        }
+
+        return EnumActionResult.SUCCESS;
+    }
+
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
+    {
+        if (worldIn.isElytraFlying())
+        {
+            ItemStack itemstack = worldIn.getHeldItem(playerIn);
+
+            if (!itemStackIn.isRemote)
+            {
+                EntityFireworkRocket entityfireworkrocket = new EntityFireworkRocket(itemStackIn, itemstack, worldIn);
+                itemStackIn.spawnEntityInWorld(entityfireworkrocket);
+
+                if (!worldIn.capabilities.isCreativeMode)
+                {
+                    itemstack.func_190918_g(1);
+                }
             }
 
-            return true;
+            return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, worldIn.getHeldItem(playerIn));
         }
         else
         {
-            return false;
+            return new ActionResult<ItemStack>(EnumActionResult.PASS, worldIn.getHeldItem(playerIn));
         }
     }
 
     /**
      * allows items to add custom lines of information to the mouseover description
      */
-    public void addInformation(ItemStack stack, EntityPlayer playerIn, List<String> tooltip, boolean advanced)
+    public void addInformation(ItemStack stack, @Nullable World playerIn, List<String> tooltip, ITooltipFlag advanced)
     {
-        if (stack.hasTagCompound())
+        NBTTagCompound nbttagcompound = stack.getSubCompound("Fireworks");
+
+        if (nbttagcompound != null)
         {
-            NBTTagCompound nbttagcompound = stack.getTagCompound().getCompoundTag("Fireworks");
-
-            if (nbttagcompound != null)
+            if (nbttagcompound.hasKey("Flight", 99))
             {
-                if (nbttagcompound.hasKey("Flight", 99))
-                {
-                    tooltip.add(StatCollector.translateToLocal("item.fireworks.flight") + " " + nbttagcompound.getByte("Flight"));
-                }
+                tooltip.add(I18n.translateToLocal("item.fireworks.flight") + " " + nbttagcompound.getByte("Flight"));
+            }
 
-                NBTTagList nbttaglist = nbttagcompound.getTagList("Explosions", 10);
+            NBTTagList nbttaglist = nbttagcompound.getTagList("Explosions", 10);
 
-                if (nbttaglist != null && nbttaglist.tagCount() > 0)
+            if (!nbttaglist.hasNoTags())
+            {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i)
                 {
-                    for (int i = 0; i < nbttaglist.tagCount(); ++i)
+                    NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+                    List<String> list = Lists.<String>newArrayList();
+                    ItemFireworkCharge.addExplosionInfo(nbttagcompound1, list);
+
+                    if (!list.isEmpty())
                     {
-                        NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
-                        List<String> list = Lists.<String>newArrayList();
-                        ItemFireworkCharge.addExplosionInfo(nbttagcompound1, list);
-
-                        if (list.size() > 0)
+                        for (int j = 1; j < list.size(); ++j)
                         {
-                            for (int j = 1; j < ((List)list).size(); ++j)
-                            {
-                                list.set(j, "  " + (String)list.get(j));
-                            }
-
-                            tooltip.addAll(list);
+                            list.set(j, "  " + (String)list.get(j));
                         }
+
+                        tooltip.addAll(list);
                     }
                 }
             }

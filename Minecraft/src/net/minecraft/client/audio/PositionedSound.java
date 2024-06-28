@@ -1,46 +1,110 @@
 package net.minecraft.client.audio;
 
+import javax.annotation.Nullable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 
-public abstract class PositionedSound implements ISound {
-	protected final ResourceLocation positionedSoundLocation;
-	protected float volume = 1.0F;
-	protected float pitch = 1.0F;
-	protected float xPosF;
-	protected float yPosF;
-	protected float zPosF;
-	protected boolean repeat = false;
-	/** The number of ticks between repeating the sound */
-	protected int repeatDelay = 0;
-	protected ISound.AttenuationType attenuationType = ISound.AttenuationType.LINEAR;
+public abstract class PositionedSound implements ISound
+{
+    protected Sound sound;
+    @Nullable
+    private SoundEventAccessor soundEvent;
+    protected SoundCategory category;
+    protected ResourceLocation positionedSoundLocation;
+    protected float volume;
+    protected float pitch;
+    protected float xPosF;
+    protected float yPosF;
+    protected float zPosF;
+    protected boolean repeat;
 
-	protected PositionedSound(final ResourceLocation soundResource)
-	{ this.positionedSoundLocation = soundResource; }
+    /** The number of ticks between repeating the sound */
+    protected int repeatDelay;
+    protected ISound.AttenuationType attenuationType;
 
-	@Override
-	public ResourceLocation getSoundLocation() { return this.positionedSoundLocation; }
+    protected PositionedSound(SoundEvent soundIn, SoundCategory categoryIn)
+    {
+        this(soundIn.getSoundName(), categoryIn);
+    }
 
-	@Override
-	public boolean canRepeat() { return this.repeat; }
+    protected PositionedSound(ResourceLocation soundId, SoundCategory categoryIn)
+    {
+        this.volume = 1.0F;
+        this.pitch = 1.0F;
+        this.attenuationType = ISound.AttenuationType.LINEAR;
+        this.positionedSoundLocation = soundId;
+        this.category = categoryIn;
+    }
 
-	@Override
-	public int getRepeatDelay() { return this.repeatDelay; }
+    public ResourceLocation getSoundLocation()
+    {
+        return this.positionedSoundLocation;
+    }
 
-	@Override
-	public float getVolume() { return this.volume; }
+    public SoundEventAccessor createAccessor(SoundHandler handler)
+    {
+        this.soundEvent = handler.getAccessor(this.positionedSoundLocation);
 
-	@Override
-	public float getPitch() { return this.pitch; }
+        if (this.soundEvent == null)
+        {
+            this.sound = SoundHandler.MISSING_SOUND;
+        }
+        else
+        {
+            this.sound = this.soundEvent.cloneEntry();
+        }
 
-	@Override
-	public float getXPosF() { return this.xPosF; }
+        return this.soundEvent;
+    }
 
-	@Override
-	public float getYPosF() { return this.yPosF; }
+    public Sound getSound()
+    {
+        return this.sound;
+    }
 
-	@Override
-	public float getZPosF() { return this.zPosF; }
+    public SoundCategory getCategory()
+    {
+        return this.category;
+    }
 
-	@Override
-	public ISound.AttenuationType getAttenuationType() { return this.attenuationType; }
+    public boolean canRepeat()
+    {
+        return this.repeat;
+    }
+
+    public int getRepeatDelay()
+    {
+        return this.repeatDelay;
+    }
+
+    public float getVolume()
+    {
+        return this.volume * this.sound.getVolume();
+    }
+
+    public float getPitch()
+    {
+        return this.pitch * this.sound.getPitch();
+    }
+
+    public float getXPosF()
+    {
+        return this.xPosF;
+    }
+
+    public float getYPosF()
+    {
+        return this.yPosF;
+    }
+
+    public float getZPosF()
+    {
+        return this.zPosF;
+    }
+
+    public ISound.AttenuationType getAttenuationType()
+    {
+        return this.attenuationType;
+    }
 }

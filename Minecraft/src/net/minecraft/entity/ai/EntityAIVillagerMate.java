@@ -2,22 +2,22 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 
 public class EntityAIVillagerMate extends EntityAIBase
 {
-    private EntityVillager villagerObj;
+    private final EntityVillager villagerObj;
     private EntityVillager mate;
-    private World worldObj;
+    private final World worldObj;
     private int matingTimeout;
     Village villageObj;
 
     public EntityAIVillagerMate(EntityVillager villagerIn)
     {
         this.villagerObj = villagerIn;
-        this.worldObj = villagerIn.worldObj;
+        this.worldObj = villagerIn.world;
         this.setMutexBits(3);
     }
 

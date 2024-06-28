@@ -1,22 +1,23 @@
 package net.minecraft.block;
 
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
-import net.minecraft.world.gen.feature.WorldGenForest;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
 import net.minecraft.world.gen.feature.WorldGenSavannaTree;
@@ -28,13 +29,17 @@ public class BlockSapling extends BlockBush implements IGrowable
 {
     public static final PropertyEnum<BlockPlanks.EnumType> TYPE = PropertyEnum.<BlockPlanks.EnumType>create("type", BlockPlanks.EnumType.class);
     public static final PropertyInteger STAGE = PropertyInteger.create("stage", 0, 1);
+    protected static final AxisAlignedBB SAPLING_AABB = new AxisAlignedBB(0.09999999403953552D, 0.0D, 0.09999999403953552D, 0.8999999761581421D, 0.800000011920929D, 0.8999999761581421D);
 
     protected BlockSapling()
     {
         this.setDefaultState(this.blockState.getBaseState().withProperty(TYPE, BlockPlanks.EnumType.OAK).withProperty(STAGE, Integer.valueOf(0)));
-        float f = 0.4F;
-        this.setBlockBounds(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, f * 2.0F, 0.5F + f);
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
+    }
+
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return SAPLING_AABB;
     }
 
     /**
@@ -42,7 +47,7 @@ public class BlockSapling extends BlockBush implements IGrowable
      */
     public String getLocalizedName()
     {
-        return StatCollector.translateToLocal(this.getUnlocalizedName() + "." + BlockPlanks.EnumType.OAK.getUnlocalizedName() + ".name");
+        return I18n.translateToLocal(this.getUnlocalizedName() + "." + BlockPlanks.EnumType.OAK.getUnlocalizedName() + ".name");
     }
 
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
@@ -80,55 +85,55 @@ public class BlockSapling extends BlockBush implements IGrowable
         switch ((BlockPlanks.EnumType)state.getValue(TYPE))
         {
             case SPRUCE:
-                label114:
+                label68:
                 for (i = 0; i >= -1; --i)
                 {
                     for (j = 0; j >= -1; --j)
                     {
-                        if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.SPRUCE))
+                        if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.SPRUCE))
                         {
                             worldgenerator = new WorldGenMegaPineTree(false, rand.nextBoolean());
                             flag = true;
-                            break label114;
+                            break label68;
                         }
                     }
                 }
 
                 if (!flag)
                 {
-                    j = 0;
                     i = 0;
+                    j = 0;
                     worldgenerator = new WorldGenTaiga2(true);
                 }
 
                 break;
 
             case BIRCH:
-                worldgenerator = new WorldGenForest(true, false);
+                worldgenerator = new WorldGenBirchTree(true, false);
                 break;
 
             case JUNGLE:
-                IBlockState iblockstate = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
-                IBlockState iblockstate1 = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-                label269:
+                IBlockState iblockstate = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+                IBlockState iblockstate1 = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+                label82:
 
                 for (i = 0; i >= -1; --i)
                 {
                     for (j = 0; j >= -1; --j)
                     {
-                        if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.JUNGLE))
+                        if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.JUNGLE))
                         {
                             worldgenerator = new WorldGenMegaJungle(true, 10, 20, iblockstate, iblockstate1);
                             flag = true;
-                            break label269;
+                            break label82;
                         }
                     }
                 }
 
                 if (!flag)
                 {
-                    j = 0;
                     i = 0;
+                    j = 0;
                     worldgenerator = new WorldGenTrees(true, 4 + rand.nextInt(7), iblockstate, iblockstate1, false);
                 }
 
@@ -139,16 +144,16 @@ public class BlockSapling extends BlockBush implements IGrowable
                 break;
 
             case DARK_OAK:
-                label390:
+                label96:
                 for (i = 0; i >= -1; --i)
                 {
                     for (j = 0; j >= -1; --j)
                     {
-                        if (this.func_181624_a(worldIn, pos, i, j, BlockPlanks.EnumType.DARK_OAK))
+                        if (this.isTwoByTwoOfType(worldIn, pos, i, j, BlockPlanks.EnumType.DARK_OAK))
                         {
                             worldgenerator = new WorldGenCanopyTree(true);
                             flag = true;
-                            break label390;
+                            break label96;
                         }
                     }
                 }
@@ -161,7 +166,7 @@ public class BlockSapling extends BlockBush implements IGrowable
             case OAK:
         }
 
-        IBlockState iblockstate2 = Blocks.air.getDefaultState();
+        IBlockState iblockstate2 = Blocks.AIR.getDefaultState();
 
         if (flag)
         {
@@ -191,9 +196,9 @@ public class BlockSapling extends BlockBush implements IGrowable
         }
     }
 
-    private boolean func_181624_a(World p_181624_1_, BlockPos p_181624_2_, int p_181624_3_, int p_181624_4_, BlockPlanks.EnumType p_181624_5_)
+    private boolean isTwoByTwoOfType(World worldIn, BlockPos pos, int p_181624_3_, int p_181624_4_, BlockPlanks.EnumType type)
     {
-        return this.isTypeAt(p_181624_1_, p_181624_2_.add(p_181624_3_, 0, p_181624_4_), p_181624_5_) && this.isTypeAt(p_181624_1_, p_181624_2_.add(p_181624_3_ + 1, 0, p_181624_4_), p_181624_5_) && this.isTypeAt(p_181624_1_, p_181624_2_.add(p_181624_3_, 0, p_181624_4_ + 1), p_181624_5_) && this.isTypeAt(p_181624_1_, p_181624_2_.add(p_181624_3_ + 1, 0, p_181624_4_ + 1), p_181624_5_);
+        return this.isTypeAt(worldIn, pos.add(p_181624_3_, 0, p_181624_4_), type) && this.isTypeAt(worldIn, pos.add(p_181624_3_ + 1, 0, p_181624_4_), type) && this.isTypeAt(worldIn, pos.add(p_181624_3_, 0, p_181624_4_ + 1), type) && this.isTypeAt(worldIn, pos.add(p_181624_3_ + 1, 0, p_181624_4_ + 1), type);
     }
 
     /**
@@ -217,11 +222,11 @@ public class BlockSapling extends BlockBush implements IGrowable
     /**
      * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list)
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> tab)
     {
         for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values())
         {
-            list.add(new ItemStack(itemIn, 1, blockplanks$enumtype.getMetadata()));
+            tab.add(new ItemStack(this, 1, blockplanks$enumtype.getMetadata()));
         }
     }
 
@@ -262,8 +267,8 @@ public class BlockSapling extends BlockBush implements IGrowable
         return i;
     }
 
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, new IProperty[] {TYPE, STAGE});
+        return new BlockStateContainer(this, new IProperty[] {TYPE, STAGE});
     }
 }

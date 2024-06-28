@@ -1,12 +1,15 @@
 package net.minecraft.item;
 
+import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class ItemHangingEntity extends Item
@@ -16,51 +19,50 @@ public class ItemHangingEntity extends Item
     public ItemHangingEntity(Class <? extends EntityHanging > entityClass)
     {
         this.hangingEntityClass = entityClass;
-        this.setCreativeTab(CreativeTabs.tabDecorations);
+        this.setCreativeTab(CreativeTabs.DECORATIONS);
     }
 
     /**
      * Called when a Block is right-clicked with this Item
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer stack, World playerIn, BlockPos worldIn, EnumHand pos, EnumFacing hand, float facing, float hitX, float hitY)
     {
-        if (side == EnumFacing.DOWN)
+        ItemStack itemstack = stack.getHeldItem(pos);
+        BlockPos blockpos = worldIn.offset(hand);
+
+        if (hand != EnumFacing.DOWN && hand != EnumFacing.UP && stack.canPlayerEdit(blockpos, hand, itemstack))
         {
-            return false;
-        }
-        else if (side == EnumFacing.UP)
-        {
-            return false;
+            EntityHanging entityhanging = this.createEntity(playerIn, blockpos, hand);
+
+            if (entityhanging != null && entityhanging.onValidSurface())
+            {
+                if (!playerIn.isRemote)
+                {
+                    entityhanging.playPlaceSound();
+                    playerIn.spawnEntityInWorld(entityhanging);
+                }
+
+                itemstack.func_190918_g(1);
+            }
+
+            return EnumActionResult.SUCCESS;
         }
         else
         {
-            BlockPos blockpos = pos.offset(side);
-
-            if (!playerIn.canPlayerEdit(blockpos, side, stack))
-            {
-                return false;
-            }
-            else
-            {
-                EntityHanging entityhanging = this.createEntity(worldIn, blockpos, side);
-
-                if (entityhanging != null && entityhanging.onValidSurface())
-                {
-                    if (!worldIn.isRemote)
-                    {
-                        worldIn.spawnEntityInWorld(entityhanging);
-                    }
-
-                    --stack.stackSize;
-                }
-
-                return true;
-            }
+            return EnumActionResult.FAIL;
         }
     }
 
+    @Nullable
     private EntityHanging createEntity(World worldIn, BlockPos pos, EnumFacing clickedSide)
     {
-        return (EntityHanging)(this.hangingEntityClass == EntityPainting.class ? new EntityPainting(worldIn, pos, clickedSide) : (this.hangingEntityClass == EntityItemFrame.class ? new EntityItemFrame(worldIn, pos, clickedSide) : null));
+        if (this.hangingEntityClass == EntityPainting.class)
+        {
+            return new EntityPainting(worldIn, pos, clickedSide);
+        }
+        else
+        {
+            return this.hangingEntityClass == EntityItemFrame.class ? new EntityItemFrame(worldIn, pos, clickedSide) : null;
+        }
     }
 }

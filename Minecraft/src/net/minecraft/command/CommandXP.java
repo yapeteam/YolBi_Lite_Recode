@@ -1,9 +1,11 @@
 package net.minecraft.command;
 
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 public class CommandXP extends CommandBase
 {
@@ -32,9 +34,9 @@ public class CommandXP extends CommandBase
     }
 
     /**
-     * Callback when the command is invoked
+     * Callback for when the command is executed
      */
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
         if (args.length <= 0)
         {
@@ -58,7 +60,7 @@ public class CommandXP extends CommandBase
                 i *= -1;
             }
 
-            EntityPlayer entityplayer = args.length > 1 ? getPlayer(sender, args[1]) : getCommandSenderAsPlayer(sender);
+            EntityPlayer entityplayer = args.length > 1 ? getPlayer(server, sender, args[1]) : getCommandSenderAsPlayer(sender);
 
             if (flag)
             {
@@ -67,12 +69,12 @@ public class CommandXP extends CommandBase
                 if (flag1)
                 {
                     entityplayer.addExperienceLevel(-i);
-                    notifyOperators(sender, this, "commands.xp.success.negative.levels", new Object[] {Integer.valueOf(i), entityplayer.getName()});
+                    notifyCommandListener(sender, this, "commands.xp.success.negative.levels", new Object[] {i, entityplayer.getName()});
                 }
                 else
                 {
                     entityplayer.addExperienceLevel(i);
-                    notifyOperators(sender, this, "commands.xp.success.levels", new Object[] {Integer.valueOf(i), entityplayer.getName()});
+                    notifyCommandListener(sender, this, "commands.xp.success.levels", new Object[] {i, entityplayer.getName()});
                 }
             }
             else
@@ -85,19 +87,14 @@ public class CommandXP extends CommandBase
                 }
 
                 entityplayer.addExperience(i);
-                notifyOperators(sender, this, "commands.xp.success", new Object[] {Integer.valueOf(i), entityplayer.getName()});
+                notifyCommandListener(sender, this, "commands.xp.success", new Object[] {i, entityplayer.getName()});
             }
         }
     }
 
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos)
     {
-        return args.length == 2 ? getListOfStringsMatchingLastWord(args, this.getAllUsernames()) : null;
-    }
-
-    protected String[] getAllUsernames()
-    {
-        return MinecraftServer.getServer().getAllUsernames();
+        return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getAllUsernames()) : Collections.emptyList();
     }
 
     /**

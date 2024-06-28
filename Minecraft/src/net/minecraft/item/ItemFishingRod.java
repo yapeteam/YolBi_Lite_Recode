@@ -1,9 +1,18 @@
 package net.minecraft.item;
 
+import javax.annotation.Nullable;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 
 public class ItemFishingRod extends Item
@@ -12,7 +21,29 @@ public class ItemFishingRod extends Item
     {
         this.setMaxDamage(64);
         this.setMaxStackSize(1);
-        this.setCreativeTab(CreativeTabs.tabTools);
+        this.setCreativeTab(CreativeTabs.TOOLS);
+        this.addPropertyOverride(new ResourceLocation("cast"), new IItemPropertyGetter()
+        {
+            public float apply(ItemStack stack, @Nullable World worldIn, @Nullable EntityLivingBase entityIn)
+            {
+                if (entityIn == null)
+                {
+                    return 0.0F;
+                }
+                else
+                {
+                    boolean flag = entityIn.getHeldItemMainhand() == stack;
+                    boolean flag1 = entityIn.getHeldItemOffhand() == stack;
+
+                    if (entityIn.getHeldItemMainhand().getItem() instanceof ItemFishingRod)
+                    {
+                        flag1 = false;
+                    }
+
+                    return (flag || flag1) && entityIn instanceof EntityPlayer && ((EntityPlayer)entityIn).fishEntity != null ? 1.0F : 0.0F;
+                }
+            }
+        });
     }
 
     /**
@@ -32,39 +63,46 @@ public class ItemFishingRod extends Item
         return true;
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
+    public ActionResult<ItemStack> onItemRightClick(World itemStackIn, EntityPlayer worldIn, EnumHand playerIn)
     {
-        if (playerIn.fishEntity != null)
+        ItemStack itemstack = worldIn.getHeldItem(playerIn);
+
+        if (worldIn.fishEntity != null)
         {
-            int i = playerIn.fishEntity.handleHookRetraction();
-            itemStackIn.damageItem(i, playerIn);
-            playerIn.swingItem();
+            int i = worldIn.fishEntity.handleHookRetraction();
+            itemstack.damageItem(i, worldIn);
+            worldIn.swingArm(playerIn);
+            itemStackIn.playSound((EntityPlayer)null, worldIn.posX, worldIn.posY, worldIn.posZ, SoundEvents.field_193780_J, SoundCategory.NEUTRAL, 1.0F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
         }
         else
         {
-            worldIn.playSoundAtEntity(playerIn, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+            itemStackIn.playSound((EntityPlayer)null, worldIn.posX, worldIn.posY, worldIn.posZ, SoundEvents.ENTITY_BOBBER_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
 
-            if (!worldIn.isRemote)
+            if (!itemStackIn.isRemote)
             {
-                worldIn.spawnEntityInWorld(new EntityFishHook(worldIn, playerIn));
+                EntityFishHook entityfishhook = new EntityFishHook(itemStackIn, worldIn);
+                int j = EnchantmentHelper.func_191528_c(itemstack);
+
+                if (j > 0)
+                {
+                    entityfishhook.func_191516_a(j);
+                }
+
+                int k = EnchantmentHelper.func_191529_b(itemstack);
+
+                if (k > 0)
+                {
+                    entityfishhook.func_191517_b(k);
+                }
+
+                itemStackIn.spawnEntityInWorld(entityfishhook);
             }
 
-            playerIn.swingItem();
-            playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+            worldIn.swingArm(playerIn);
+            worldIn.addStat(StatList.getObjectUseStats(this));
         }
 
-        return itemStackIn;
-    }
-
-    /**
-     * Checks isDamagable and if it cannot be stacked
-     */
-    public boolean isItemTool(ItemStack stack)
-    {
-        return super.isItemTool(stack);
+        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, itemstack);
     }
 
     /**
