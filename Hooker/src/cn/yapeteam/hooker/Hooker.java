@@ -49,35 +49,6 @@ public class Hooker {
         return outStream.toByteArray();
     }
 
-    private static byte[] getNeteaseHook() throws Throwable {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YOLBI_DIR, "hooker.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    if (entry.getName().equals("cn/yapeteam/hooker/FuckNetEaseMixin.class")) {
-                        return readStream(zis);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private static byte[] getClassFindHook() throws Throwable {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YOLBI_DIR, "hooker.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    if (entry.getName().equals("cn/yapeteam/hooker/LaunchClassLoaderMixin.class")) {
-                        return readStream(zis);
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-
     private native static byte[] getClassBytes(Class<?> clazz);
 
     private native static int redefineClass(Class<?> clazz, byte[] bytes);
@@ -144,6 +115,7 @@ public class Hooker {
         return writer.toByteArray();
     }
 
+    @SuppressWarnings("unused")
     public static Class<?> onFindClass(ClassLoader cl, String name) {
         try {
             if (shouldHook(name)) {
@@ -165,6 +137,7 @@ public class Hooker {
         return null;
     }
 
+    @SuppressWarnings("unused")
     public static void hook() {
         try {
             cacheJar(new File(YOLBI_DIR, "loader.jar"));
