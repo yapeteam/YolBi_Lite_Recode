@@ -1,11 +1,7 @@
 package cn.yapeteam.agent;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 @SuppressWarnings("unused")
 public class Bootstrap {
@@ -18,7 +14,7 @@ public class Bootstrap {
     public static void premain(String args, Instrumentation instrumentation) {
         new Thread(() -> {
             try {
-                Thread.sleep(5000);
+                Thread.sleep(7000);
                 inject();
             } catch (Throwable e) {
                 throw new RuntimeException(e);

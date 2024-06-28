@@ -15,6 +15,7 @@ import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.notification.NotificationType;
+import cn.yapeteam.yolbi.render.JFrameRenderer;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.animation.Easing;
@@ -40,6 +41,7 @@ public class YolBi {
     private NotificationManager notificationManager;
     private BotManager botManager;
     private RenderManager renderManager;
+    private JFrameRenderer jFrameRenderer;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -64,18 +66,19 @@ public class YolBi {
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
         instance.renderManager = new RenderManager();
+        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
+        instance.eventManager.register(instance.botManager);
+        instance.eventManager.register(instance.renderManager);
+        instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(YolBi.class);
         instance.eventManager.register(RotationManager.class);
-        instance.eventManager.register(instance.botManager);
-        instance.eventManager.register(instance.renderManager);
-        instance.eventManager.register(instance.targetManager);
         instance.moduleManager.load();
         instance.getRenderManager().initwindow();
         try {
@@ -102,6 +105,7 @@ public class YolBi {
     public void shutdown() {
         try {
             renderManager.destroywindow();
+            instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
             instance = new YolBi();
