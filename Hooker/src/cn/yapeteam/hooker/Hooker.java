@@ -8,7 +8,6 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
-import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -122,6 +121,13 @@ public class Hooker {
             if (shouldHook(name)) {
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
+                if (name.startsWith("javafx.") && !classes.containsKey(name)) {
+                    if (System.getProperty("java.version").startsWith("1.8"))
+                        Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "dependencies/jfxrt/jfxrt.jar"));
+                    else
+                        for (File file : Objects.requireNonNull(new File(Hooker.YOLBI_DIR, "dependencies/javafx").listFiles()))
+                            Hooker.cacheJar(file);
+                }
                 byte[] bytes = Hooker.classes.get(name);
                 if (bytes == null)
                     return null;
@@ -154,7 +160,6 @@ public class Hooker {
             Thread thread = (Thread) o;
             if (thread.getName().equals("Client thread")) {
                 client_thread = thread;
-                JOptionPane.showMessageDialog(null, "Class loader: " + client_thread.getContextClassLoader().getClass().getName());
                 break;
             }
         }
