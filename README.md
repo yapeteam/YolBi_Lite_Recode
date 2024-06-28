@@ -44,3 +44,6 @@ For custom build, please edit `YBuild.xml`
 - [ ] Legit TellyBridge
 - [ ] Legit KillAura
 - [ ] Legit AimAssist
+- [ ] Modifier
+- [ ] TargetHUD without OpenGL
+- [ ] Killaura
