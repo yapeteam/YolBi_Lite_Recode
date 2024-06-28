@@ -123,17 +123,17 @@ jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsig
 #pragma ide diagnostic ignored "UnusedParameter"
 
 void JNICALL classFileLoadHook(jvmtiEnv
-                      *jvmti_env,
-                  JNIEnv *env,
-                  jclass
-                      class_being_redefined,
-                  jobject loader,
-                  const char *name, jobject protection_domain,
-                  jint class_data_len,
-                  const unsigned char *class_data,
-                  jint
-                      *new_class_data_len,
-                  unsigned char **new_class_data)
+                                   *jvmti_env,
+                               JNIEnv *env,
+                               jclass
+                                   class_being_redefined,
+                               jobject loader,
+                               const char *name, jobject protection_domain,
+                               jint class_data_len,
+                               const unsigned char *class_data,
+                               jint
+                                   *new_class_data_len,
+                               unsigned char **new_class_data)
 {
     *new_class_data = NULL;
 
@@ -351,9 +351,32 @@ void Inject()
     else
         printf("classLoader found\n");
 
+    jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
+    jclass Object = (*jniEnv)->FindClass(jniEnv, "java/lang/Object");
+    jmethodID getClassLoader = (*jniEnv)->GetMethodID(jniEnv, Class, "getClassLoader", "()Ljava/lang/ClassLoader;");
+    jmethodID getClass = (*jniEnv)->GetMethodID(jniEnv, Object, "getClass", "()Ljava/lang/Class;");
+    jobject classObject = (*jniEnv)->CallObjectMethod(jniEnv, classLoader, getClass);
+    jobject classLoaderLoader = (*jniEnv)->CallObjectMethod(jniEnv, classObject, getClassLoader);
+
+    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
+    jstring className = (*jniEnv)->NewStringUTF(jniEnv, "net.minecraft.launchwrapper.LaunchClassLoader");
+    (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    boolean hasLaunchClassLoader = TRUE;
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionDescribe(jniEnv);
+        (*jniEnv)->ExceptionClear(jniEnv);
+        hasLaunchClassLoader = FALSE;
+    }
+
+    if (hasLaunchClassLoader)
+        printf("LaunchClassLoader found\n");
+
     char jarPath[260];
     sprintf_s(jarPath, 260, "%s\\deps.jar", yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
+    if (hasLaunchClassLoader)
+        loadJar(jniEnv, jarPath, classLoaderLoader);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
@@ -377,9 +400,19 @@ void Inject()
 
     char hookerPath[260];
     sprintf_s(hookerPath, 260, "%s\\hooker.jar", yolbiPath);
-    loadJar(jniEnv, hookerPath, systemClassLoader);
 
-    jclass Hooker = findThreadClass("cn.yapeteam.hooker.Hooker", systemClassLoader);
+    if (hasLaunchClassLoader)
+        loadJar(jniEnv, hookerPath, classLoaderLoader);
+    else
+        loadJar(jniEnv, hookerPath, systemClassLoader);
+
+    JNINativeMethod HookerMethods[] = {
+        {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
+        {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
+        {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
+    };
+
+    jclass Hooker = findThreadClass("cn.yapeteam.hooker.Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
 
     if (!Hooker)
     {
@@ -388,12 +421,6 @@ void Inject()
     }
 
     printf("Hooker class found\n");
-
-    JNINativeMethod HookerMethods[] = {
-        {"getClassBytes", "(Ljava/lang/Class;)[B", (void *)&GetClassBytes},
-        {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
-        {"redefineClass", "(Ljava/lang/Class;[B)I", (void *)&RedefineClass},
-    };
     (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
 
     jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");

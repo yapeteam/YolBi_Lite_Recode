@@ -8,6 +8,7 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -150,20 +151,20 @@ public class Hooker {
             Thread thread = (Thread) o;
             if (thread.getName().equals("Client thread")) {
                 client_thread = thread;
+                JOptionPane.showMessageDialog(null, "Class loader: " + client_thread.getContextClassLoader().getClass().getName());
                 break;
             }
         }
 
         boolean hasLaunchClassLoader = true;
-        Class<?> LaunchClassLoaderClass = null;
         try {
-            LaunchClassLoaderClass = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
+            Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
         } catch (ClassNotFoundException e) {
             hasLaunchClassLoader = false;
         }
         if (hasLaunchClassLoader) {
             try {
-                byte[] targetBytes = getClassBytes(LaunchClassLoaderClass);
+                byte[] targetBytes = getClassBytes(client_thread.getContextClassLoader().getClass());
                 ClassNode targetNode = node(targetBytes);
                 for (MethodNode method : targetNode.methods) {
                     if (method.name.equals("findClass") && method.desc.equals("(Ljava/lang/String;)Ljava/lang/Class;")) {
@@ -184,7 +185,7 @@ public class Hooker {
                     }
                 }
                 val bytes = rewriteClass(targetNode);
-                redefineClass(LaunchClassLoaderClass, bytes);
+                redefineClass(client_thread.getContextClassLoader().getClass(), bytes);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
