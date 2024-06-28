@@ -31,7 +31,7 @@ Run `DEBUG`
 
 3. Your jar will appear in `./build`
 
-- YolBi Dir is `<userhome>/.yolbi`
+- Cache Dir is `<userhome>/.yolbi`
 
 ## Custom
 
