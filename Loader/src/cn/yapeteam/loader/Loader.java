@@ -19,7 +19,7 @@ public class Loader {
             Logger.warn("ClassLoader: " + BootStrap.client_thread.getContextClassLoader().getClass().getName());
             SocketSender.init();
             try {
-                UIManager.getDefaults().put("ClassLoader", ClassLoader.getSystemClassLoader());
+                UIManager.getDefaults().put("ClassLoader", BootStrap.client_thread.getContextClassLoader());
                 UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } catch (UnsupportedLookAndFeelException e) {
                 Logger.exception(e);

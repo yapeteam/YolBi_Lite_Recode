@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -144,7 +145,9 @@ public class Hooker {
         } catch (Exception ignored) {
         }
         try {
-            cacheJar(new File(YOLBI_DIR, "deps.jar"));
+            for (File file : Objects.requireNonNull(new File(YOLBI_DIR, "dependencies").listFiles())) {
+                cacheJar(file);
+            }
         } catch (Exception ignored) {
         }
         for (Object o : Thread.getAllStackTraces().keySet().toArray()) {

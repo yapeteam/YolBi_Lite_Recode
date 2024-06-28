@@ -286,6 +286,11 @@ JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
     printf("Start method called\n");
 }
 
+int starts_with(const char *str, const char *prefix)
+{
+    return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
 int str_endwith(const char *str, const char *reg)
 {
     int l1 = strlen(str), l2 = strlen(reg);
@@ -373,7 +378,7 @@ void Inject()
         printf("LaunchClassLoader found\n");
 
     char jarPath[260];
-    sprintf_s(jarPath, 260, "%s\\deps.jar", yolbiPath);
+    sprintf_s(jarPath, 260, "%s\\dependencies\\asm-all-9.2.jar", yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
         loadJar(jniEnv, jarPath, classLoaderLoader);
@@ -426,6 +431,57 @@ void Inject()
     jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
     (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
 
+    char depsPath[MAX_PATH];
+    sprintf_s(depsPath, MAX_PATH, "%s\\dependencies", yolbiPath);
+
+    DIR *dir = opendir(depsPath);
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (str_endwith(entry->d_name, ".jar"))
+        {
+            char jarPath[260];
+            sprintf_s(jarPath, 260, "%s\\%s", depsPath, entry->d_name);
+            loadJar(jniEnv, jarPath, systemClassLoader);
+            printf("loaded: %s\n", jarPath);
+        }
+    }
+    closedir(dir);
+
+    jclass systemClass = (*jniEnv)->FindClass(jniEnv, "java/lang/System");
+    jmethodID getPropertyMethodID = (*jniEnv)->GetStaticMethodID(jniEnv, systemClass, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
+    jstring jdkVersionString = (jstring)(*jniEnv)->CallStaticObjectMethod(jniEnv, systemClass, getPropertyMethodID, (*jniEnv)->NewStringUTF(jniEnv, "java.version"));
+    const char *jdkVersion = (*jniEnv)->GetStringUTFChars(jniEnv, jdkVersionString, 0);
+    if (starts_with(jdkVersion, "1.8"))
+    {
+        char jfxrtPath[MAX_PATH];
+        sprintf_s(jfxrtPath, MAX_PATH, "%s\\jfxrt\\jfxrt.jar", depsPath);
+        loadJar(jniEnv, jfxrtPath, systemClassLoader);
+        printf("loaded: jfxrt.jar\n");
+    }
+    else
+    {
+        char javafxPath[MAX_PATH];
+        sprintf_s(javafxPath, MAX_PATH, "%s\\%s", depsPath, "javafx");
+        DIR *javafx_dir = opendir(javafxPath);
+        struct dirent *entry;
+        while ((entry = readdir(javafx_dir)) != NULL)
+        {
+            if (str_endwith(entry->d_name, ".jar"))
+            {
+                char jarPath[260];
+                sprintf_s(jarPath, 260, "%s\\%s", javafxPath, entry->d_name);
+                loadJar(jniEnv, jarPath, systemClassLoader);
+                printf("loaded: %s\n", jarPath);
+            }
+        }
+        closedir(javafx_dir);
+    }
+
+    char ymixinPath[260];
+    sprintf_s(ymixinPath, 260, "%s\\ymixin.jar", yolbiPath);
+    loadJar(jniEnv, ymixinPath, classLoader);
+
     char loaderPath[260];
     sprintf_s(loaderPath, 260, "%s\\loader.jar", yolbiPath);
     loadJar(jniEnv, loaderPath, classLoader);
@@ -454,6 +510,11 @@ void Inject()
     printf("Native methods registered\n");
 
     jclass BootStrap = findThreadClass("cn.yapeteam.loader.BootStrap", classLoader);
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionDescribe(jniEnv);
+        (*jniEnv)->ExceptionClear(jniEnv);
+    }
     if (!BootStrap)
     {
         printf("Failed to find BootStrap class\n");

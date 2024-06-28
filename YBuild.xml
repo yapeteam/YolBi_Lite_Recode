@@ -7,7 +7,6 @@
             <binary>out/production/Injector</binary>
             <includes>
                 <dir>Injector/META-INF</dir>
-                <extract>deps/asm-all-9.2.jar</extract>
                 <extract>deps/jna.jar</extract>
                 <extract>deps/flatlaf.jar</extract>
                 <extract>deps/flatlaf-intellij-themes.jar</extract>
@@ -16,32 +15,27 @@
                     <dir name="injection">
                         <archive name="injection.jar">
                             <files>out/production/Core</files>
-                            <extract>deps/jfxrt.jar</extract>
-                            <file>module-infos/core/module-info.java</file>
                         </archive>
                     </dir>
-                    <archive name="deps.jar">
-                        <extract>deps/asm-all-9.2.jar</extract>
-                        <extract>deps/flatlaf.jar</extract>
-                        <extract>deps/flatlaf-intellij-themes.jar</extract>
-                        <extract>deps/jfxrt.jar</extract>
-                        <extract>deps/jna.jar</extract>
-                        <extract>deps/javafx.base.jar</extract>
-                        <extract>deps/javafx.controls.jar</extract>
-                        <extract>deps/javafx.fxml.jar</extract>
-                        <extract>deps/javafx.graphics.jar</extract>
-                        <extract>deps/javafx.media.jar</extract>
-                        <extract>deps/javafx.swing.jar</extract>
-                        <extract>deps/javafx.web.jar</extract>
-                        <extract>deps/javafx-swt.jar</extract>
-                        <files>out/production/YMixin</files>
-                    </archive>
+                    <dir name="dependencies">
+                        <file>deps/asm-all-9.2.jar</file>
+                        <file>deps/flatlaf.jar</file>
+                        <file>deps/flatlaf-intellij-themes.jar</file>
+                        <dir name="jfxrt">
+                            <file>deps/jfxrt.jar</file>
+                        </dir>
+                        <dir name="javafx">
+                            <files>javafx</files>
+                        </dir>
+                    </dir>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
-                        <file>module-infos/loader/module-info.java</file>
                     </archive>
                     <archive name="hooker.jar">
                         <files>out/production/Hooker</files>
+                    </archive>
+                    <archive name="ymixin.jar">
+                        <files>out/production/YMixin</files>
                     </archive>
                     <archive name="agent.jar">
                         <dir>Agent/META-INF</dir>

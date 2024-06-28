@@ -21,7 +21,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.opengl.Display;
 
@@ -155,7 +154,8 @@ public class RenderManager implements IMinecraft {
     // Initialize the overlay window
     public void initwindow() {
         try {
-            unzip(RenderManager.class.getResourceAsStream("/jfx-natives.zip"), new File(System.getProperty("java.library.path")));
+            unzip(RenderManager.class.getResourceAsStream(System.getProperty("java.version").startsWith("1.8") ?
+                    "/jfxrt-natives.zip" : "/javafx-natives.zip"), new File(System.getProperty("java.library.path")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

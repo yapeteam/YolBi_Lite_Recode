@@ -74,66 +74,77 @@ public class BootStrap {
         return Mapper.Mode.Searge;
     }
 
-    public static void entry() throws Throwable {
-        if (JVMTIWrapper.instance == null)
-            JVMTIWrapper.instance = new NativeWrapper();
-        for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
-            Thread thread = (Thread) o;
-            if (thread.getName().equals("Client thread")) {
-                client_thread = thread;
-                break;
-            }
-        }
-        Mapper.Mode mode = guessMappingMode();
-        YMixin.init(
-                name -> {
-                    try {
-                        return Class.forName(name.replace("/", "."), true, client_thread.getContextClassLoader());
-                    } catch (ClassNotFoundException e) {
-                        return null;
-                    }
-                }, new cn.yapeteam.ymixin.Logger() {
-                    @Override
-                    public void error(String str, Object... o) {
-                        Logger.error(str, o);
-                    }
+    public static boolean hasLaunchClassLoader = true;
 
-                    @Override
-                    public void info(String str, Object... o) {
-                        Logger.info(str, o);
-                    }
-
-                    @Override
-                    public void warn(String str, Object... o) {
-                        Logger.warn(str, o);
-                    }
-
-                    @Override
-                    public void success(String str, Object... o) {
-                        Logger.success(str, o);
-                    }
-
-                    @Override
-                    public void exception(Throwable ex) {
-                        Logger.exception(ex);
-                    }
+    public static void entry() {
+        try {
+            if (JVMTIWrapper.instance == null)
+                JVMTIWrapper.instance = new NativeWrapper();
+            for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
+                Thread thread = (Thread) o;
+                if (thread.getName().equals("Client thread")) {
+                    client_thread = thread;
+                    break;
                 }
-        );
-        Logger.info("Reading mappings, mode: {}", mode.name());
-        Mapper.setMode(mode);
-        String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/vanilla.srg")), StandardCharsets.UTF_8);
-        String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/forge.srg")), StandardCharsets.UTF_8);
-        Mapper.readMappings(vanilla, forge);
+            }
+            try {
+                Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
+            } catch (ClassNotFoundException e) {
+                hasLaunchClassLoader = false;
+            }
+            Mapper.Mode mode = guessMappingMode();
+            YMixin.init(
+                    name -> {
+                        try {
+                            return Class.forName(name.replace("/", "."), true, client_thread.getContextClassLoader());
+                        } catch (ClassNotFoundException e) {
+                            return null;
+                        }
+                    }, new cn.yapeteam.ymixin.Logger() {
+                        @Override
+                        public void error(String str, Object... o) {
+                            Logger.error(str, o);
+                        }
 
-        Logger.warn("Loading Hooks...");
-        Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
+                        @Override
+                        public void info(String str, Object... o) {
+                            Logger.info(str, o);
+                        }
 
-        byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
-        ClassNode initHookNode = ASMUtils.node(initHook);
-        Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
-        transformer.addMixin(initHookNode);
+                        @Override
+                        public void warn(String str, Object... o) {
+                            Logger.warn(str, o);
+                        }
 
-        val map = transformer.transform();
-        Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
+                        @Override
+                        public void success(String str, Object... o) {
+                            Logger.success(str, o);
+                        }
+
+                        @Override
+                        public void exception(Throwable ex) {
+                            Logger.exception(ex);
+                        }
+                    }
+            );
+            Logger.info("Reading mappings, mode: {}", mode.name());
+            Mapper.setMode(mode);
+            String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/vanilla.srg")), StandardCharsets.UTF_8);
+            String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/forge.srg")), StandardCharsets.UTF_8);
+            Mapper.readMappings(vanilla, forge);
+
+            Logger.warn("Loading Hooks...");
+            Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
+
+            byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
+            ClassNode initHookNode = ASMUtils.node(initHook);
+            Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
+            transformer.addMixin(initHookNode);
+
+            val map = transformer.transform();
+            Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
+        } catch (Throwable e) {
+            Logger.exception(e);
+        }
     }
 }
