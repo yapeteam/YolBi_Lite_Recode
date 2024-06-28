@@ -168,7 +168,9 @@ public class Hooker {
         Class<?> LaunchClassLoaderClass = null;
         try {
             LaunchClassLoaderClass = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
+            UIManager.getDefaults().put("ClassLoader", ClassLoader.getSystemClassLoader());
         } catch (ClassNotFoundException e) {
+            UIManager.getDefaults().put("ClassLoader", client_thread.getContextClassLoader());
             hasLaunchClassLoader = false;
         }
         if (hasLaunchClassLoader) {
