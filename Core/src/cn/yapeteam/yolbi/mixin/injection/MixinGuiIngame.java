@@ -5,6 +5,7 @@ import cn.yapeteam.ymixin.annotations.Local;
 import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.annotations.Target;
 import cn.yapeteam.yolbi.YolBi;
+import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.ScaledResolution;
 
@@ -20,6 +21,6 @@ public class MixinGuiIngame {
             )
     )
     public void onRenderGameOverlay(@Local(source = "partialTicks", index = 1) float partialTicks, @Local(source = "scaledResolution", index = 2) ScaledResolution scaledResolution) {
-        YolBi.instance.getFontManager().getPingFang12().drawString("YolBi-" + partialTicks, 10, 10, 0xFFFFFF);
+        YolBi.instance.getEventManager().post(new EventRender2D(partialTicks, scaledResolution));
     }
 }
