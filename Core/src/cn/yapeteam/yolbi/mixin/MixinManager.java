@@ -24,7 +24,7 @@ public class MixinManager {
 
     public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
-        //  add("MixinMinecraft");
+        add("MixinMinecraft");
         //  add("MixinGuiIngame");
         //  add("MixinEntityPlayerSP");
         //  add("MixinEntityRenderer");
