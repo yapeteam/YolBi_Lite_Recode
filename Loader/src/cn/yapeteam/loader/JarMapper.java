@@ -4,6 +4,7 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.StreamUtils;
 import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.ymixin.utils.ASMUtils;
 import lombok.val;
 import lombok.var;
@@ -43,17 +44,20 @@ public class JarMapper {
                 new Thread(() -> SocketSender.send("P1" + " " + (float) finalCount / finalAll * 100f)).start();
                 var bytes = StreamUtils.readStream(zis);
                 if (!se.isDirectory() && se.getName().endsWith(".class") && se.getName().startsWith("cn/yapeteam/")) {
-                    val node = ASMUtils.node(bytes);
+                    var node = ASMUtils.node(bytes);
                     if (DontMap.Helper.hasAnnotation(node)) {
                         write(se.getName(), bytes, zos);
-                        System.out.println("Skipping class: " + se.getName());
+                        Logger.info("Skipping class: {}", se.getName());
                         continue;
                     }
-                    bytes = ASMUtils.rewriteClass(ClassMapper.map(node, mode));
+                    ClassMapper.map(node, mode);
                     if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
                         Logger.info("Mapping mixin class: {}", se.getName());
+                        Shadow.Helper.processShadow(node);
+                        bytes = ASMUtils.rewriteClass(node);
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
                     }
+                    bytes = ASMUtils.rewriteClass(node);
                     write(se.getName(), bytes, zos);
                 } else if (!se.isDirectory()) write(se.getName(), bytes, zos);
             }
