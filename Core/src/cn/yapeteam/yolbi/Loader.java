@@ -1,8 +1,6 @@
 package cn.yapeteam.yolbi;
 
-import cn.yapeteam.loader.JVMTIWrapper;
-import cn.yapeteam.loader.NativeWrapper;
-import cn.yapeteam.loader.SocketSender;
+import cn.yapeteam.loader.*;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.mixin.MixinManager;
 
@@ -15,6 +13,12 @@ public class Loader {
         try {
             if (JVMTIWrapper.instance == null)
                 JVMTIWrapper.instance = new NativeWrapper();
+            // 暂时的
+            if (BootStrap.getVersion().first != Version.V1_8_9) {
+                Logger.error("Unsupported Minecraft version: {}", BootStrap.getVersion().first.getVersion());
+                SocketSender.send("CLOSE");
+                return;
+            }
             Logger.info("Start Loading!");
             Logger.info("Initializing MixinLoader...");
             MixinManager.init();

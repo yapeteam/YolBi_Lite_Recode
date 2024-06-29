@@ -149,12 +149,6 @@ public class BootStrap {
             }
             Logger.info("Minecraft version: {} ({})", version.first.getVersion(), branch);
             Mapper.Mode mode = version.second;
-            // 暂时的
-            if (version.first != Version.V1_8_9) {
-                Logger.error("Unsupported Minecraft version: {}", version.first.getVersion());
-                SocketSender.send("CLOSE");
-                return;
-            }
 
             Logger.info("Reading mappings, mode: {}", mode.name());
             Mapper.setMode(mode);

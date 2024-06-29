@@ -16,6 +16,9 @@
                         <archive name="injection.jar">
                             <files>out/production/Core</files>
                         </archive>
+                        <archive name="wrapper.jar">
+                            <files>out/production/Wrapper</files>
+                        </archive>
                     </dir>
                     <dir name="dependencies">
                         <file>deps/asm-all-9.2.jar</file>
