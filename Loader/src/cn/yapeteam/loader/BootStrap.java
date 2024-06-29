@@ -68,9 +68,7 @@ public class BootStrap {
 
     private static Pair<Version, Mapper.Mode> getMinecraftVersion() {
         Mapper.Mode mode;
-        Version version = Version.parse(System.getProperty("java.library.path"));
-        if (version == null)
-            version = Version.parse(System.getProperty("sun.java.command"));
+        Version version = Version.get();
         Class<?> clazz = ClassUtils.getClass(("net.minecraft.client.Minecraft"));
         if (clazz != null) {
             byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
@@ -138,7 +136,11 @@ public class BootStrap {
             );
             Pair<Version, Mapper.Mode> version = getMinecraftVersion();
             if (version == null || version.first == null || version.second == null) {
-                Logger.error("Failed to get Minecraft version, please check your game version.");
+                Logger.error("Failed to get Minecraft version.");
+                if (version != null) {
+                    Logger.error("Version: {}, Mode: {}", version.first, version.second);
+                    Logger.error("java.library.path: {}, sun.java.command: {}", System.getProperty("java.library.path"), System.getProperty("sun.java.command"));
+                } else Logger.error("Version: null, Mode: null");
                 return;
             }
             String branch = "null";

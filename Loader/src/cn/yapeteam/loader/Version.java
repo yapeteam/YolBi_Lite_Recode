@@ -14,8 +14,9 @@ public enum Version {
         this.version = version;
     }
 
-    public static Version parse(String libraryPath) {
-        if (libraryPath == null) return null;
-        return Arrays.stream(values()).filter(v -> libraryPath.contains(v.version)).findFirst().orElse(null);
+    public static Version get() {
+        Version version = Arrays.stream(values()).filter(v -> System.getProperty("java.library.path").contains(v.version)).findFirst().orElse(null);
+        if (version != null) return version;
+        return Arrays.stream(values()).filter(v -> System.getProperty("sun.java.command").contains(" " + v.version.substring(0, 3) + " ")).findFirst().orElse(null);
     }
 }
