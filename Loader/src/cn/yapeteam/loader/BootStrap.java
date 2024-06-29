@@ -156,15 +156,17 @@ public class BootStrap {
             }
             Logger.info("Minecraft version: {} ({})", version.first.getVersion(), branch);
             Mapper.Mode mode = version.second;
+            // 暂时的
+            if (version.first != Version.V1_8_9) {
+                Logger.error("Unsupported Minecraft version: {}", version.first.getVersion());
+                SocketSender.send("CLOSE");
+                return;
+            }
             Logger.info("Reading mappings, mode: {}", mode.name());
             Mapper.setMode(mode);
             String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8);
             String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
             Mapper.readMappings(vanilla, forge);
-            if (version.first != Version.V1_8_9) {
-                Logger.error("Unsupported Minecraft version: {}", version.first.getVersion());
-                return;
-            }
 
             Logger.warn("Loading Hooks...");
             Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
