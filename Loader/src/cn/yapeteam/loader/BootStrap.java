@@ -9,10 +9,7 @@ import cn.yapeteam.ymixin.YMixin;
 import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.val;
-import org.objectweb.asm_9_2.tree.AbstractInsnNode;
 import org.objectweb.asm_9_2.tree.ClassNode;
-import org.objectweb.asm_9_2.tree.LdcInsnNode;
-import org.objectweb.asm_9_2.tree.MethodNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,8 +19,6 @@ import java.nio.file.Files;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import static cn.yapeteam.ymixin.utils.ASMUtils.node;
 
 /**
  * native used
@@ -72,26 +67,21 @@ public class BootStrap {
     public static Thread client_thread = null;
 
     private static Pair<Version, Mapper.Mode> getMinecraftVersion() {
-        byte[] bytes;
+        Mapper.Mode mode;
+        Version version = Version.parse(System.getProperty("java.library.path"));
+        if (version == null)
+            version = Version.parse(System.getProperty("sun.java.command"));
         Class<?> clazz = ClassUtils.getClass(("net.minecraft.client.Minecraft"));
         if (clazz != null) {
-            bytes = JVMTIWrapper.instance.getClassBytes(clazz);
-            ClassNode node = node(bytes);
-            MethodNode methodNode = node.methods.stream().filter(m -> m.name.equals("createDisplay") || m.name.equals("func_175609_am")).findFirst().orElse(null);
-            if (methodNode == null)
-                return null;
-            for (AbstractInsnNode instruction : methodNode.instructions)
-                if (instruction instanceof LdcInsnNode)
-                    return new Pair<>(Version.parse(((LdcInsnNode) instruction).cst.toString().split(" ")[1]), methodNode.name.equals("createDisplay") ? Mapper.Mode.None : Mapper.Mode.Searge);
-            return null;
-        } else {
-            clazz = ClassUtils.getClass(("ave"));
-            bytes = JVMTIWrapper.instance.getClassBytes(clazz);
-            ClassNode node = node(bytes);
-            if (node.methods.stream().anyMatch(m -> m.name.equals("ap")))
-                return new Pair<>(Version.V1_8_9, Mapper.Mode.Vanilla);
-            else return new Pair<>(Version.V1_12_2, Mapper.Mode.Vanilla);
-        }
+            byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
+            if (bytes != null) {
+                ClassNode node = ASMUtils.node(bytes);
+                if (node.methods.stream().anyMatch(method -> method.name.equals("runTick")))
+                    mode = Mapper.Mode.None;
+                else mode = Mapper.Mode.Searge;
+            } else return null;
+        } else mode = Mapper.Mode.Vanilla;
+        return new Pair<>(version, mode);
     }
 
     public static boolean hasLaunchClassLoader = true;
@@ -147,7 +137,7 @@ public class BootStrap {
                     }
             );
             Pair<Version, Mapper.Mode> version = getMinecraftVersion();
-            if (version == null) {
+            if (version == null || version.first == null || version.second == null) {
                 Logger.error("Failed to get Minecraft version, please check your game version.");
                 return;
             }
@@ -169,7 +159,7 @@ public class BootStrap {
             String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8);
             String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
             Mapper.readMappings(vanilla, forge);
-            if (version.first == Version.V1_12_2) {
+            if (version.first != Version.V1_8_9) {
                 Logger.error("Unsupported Minecraft version: 1.12.2");
                 return;
             }

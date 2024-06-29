@@ -14,7 +14,8 @@ public enum Version {
         this.version = version;
     }
 
-    public static Version parse(String version) {
-        return Arrays.stream(values()).filter(v -> v.getVersion().equals(version)).findFirst().orElse(null);
+    public static Version parse(String libraryPath) {
+        if (libraryPath == null) return null;
+        return Arrays.stream(values()).filter(v -> libraryPath.contains(v.version)).findFirst().orElse(null);
     }
 }
