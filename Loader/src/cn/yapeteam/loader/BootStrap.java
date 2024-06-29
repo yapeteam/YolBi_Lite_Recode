@@ -169,6 +169,10 @@ public class BootStrap {
             String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8);
             String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
             Mapper.readMappings(vanilla, forge);
+            if (version.first == Version.V1_12_2) {
+                Logger.error("Unsupported Minecraft version: 1.12.2");
+                return;
+            }
 
             Logger.warn("Loading Hooks...");
             Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
