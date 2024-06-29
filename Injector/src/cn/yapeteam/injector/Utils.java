@@ -92,16 +92,4 @@ public class Utils {
         mkdir(file.getParentFile());
         boolean ignored = file.mkdir();
     }
-
-    public static byte[] readStream(InputStream inStream) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        try (InputStream input = inStream;
-             ByteArrayOutputStream output = outStream) {
-            while ((len = input.read(buffer)) != -1)
-                output.write(buffer, 0, len);
-            return output.toByteArray();
-        }
-    }
 }

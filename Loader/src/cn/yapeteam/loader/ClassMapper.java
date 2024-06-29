@@ -1,14 +1,11 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.ymixin.annotations.DontMap;
-import cn.yapeteam.ymixin.annotations.Mixin;
-import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.ymixin.annotations.Super;
 import cn.yapeteam.ymixin.utils.DescParser;
 import cn.yapeteam.ymixin.utils.Mapper;
-import lombok.AllArgsConstructor;
+import lombok.val;
 import org.objectweb.asm_9_2.Handle;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
@@ -19,103 +16,62 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClassMapper {
-    public static ClassNode map(ClassNode node) throws Throwable {
-        if (DontMap.Helper.hasAnnotation(node)) return node;
-        Logger.info("Mapping class " + node.name);
-        node.superName = Mapper.getObfClass(node.superName);
-        List<String> interfaces = new ArrayList<>();
-        for (String anInterface : node.interfaces)
-            interfaces.add(Mapper.getObfClass(anInterface));
-        node.interfaces = interfaces;
-        if (node.visibleAnnotations != null)
-            for (AnnotationNode visibleAnnotation : node.visibleAnnotations) {
-                if (visibleAnnotation.values == null) continue;
-                List<Object> values = new ArrayList<>();
-                for (int i = 0; i < visibleAnnotation.values.size(); i++) {
-                    Object aValue = visibleAnnotation.values.get(i);
-                    if (aValue instanceof Type) {
-                        Type type = (Type) aValue;
-                        String name = type.getClassName();
-                        int count = 0;
-                        if (name.contains("[]"))
-                            while (name.contains("[]")) {
-                                name = replaceFirst(name, "[]", "");
-                                count++;
-                            }
-                        StringBuilder builder = new StringBuilder();
-                        for (int j = 0; j < count; j++)
-                            builder.append("[");
-                        aValue = Type.getType(builder + "L" + name.replace(name, Mapper.getObfClass(name)).replace('.', '/') + ";");
+    public enum MapMode {
+        Super, Interface, Annotation, Method, Field, Mixed
+    }
+
+    public static ClassNode map(ClassNode node, MapMode mode) throws Throwable {
+        if (Mapper.getMode() == Mapper.Mode.None || DontMap.Helper.hasAnnotation(node)) return node;
+        Logger.info("Mapping class {}", node.name);
+        if (mode == MapMode.Super || mode == MapMode.Mixed)
+            node.superName = Mapper.getObfClass(node.superName);
+        if (mode == MapMode.Interface || mode == MapMode.Mixed) {
+            List<String> interfaces = new ArrayList<>();
+            for (String anInterface : node.interfaces)
+                interfaces.add(Mapper.getObfClass(anInterface));
+            node.interfaces = interfaces;
+        }
+        if (mode == MapMode.Annotation || mode == MapMode.Mixed)
+            if (node.visibleAnnotations != null)
+                for (AnnotationNode visibleAnnotation : node.visibleAnnotations) {
+                    if (visibleAnnotation.values == null) continue;
+                    List<Object> values = new ArrayList<>();
+                    for (int i = 0; i < visibleAnnotation.values.size(); i++) {
+                        Object aValue = visibleAnnotation.values.get(i);
+                        if (aValue instanceof Type) {
+                            Type type = (Type) aValue;
+                            String name = type.getClassName();
+                            int count = 0;
+                            if (name.contains("[]"))
+                                while (name.contains("[]")) {
+                                    name = replaceFirst(name, "[]", "");
+                                    count++;
+                                }
+                            StringBuilder builder = new StringBuilder();
+                            for (int j = 0; j < count; j++)
+                                builder.append("[");
+                            aValue = Type.getType(builder + "L" + name.replace(name, Mapper.getObfClass(name)).replace('.', '/') + ";");
+                        }
+                        values.add(aValue);
                     }
-                    values.add(aValue);
+                    visibleAnnotation.values = values;
                 }
-                visibleAnnotation.values = values;
-            }
-        ArrayList<Name_Desc> methodShadows = new ArrayList<>();
-        ArrayList<Name_Desc> fieldShadows = new ArrayList<>();
-        String targetName = null;
-        if (node.visibleAnnotations != null) {
-            Type type = ASMUtils.getAnnotationValue(
-                    node.visibleAnnotations.stream()
-                            .filter(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))
-                            .findFirst().orElse(null), "value"
-            );
-            if (type != null) targetName = type.getClassName();
-            if (targetName != null) {
-                for (MethodNode method : node.methods) {
-                    if (Shadow.Helper.hasAnnotation(method))
-                        methodShadows.add(new Name_Desc(method.name, method.desc));
-                }
-                for (FieldNode field : node.fields) {
-                    if (Shadow.Helper.hasAnnotation(field))
-                        fieldShadows.add(new Name_Desc(field.name, field.desc));
-                }
-                targetName = targetName.replace('.', '/');
-            }
-        }
-        for (MethodNode method : node.methods) {
-            for (AbstractInsnNode instruction : method.instructions) {
-                if (instruction instanceof MethodInsnNode) {
-                    MethodInsnNode methodInsnNode = (MethodInsnNode) instruction;
-                    if (methodShadows.stream().anyMatch(m -> m.name.equals(methodInsnNode.name) && m.desc.equals(methodInsnNode.desc)))
-                        methodInsnNode.owner = Mapper.getFriendlyClass(targetName);
-                } else if (instruction instanceof FieldInsnNode) {
-                    FieldInsnNode fieldInsnNode = (FieldInsnNode) instruction;
-                    if (fieldShadows.stream().anyMatch(m -> m.name.equals(fieldInsnNode.name) && m.desc.equals(fieldInsnNode.desc)))
-                        fieldInsnNode.owner = Mapper.getFriendlyClass(targetName);
-                }
-            }
-            if (Mapper.getMode() != Mapper.Mode.None)
+        if (mode == MapMode.Method || mode == MapMode.Mixed)
+            for (MethodNode method : node.methods)
                 method(method, node);
-        }
-        for (FieldNode field : node.fields) {
-            if (Mapper.getMode() != Mapper.Mode.None)
+        if (mode == MapMode.Field || mode == MapMode.Mixed)
+            for (FieldNode field : node.fields)
                 field(field);
-        }
         return node;
     }
 
-    private static String parseDesc(String desc) {
-        char[] chars = desc.toCharArray();
-        ArrayList<String> types = new ArrayList<>();
+    private static String splitDesc(String desc) {
+        val types = DescParser.parseType(desc);
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == 'L') {
-                i++;
-                while (chars[i] != ';') {
-                    builder.append(chars[i]);
-                    i++;
-                }
-                types.add(builder.toString());
-                builder = new StringBuilder();
-            }
-        }
-        for (String type : types) {
+        for (String type : types)
             builder.append(type).append(';');
-        }
         String result = builder.toString();
-        result = types.size() == 1 ? result.replace(";", "") : result;
+        result = types.length == 1 ? result.replace(";", "") : result;
         return result;
     }
 
@@ -128,11 +84,6 @@ public class ClassMapper {
         return Mapper.getVanilla().stream().anyMatch(m -> m.getType() == Mapper.Type.Class && m.getName().equals(type));
     }
 
-    @AllArgsConstructor
-    public static class Name_Desc {
-        public String name, desc;
-    }
-
     public static void method(MethodNode source, ClassNode parent) throws Throwable {
         if (source.visibleAnnotations != null) {
             for (AnnotationNode visibleAnnotation : source.visibleAnnotations) {
@@ -143,7 +94,7 @@ public class ClassMapper {
                 if (DontMap.Helper.isAnnotation(visibleAnnotation)) return;
             }
         }
-        for (String name : parseDesc(source.desc).split(";"))
+        for (String name : splitDesc(source.desc).split(";"))
             source.desc = replaceFirst(source.desc, name, Mapper.getObfClass(name));
         for (AbstractInsnNode instruction : source.instructions) {
             if (instruction instanceof MethodInsnNode) {
@@ -152,8 +103,8 @@ public class ClassMapper {
                     methodInsnNode.name = Mapper.mapMethodWithSuper(methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc);
                     methodInsnNode.owner = Mapper.getObfClass(methodInsnNode.owner);
                 }
-                if (hasType(parseDesc(methodInsnNode.desc))) methodInsnNode.desc = desc(methodInsnNode.desc);
-                for (String name : parseDesc(methodInsnNode.desc).split(";"))
+                if (hasType(splitDesc(methodInsnNode.desc))) methodInsnNode.desc = desc(methodInsnNode.desc);
+                for (String name : splitDesc(methodInsnNode.desc).split(";"))
                     methodInsnNode.desc = replaceFirst(methodInsnNode.desc, name, Mapper.getObfClass(name));
             } else if (instruction instanceof TypeInsnNode) {
                 TypeInsnNode typeInsnNode = (TypeInsnNode) instruction;
@@ -164,7 +115,7 @@ public class ClassMapper {
                     fieldInsnNode.name = Mapper.mapFieldWithSuper(fieldInsnNode.owner, fieldInsnNode.name, fieldInsnNode.desc);
                     fieldInsnNode.owner = Mapper.map(null, fieldInsnNode.owner, null, Mapper.Type.Class);
                 }
-                if (hasType(parseDesc(fieldInsnNode.desc)))
+                if (hasType(splitDesc(fieldInsnNode.desc)))
                     fieldInsnNode.desc = desc(fieldInsnNode.desc);
             } else if (instruction instanceof LdcInsnNode) {
                 LdcInsnNode ldcInsnNode = (LdcInsnNode) instruction;
@@ -201,12 +152,12 @@ public class ClassMapper {
     }
 
     public static void field(FieldNode node) {
-        for (String name : parseDesc(node.desc).split(";"))
+        for (String name : splitDesc(node.desc).split(";"))
             node.desc = replaceFirst(node.desc, name, Mapper.getObfClass(name));
     }
 
     private static String desc(String desc) {
-        for (String name : parseDesc(desc).split(";"))
+        for (String name : splitDesc(desc).split(";"))
             desc = replaceFirst(desc, name, Mapper.getObfClass(name));
         return desc;
     }

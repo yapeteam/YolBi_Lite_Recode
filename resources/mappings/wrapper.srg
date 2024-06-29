@@ -1,0 +1,2 @@
+CL: net/minecraft/client/Minecraft cn/yapeteam/wrapper/client/MinecraftWrapper
+CL: net/minecraft/client/entity/EntityPlayerSP cn/yapeteam/wrapper/client/entity/EntityPlayerSPWrapper

@@ -25,7 +25,15 @@ public class Loader {
                 Logger.exception(e);
             }
             Logger.warn("Start Mapping Injection!");
-            JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar");
+            if (BootStrap.getVersion().first == Version.V1_8_9)
+                JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar", ClassMapper.MapMode.Mixed);
+            else {
+                Mapper.Mode oldMode = Mapper.getMode();
+                JarMapper.dispose(new File(YOLBI_DIR, "injection/wrapper.jar"), "wrapper.jar", ClassMapper.MapMode.Mixed);
+                Mapper.setMode(Mapper.Mode.Wrapper);
+                JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar", ClassMapper.MapMode.Mixed);
+                Mapper.setMode(oldMode);
+            }
             Logger.success("Completed");
             Mapper.getCache().clear();
         } catch (Throwable e) {

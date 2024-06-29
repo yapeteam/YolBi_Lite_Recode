@@ -3,10 +3,10 @@ package cn.yapeteam.yolbi.mixin;
 import cn.yapeteam.loader.JVMTIWrapper;
 import cn.yapeteam.loader.SocketSender;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.ymixin.Transformer;
 import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
 import javax.swing.*;

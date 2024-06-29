@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/Hooker/Hooker.iml" filepath="$PROJECT_DIR$/Hooker/Hooker.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/Injector.iml" filepath="$PROJECT_DIR$/Injector/Injector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loader/Loader.iml" filepath="$PROJECT_DIR$/Loader/Loader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Wrapper/Wrapper.iml" filepath="$PROJECT_DIR$/Wrapper/Wrapper.iml" />
       <module fileurl="file://$PROJECT_DIR$/YMixin/YMixin.iml" filepath="$PROJECT_DIR$/YMixin/YMixin.iml" />
       <module fileurl="file://$PROJECT_DIR$/YolBi_Lite_Recode.iml" filepath="$PROJECT_DIR$/YolBi_Lite_Recode.iml" />
     </modules>

@@ -1,19 +1,19 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.loader.utils.Pair;
+import cn.yapeteam.loader.utils.StreamUtils;
 import cn.yapeteam.ymixin.Transformer;
 import cn.yapeteam.ymixin.YMixin;
 import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import cn.yapeteam.ymixin.utils.Mapper;
+import lombok.Getter;
 import lombok.val;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
  */
 @SuppressWarnings("unused")
 public class BootStrap {
-    private static native void loadInjection();
+    private static native void loadInjection(boolean wrapper);
 
     private static boolean initialized = false;
 
@@ -35,19 +35,9 @@ public class BootStrap {
             initialized = true;
             new Thread(() -> {
                 Loader.preload();
-                loadInjection();
+                loadInjection(version.first != Version.V1_8_9);
             }).start();
         }
-    }
-
-    private static byte[] readStream(InputStream inStream) throws Exception {
-        val outStream = new ByteArrayOutputStream();
-        val buffer = new byte[1024];
-        int len;
-        while ((len = inStream.read(buffer)) != -1)
-            outStream.write(buffer, 0, len);
-        outStream.close();
-        return outStream.toByteArray();
     }
 
     private static byte[] getInitHook() throws Throwable {
@@ -57,7 +47,7 @@ public class BootStrap {
                 if (!entry.isDirectory()) {
                     String name = entry.getName().replace('/', '.');
                     name = name.substring(0, name.length() - 6);
-                    if (name.equals(InitHookMixin.class.getName())) return readStream(zis);
+                    if (name.equals(InitHookMixin.class.getName())) return StreamUtils.readStream(zis);
                 }
             }
         }
@@ -83,6 +73,8 @@ public class BootStrap {
     }
 
     public static boolean hasLaunchClassLoader = true;
+    @Getter
+    private static Pair<Version, Mapper.Mode> version;
 
     public static void entry() {
         try {
@@ -134,7 +126,7 @@ public class BootStrap {
                         }
                     }
             );
-            Pair<Version, Mapper.Mode> version = getMinecraftVersion();
+            version = getMinecraftVersion();
             if (version == null || version.first == null || version.second == null) {
                 Logger.error("Failed to get Minecraft version.");
                 if (version != null) {
@@ -163,16 +155,17 @@ public class BootStrap {
                 SocketSender.send("CLOSE");
                 return;
             }
+
             Logger.info("Reading mappings, mode: {}", mode.name());
             Mapper.setMode(mode);
-            String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8);
-            String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
-            Mapper.readMappings(vanilla, forge);
+            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8), Mapper.getVanilla());
+            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
+            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/wrapper.srg")), StandardCharsets.UTF_8), Mapper.getWrapper());
 
             Logger.warn("Loading Hooks...");
             Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
 
-            byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
+            byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()), ClassMapper.MapMode.Annotation)));
             ClassNode initHookNode = ASMUtils.node(initHook);
             Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
             transformer.addMixin(initHookNode);

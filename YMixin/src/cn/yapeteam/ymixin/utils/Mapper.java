@@ -22,10 +22,8 @@ public class Mapper {
     }
 
     public enum Mode {
-        None, Vanilla, Searge
+        None, Vanilla, Searge, Wrapper
     }
-
-
 
     /**
      * friendly→obf
@@ -42,6 +40,11 @@ public class Mapper {
      **/
     @Getter
     private static final ArrayList<Map> searges = new ArrayList<>();
+    /**
+     * friendly→wrapper
+     **/
+    @Getter
+    private static final ArrayList<Map> wrapper = new ArrayList<>();
 
     @Getter
     public static Mode mode = null;
@@ -60,8 +63,8 @@ public class Mapper {
                     break;
                 case "FD":
                     if (values.length == 4) {
-                        obf = ASMUtils.split(values[0], "/");
-                        friendly = ASMUtils.split(values[2], "/");
+                        obf = StringUtil.split(values[0], "/");
+                        friendly = StringUtil.split(values[2], "/");
                         dest.add(new Map(
                                 values[2].replace("/" + friendly[friendly.length - 1], ""),
                                 friendly[friendly.length - 1],
@@ -70,8 +73,8 @@ public class Mapper {
                                 Mapper.Type.Field
                         ));
                     } else if (values.length == 2) {
-                        obf = ASMUtils.split(values[0], "/");
-                        friendly = ASMUtils.split(values[1], "/");
+                        obf = StringUtil.split(values[0], "/");
+                        friendly = StringUtil.split(values[1], "/");
                         dest.add(new Map(
                                 values[1].replace("/" + friendly[friendly.length - 1], ""),
                                 friendly[friendly.length - 1],
@@ -95,11 +98,6 @@ public class Mapper {
                     );
             }
         }
-    }
-
-    public static void readMappings(String vanilla, String forge) {
-        readMapping(vanilla, getVanilla());
-        readMapping(forge, getSearges());
     }
 
     @Getter
@@ -138,6 +136,8 @@ public class Mapper {
             case Searge:
                 mappings = searges;
                 break;
+            case Wrapper:
+                mappings = wrapper;
             case None:
                 break;
         }
@@ -152,6 +152,10 @@ public class Mapper {
                     return map.name;
                 return map.obf;
             case None:
+                return map.name;
+            case Wrapper:
+                if (map.type == Type.Class)
+                    return map.obf;
                 return map.name;
         }
         return map.name;
