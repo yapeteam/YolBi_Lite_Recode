@@ -448,36 +448,6 @@ void Inject()
     }
     closedir(dir);
 
-    jclass systemClass = (*jniEnv)->FindClass(jniEnv, "java/lang/System");
-    jmethodID getPropertyMethodID = (*jniEnv)->GetStaticMethodID(jniEnv, systemClass, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
-    jstring jdkVersionString = (jstring)(*jniEnv)->CallStaticObjectMethod(jniEnv, systemClass, getPropertyMethodID, (*jniEnv)->NewStringUTF(jniEnv, "java.version"));
-    const char *jdkVersion = (*jniEnv)->GetStringUTFChars(jniEnv, jdkVersionString, 0);
-    if (starts_with(jdkVersion, "1.8"))
-    {
-        char jfxrtPath[MAX_PATH];
-        sprintf_s(jfxrtPath, MAX_PATH, "%s\\jfxrt\\jfxrt.jar", depsPath);
-        loadJar(jniEnv, jfxrtPath, systemClassLoader);
-        printf("loaded: jfxrt.jar\n");
-    }
-    else
-    {
-        char javafxPath[MAX_PATH];
-        sprintf_s(javafxPath, MAX_PATH, "%s\\%s", depsPath, "javafx");
-        DIR *javafx_dir = opendir(javafxPath);
-        struct dirent *entry;
-        while ((entry = readdir(javafx_dir)) != NULL)
-        {
-            if (str_endwith(entry->d_name, ".jar"))
-            {
-                char jarPath[260];
-                sprintf_s(jarPath, 260, "%s\\%s", javafxPath, entry->d_name);
-                loadJar(jniEnv, jarPath, systemClassLoader);
-                printf("loaded: %s\n", jarPath);
-            }
-        }
-        closedir(javafx_dir);
-    }
-
     char ymixinPath[260];
     sprintf_s(ymixinPath, 260, "%s\\ymixin.jar", yolbiPath);
     loadJar(jniEnv, ymixinPath, classLoader);
