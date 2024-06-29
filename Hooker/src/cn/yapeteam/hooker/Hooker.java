@@ -21,6 +21,10 @@ import java.util.zip.ZipInputStream;
 import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_MAXS;
 
+/**
+ * native used
+ * native invoked
+ */
 @SuppressWarnings("unused")
 public class Hooker {
     public static final String YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi").getAbsolutePath();

@@ -21,6 +21,10 @@ import java.util.zip.ZipInputStream;
 
 import static cn.yapeteam.ymixin.utils.ASMUtils.node;
 
+/**
+ * native used
+ * native invoked
+ */
 @SuppressWarnings("unused")
 public class BootStrap {
     private static native void loadInjection();

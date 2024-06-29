@@ -2,6 +2,9 @@ package cn.yapeteam.loader;
 
 import org.lwjgl.opengl.Display;
 
+/**
+ * native used
+ */
 public class Natives {
     public static boolean initialized = false;
 

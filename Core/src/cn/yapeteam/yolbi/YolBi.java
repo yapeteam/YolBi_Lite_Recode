@@ -9,7 +9,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
-import cn.yapeteam.yolbi.managers.RenderManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
@@ -40,7 +39,6 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private RenderManager renderManager;
     private JFrameRenderer jFrameRenderer;
     private TargetManager targetManager;
 
@@ -65,7 +63,6 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.renderManager = new RenderManager();
         instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
@@ -73,14 +70,12 @@ public class YolBi {
         instance.eventManager.register(instance.commandManager);
         instance.eventManager.register(instance.moduleManager);
         instance.eventManager.register(instance.botManager);
-        instance.eventManager.register(instance.renderManager);
         instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(YolBi.class);
         instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
-        instance.getRenderManager().initwindow();
         try {
             instance.getConfigManager().load();
             WebServer.start();
@@ -104,7 +99,6 @@ public class YolBi {
 
     public void shutdown() {
         try {
-            renderManager.destroywindow();
             instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();

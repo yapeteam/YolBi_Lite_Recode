@@ -247,30 +247,7 @@ public class Builder {
         terminal.execute(new String[]{gcc_path, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
     }
 
-    private static void buildAgentForDebug() throws Exception {
-        File output_file = new File("Minecraft/run/agent.jar");
-        String artifact_binary = "out/production/Agent";
-        ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(output_file.toPath()));
-        Action action = file -> {
-            String path = file.toString().replace("\\", "/");
-            boolean isMETA = path.contains("/META-INF/");
-            String entry_name = (isMETA ? "META-INF/" : "") + path.substring((isMETA ? "Agent/META-INF" : artifact_binary).length()).replace("\\", "/").substring(1);
-            System.out.println(entry_name);
-            ZipEntry entry = new ZipEntry(entry_name);
-            try {
-                output.putNextEntry(entry);
-                output.write(readStream(Files.newInputStream(file.toPath())));
-                output.closeEntry();
-            } catch (IOException ignored) {
-            }
-        };
-        traverseFiles(new File(artifact_binary), action);
-        traverseFiles(new File("Agent/META-INF"), action);
-        output.close();
-    }
-
     public static void main(String[] args) throws Exception {
-        buildAgentForDebug();
         checkMinGW();
         buildDLL();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.utils.animation;
 
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Function;
 
@@ -84,10 +83,5 @@ public enum Easing {
 
     Easing(final Function<Double, Double> function) {
         this.function = function;
-    }
-
-    @Override
-    public String toString() {
-        return StringUtils.capitalize(super.toString().toLowerCase().replace("_", " "));
     }
 }

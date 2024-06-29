@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class InstrumentationWrapper extends JVMTIWrapper {
     private final Instrumentation instrumentation;
 
