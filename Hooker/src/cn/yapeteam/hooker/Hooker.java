@@ -184,7 +184,12 @@ public class Hooker {
         if (hasLaunchClassLoader) {
             try {
                 byte[] targetBytes = getClassBytes(client_thread.getContextClassLoader().getClass());
-                ClassNode targetNode = node(targetBytes);
+                ClassNode targetNode;
+                try {
+                    targetNode = node(targetBytes);
+                } catch (IllegalArgumentException e) {
+                    targetNode = node(targetBytes);
+                }
                 for (MethodNode method : targetNode.methods) {
                     if (method.name.equals("findClass") && method.desc.equals("(Ljava/lang/String;)Ljava/lang/Class;")) {
                         LabelNode labelNode = new LabelNode();
