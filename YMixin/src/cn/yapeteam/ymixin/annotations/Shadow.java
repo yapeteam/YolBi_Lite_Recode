@@ -28,7 +28,7 @@ public @interface Shadow {
         public static boolean hasAnnotation(@NotNull FieldNode node) {
             return node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(Shadow.Helper::isAnnotation);
         }
-        public static ClassNode processShadow(ClassNode node) {
+        public static void processShadow(ClassNode node) {
             // Process @Shadow
             ArrayList<Name_Desc> methodShadows = new ArrayList<>();
             ArrayList<Name_Desc> fieldShadows = new ArrayList<>();
@@ -65,7 +65,6 @@ public @interface Shadow {
                     }
                 }
             }
-            return node;
         }
     }
 }

@@ -50,14 +50,16 @@ public class JarMapper {
                         Logger.info("Skipping class: {}", se.getName());
                         continue;
                     }
-                    ClassMapper.map(node, mode);
                     if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
                         Logger.info("Mapping mixin class: {}", se.getName());
                         Shadow.Helper.processShadow(node);
+                        ClassMapper.map(node, mode);
                         bytes = ASMUtils.rewriteClass(node);
                         ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
+                    } else {
+                        ClassMapper.map(node, mode);
+                        bytes = ASMUtils.rewriteClass(node);
                     }
-                    bytes = ASMUtils.rewriteClass(node);
                     write(se.getName(), bytes, zos);
                 } else if (!se.isDirectory()) write(se.getName(), bytes, zos);
             }

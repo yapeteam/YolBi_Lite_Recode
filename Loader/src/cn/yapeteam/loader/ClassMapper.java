@@ -5,7 +5,6 @@ import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.ymixin.annotations.Super;
 import cn.yapeteam.ymixin.utils.DescParser;
 import cn.yapeteam.ymixin.utils.Mapper;
-import lombok.val;
 import org.objectweb.asm_9_2.Handle;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
@@ -65,13 +64,28 @@ public class ClassMapper {
         return node;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private static String splitDesc(String desc) {
-        val types = DescParser.parseType(desc);
+        char[] chars = desc.toCharArray();
+        ArrayList<String> types = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
-        for (String type : types)
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == 'L') {
+                i++;
+                while (chars[i] != ';') {
+                    builder.append(chars[i]);
+                    i++;
+                }
+                types.add(builder.toString());
+                builder = new StringBuilder();
+            }
+        }
+        for (String type : types) {
             builder.append(type).append(';');
+        }
         String result = builder.toString();
-        result = types.length == 1 ? result.replace(";", "") : result;
+        result = types.size() == 1 ? result.replace(";", "") : result;
         return result;
     }
 
