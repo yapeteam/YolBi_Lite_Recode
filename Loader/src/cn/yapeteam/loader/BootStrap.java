@@ -9,6 +9,7 @@ import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.val;
 import org.objectweb.asm_9_2.tree.ClassNode;
+import org.objectweb.asm_9_2.tree.LdcInsnNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -78,6 +80,22 @@ public class BootStrap {
         return Mapper.Mode.Searge;
     }
 
+    private static MinecraftVersion getMinecraftVersion() {
+        Class<?> clazz = ClassUtils.getClass("net.minecraft.client.Minecraft");
+        if (clazz == null) return null;
+        byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
+        ClassNode node = node(bytes);
+        AtomicReference<String> title = new AtomicReference<>("");
+        node.methods.stream().filter(m -> m.name.equals(Mapper.map("net.minecraft.client.Minecraft", "createDisplay", "()V", Mapper.Type.Method))).findFirst().ifPresent(m -> m.instructions.forEach(i -> {
+            if (i instanceof LdcInsnNode) {
+                LdcInsnNode insnNode = (LdcInsnNode) i;
+                if (insnNode.cst instanceof String)
+                    title.set((String) insnNode.cst);
+            }
+        }));
+        return MinecraftVersion.parse(title.get().split(" ")[1]);
+    }
+
     public static boolean hasLaunchClassLoader = true;
 
     public static void entry() {
@@ -133,8 +151,14 @@ public class BootStrap {
             );
             Logger.info("Reading mappings, mode: {}", mode.name());
             Mapper.setMode(mode);
-            String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/vanilla.srg")), StandardCharsets.UTF_8);
-            String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/forge.srg")), StandardCharsets.UTF_8);
+            MinecraftVersion version = getMinecraftVersion();
+            if (version == null) {
+                Logger.error("Failed to get Minecraft version, please check your game version.");
+                return;
+            }
+            Logger.info("Minecraft version: {}", version.getVersion());
+            String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8);
+            String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
             Mapper.readMappings(vanilla, forge);
 
             Logger.warn("Loading Hooks...");
