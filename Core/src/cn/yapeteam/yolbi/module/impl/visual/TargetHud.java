@@ -110,7 +110,7 @@ import net.minecraft.entity.EntityLivingBase;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
-
+// code by wzhy233
 @ModuleInfo(name = "TargetHUD", category = ModuleCategory.VISUAL)
 public class TargetHud extends Module {
     private final Minecraft mc = Minecraft.getMinecraft();
