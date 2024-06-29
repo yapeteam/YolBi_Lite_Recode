@@ -162,7 +162,7 @@ public class BootStrap {
             String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8);
             Mapper.readMappings(vanilla, forge);
             if (version.first != Version.V1_8_9) {
-                Logger.error("Unsupported Minecraft version: 1.12.2");
+                Logger.error("Unsupported Minecraft version: {}", version.first.getVersion());
                 return;
             }
 
