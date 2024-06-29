@@ -141,6 +141,7 @@ public class BootStrap {
                     Logger.error("Version: {}, Mode: {}", version.first, version.second);
                     Logger.error("java.library.path: {}, sun.java.command: {}", System.getProperty("java.library.path"), System.getProperty("sun.java.command"));
                 } else Logger.error("Version: null, Mode: null");
+                SocketSender.send("CLOSE");
                 return;
             }
             String branch = "null";
