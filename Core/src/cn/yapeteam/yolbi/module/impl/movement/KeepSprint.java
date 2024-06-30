@@ -11,7 +11,7 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 public class KeepSprint extends Module {
     private final BooleanValue keepSprint = new BooleanValue("KeepSprint", true);
 
-    {
+    public KeepSprint() {
         addValues(keepSprint);
     }
 
