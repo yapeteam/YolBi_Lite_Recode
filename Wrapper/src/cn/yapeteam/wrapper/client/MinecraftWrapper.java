@@ -1,16 +1,14 @@
 package cn.yapeteam.wrapper.client;
 
-import cn.yapeteam.loader.Version;
-import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.wrapper.Wrapper;
+import net.minecraft.client.Minecraft;
 
 public class MinecraftWrapper extends Wrapper {
-    private static MinecraftWrapper INSTANCE;
+    private static final MinecraftWrapper INSTANCE = new MinecraftWrapper();
 
 
     public MinecraftWrapper() {
-        super(ClassUtils.getClass("net.minecraft.client.Minecraft"));
-
+        super(Minecraft.getMinecraft());
     }
 
     public static MinecraftWrapper getMinecraft() {
