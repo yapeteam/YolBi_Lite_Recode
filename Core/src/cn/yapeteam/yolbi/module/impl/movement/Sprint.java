@@ -12,7 +12,7 @@ public class Sprint extends Module {
     private boolean sprinting;
     private final BooleanValue autoSprint = new BooleanValue("AutoSprint", true);
 
-    {
+    public Sprint() {
         addValues(autoSprint);
     }
 
