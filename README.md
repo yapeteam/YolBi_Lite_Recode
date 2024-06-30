@@ -5,7 +5,7 @@
 
 # YolBi Inject - Recode
 
-- ***Powered by 吴硕科技***
+- ***Powered by Yape Development Team***
 
 # Join Us
 
