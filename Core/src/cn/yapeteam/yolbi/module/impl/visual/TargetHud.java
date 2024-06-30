@@ -96,23 +96,24 @@
 
 package cn.yapeteam.yolbi.module.impl.visual;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.EntityLivingBase;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 
 @ModuleInfo(name = "TargetHUD", category = ModuleCategory.VISUAL)
 public class TargetHud extends Module {
+    private final NumberValue<Integer> x = new NumberValue<>("Display X", 200, 0, 1000, 50), y = new NumberValue<>("Display Y", 200, 0, 1000, 50);
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Listener
@@ -122,8 +123,8 @@ public class TargetHud extends Module {
             return;
         }
 
-        int x = 200; // HUD 的 X 位置
-        int y = 200; // HUD 的 Y 位置
+        int x = this.x.getValue(); // HUD 的 X 位置
+        int y = this.y.getValue(); // HUD 的 Y 位置
         int width = 120; // HUD 的宽度
         int height = 40; // HUD 的高度
 
@@ -168,12 +169,12 @@ public class TargetHud extends Module {
     }
 
     private void drawPlayerHead(int x, int y, int width, int height) {
-        GL11.glPushMatrix();
+        GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
-        GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(width / 32.0F, height / 32.0F, 1);
+        GlStateManager.translate(x, y, 0);
+        GlStateManager.scale(width / 32.0F, height / 32.0F, 1);
         Gui.drawModalRectWithCustomSizedTexture(0, 0, 8, 8, 8, 8, 64, 64);
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
     }
 
     private void drawRect(int left, int top, int right, int bottom, int color) {
