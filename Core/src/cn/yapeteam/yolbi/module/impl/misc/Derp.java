@@ -7,7 +7,7 @@ import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 
-@Deprecated
+//@Deprecated
 @ModuleInfo(name = "Derp", category = ModuleCategory.MISC)
 public class Derp extends Module {
     private float yaw;
