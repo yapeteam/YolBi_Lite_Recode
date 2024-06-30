@@ -30,6 +30,7 @@ public class Loader {
             else {
                 Mapper.Mode oldMode = Mapper.getMode();
                 JarMapper.dispose(new File(YOLBI_DIR, "injection/wrapper.jar"), "wrapper.jar", ClassMapper.MapMode.Mixed);
+                Mapper.getCache().clear();
                 Mapper.setMode(Mapper.Mode.Wrapper);
                 JarMapper.dispose(new File(YOLBI_DIR, "injection/injection.jar"), "injection.jar", ClassMapper.MapMode.Mixed);
                 Mapper.setMode(oldMode);
