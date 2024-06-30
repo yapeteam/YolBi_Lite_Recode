@@ -1,6 +1,6 @@
-CL: net/minecraft/client/MinecraftWrapper cn/yapeteam/wrapper/client/Minecraft
-CL: net/minecraft/client/entity/EntityPlayerSPWrapper cn/yapeteam/wrapper/client/entity/EntityPlayerSP
-CL: net/minecraft/entity/EntityWrapper cn/yapeteam/wrapper/entity/Entity
-CL: net/minecraft/entity/player/EntityPlayerWrapper cn/yapeteam/wrapper/entity/player/EntityPlayer
-CL: net/minecraft/entity/EntityLivingBaseWrapper cn/yapeteam/wrapper/entity/EntityLivingBase
-CL: net/minecraft/entity/EntityLivingWrapper cn/yapeteam/wrapper/entity/EntityLiving
+CL: cn/yapeteam/wrapper/MinecraftWrapper net/minecraft/client/Minecraft
+CL: cn/yapeteam/wrapper/entity/player/EntityPlayerSPWrapper net/minecraft/client/entity/EntityPlayerSP
+CL: cn/yapeteam/wrapper/entity/EntityWrapper net/minecraft/entity/Entity
+CL: cn/yapeteam/wrapper/entity/player/EntityPlayerWrapper net/minecraft/entity/player/EntityPlayer
+CL: cn/yapeteam/wrapper/entity/EntityLivingBaseWrapper net/minecraft/entity/EntityLivingBase
+CL: cn/yapeteam/wrapper/entity/EntityLivingWrapper net/minecraft/entity/EntityLiving
