@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Premain-Class: cn.yapeteam.agent.Bootstrap
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
