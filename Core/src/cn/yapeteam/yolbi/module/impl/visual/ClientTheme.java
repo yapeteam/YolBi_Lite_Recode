@@ -12,7 +12,7 @@ import java.awt.*;
 
 @ModuleInfo(name = "ClientTheme", category = ModuleCategory.VISUAL)
 public class ClientTheme extends Module {
-    public final ModeValue<String> color = new ModeValue<>("Color", "Custom fade", "White", "Blue", "Vape", "Custom static", "Custom fade", "Custom 3 colors", "Rainbow");
+    public final ModeValue<String> color = new ModeValue<>("Color", "Custom fade", "White", "Red", "Blue", "Vape", "Custom static", "Custom fade", "Custom 3 colors", "Rainbow");
     private final ColorValue color1 = new ColorValue("Color1", () -> color.getValue().startsWith("Custom"), new Color(210, 80, 105).getRGB());
     private final ColorValue color2 = new ColorValue("Color2", () -> color.getValue().startsWith("Custom"), new Color(135, 190, 255).getRGB());
     private final ColorValue color3 = new ColorValue("Color3", () -> color.getValue().startsWith("Custom"), new Color(0, 255, 255).getRGB());
@@ -32,6 +32,8 @@ public class ClientTheme extends Module {
         switch (color.getValue()) {
             case "White":
                 return -1;
+            case "Red":
+                return ColorUtil.getColor(new Color(239, 76, 76), new Color(202, 0, 0), 2500, offset);
             case "Blue":
                 return ColorUtil.getColor(new Color(5, 138, 255), new Color(0, 35, 206), 2500, offset);
             case "Vape":
