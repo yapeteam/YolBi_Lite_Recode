@@ -45,5 +45,3 @@ For custom build, please edit `YBuild.xml`
 - [ ] Legit KillAura
 - [ ] Legit AimAssist
 - [ ] Modifier
-- [ ] TargetHUD without OpenGL
-- [ ] Killaura
