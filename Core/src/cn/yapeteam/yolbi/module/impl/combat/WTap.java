@@ -11,27 +11,28 @@ import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 
 @ModuleInfo(name = "WTap", category = ModuleCategory.COMBAT)
 public class WTap extends Module {
-    private boolean unSprint, canDo;
+    private boolean unsprint, wTap;
 
     @Listener
     private void onAttack(EventAttack event) {
-        canDo = Math.random() * 100 < 95;
+        wTap = Math.random() * 100 < 85;
 
-        if (!canDo) return;
+        if (!wTap) return;
 
         if (mc.thePlayer.isSprinting() || Natives.IsKeyDown(VirtualKeyBoard.VK_LCONTROL)) {
+            // 无法使用模拟按键 因为和windows快捷键冲突以及延迟过大
             mc.thePlayer.setSprinting(true);
-            unSprint = true;
+            unsprint = true;
         }
     }
 
     @Listener
     private void onPreMotion(EventMotion event) {
-        if (!canDo) return;
+        if (!wTap) return;
 
-        if (unSprint) {
+        if (unsprint) {
             mc.thePlayer.setSprinting(false);
-            unSprint = false;
+            unsprint = false;
         }
     }
 }
