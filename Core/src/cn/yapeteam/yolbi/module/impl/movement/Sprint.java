@@ -1,11 +1,11 @@
 package cn.yapeteam.yolbi.module.impl.movement;
 
-import cn.yapeteam.loader.api.module.ModuleCategory;
-import cn.yapeteam.loader.api.module.ModuleInfo;
-import cn.yapeteam.loader.api.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
+import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 
 @ModuleInfo(name = "Sprint", category = ModuleCategory.MOVEMENT)
 public class Sprint extends Module {
@@ -18,8 +18,10 @@ public class Sprint extends Module {
 
     @Listener
     private void onMotion(EventMotion event) {
+        if (mc.thePlayer == null) return;
+
         if (autoSprint.getValue()) {
-            if (mc.thePlayer != null && mc.thePlayer.movementInput.moveForward > 0) {
+            if (mc.thePlayer.movementInput.moveForward > 0) {
                 if (!mc.thePlayer.isSprinting()) {
                     mc.thePlayer.setSprinting(true);
                     sprinting = true;
