@@ -1,5 +1,7 @@
 package cn.yapeteam.yolbi.module;
 
+import cn.yapeteam.loader.api.module.ModuleCategory;
+import cn.yapeteam.loader.api.module.ModuleInfo;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
@@ -53,7 +55,8 @@ public class ModuleManager {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
             YolBi.instance.getNotificationManager().post(new Notification(
-                    "Module: " + module.getName() + " toggled",
+                    module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
+                    //"[Wagon]: " + module.getName() + (module.isEnabled() ? " enabled" : " disabled"),
                     Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
                     1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
                     )
