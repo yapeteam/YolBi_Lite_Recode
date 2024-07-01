@@ -13,11 +13,11 @@
                 <archive name="injection.zip">
                     <dir>resources</dir>
                     <dir name="injection">
-                        <archive name="injection.jar">
-                            <files>out/production/Core</files>
+                        <archive name="injection-1.8.9.jar">
+                            <files>out/production/Core-1.8.9</files>
                         </archive>
-                        <archive name="wrapper.jar">
-                            <files>out/production/Wrapper</files>
+                        <archive name="injection-1.12.2.jar">
+                            <files>out/production/Core-1.12.2</files>
                         </archive>
                     </dir>
                     <dir name="dependencies">

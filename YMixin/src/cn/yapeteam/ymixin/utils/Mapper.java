@@ -22,7 +22,7 @@ public class Mapper {
     }
 
     public enum Mode {
-        None, Vanilla, Searge, Wrapper
+        None, Vanilla, Searge
     }
 
     /**
@@ -40,11 +40,6 @@ public class Mapper {
      **/
     @Getter
     private static final ArrayList<Map> searges = new ArrayList<>();
-    /**
-     * friendly→wrapper
-     **/
-    @Getter
-    private static final ArrayList<Map> wrapper = new ArrayList<>();
 
     @Getter
     public static Mode mode = null;
@@ -136,11 +131,10 @@ public class Mapper {
             case Searge:
                 mappings = searges;
                 break;
-            case Wrapper:
-                mappings = wrapper;
             case None:
                 break;
         }
+        cache.clear();
     }
 
     public static String applyMode(Map map) {
@@ -152,10 +146,6 @@ public class Mapper {
                     return map.name;
                 return map.obf;
             case None:
-                return map.name;
-            case Wrapper:
-                if (map.type == Type.Class)
-                    return map.obf;
                 return map.name;
         }
         return map.name;

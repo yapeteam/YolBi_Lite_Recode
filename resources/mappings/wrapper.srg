@@ -1,6 +1,0 @@
-CL: cn/yapeteam/wrapper/MinecraftWrapper net/minecraft/client/Minecraft
-CL: cn/yapeteam/wrapper/entity/player/EntityPlayerSPWrapper net/minecraft/client/entity/EntityPlayerSP
-CL: cn/yapeteam/wrapper/entity/EntityWrapper net/minecraft/entity/Entity
-CL: cn/yapeteam/wrapper/entity/player/EntityPlayerWrapper net/minecraft/entity/player/EntityPlayer
-CL: cn/yapeteam/wrapper/entity/EntityLivingBaseWrapper net/minecraft/entity/EntityLivingBase
-CL: cn/yapeteam/wrapper/entity/EntityLivingWrapper net/minecraft/entity/EntityLiving

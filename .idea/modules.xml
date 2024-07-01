@@ -3,11 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Builder/Builder.iml" filepath="$PROJECT_DIR$/Builder/Builder.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Core/Core.iml" filepath="$PROJECT_DIR$/Core/Core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Core-1.12.2/Core-1.12.2.iml" filepath="$PROJECT_DIR$/Core-1.12.2/Core-1.12.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" filepath="$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" />
       <module fileurl="file://$PROJECT_DIR$/Hooker/Hooker.iml" filepath="$PROJECT_DIR$/Hooker/Hooker.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/Injector.iml" filepath="$PROJECT_DIR$/Injector/Injector.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loader/Loader.iml" filepath="$PROJECT_DIR$/Loader/Loader.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Wrapper/Wrapper.iml" filepath="$PROJECT_DIR$/Wrapper/Wrapper.iml" />
       <module fileurl="file://$PROJECT_DIR$/YMixin/YMixin.iml" filepath="$PROJECT_DIR$/YMixin/YMixin.iml" />
       <module fileurl="file://$PROJECT_DIR$/YolBi_Lite_Recode.iml" filepath="$PROJECT_DIR$/YolBi_Lite_Recode.iml" />
     </modules>

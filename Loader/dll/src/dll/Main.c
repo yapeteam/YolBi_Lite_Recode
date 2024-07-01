@@ -269,14 +269,8 @@ void loadJar(JNIEnv *env, const char *path, jobject loader)
 jobject classLoader;
 char yolbiPath[MAX_PATH];
 
-JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _, jboolean wrapper)
+JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
 {
-    if (wrapper)
-    {
-        char wrapperOutPath[260];
-        sprintf_s(wrapperOutPath, 260, "%s\\wrapper.jar", yolbiPath);
-        loadJar(env, wrapperOutPath, classLoader);
-    }
     char injectionOutPath[260];
     sprintf_s(injectionOutPath, 260, "%s\\injection.jar", yolbiPath);
     loadJar(env, injectionOutPath, classLoader);
@@ -497,7 +491,7 @@ void Inject()
         return;
     }
     JNINativeMethod BootMethods[] = {
-        {"loadInjection", "(Z)V", (void *)&loadInjection},
+        {"loadInjection", "()V", (void *)&loadInjection},
     };
     (*jniEnv)->RegisterNatives(jniEnv, BootStrap, BootMethods, 1);
     jmethodID entryPoint = (*jniEnv)->GetStaticMethodID(jniEnv, BootStrap, "entry", "()V");

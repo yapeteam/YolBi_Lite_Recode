@@ -7,9 +7,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="module" module-name="Loader" />
-    <orderEntry type="module" module-name="YMixin" />
-    <orderEntry type="library" name="minecraft-1.12.2" level="project" />
   </component>
 </module>

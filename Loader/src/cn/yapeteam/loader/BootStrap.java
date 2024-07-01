@@ -26,7 +26,7 @@ import java.util.zip.ZipInputStream;
  */
 @SuppressWarnings("unused")
 public class BootStrap {
-    private static native void loadInjection(boolean wrapper);
+    private static native void loadInjection();
 
     private static boolean initialized = false;
 
@@ -35,7 +35,7 @@ public class BootStrap {
             initialized = true;
             new Thread(() -> {
                 Loader.preload();
-                loadInjection(version.first != Version.V1_8_9);
+                loadInjection();
             }).start();
         }
     }
@@ -154,7 +154,6 @@ public class BootStrap {
             Mapper.setMode(mode);
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8), Mapper.getVanilla());
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
-            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/wrapper.srg")), StandardCharsets.UTF_8), Mapper.getWrapper());
 
             Logger.warn("Loading Hooks...");
             Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
