@@ -34,7 +34,7 @@ public class MixinManager {
         // add("MixinPlayerControllerMP");
         add("MixinEntityPlayer");
         add("MixinBlockNote");
-        add("MixinBlock");
+        // add("MixinBlock");
         // add("MixinEntity");
         // add("MixinModelBiped");
     }

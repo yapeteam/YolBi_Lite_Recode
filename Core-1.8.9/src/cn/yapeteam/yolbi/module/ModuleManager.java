@@ -30,6 +30,7 @@ public class ModuleManager {
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     String name = entry.getName().replace('/', '.');
+                    if (!name.endsWith(".class")) continue;
                     name = name.substring(0, name.length() - 6);
                     if (name.startsWith("cn.yapeteam.yolbi.module.impl."))
                         try {
@@ -53,10 +54,10 @@ public class ModuleManager {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
             YolBi.instance.getNotificationManager().post(new Notification(
-                    module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
-                    //"[Wagon]: " + module.getName() + (module.isEnabled() ? " enabled" : " disabled"),
-                    Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
-                    1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
+                            module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
+                            //"[Wagon]: " + module.getName() + (module.isEnabled() ? " enabled" : " disabled"),
+                            Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
+                            1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
                     )
             );
         });
