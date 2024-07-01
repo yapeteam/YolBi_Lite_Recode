@@ -28,15 +28,15 @@ public class MixinManager {
         add("MixinGuiIngame");
         add("MixinEntityPlayerSP");
         add("MixinEntityRenderer");
-        add("MixinEntityLivingBase");
+        // add("MixinEntityLivingBase");
         // add("MixinRendererLivingEntity");
         add("MixinNetworkManager");
-        add("MixinPlayerControllerMP");
+        // add("MixinPlayerControllerMP");
         add("MixinEntityPlayer");
         add("MixinBlockNote");
         add("MixinBlock");
-        add("MixinEntity");
-        add("MixinModelBiped");
+        // add("MixinEntity");
+        // add("MixinModelBiped");
     }
 
     public static void destroyClient() throws IOException {
