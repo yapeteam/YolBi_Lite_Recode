@@ -1,0 +1,14 @@
+CPacketPlayerPosLook->PositionRotation
+MovingObjectPosition->RayTraceResult
+EnumChatFormatting->TextFormatting
+WorldRenderer->BufferBuilder
+getNetHandler->getConnection
+addToSendQueue->sendPacket
+swingItem->swingArm
+getCollidingBoundingBoxes->getCollisionBoxes
+renderPartialTicks->field_194148_c
+MathHelper.xxx_double/float->xxx
+wrapAngleTo180->wrapDegrees
+Vec3->Vec3d
+SXX->S
+CXX->C

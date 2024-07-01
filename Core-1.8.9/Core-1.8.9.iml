@@ -8,9 +8,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="deps" level="project" />
-    <orderEntry type="module" module-name="YMixin" />
-    <orderEntry type="module" module-name="Loader" />
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="minecraft-1.8.9" level="project" />
+    <orderEntry type="module" module-name="YMixin" />
+    <orderEntry type="module" module-name="Loader" />
   </component>
 </module>
