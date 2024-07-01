@@ -14,14 +14,13 @@ import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
-import org.lwjgl.input.Keyboard;
 
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT, key = Keyboard.KEY_F)
+@ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT)
 public class AutoClicker extends Module {
     private final NumberValue<Integer> cps = new NumberValue<>("cps", 17, 1, 100, 1);
     private final NumberValue<Double> range = new NumberValue<>("cps range", 1.5, 0.1d, 2.5d, 0.1);
