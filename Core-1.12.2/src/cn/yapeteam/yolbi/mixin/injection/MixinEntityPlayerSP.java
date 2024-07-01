@@ -5,19 +5,17 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventChat;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
-import cn.yapeteam.yolbi.utils.player.RotationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.stats.StatisticsManager;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 @Mixin(EntityPlayerSP.class)
 public class MixinEntityPlayerSP extends EntityPlayerSP {
@@ -25,19 +23,19 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         super(p_i47378_1_, p_i47378_2_, p_i47378_3_, p_i47378_4_, p_i47378_5_);
     }
 
-    @Inject(
-            method = "onUpdate", desc = "()V",
-            target = @Target(
-                    value = "INVOKEVIRTUAL",
-                    target = "net/minecraft/client/entity/EntityPlayerSP.isRiding()Z",
-                    shift = Target.Shift.BEFORE
-            )
-    )
-    public void onUpdate() {
-        RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
-        RotationManager.renderPitchHead = rotationPitch;
-        YolBi.instance.getEventManager().post(new EventUpdate());
-    }
+    //  @Inject(
+    //          method = "onUpdate", desc = "()V",
+    //          target = @Target(
+    //                  value = "INVOKEVIRTUAL",
+    //                  target = "net/minecraft/client/entity/EntityPlayerSP.isRiding()Z",
+    //                  shift = Target.Shift.BEFORE
+    //          )
+    //  )
+    //  public void onUpdate() {
+    //      RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
+    //      RotationManager.renderPitchHead = rotationPitch;
+    //      YolBi.instance.getEventManager().post(new EventUpdate());
+    //  }
 
     @Shadow
     public double posX;
@@ -68,8 +66,6 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
     @Shadow
     public double motionZ;
     @Shadow
-    public NetHandlerPlayClient sendQueue = null;
-    @Shadow
     private int positionUpdateTicks;
     @Shadow
     public Entity ridingEntity;
@@ -77,10 +73,20 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
     private boolean serverSprintState;
     @Shadow
     private boolean serverSneakState;
+    @Shadow
+    private boolean prevOnGround;
+    @Shadow
+    public boolean autoJumpEnabled;
+    @Shadow
+    public Minecraft mc;
+    @Shadow
+    public NetHandlerPlayClient connection;
+    @Shadow
+    public RecipeBook recipeBook;
 
     @Shadow
-    public AxisAlignedBB getEntityBoundingBox() {
-        return null;
+    public @NotNull AxisAlignedBB getEntityBoundingBox() {
+        return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     }
 
     @Shadow
@@ -98,25 +104,32 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         return false;
     }
 
+    @Shadow
+    public boolean isRiding() {
+        return false;
+    }
+
     @Overwrite(method = "onUpdateWalkingPlayer", desc = "()V")
     public void onUpdateWalkingPlayer() {
         boolean flag = this.isSprinting();
+
         if (flag != this.serverSprintState) {
             if (flag) {
-                this.sendQueue.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SPRINTING));
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SPRINTING));
             } else {
-                this.sendQueue.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SPRINTING));
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SPRINTING));
             }
 
             this.serverSprintState = flag;
         }
 
         boolean flag1 = this.isSneaking();
+
         if (flag1 != this.serverSneakState) {
             if (flag1) {
-                this.sendQueue.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SNEAKING));
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.START_SNEAKING));
             } else {
-                this.sendQueue.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SNEAKING));
+                this.connection.sendPacket(new CPacketEntityAction(this, CPacketEntityAction.Action.STOP_SNEAKING));
             }
 
             this.serverSneakState = flag1;
@@ -124,27 +137,27 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         EventMotion motionEvent = new EventMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround);
         YolBi.instance.getEventManager().post(motionEvent);
         if (this.isCurrentViewEntity()) {
+            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
             double d0 = motionEvent.getX() - this.lastReportedPosX;
             double d1 = motionEvent.getY() - this.lastReportedPosY;
             double d2 = motionEvent.getZ() - this.lastReportedPosZ;
             double d3 = motionEvent.getYaw() - this.lastReportedYaw;
             double d4 = motionEvent.getPitch() - this.lastReportedPitch;
+            ++this.positionUpdateTicks;
             boolean flag2 = d0 * d0 + d1 * d1 + d2 * d2 > 9.0E-4D || this.positionUpdateTicks >= 20;
             boolean flag3 = d3 != 0.0D || d4 != 0.0D;
 
-            if (this.ridingEntity == null) {
-                if (flag2 && flag3) {
-                    this.sendQueue.sendPacket(new CPacketPlayer.PositionRotation(motionEvent.getX(), motionEvent.getY(), motionEvent.getZ(), motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
-                } else if (flag2) {
-                    this.sendQueue.sendPacket(new CPacketPlayer.Position(motionEvent.getX(), motionEvent.getY(), motionEvent.getZ(), motionEvent.isOnGround()));
-                } else if (flag3) {
-                    this.sendQueue.sendPacket(new CPacketPlayer.Rotation(motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
-                } else {
-                    this.sendQueue.sendPacket(new CPacketPlayer(motionEvent.isOnGround()));
-                }
-            } else {
-                this.sendQueue.sendPacket(new CPacketPlayer.PositionRotation(this.motionX, -999.0D, this.motionZ, motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
+            if (this.isRiding()) {
+                this.connection.sendPacket(new CPacketPlayer.PositionRotation(this.motionX, -999.0D, this.motionZ, motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
                 flag2 = false;
+            } else if (flag2 && flag3) {
+                this.connection.sendPacket(new CPacketPlayer.PositionRotation(motionEvent.getX(), axisalignedbb.minY, motionEvent.getZ(), motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
+            } else if (flag2) {
+                this.connection.sendPacket(new CPacketPlayer.Position(motionEvent.getX(), axisalignedbb.minY, motionEvent.getZ(), motionEvent.isOnGround()));
+            } else if (flag3) {
+                this.connection.sendPacket(new CPacketPlayer.Rotation(motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
+            } else if (this.prevOnGround != this.onGround) {
+                this.connection.sendPacket(new CPacketPlayer(motionEvent.isOnGround()));
             }
 
             ++this.positionUpdateTicks;
@@ -160,17 +173,19 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
                 this.lastReportedYaw = motionEvent.getYaw();
                 this.lastReportedPitch = motionEvent.getPitch();
             }
+
+            this.prevOnGround = this.onGround;
+            this.autoJumpEnabled = this.mc.gameSettings.autoJump;
         }
         YolBi.instance.getEventManager().post(new EventPostMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround));
     }
 
-    @Overwrite(method = "sendChatMessage", desc = "(Ljava/lang/String;)V")
-    public void sendChatMessage(String message) {
+    @Inject(method = "sendChatMessage", desc = "(Ljava/lang/String;)V",target = @Target("HEAD"))
+    public void sendChatMessage(@NotNull String message) {
         EventChat event = new EventChat(message);
         YolBi.instance.getEventManager().post(event);
-        if (!event.isCancelled()) {
-            message = event.getMessage();
-            this.sendQueue.sendPacket(new CPacketChatMessage(message));
-        }
+        if (event.isCancelled())
+            //noinspection UnnecessaryReturnStatement
+            return;
     }
 }
