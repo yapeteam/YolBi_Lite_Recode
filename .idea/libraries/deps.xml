@@ -6,8 +6,10 @@
     <JAVADOC />
     <SOURCES>
       <root url="file://$PROJECT_DIR$/deps" />
+      <root url="file://$PROJECT_DIR$/deps" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/deps" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/deps" recursive="false" type="SOURCES" />
     <jarDirectory url="file://$PROJECT_DIR$/deps" recursive="false" type="SOURCES" />
   </library>
 </component>
