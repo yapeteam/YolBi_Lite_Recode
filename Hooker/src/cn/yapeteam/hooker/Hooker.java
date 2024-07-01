@@ -181,7 +181,8 @@ public class Hooker {
                 // 偶尔抽风，尝试两次
                 try {
                     targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
-                } catch (IllegalArgumentException e) {
+                } catch (Exception e) {
+                    Thread.sleep(500);
                     targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
                 }
                 for (MethodNode method : targetNode.methods) {
