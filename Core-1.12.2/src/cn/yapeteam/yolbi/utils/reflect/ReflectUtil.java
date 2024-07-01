@@ -54,7 +54,7 @@ public class ReflectUtil {
             Logger.exception(e);
         }
         try {
-            Entity$getVectorForRotation = Entity.class.getDeclaredMethod(Mapper.map("net/minecraft/entity/Entity", "getVectorForRotation", "(FF)Lnet/minecraft/util/Vec3;", Mapper.Type.Method), float.class, float.class);
+            Entity$getVectorForRotation = Entity.class.getDeclaredMethod(Mapper.map("net/minecraft/entity/Entity", "getVectorForRotation", "(FF)Lnet/minecraft/util/math/Vec3d;", Mapper.Type.Method), float.class, float.class);
             Entity$getVectorForRotation.setAccessible(true);
         } catch (NoSuchMethodException e) {
             Logger.exception(e);

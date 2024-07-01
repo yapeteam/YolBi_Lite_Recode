@@ -12,3 +12,7 @@ wrapAngleTo180->wrapDegrees
 Vec3->Vec3d
 SXX->S
 CXX->C
+addCollisionBoxesToList->addCollisionBoxToList
+"net/minecraft/util/Vec3"->"net/minecraft/util/math/Vec3d"
+"net/minecraft/util/BlockPos"->"net/minecraft/util/math/BlockPos"
+"net/minecraft/util/AxisAlignedBB"->"net/minecraft/util/math/AxisAlignedBB"
