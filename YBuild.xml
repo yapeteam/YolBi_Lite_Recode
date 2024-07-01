@@ -19,6 +19,9 @@
                         <archive name="injection-1.12.2.jar">
                             <files>out/production/Core-1.12.2</files>
                         </archive>
+                        <archive name="injection-1.20.6.jar">
+                            <files>out/production/Core-1.12.2</files>
+                        </archive>
                     </dir>
                     <dir name="dependencies">
                         <file>deps/asm-all-9.2.jar</file>
@@ -33,10 +36,6 @@
                     </archive>
                     <archive name="ymixin.jar">
                         <files>out/production/YMixin</files>
-                    </archive>
-                    <archive name="agent.jar">
-                        <dir>Agent/META-INF</dir>
-                        <files>out/production/Agent</files>
                     </archive>
                     <file>Loader/dll/build/libinjection.dll</file>
                     <file>Loader/dll/build/libapi.dll</file>

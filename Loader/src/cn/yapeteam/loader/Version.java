@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 @Getter
 public enum Version {
-    V1_8_9("1.8.9"), V1_12_2("1.12.2");
+    V1_8_9("1.8.9"), V1_12_2("1.12.2"), V1_20_6("1.20.6");
 
     private final String version;
 

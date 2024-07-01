@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Builder/Builder.iml" filepath="$PROJECT_DIR$/Builder/Builder.iml" />
       <module fileurl="file://$PROJECT_DIR$/Core-1.12.2/Core-1.12.2.iml" filepath="$PROJECT_DIR$/Core-1.12.2/Core-1.12.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Core-1.20.6/Core-1.20.6.iml" filepath="$PROJECT_DIR$/Core-1.20.6/Core-1.20.6.iml" />
       <module fileurl="file://$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" filepath="$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" />
       <module fileurl="file://$PROJECT_DIR$/Hooker/Hooker.iml" filepath="$PROJECT_DIR$/Hooker/Hooker.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/Injector.iml" filepath="$PROJECT_DIR$/Injector/Injector.iml" />
