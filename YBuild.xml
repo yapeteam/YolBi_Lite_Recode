@@ -21,7 +21,7 @@
                             <files>out/production/Core-1.12.2</files>
                         </archive>
                         <archive name="injection-1.20.6.jar">
-                            <files>out/production/Core-1.12.2</files>
+                            <files>out/production/Core-1.20.6</files>
                         </archive>
                     </dir>
                     <dir name="dependencies">
