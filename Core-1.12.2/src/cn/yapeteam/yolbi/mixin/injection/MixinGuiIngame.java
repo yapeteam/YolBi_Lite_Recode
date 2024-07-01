@@ -12,16 +12,15 @@ import net.minecraft.client.gui.ScaledResolution;
 @Mixin(GuiIngame.class)
 public class MixinGuiIngame {
     @Inject(
-            method = "renderTooltip",
-            desc = "(Lnet/minecraft/client/gui/ScaledResolution;F)V",
+            method = "renderGameOverlay",
+            desc = "(F)V",
             target = @Target(
-                    value = "INVOKESTATIC",
-                    target = "net/minecraft/client/renderer/GlStateManager.disableRescaleNormal()V",
+                    value = "INVOKEVIRTUAL",
+                    target = "net/minecraft/client/gui/GuiIngame.renderHotbar(Lnet/minecraft/client/gui/ScaledResolution;F)V",
                     shift = Target.Shift.AFTER
             )
     )
-    //After "this.mc.theWorld.getScoreboard();"
-    public void render(@Local(source = "sr", index = 1) ScaledResolution sr, @Local(source = "partialTicks", index = 2) float partialTicks) {
-        YolBi.instance.getEventManager().post(new EventRender2D(partialTicks, sr));
+    public void onRenderGameOverlay(@Local(source = "partialTicks", index = 1) float partialTicks, @Local(source = "scaledResolution", index = 2) ScaledResolution scaledResolution) {
+        YolBi.instance.getEventManager().post(new EventRender2D(partialTicks, scaledResolution));
     }
 }

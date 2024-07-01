@@ -30,7 +30,7 @@ public class MixinMinecraft {
     }
 
     @Inject(
-            method = "runTick", desc = "()V",
+            method = "runTickKeyboard", desc = "()V",
             target = @Target(
                     value = "INVOKESTATIC",
                     target = "org/lwjgl/input/Keyboard.getEventKeyState()Z",
