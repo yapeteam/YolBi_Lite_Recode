@@ -10,6 +10,7 @@
                 <extract>deps/jna.jar</extract>
                 <extract>deps/flatlaf.jar</extract>
                 <extract>deps/flatlaf-intellij-themes.jar</extract>
+                <extract>deps/tools.jar</extract>
                 <archive name="injection.zip">
                     <dir>resources</dir>
                     <dir name="injection">
@@ -24,6 +25,7 @@
                         <file>deps/asm-all-9.2.jar</file>
                         <file>deps/flatlaf.jar</file>
                         <file>deps/flatlaf-intellij-themes.jar</file>
+                        <file>deps/tools.jar</file>
                     </dir>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
