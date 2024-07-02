@@ -5,6 +5,7 @@ import cn.yapeteam.yolbi.antileak.check.OSCheck;
 import cn.yapeteam.yolbi.antileak.confusion.GenFakeIP;
 import cn.yapeteam.yolbi.antileak.confusion.GenRandomString;
 import cn.yapeteam.yolbi.antileak.utils.HwidUtils;
+import cn.yapeteam.yolbi.antileak.utils.encode.AESEncode;
 
 public class AntiLeak {
     public static final AntiLeak instance = new AntiLeak();
@@ -15,6 +16,13 @@ public class AntiLeak {
     public String latestVersionUrl = GenFakeIP.generateRandomIP(4);
     public final String ENCODE_KEY = "XXDoYou_LoveMeXX";
 
+    static {
+        System.loadLibrary("AntiLeak");
+    }
+
+    private native String getHwid();
+    private native void crash();
+
     // TODO 应该在主类里调用此方法
     public void init() {
         // checks
@@ -22,7 +30,7 @@ public class AntiLeak {
         JvmProcessCheck.check();
 
         if (userName.length() != 32 || latestVersion.length() != 32) {
-            crash();
+            doCrash();
         }
 
         if (isPremium) {
@@ -34,19 +42,25 @@ public class AntiLeak {
         }
 
         try {
-            HwidUtils.getHwid();
+            HwidUtils.hwid = AESEncode.encode(getHwid(), ENCODE_KEY);
         } catch (Exception e) {
-            crash();
+            doCrash();
         }
     }
 
     @SuppressWarnings("all")
-    public void crash() {
-        // TODO 更好的崩溃操作
+    public void doCrash() {
         try {
             crash();
+            doCrash();
         } catch (Exception e) {
             crash();
+            doCrash();
         }
+    }
+
+    public static void main(String[] args) {
+        instance.init();
+        System.out.println(HwidUtils.hwid);
     }
 }

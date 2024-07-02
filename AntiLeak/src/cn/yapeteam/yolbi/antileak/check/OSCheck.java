@@ -6,7 +6,7 @@ import cn.yapeteam.yolbi.antileak.utils.os.OSUtils;
 public class OSCheck {
     public static void check() {
         if (OSUtils.getPlatform() != OSUtils.OS.WINDOWS) {
-            AntiLeak.instance.crash();
+            AntiLeak.instance.doCrash();
         }
     }
 }
