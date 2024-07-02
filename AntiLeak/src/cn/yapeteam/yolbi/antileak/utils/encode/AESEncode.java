@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi.antileak.utils.encode;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 public class AESEncode {
     public static String encode(final String plainText, final String key) throws Exception {
@@ -21,6 +22,6 @@ public class AESEncode {
         Cipher cipher = Cipher.getInstance(PATTERN);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         byte[] encryptData = cipher.doFinal(plainText.getBytes(ENCODING));
-        return java.util.Base64.getEncoder().encodeToString(encryptData);
+        return Base64.getEncoder().encodeToString(encryptData);
     }
 }
