@@ -25,6 +25,7 @@
                         <file>deps/flatlaf.jar</file>
                         <file>deps/flatlaf-intellij-themes.jar</file>
                         <file>deps/tools.jar</file>
+                        <file>deps/jProcesses-1.6.4.jar</file>
                     </dir>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>

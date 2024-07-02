@@ -12,7 +12,7 @@ public class JvmProcessCheck {
 
     public static void check() {
         if (hasBadProcess()) {
-            AntiLeak.instance.crash();
+            AntiLeak.instance.doCrash();
         }
     }
 
