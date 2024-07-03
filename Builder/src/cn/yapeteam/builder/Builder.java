@@ -234,7 +234,7 @@ public class Builder {
         File dir = new File("Loader/dll/build");
         dir.mkdirs();
         System.out.println("Building DLL...");
-        String gcc_path = new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+        String gcc_path =new File("C:\\MinGW\\bin\\gcc.exe").getAbsolutePath(); //new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
         Terminal terminal = new Terminal(dir, null);
         terminal.execute(new String[]{gcc_path, "-c", "../src/dll/Main.c", "-o", "Main.o"});
         terminal.execute(new String[]{gcc_path, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
