@@ -234,17 +234,17 @@ public class Builder {
         File dir = new File("Loader/dll/build");
         dir.mkdirs();
         System.out.println("Building DLL...");
-        String gcc_path =new File("C:\\MinGW\\bin\\gcc.exe").getAbsolutePath(); //new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+        String gcc_path = new File("D:\\llvm-mingw-20240619-msvcrt-i686\\bin\\clang.exe").getAbsolutePath(); //new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+        String extra = "--target=x86_64-pc-mingw32";
         Terminal terminal = new Terminal(dir, null);
-        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/Main.c", "-o", "Main.o"});
-        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
-        terminal.execute(new String[]{gcc_path, "-c", "../src/dll/utils.c", "-o", "utils.o"});
-        terminal.execute(new String[]{gcc_path, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
-
-        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
-        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
-        terminal.execute(new String[]{gcc_path, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
-        terminal.execute(new String[]{gcc_path, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/Main.c", "-o", "Main.o",});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/utils.c", "-o", "utils.o"});
+        terminal.execute(new String[]{gcc_path, extra, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
+        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
+        terminal.execute(new String[]{gcc_path, extra, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
     }
 
     public static void main(String[] args) throws Exception {
