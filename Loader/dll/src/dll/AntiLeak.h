@@ -17,6 +17,14 @@ extern "C" {
 
 	/*
 	 * Class:     cn_yapeteam_yolbi_antileak_AntiLeak
+	 * Method:    crash2
+	 * Signature: ()V
+	 */
+	JNIEXPORT void JNICALL Java_cn_yapeteam_yolbi_antileak_AntiLeak_crash2
+	(JNIEnv*, jobject);
+
+	/*
+	 * Class:     cn_yapeteam_yolbi_antileak_AntiLeak
 	 * Method:    getHwid
 	 * Signature: ()Ljava/lang/String;
 	 */
