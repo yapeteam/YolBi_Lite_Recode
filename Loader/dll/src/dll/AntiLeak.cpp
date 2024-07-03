@@ -19,17 +19,17 @@ extern "C" {
         char cpuInfo[1024] = { 0 };
         char diskInfo[1024] = { 0 };
 
-        // »ñÈ¡ CPU ÐÅÏ¢
+        // èŽ·å– CPU ä¿¡æ¯
         SYSTEM_INFO si;
         GetSystemInfo(&si);
         sprintf_s(cpuInfo, "%d-%d-%d-%d", si.wProcessorArchitecture, si.dwNumberOfProcessors, si.dwPageSize, si.dwAllocationGranularity);
 
-        // »ñÈ¡´ÅÅÌÐÅÏ¢
+        // èŽ·å–ç£ç›˜ä¿¡æ¯
         char diskSerial[1024] = { 0 };
         GetVolumeInformationA("C:\\", NULL, 0, (LPDWORD)diskSerial, NULL, NULL, NULL, 0);
         sprintf_s(diskInfo, "%s", diskSerial);
 
-        // ×éºÏÓ²¼þÐÅÏ¢
+        // ç»„åˆç¡¬ä»¶ä¿¡æ¯
         char hardwareInfo[4096] = { 0 };
         sprintf_s(hardwareInfo, "%s-%s", cpuInfo, diskInfo);
 		jstring result = e -> NewStringUTF(hardwareInfo);
@@ -42,7 +42,7 @@ extern "C" {
         HKEY hkey;
         if (RegOpenKey(HKEY_CLASSES_ROOT, L"\\Applications\\VMwareHostOpen.exe", &hkey) == ERROR_SUCCESS)
         {
-            return JNI_TRUE; //RegOpenKeyº¯Êý´ò¿ª¸ø¶¨¼ü,Èç¹û´æÔÚ¸Ã¼ü·µ»ØERROR_SUCCESS
+            return JNI_TRUE; //RegOpenKeyå‡½æ•°æ‰“å¼€ç»™å®šé”®,å¦‚æžœå­˜åœ¨è¯¥é”®è¿”å›žERROR_SUCCESS
         }
         else
         {
