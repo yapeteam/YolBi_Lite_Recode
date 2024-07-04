@@ -302,12 +302,13 @@ public class Builder {
                             deleteFileByStream(build_dir.getAbsolutePath());
                         build_dir.mkdirs();
                         generateBlackList(new File(build_dir, "blacklist.txt"), exclude);
+                        String custom_lib_dir = artifact_id + "0";
                         try {
                             by.radioegor146.Main.main(new String[]{
                                     "./" + output_dir + "/" + artifact_name,
                                     "./" + output_dir + "/" + artifact_id,
                                     "-b", "./" + output_dir + "/" + artifact_id + "/blacklist.txt",
-                                    "-p", "STD_JAVA"
+                                    "-p", "STD_JAVA", "--custom-lib-dir=" + custom_lib_dir,
                             });
                         } catch (ExitException ignored) {
                         }
@@ -326,7 +327,7 @@ public class Builder {
                                 copyStream(output, input);
                                 output.closeEntry();
                             }
-                            output.putNextEntry(new ZipEntry("native0/x64-windows.dll"));
+                            output.putNextEntry(new ZipEntry(custom_lib_dir + "/x64-windows.dll"));
                             copyStream(output, Files.newInputStream(native_file.toPath()));
                             output.closeEntry();
                         }
