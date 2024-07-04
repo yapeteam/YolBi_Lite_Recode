@@ -196,7 +196,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = true;
+    private static final boolean advanced_mode = false;
     // <unknown-file>:0: syntax error 不用管
 
     private static void buildDLL() throws Exception {
