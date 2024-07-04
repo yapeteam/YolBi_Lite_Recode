@@ -200,7 +200,7 @@ public class Builder {
     private static void checkMinGW() throws Exception {
         String os_name = System.getProperty("os.name").toLowerCase();
         if (os_name.contains("windows") && !os_name.contains("linux")) {
-            File mingw_dir = new File(MINGW_PATH);
+            File mingw_dir = new File(MINGW_PATH + "/bin");
             if (mingw_dir.exists()) {
                 System.out.println("MinGW already exists");
                 return;
@@ -230,21 +230,64 @@ public class Builder {
         }
     }
 
+    private static final boolean advanced_mode = false;
+
     private static void buildDLL() throws Exception {
         File dir = new File("Loader/dll/build");
         dir.mkdirs();
         System.out.println("Building DLL...");
-        String gcc_path = new File("D:\\llvm-mingw-20240619-msvcrt-i686\\bin\\clang.exe").getAbsolutePath(); //new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
-        String extra = "--target=x86_64-pc-mingw32";
-        Terminal terminal = new Terminal(dir, null);
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/Main.c", "-o", "Main.o",});
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/dll/utils.c", "-o", "utils.o"});
-        terminal.execute(new String[]{gcc_path, extra, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
-        terminal.execute(new String[]{gcc_path, extra, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
-        terminal.execute(new String[]{gcc_path, extra, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
+        if (advanced_mode) {
+            String exe = "C:\\Windows\\System32\\cmd.exe";
+            Terminal terminal = new Terminal(dir, null);
+            String target = "--target=x86_64-pc-mingw32";
+            terminal.execute(new String[]{exe, "/c", "clang-cl",
+                    "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
+                    "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
+                    "-mllvm", "-split_num=1", "-mllvm", "-igv",
+                    target, "-c", "../src/dll/Main.c", "-o", "Main.o",});
+            terminal.execute(new String[]{exe, "/c", "clang", "--target=x86_64-pc-mingw32", "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
+            terminal.execute(new String[]{exe, "/c", "clang-cl",
+                    "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
+                    "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
+                    "-mllvm", "-split_num=5", "-mllvm", "-igv",
+                    target, "-c", "../src/dll/utils.c", "-o", "utils.o"});
+            terminal.execute(new String[]{exe, "/c", "clang", "--target=x86_64-pc-mingw32", "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
+
+            terminal.execute(new String[]{exe, "/c", "clang-cl",
+                    "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
+                    "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
+                    "-mllvm", "-split_num=1", "-mllvm", "-igv",
+                    target, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
+            terminal.execute(new String[]{exe, "/c", "clang-cl",
+                    "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
+                    "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
+                    "-mllvm", "-split_num=1", "-mllvm", "-igv",
+                    target, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
+            terminal.execute(new String[]{exe, "/c", "clang-cl",
+                    "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
+                    "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
+                    "-mllvm", "-split_num=1", "-mllvm", "-igv",
+                    target, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
+            terminal.execute(new String[]{exe, "/c", "clang",
+                    target, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
+        } else {
+            String gcc_path = new File("Loader/dll/mingw/mingw64/bin/gcc.exe").getAbsolutePath();
+            Terminal terminal = new Terminal(dir, null);
+            terminal.execute(new String[]{gcc_path, "-c", "../src/dll/Main.c", "-o", "Main.o"});
+            terminal.execute(new String[]{gcc_path, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
+            terminal.execute(new String[]{gcc_path, "-c", "../src/dll/utils.c", "-o", "utils.o"});
+            terminal.execute(new String[]{gcc_path, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
+
+            terminal.execute(new String[]{gcc_path, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
+            terminal.execute(new String[]{gcc_path, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
+            terminal.execute(new String[]{gcc_path, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
+            terminal.execute(new String[]{gcc_path, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
+        }
     }
 
     public static void main(String[] args) throws Exception {
