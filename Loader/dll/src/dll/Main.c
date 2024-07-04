@@ -17,8 +17,6 @@ JavaVM *jvm;
 JNIEnv *jniEnv;
 jvmtiEnv *jvmti;
 
-#define CALL(function_ptr, ...) (*function_ptr)(__VA_ARGS__)
-
 struct Callback
 {
     const unsigned char *array;
@@ -238,7 +236,7 @@ JNIEXPORT jint JNICALL RedefineClass(JNIEnv *env, jclass _, jclass clazz, jbyteA
 JNIEXPORT jclass JNICALL DefineClass(JNIEnv *env, jclass _, jobject classLoader, jbyteArray bytes)
 {
     jclass clClass = (*env)->FindClass(env, "java/lang/ClassLoader");
-    jmethodID defineClass = (*env)->GetMethodID(env, clClass, "defineClass","([BII)Ljava/lang/Class;");
+    jmethodID defineClass = (*env)->GetMethodID(env, clClass, "defineClass", "([BII)Ljava/lang/Class;");
     jobject classDefined = (*env)->CallObjectMethod(env, classLoader, defineClass, bytes, 0,
                                                     (*env)->GetArrayLength(env, bytes));
     return (jclass)classDefined;
@@ -275,9 +273,9 @@ JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
 {
     char injectionOutPath[260];
     sprintf_s(injectionOutPath, 260, ("%s\\injection.jar"), yolbiPath);
-    CALL(&loadJar, env, injectionOutPath, classLoader);
+    loadJar(env, injectionOutPath, classLoader);
     jniEnv = env;
-    jclass Start = CALL(&findThreadClass, ("cn.yapeteam.yolbi.Loader"), classLoader);
+    jclass Start = findThreadClass(("cn.yapeteam.yolbi.Loader"), classLoader);
     if (!Start)
     {
         printf(("Failed to find Loader class\n"));
@@ -344,39 +342,39 @@ void Inject_fla_bcf_()
     const char *water30 = "|        /**      /**   //** //*******  /*******  //*******  //******     /**    /** //*******  /**    //***         |\n";
     const char *water31 = "|        //       //     //   ///////   ///////    ///////    //////      //     //   ///////   //      ///          |\n";
     const char *water32 = "*--------------------------------------------------------------------------------------------------------------------*\n";
-    CALL(&printf, water00);
-    CALL(&printf, water01);
-    CALL(&printf, water02);
-    CALL(&printf, water03);
-    CALL(&printf, water04);
-    CALL(&printf, water05);
-    CALL(&printf, water06);
-    CALL(&printf, water07);
-    CALL(&printf, water08);
-    CALL(&printf, water09);
-    CALL(&printf, water10);
-    CALL(&printf, water11);
-    CALL(&printf, water12);
-    CALL(&printf, water13);
-    CALL(&printf, water14);
-    CALL(&printf, water15);
-    CALL(&printf, water16);
-    CALL(&printf, water17);
-    CALL(&printf, water18);
-    CALL(&printf, water19);
-    CALL(&printf, water20);
-    CALL(&printf, water21);
-    CALL(&printf, water22);
-    CALL(&printf, water23);
-    CALL(&printf, water24);
-    CALL(&printf, water25);
-    CALL(&printf, water26);
-    CALL(&printf, water27);
-    CALL(&printf, water28);
-    CALL(&printf, water29);
-    CALL(&printf, water30);
-    CALL(&printf, water31);
-    CALL(&printf, water32);
+    printf(water00);
+    printf(water01);
+    printf(water02);
+    printf(water03);
+    printf(water04);
+    printf(water05);
+    printf(water06);
+    printf(water07);
+    printf(water08);
+    printf(water09);
+    printf(water10);
+    printf(water11);
+    printf(water12);
+    printf(water13);
+    printf(water14);
+    printf(water15);
+    printf(water16);
+    printf(water17);
+    printf(water18);
+    printf(water19);
+    printf(water20);
+    printf(water21);
+    printf(water22);
+    printf(water23);
+    printf(water24);
+    printf(water25);
+    printf(water26);
+    printf(water27);
+    printf(water28);
+    printf(water29);
+    printf(water30);
+    printf(water31);
+    printf(water32);
 
     jclass ClassLoader = (*jniEnv)->FindClass(jniEnv, ("java/lang/ClassLoader"));
     jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, ("getSystemClassLoader"), ("()Ljava/lang/ClassLoader;"));
@@ -449,7 +447,7 @@ void Inject_fla_bcf_()
     sprintf_s(jarPath, 260, ("%s\\dependencies\\asm-all-9.2.jar"), yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
-        CALL(&loadJar, jniEnv, jarPath, classLoaderLoader);
+        loadJar, (jniEnv, jarPath, classLoaderLoader);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
@@ -464,7 +462,7 @@ void Inject_fla_bcf_()
     (*jvmti)->AddCapabilities((jvmtiEnv *)jvmti, &capabilities);
 
     jvmtiEventCallbacks callbacks = {0};
-    CALL(&memset, &callbacks, 0, sizeof(jvmtiEventCallbacks));
+    memset(&callbacks, 0, sizeof(jvmtiEventCallbacks));
 
     callbacks.ClassFileLoadHook = &classFileLoadHook;
 
@@ -477,7 +475,7 @@ void Inject_fla_bcf_()
     if (hasLaunchClassLoader)
         loadJar(jniEnv, hookerPath, classLoaderLoader);
     else
-        CALL(&loadJar, jniEnv, hookerPath, systemClassLoader);
+        loadJar(jniEnv, hookerPath, systemClassLoader);
 
     JNINativeMethod HookerMethods[] = {
         {("getClassBytes"), ("(Ljava/lang/Class;)[B"), (void *)&GetClassBytes},
@@ -485,7 +483,7 @@ void Inject_fla_bcf_()
         {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
     };
 
-    jclass Hooker = CALL(&findThreadClass, ("cn.yapeteam.hooker.Hooker"), hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
+    jclass Hooker = findThreadClass(("cn.yapeteam.hooker.Hooker"), hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
 
     if (!Hooker)
     {
@@ -506,11 +504,11 @@ void Inject_fla_bcf_()
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (CALL(&str_endwith, entry->d_name, (".jar")))
+        if (str_endwith(entry->d_name, (".jar")))
         {
             char jarPath[260];
             sprintf_s(jarPath, 260, "%s\\%s", depsPath, entry->d_name);
-            CALL(&loadJar, jniEnv, jarPath, systemClassLoader);
+            loadJar(jniEnv, jarPath, systemClassLoader);
             printf(("loaded: %s\n"), jarPath);
         }
     }
@@ -524,7 +522,9 @@ void Inject_fla_bcf_()
     sprintf_s(loaderPath, 260, ("%s\\loader.jar"), yolbiPath);
     loadJar(jniEnv, loaderPath, classLoader);
 
-    jclass wrapperClass = CALL(&findThreadClass, ("cn.yapeteam.loader.NativeWrapper"), classLoader);
+    printf(("All jars loaded\n"));
+    jclass wrapperClass = findThreadClass(("cn.yapeteam.loader.NativeWrapper"), classLoader);
+    printf(("NativeWrapper\n"));
     if (!wrapperClass)
     {
         printf(("Failed to find NativeWrapper class\n"));
@@ -538,7 +538,7 @@ void Inject_fla_bcf_()
         {("FindClass"), ("(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Class;"), (void *)&FindClass},
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
-    jclass natvieClass = CALL(&findThreadClass, ("cn.yapeteam.loader.Natives"), classLoader);
+    jclass natvieClass = findThreadClass(("cn.yapeteam.loader.Natives"), classLoader);
     if (!natvieClass)
     {
         printf(("Failed to find Natives class\n"));
@@ -547,7 +547,7 @@ void Inject_fla_bcf_()
     register_native_methods(jniEnv, natvieClass);
     printf(("Native methods registered\n"));
 
-    jclass BootStrap = CALL(&findThreadClass, ("cn.yapeteam.loader.BootStrap"), classLoader);
+    jclass BootStrap = findThreadClass(("cn.yapeteam.loader.BootStrap"), classLoader);
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {
         (*jniEnv)->ExceptionDescribe(jniEnv);
@@ -570,7 +570,7 @@ void Inject_fla_bcf_()
 
 void HookMain()
 {
-    CALL(&printf, "1\n");
+    printf("1\n");
     HMODULE jvmHandle = GetModuleHandle(("jvm.dll"));
     if (!jvmHandle)
         return;
@@ -621,29 +621,24 @@ JVM_MonitorNotify MonitorNotify = NULL;
 
 void MonitorNotify_Hook(JNIEnv *env, jobject obj)
 {
-    // UnHookFunction64(ENCRYPTED_STRING("jvm.dll"), ENCRYPTED_STRING("JVM_MonitorNotify"));
-    CALL(&UnHookFunction64, ("jvm.dll"), ("JVM_MonitorNotify"));
+    UnHookFunction64(("jvm.dll"), ("JVM_MonitorNotify"));
     MonitorNotify(env, obj);
 
     jniEnv = env;
-    // HookMain();
-    CALL(&HookMain);
+    HookMain();
 }
 
 PVOID WINAPI remote()
 {
-    // HookFunction64(ENCRYPTED_STRING("jvm.dll"), ENCRYPTED_STRING("JVM_MonitorNotify"), (PROC)MonitorNotify_Hook);
-    CALL(&HookFunction64, ("jvm.dll"), ("JVM_MonitorNotify"), (PROC)MonitorNotify_Hook);
+    HookFunction64(("jvm.dll"), ("JVM_MonitorNotify"), (PROC)MonitorNotify_Hook);
     HMODULE jvm = GetModuleHandle(("jvm.dll"));
     MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, ("JVM_MonitorNotify"));
-
     return NULL;
 }
 
 void entry()
 {
-    // CreateThread(NULL, 4096, (LPTHREAD_START_ROUTINE)(&remote), NULL, 0, NULL);
-    CALL(&CreateThread, NULL, 4096, (LPTHREAD_START_ROUTINE)(&remote), NULL, 0, NULL);
+    CreateThread(NULL, 4096, (LPTHREAD_START_ROUTINE)(&remote), NULL, 0, NULL);
 }
 
 #pragma clang diagnostic pop

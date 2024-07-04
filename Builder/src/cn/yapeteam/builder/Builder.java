@@ -197,14 +197,15 @@ public class Builder {
     }
 
     private static final boolean advanced_mode = false;
+    // clang-mingw安装: https://www.cnblogs.com/esllovesn/p/10012653.html
     // <unknown-file>:0: syntax error 不用管
 
     private static void buildDLL() throws Exception {
         File dir = new File("Loader/dll/build");
         dir.mkdirs();
         System.out.println("Building DLL...");
+        Terminal terminal = new Terminal(dir, null);
         if (advanced_mode) {
-            Terminal terminal = new Terminal(dir, null);
             String target = "--target=x86_64-w64-mingw";
             terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
@@ -242,7 +243,6 @@ public class Builder {
             terminal.execute(new String[]{"clang",
                     target, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
         } else {
-            Terminal terminal = new Terminal(dir, null);
             terminal.execute(new String[]{"gcc.exe", "-c", "../src/dll/Main.c", "-o", "Main.o"});
             terminal.execute(new String[]{"gcc.exe", "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
             terminal.execute(new String[]{"gcc.exe", "-c", "../src/dll/utils.c", "-o", "utils.o"});
