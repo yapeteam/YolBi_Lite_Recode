@@ -196,7 +196,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = true;
+    private static final boolean advanced_mode = false;
 
     private static final String clang_path = "clang.exe";
     private static final String clang_cl_path = "clang-cl.exe";
