@@ -196,10 +196,8 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = false;
-
-    private static final String clang_path = "clang.exe";
-    private static final String clang_cl_path = "clang-cl.exe";
+    private static final boolean advanced_mode = true;
+    // <unknown-file>:0: syntax error 不用管
 
     private static void buildDLL() throws Exception {
         File dir = new File("Loader/dll/build");
@@ -207,41 +205,41 @@ public class Builder {
         System.out.println("Building DLL...");
         if (advanced_mode) {
             Terminal terminal = new Terminal(dir, null);
-            String target = "--target=x86_64-pc-mingw32";
-            terminal.execute(new String[]{clang_cl_path,
+            String target = "--target=x86_64-w64-mingw";
+            terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
                     "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
                     "-mllvm", "-split_num=1", "-mllvm", "-igv",
                     target, "-c", "../src/dll/Main.c", "-o", "Main.o",});
-            terminal.execute(new String[]{clang_path, "--target=x86_64-pc-mingw32", "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
-            terminal.execute(new String[]{clang_cl_path,
+            terminal.execute(new String[]{"clang", target, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
+            terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
                     "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
                     "-mllvm", "-split_num=5", "-mllvm", "-igv",
                     target, "-c", "../src/dll/utils.c", "-o", "utils.o"});
-            terminal.execute(new String[]{clang_path, "--target=x86_64-pc-mingw32", "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
+            terminal.execute(new String[]{"clang", target, "-shared", "Main.o", "ReflectiveLoader.o", "utils.o", "-o", "libinjection.dll"});
 
-            terminal.execute(new String[]{clang_cl_path,
+            terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
                     "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
                     "-mllvm", "-split_num=1", "-mllvm", "-igv",
                     target, "-c", "../src/inject/GetProcAddressR.c", "-o", "GetProcAddressR.o"});
-            terminal.execute(new String[]{clang_cl_path,
+            terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
                     "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
                     "-mllvm", "-split_num=1", "-mllvm", "-igv",
                     target, "-c", "../src/inject/LoadLibraryR.c", "-o", "LoadLibraryR.o"});
-            terminal.execute(new String[]{clang_cl_path,
+            terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
                     "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
                     "-mllvm", "-split_num=1", "-mllvm", "-igv",
                     target, "-c", "../src/inject/Inject.c", "-o", "Inject.o"});
-            terminal.execute(new String[]{clang_path,
+            terminal.execute(new String[]{"clang",
                     target, "-shared", "GetProcAddressR.o", "LoadLibraryR.o", "Inject.o", "-o", "libapi.dll"});
         } else {
             Terminal terminal = new Terminal(dir, null);
@@ -367,29 +365,28 @@ public class Builder {
         copyStream(Files.newOutputStream(new File(dir, "jvmti.h").toPath()), Objects.requireNonNull(Builder.class.getResourceAsStream("/jvmti.h")));
         if (advanced_mode) {
             Terminal terminal = new Terminal(output, null);
-            String compiler = clang_cl_path;
-            String linker = clang_path;
+            String target = "--target=x86_64-w64-mingw";
             ArrayList<String> binaries = new ArrayList<>();
-            terminal.execute(new String[]{compiler, "--target=x86_64-pc-mingw32", "-c", "../native_jvm.cpp", "-o", "native_jvm.o"});
-            terminal.execute(new String[]{compiler, "--target=x86_64-pc-mingw32", "-c", "../native_jvm_output.cpp", "-o", "native_jvm_output.o"});
-            terminal.execute(new String[]{compiler, "--target=x86_64-pc-mingw32", "-c", "../string_pool.cpp", "-o", "string_pool.o"});
+            terminal.execute(new String[]{"clang-cl", target, "-c", "../native_jvm.cpp", "-o", "native_jvm.o"});
+            terminal.execute(new String[]{"clang-cl", target, "-c", "../native_jvm_output.cpp", "-o", "native_jvm_output.o"});
+            terminal.execute(new String[]{"clang-cl", target, "-c", "../string_pool.cpp", "-o", "string_pool.o"});
             binaries.add("native_jvm.o");
             binaries.add("native_jvm_output.o");
             binaries.add("string_pool.o");
             for (String file : Objects.requireNonNull(src.list())) {
                 if (file.endsWith(".cpp")) {
-                    terminal.execute(new String[]{compiler,
+                    terminal.execute(new String[]{"clang-cl",
                             "-mllvm", "-bcf",
                             "-mllvm", "-bcf_loop=1", "-mllvm", "-sobf", "-mllvm", "-icall",
                             "-mllvm", "-sub", "-mllvm", "-split",
                             "-mllvm", "-split_num=2",
-                            "--target=x86_64-pc-mingw32", "-c", "../output/" + file, "-o", file.substring(0, file.lastIndexOf(".")) + ".o"});
+                            target, "-c", "../output/" + file, "-o", file.substring(0, file.lastIndexOf(".")) + ".o"});
                     binaries.add(file.replace(".cpp", ".o"));
                 }
             }
             String[] linkArgs = new String[1 + 1 + 1 + binaries.size() + 4 + 1 + 1];
-            linkArgs[0] = linker;
-            linkArgs[1] = "--target=x86_64-pc-mingw32";
+            linkArgs[0] = "clang++";
+            linkArgs[1] = target;
             linkArgs[2] = "-shared";
             for (int i = 0; i < binaries.size(); i++)
                 linkArgs[3 + i] = binaries.get(i);
