@@ -18,8 +18,8 @@
         <artifact name="injection-1.12.2.jar">
             <files>out/production/Core-1.12.2</files>
         </artifact>
-        <obfuscate artifact="hooker.jar"/>
-        <obfuscate artifact="loader.jar" exclude="cn.yapeteam.loader.ClassMapper"/>
+        <obfuscate artifact="hooker.jar" white="cn.yapeteam.hooker.*"/>
+        <obfuscate artifact="loader.jar" black="cn.yapeteam.loader.ClassMapper"/>
         <artifact name="injector.jar">
             <files>out/production/Injector</files>
             <dir>Injector/META-INF</dir>

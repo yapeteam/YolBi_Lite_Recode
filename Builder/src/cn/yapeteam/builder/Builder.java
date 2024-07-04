@@ -294,22 +294,42 @@ public class Builder {
                     }
                     case "obfuscate": {
                         Node artifact = element.getAttributes().getNamedItem("artifact");
-                        Node exclude = element.getAttributes().getNamedItem("exclude");
+                        Node black = element.getAttributes().getNamedItem("black");
+                        Node white = element.getAttributes().getNamedItem("white");
                         String artifact_name = artifact.getNodeValue();
                         String artifact_id = artifact_name.substring(0, artifact_name.lastIndexOf("."));
                         File build_dir = new File(output_dir, artifact_id);
                         if (build_dir.exists())
                             deleteFileByStream(build_dir.getAbsolutePath());
                         build_dir.mkdirs();
-                        generateBlackList(new File(build_dir, "blacklist.txt"), exclude);
+                        if (black != null)
+                            generateList(new File(build_dir, "blacklist.txt"), black);
+                        if (white != null)
+                            generateList(new File(build_dir, "whitelist.txt"), white);
                         String custom_lib_dir = artifact_id + "0";
+                        String[] obf_args = new String[black != null || white != null ? 7 : 5];
+                        obf_args[0] = "./" + output_dir + "/" + artifact_name;
+                        obf_args[1] = "./" + output_dir + "/" + artifact_id;
+                        if (black != null) {
+                            obf_args[2] = "-b";
+                            obf_args[3] = "./" + output_dir + "/" + artifact_id + "/blacklist.txt";
+                            obf_args[4] = "-p";
+                            obf_args[5] = "STD_JAVA";
+                            obf_args[6] = "--custom-lib-dir=" + custom_lib_dir;
+                        } else if (white != null) {
+                            obf_args[2] = "-w";
+                            obf_args[3] = "./" + output_dir + "/" + artifact_id + "/whitelist.txt";
+                            obf_args[4] = "-p";
+                            obf_args[5] = "STD_JAVA";
+                            obf_args[6] = "--custom-lib-dir=" + custom_lib_dir;
+                        } else {
+                            obf_args[2] = "-p";
+                            obf_args[3] = "STD_JAVA";
+                            obf_args[4] = "--custom-lib-dir=" + custom_lib_dir;
+                        }
+                        System.out.println("Args: " + Arrays.toString(obf_args));
                         try {
-                            by.radioegor146.Main.main(new String[]{
-                                    "./" + output_dir + "/" + artifact_name,
-                                    "./" + output_dir + "/" + artifact_id,
-                                    "-b", "./" + output_dir + "/" + artifact_id + "/blacklist.txt",
-                                    "-p", "STD_JAVA", "--custom-lib-dir=" + custom_lib_dir,
-                            });
+                            by.radioegor146.Main.main(obf_args);
                         } catch (ExitException ignored) {
                         }
                         File obf_out_dir = new File(build_dir, "cpp");
@@ -432,13 +452,13 @@ public class Builder {
         return new File(output, "native.dll");
     }
 
-    private static void generateBlackList(File blacklist_file, Node exclude) throws IOException {
+    private static void generateList(File file, Node exclude) throws IOException {
         ArrayList<String> exclude_list = new ArrayList<>();
         if (exclude != null) {
             String[] values = exclude.getNodeValue().split(",");
             for (String value : values) exclude_list.add(value.trim());
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(blacklist_file))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             for (String exclude_name : exclude_list)
                 writer.write(exclude_name.replace(".", "/") + "\n");
         }
