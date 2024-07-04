@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="natives" level="project" />
+    <orderEntry type="library" name="obf" level="project" />
   </component>
 </module>

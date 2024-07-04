@@ -16,6 +16,7 @@ public class Terminal {
     }
 
     public void execute(String[] command) throws Exception {
+        System.out.printf("Running command: %s\n", String.join(" ", command));
         Process proc = Runtime.getRuntime().exec(command, envp, dir);
         reading = true;
         new Thread(() -> {

@@ -35,7 +35,6 @@ bin/
 /Core/target/
 /Injector/target/
 /Loader/target/
-/Loader/dll/mingw/
 /Loader/dll/build/
 /Loader/dll/cmake-build-debug/
 /Loader/dll/.idea/
