@@ -21,6 +21,7 @@
                         <file>deps/asm-all-9.2.jar</file>
                         <file>deps/flatlaf.jar</file>
                         <file>deps/flatlaf-intellij-themes.jar</file>
+                        <file>deps/rt.jar</file>
                         <dir name="jfxrt">
                             <file>deps/jfxrt.jar</file>
                         </dir>

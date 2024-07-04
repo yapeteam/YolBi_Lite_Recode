@@ -27,6 +27,8 @@ import org.lwjgl.opengl.Display;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -159,6 +161,7 @@ public class RenderManager implements IMinecraft {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        System.setProperty("java.base","true");
         new JFXPanel(); // Initialize JavaFX toolkit
         shapesMap = new HashMap<>();
         modifiedidbuffer = new ArrayList<>(); // Corrected initialization
