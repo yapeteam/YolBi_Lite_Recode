@@ -65,13 +65,17 @@ jclass JNICALL loadClass(JNIEnv *jniEnv, const char *name, jobject classloader)
 
 jclass findThreadClass(const char *name, jobject classLoader)
 {
-    jclass urlClassLoader = (*jniEnv)->FindClass(jniEnv, "java/net/URLClassLoader");
     jclass result = NULL;
     replace(name, "/", ".");
     jclass Class = (*jniEnv)->FindClass(jniEnv, "java/lang/Class");
     jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, "forName", "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;");
     jstring className = (*jniEnv)->NewStringUTF(jniEnv, name);
     result = (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionDescribe(jniEnv);
+        (*jniEnv)->ExceptionClear(jniEnv);
+    }
     if (result)
         return result;
     replace(name, ".", "/");
@@ -441,10 +445,10 @@ void Inject_fla_bcf_()
     }
 
     if (hasLaunchClassLoader)
-        printf(("LaunchClassLoader found\n"));
+        printf("LaunchClassLoader found\n");
 
     char jarPath[260];
-    sprintf_s(jarPath, 260, ("%s\\dependencies\\asm-all-9.2.jar"), yolbiPath);
+    sprintf_s(jarPath, 260, "%s\\dependencies\\asm-all-9.2.jar", yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
         loadJar(jniEnv, jarPath, classLoaderLoader);
@@ -470,7 +474,7 @@ void Inject_fla_bcf_()
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
     char hookerPath[260];
-    sprintf_s(hookerPath, 260, ("%s\\hooker.jar"), yolbiPath);
+    sprintf_s(hookerPath, 260, "%s\\hooker.jar", yolbiPath);
 
     if (hasLaunchClassLoader)
         loadJar(jniEnv, hookerPath, classLoaderLoader);
@@ -483,7 +487,7 @@ void Inject_fla_bcf_()
         {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
     };
 
-    jclass Hooker = findThreadClass(("cn.yapeteam.hooker.Hooker"), hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
+    jclass Hooker = findThreadClass("cn.yapeteam.hooker.Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
 
     if (!Hooker)
     {
