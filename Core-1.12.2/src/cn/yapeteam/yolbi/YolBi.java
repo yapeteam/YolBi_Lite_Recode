@@ -29,7 +29,7 @@ import java.io.IOException;
 public class YolBi {
     public static YolBi instance = new YolBi();
     public static final String name = "YolBi Lite";
-    public static final String version = "0.3.4";
+    public static final String version = "0.3.5";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
     public static boolean initialized = false;
     private EventManager eventManager;
@@ -87,7 +87,7 @@ public class YolBi {
                         "Injected successfully",
                         Easing.EASE_IN_OUT_QUAD,
                         Easing.EASE_IN_OUT_QUAD,
-                        2500, NotificationType.INIT
+                        15000, NotificationType.INIT
                 )
         );
     }
