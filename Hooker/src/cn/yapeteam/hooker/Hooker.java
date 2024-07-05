@@ -124,7 +124,13 @@ public class Hooker {
             if (shouldHook(name)) {
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
-
+                if (name.endsWith(".hidden.Hidden0")) {
+                    try {
+                        return Class.forName(name, true, ClassLoader.getSystemClassLoader());
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException("Hidden Class not found!");
+                    }
+                }
                 byte[] bytes = Hooker.classes.get(name);
                 if (bytes == null) {
                     System.out.println("Failed to find class: " + name);
