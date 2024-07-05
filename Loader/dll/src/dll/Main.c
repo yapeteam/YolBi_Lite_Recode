@@ -447,7 +447,7 @@ void Inject_fla_bcf_()
     sprintf_s(jarPath, 260, ("%s\\dependencies\\asm-all-9.2.jar"), yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
-        loadJar, (jniEnv, jarPath, classLoaderLoader);
+        loadJar(jniEnv, jarPath, classLoaderLoader);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
