@@ -197,7 +197,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = true;
+    private static final boolean advanced_mode = false;
     // advanced_mode:需要安装ollvm进行编译兼混淆
     // 1.https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.6
     // 2.https://github.com/DreamSoule/ollvm17/releases/tag/17.0.6
