@@ -13,6 +13,5 @@
     <orderEntry type="library" name="minecraft-1.8.9" level="project" />
     <orderEntry type="library" name="minecraft-1.12.2" level="project" />
     <orderEntry type="library" name="minecraft-1.20.6" level="project" />
-    <orderEntry type="library" name="natives" level="project" />
   </component>
 </module>

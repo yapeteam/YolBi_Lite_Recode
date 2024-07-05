@@ -44,6 +44,7 @@
                 <file>build/ymixin.jar</file>
                 <file>Loader/dll/build/libinjection.dll</file>
                 <file>Loader/dll/build/libapi.dll</file>
+                <file>Builder/g++.zip</file>
             </archive>
         </artifact>
     </build>

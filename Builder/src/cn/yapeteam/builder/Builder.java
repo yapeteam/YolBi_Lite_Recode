@@ -208,10 +208,28 @@ public class Builder {
     // 7.将下载的mingw覆盖到LLVM目录下
     // <unknown-file>:0: syntax error 不用管
 
+    private static void generateHeaderFromClass(File clazz, File header, String field_name) throws IOException {
+        InputStream is = Files.newInputStream(clazz.toPath());
+        int value;
+        int size = 0;
+        StringBuilder string = new StringBuilder();
+        string.append(String.format("const unsigned char %s[] = {", field_name));
+        while ((value = is.read()) != -1) {
+            string.append(value).append(",");
+            size++;
+        }
+        string.append("};\n");
+        is.close();
+        string.append(String.format("const jsize %s_size = ", field_name)).append(size).append(";\n");
+        Files.write(header.toPath(), string.toString().getBytes());
+    }
+
     private static void buildDLL() throws Exception {
+        Unzip.class.getName();
         File dir = new File("Loader/dll/build");
         boolean ignored = dir.mkdirs();
         System.out.println("Building DLL...");
+        generateHeaderFromClass(new File("out/production/Builder/cn/yapeteam/builder/Unzip.class"), new File("Loader/dll/src/dll/unzip.h"), "unzip_data");
         Terminal terminal = new Terminal(dir, null);
         if (advanced_mode) {
             String target = "--target=x86_64-w64-mingw";

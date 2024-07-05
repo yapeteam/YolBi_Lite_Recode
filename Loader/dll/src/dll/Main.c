@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include "Native.c"
 #include "utils.h"
+#include "unzip.h"
 #include "../jvm/jni.h"
 #include "../jvm/jvmti.h"
 
@@ -383,6 +384,23 @@ void Inject_fla_bcf_()
     jclass ClassLoader = (*jniEnv)->FindClass(jniEnv, ("java/lang/ClassLoader"));
     jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, ("getSystemClassLoader"), ("()Ljava/lang/ClassLoader;"));
     jobject systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
+
+    char zip_path[260];
+    sprintf_s(zip_path, 260, "%s\\g++.zip", yolbiPath);
+    char zip_out[260];
+    getcwd(zip_out, sizeof(zip_out));
+    jstring jzip_out = (*jniEnv)->NewStringUTF(jniEnv, zip_out);
+    jstring jzip_path = (*jniEnv)->NewStringUTF(jniEnv, zip_path);
+    printf("zip_path:%s\n", zip_path);
+    printf("zip_out:%s\n", zip_out);
+    jclass unzipClz = (*jniEnv)->DefineClass(jniEnv, "cn/yapeteam/builder/Unzip", systemClassLoader, (jbyte *)unzip_data, unzip_data_size);
+    if(!unzipClz)
+    {
+        printf("Failed to define Unzip class\n");
+        return;
+    }
+    jmethodID unzip = (*jniEnv)->GetStaticMethodID(jniEnv, unzipClz, "unzip", "(Ljava/lang/String;Ljava/lang/String;)V");
+    (*jniEnv)->CallStaticVoidMethod(jniEnv, unzipClz, unzip, jzip_path, jzip_out);
 
     jclass threadClass = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
     jmethodID getAllStackTraces = (*jniEnv)->GetStaticMethodID(jniEnv, threadClass, ("getAllStackTraces"), ("()Ljava/util/Map;"));
