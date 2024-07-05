@@ -197,7 +197,14 @@ public class Builder {
     }
 
     private static final boolean advanced_mode = false;
-    // clang-mingw安装: https://www.cnblogs.com/esllovesn/p/10012653.html
+    // advanced_mode:需要安装ollvm进行编译兼混淆
+    // 1.https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.6
+    // 2.https://github.com/DreamSoule/ollvm17/releases/tag/17.0.6
+    // 3.https://winlibs.com/#download-release
+    // 4.安装LLVM-17.0.6-win64.exe后
+    // 5.将下载的ollvm的三个文件覆盖到LLVM/bin目录下
+    // 6.将LLVM/bin目录添加到环境变量PATH中
+    // 7.将下载的mingw覆盖到LLVM目录下
     // <unknown-file>:0: syntax error 不用管
 
     private static void buildDLL() throws Exception {
