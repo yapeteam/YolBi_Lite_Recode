@@ -182,13 +182,13 @@ public class Hooker {
         }
         if (hasLaunchClassLoader) {
             try {
-                ClassNode targetNode;
-                // 偶尔抽风，尝试两次
-                try {
-                    targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
-                } catch (Exception e) {
-                    Thread.sleep(500);
-                    targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
+                ClassNode targetNode = null;
+                while (targetNode == null) {
+                    try {
+                        targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
+                    } catch (Exception e) {
+                        Thread.sleep(500);
+                    }
                 }
                 for (MethodNode method : targetNode.methods) {
                     if (method.name.equals("findClass") && method.desc.equals("(Ljava/lang/String;)Ljava/lang/Class;")) {

@@ -225,7 +225,7 @@ public class Builder {
     }
 
     private static void buildDLL() throws Exception {
-        Unzip.class.getName();
+        Unzip.class.notify();
         File dir = new File("Loader/dll/build");
         boolean ignored = dir.mkdirs();
         System.out.println("Building DLL...");
