@@ -31,6 +31,7 @@ public class Hooker {
         return name.startsWith("cn.yapeteam.") ||
                 name.startsWith("org.objectweb.") ||
                 name.startsWith("com.formdev.") ||
+                name.split("\\.")[0].endsWith("_yolbi") ||
                 name.startsWith("javafx.") ||
                 name.startsWith("com.sun.glass.") ||
                 name.startsWith("com.sun.javafx.") ||

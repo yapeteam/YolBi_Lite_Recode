@@ -173,6 +173,7 @@ public class Builder {
     }
 
     @Deprecated
+    @SuppressWarnings("unused")
     private static void downloadFile(String file_url, File file) throws Exception {
         SSLUtils.ignoreSsl();
         URL url = new URL(file_url);
@@ -209,7 +210,7 @@ public class Builder {
 
     private static void buildDLL() throws Exception {
         File dir = new File("Loader/dll/build");
-        dir.mkdirs();
+        boolean ignored = dir.mkdirs();
         System.out.println("Building DLL...");
         Terminal terminal = new Terminal(dir, null);
         if (advanced_mode) {
@@ -308,12 +309,12 @@ public class Builder {
                         File build_dir = new File(output_dir, artifact_id);
                         if (build_dir.exists())
                             deleteFileByStream(build_dir.getAbsolutePath());
-                        build_dir.mkdirs();
+                        boolean ignored = build_dir.mkdirs();
                         if (black != null)
                             generateList(new File(build_dir, "blacklist.txt"), black);
                         if (white != null)
                             generateList(new File(build_dir, "whitelist.txt"), white);
-                        String custom_lib_dir = artifact_id + "0";
+                        String custom_lib_dir = artifact_id + "_yolbi";
                         String[] obf_args = new String[black != null || white != null ? 7 : 5];
                         obf_args[0] = "./" + output_dir + "/" + artifact_name;
                         obf_args[1] = "./" + output_dir + "/" + artifact_id;
@@ -337,7 +338,7 @@ public class Builder {
                         System.out.println("Args: " + Arrays.toString(obf_args));
                         try {
                             by.radioegor146.Main.main(obf_args);
-                        } catch (ExitException ignored) {
+                        } catch (ExitException ignored0) {
                         }
                         File obf_out_dir = new File(build_dir, "cpp");
                         File obf_out_file = new File(build_dir, artifact_name);
@@ -383,7 +384,7 @@ public class Builder {
     }
 
     private static File buildNative(File dir) throws Exception {
-        dir.mkdirs();
+        boolean ignored = dir.mkdirs();
         File output = new File(dir, "build");
         File src = new File(dir, "output");
         if (!output.exists())
