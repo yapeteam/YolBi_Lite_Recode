@@ -1,23 +1,25 @@
 package cn.yapeteam.yolbi.module;
 
-import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventKey;
+import cn.yapeteam.yolbi.module.impl.combat.*;
+import cn.yapeteam.yolbi.module.impl.misc.AntiInvisible;
+import cn.yapeteam.yolbi.module.impl.misc.ClientSpoof;
+import cn.yapeteam.yolbi.module.impl.misc.NoteBot;
+import cn.yapeteam.yolbi.module.impl.misc.SelfDestruct;
+import cn.yapeteam.yolbi.module.impl.movement.Eagle;
+import cn.yapeteam.yolbi.module.impl.movement.Scaffold;
+import cn.yapeteam.yolbi.module.impl.movement.Sprint;
+import cn.yapeteam.yolbi.module.impl.visual.*;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Getter
 @SuppressWarnings({"unchecked", "unused"})
@@ -25,27 +27,37 @@ public class ModuleManager {
     private final List<Module> modules = new CopyOnWriteArrayList<>();
 
     public void load() {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YolBi.YOLBI_DIR, "injection.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    String name = entry.getName().replace('/', '.');
-                    if (!name.endsWith(".class")) continue;
-                    name = name.substring(0, name.length() - 6);
-                    if (name.startsWith("cn.yapeteam.yolbi.module.impl."))
-                        try {
-                            Class<?> aClass = Class.forName(name, true, ModuleManager.class.getClassLoader());
-                            if (aClass.getSuperclass() == Module.class && aClass.getAnnotation(ModuleInfo.class) != null && aClass.getAnnotation(Deprecated.class) == null)
-                                registerModule(aClass);
-                        } catch (Throwable e) {
-                            Logger.error("Failed to load Module: {}", name);
-                            Logger.exception(e);
-                        }
-                }
-            }
-        } catch (IOException e) {
-            Logger.exception(e);
-        }
+        modules.add(new AimAssist());
+        modules.add(new AntiBot());
+        modules.add(new AutoClicker());
+        modules.add(new Backtrack());
+        modules.add(new BlatantVelocity());
+        modules.add(new Criticals());
+        modules.add(new FakeLag());
+        modules.add(new KillAura());
+        modules.add(new Reach());
+        modules.add(new Velocity());
+        modules.add(new WTap());
+        modules.add(new AntiInvisible());
+        modules.add(new ClientSpoof());
+        modules.add(new NoteBot());
+        modules.add(new SelfDestruct());
+        modules.add(new Eagle());
+        modules.add(new Scaffold());
+        modules.add(new Sprint());
+        modules.add(new ClickUI());
+        modules.add(new ClientTheme());
+        modules.add(new ESP());
+        modules.add(new HeadUpDisplay());
+        modules.add(new JFrameESP2D());
+        modules.add(new JFrameRenderer());
+        modules.add(new PacketDebug());
+        modules.add(new Rotations());
+        modules.add(new TargetHud());
+
+        modules.add(new ClientSpoof());
+
+
         modules.sort((m1, m2) -> -Integer.compare(m2.getName().charAt(0), m1.getName().charAt(0)));
     }
 
@@ -61,26 +73,6 @@ public class ModuleManager {
                     )
             );
         });
-    }
-
-    private void registerModule(@NotNull Class<?> aClass) {
-        if (aClass.getAnnotation(Deprecated.class) == null && aClass.getAnnotation(ModuleInfo.class) != null && modules.stream().noneMatch(module -> module.getClass() == aClass)) {
-            try {
-                Module module = (Module) aClass.newInstance();
-                ModuleInfo info = aClass.getAnnotation(ModuleInfo.class);
-                if (module.getName() == null)
-                    module.setName(info.name());
-                if (module.getCategory() == null)
-                    module.setCategory(info.category());
-                if (module.getKey() == 0)
-                    module.setKey(info.key());
-                modules.add(module);
-                YolBi.instance.getConfigManager().registerConfig(module.getConfig());
-            } catch (Throwable e) {
-                Logger.error("Failed to load Module: {}", aClass.getSimpleName());
-                Logger.exception(e);
-            }
-        }
     }
 
     public <T extends Module> T getModule(Class<T> clazz) {

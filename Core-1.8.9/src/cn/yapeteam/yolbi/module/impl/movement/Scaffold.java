@@ -4,7 +4,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
@@ -21,7 +20,6 @@ import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 
-@ModuleInfo(name = "Scaffold", category = ModuleCategory.MOVEMENT)
 public class Scaffold extends Module {
     private final ModeValue<String> sameY = new ModeValue<>("Same Y", "Off", "Off", "On", "Auto Jump");
     private final NumberValue<Integer> minRotationSpeed = new NumberValue<>("Min Rotation Speed", 0, 0, 10, 1);
@@ -37,6 +35,7 @@ public class Scaffold extends Module {
     private double startY;
 
     public Scaffold() {
+        super("Scaffold", ModuleCategory.COMBAT);
         NumberValue.setBound(minRotationSpeed, maxRotationSpeed);
         NumberValue.setBound(minPlaceDelay, maxPlaceDelay);
         addValues(sameY, minRotationSpeed, maxRotationSpeed, minPlaceDelay, maxPlaceDelay);

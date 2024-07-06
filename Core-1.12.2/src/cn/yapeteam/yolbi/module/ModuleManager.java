@@ -25,6 +25,7 @@ public class ModuleManager {
     private final List<Module> modules = new CopyOnWriteArrayList<>();
 
     public void load() {
+        String packageName = ModuleManager.class.getName().substring(0, ModuleManager.class.getName().lastIndexOf('.'));
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(YolBi.YOLBI_DIR, "injection.jar").toPath()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -32,7 +33,7 @@ public class ModuleManager {
                     String name = entry.getName().replace('/', '.');
                     if (!name.endsWith(".class")) continue;
                     name = name.substring(0, name.length() - 6);
-                    if (name.startsWith("cn.yapeteam.yolbi.module.impl."))
+                    if (name.startsWith(packageName))
                         try {
                             Class<?> aClass = Class.forName(name, true, ModuleManager.class.getClassLoader());
                             if (aClass.getSuperclass() == Module.class && aClass.getAnnotation(ModuleInfo.class) != null && aClass.getAnnotation(Deprecated.class) == null)

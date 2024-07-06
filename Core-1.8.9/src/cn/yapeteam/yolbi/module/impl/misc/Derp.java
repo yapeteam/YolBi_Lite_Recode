@@ -4,18 +4,18 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 
 @Deprecated
-@ModuleInfo(name = "Derp", category = ModuleCategory.MISC)
 public class Derp extends Module {
     private float yaw;
     private long time;
     private final NumberValue<Float> speed = new NumberValue<>("speed", 1f, 0f, 10f, .1f);
     private final NumberValue<Float> pitch = new NumberValue<>("pitch", 90f, -90f, 90f, .1f);
 
-    {
+
+    protected Derp() {
+        super("Derp", ModuleCategory.MISC);
         addValues(speed, pitch);
     }
 

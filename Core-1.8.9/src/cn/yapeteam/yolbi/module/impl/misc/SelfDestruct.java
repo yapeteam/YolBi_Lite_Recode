@@ -4,15 +4,17 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.mixin.MixinManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 
 import java.io.IOException;
 
-@ModuleInfo(name = "SelfDestruct", category = ModuleCategory.MISC)
 public class SelfDestruct extends Module {
+    protected SelfDestruct() {
+        super("SelfDestruct", ModuleCategory.MISC);
+    }
+
     public void onEnable() {
         try {
             enabled = false;

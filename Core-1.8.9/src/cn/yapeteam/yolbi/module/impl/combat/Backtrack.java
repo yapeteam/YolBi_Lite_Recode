@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.impl.network.EventPacket;
 import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("DuplicatedCode")
-@ModuleInfo(name = "Backtrack", category = ModuleCategory.COMBAT)
 public class Backtrack extends Module {
     private final BooleanValue
             attackTimeFix = new BooleanValue("Attack Time Fix", false),
@@ -64,6 +62,7 @@ public class Backtrack extends Module {
             processS27Mode = new ModeValue<>("ProcessS27Mode", "InPut", "Cancel", "InPut");
 
     public Backtrack() {
+        super("Backtrack", ModuleCategory.COMBAT);
         addValues(
                 attackTimeFix,
                 renderBox,

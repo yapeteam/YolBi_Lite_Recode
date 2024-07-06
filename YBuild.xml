@@ -29,8 +29,8 @@
             <archive name="injection.zip">
                 <dir>resources</dir>
                 <dir name="injection">
-                    <file>build/Core-1.8.9.jar</file>
-                    <file>build/production/Core-1.12.2/Core-1.12.2.jar</file>
+                    <file>build/injection-1.8.9.jar</file>
+                    <file>build/injection-1.12.2.jar</file>
                 </dir>
                 <dir name="dependencies">
                     <file>deps/asm-all-9.2.jar</file>

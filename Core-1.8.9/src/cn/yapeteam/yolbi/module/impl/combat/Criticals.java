@@ -4,17 +4,16 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import net.minecraft.network.play.client.C03PacketPlayer;
 
-@ModuleInfo(name = "Criticals", category = ModuleCategory.COMBAT)
 public class Criticals extends Module {
     private final ModeValue<String> mode = new ModeValue<>("Mode", "Packet", "Packet", "Single Packet", "Low Jump", "Jump");
 
     public Criticals() {
+        super("Criticals", ModuleCategory.COMBAT);
         addValues(mode);
     }
 

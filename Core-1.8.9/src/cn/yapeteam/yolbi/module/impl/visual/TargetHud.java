@@ -96,11 +96,10 @@
 
 package cn.yapeteam.yolbi.module.impl.visual;
 
-import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
+import cn.yapeteam.yolbi.module.ModuleCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -110,10 +109,14 @@ import net.minecraft.entity.EntityLivingBase;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
+
 // code by wzhy233
-@ModuleInfo(name = "TargetHUD", category = ModuleCategory.VISUAL)
 public class TargetHud extends Module {
     private final Minecraft mc = Minecraft.getMinecraft();
+
+    protected TargetHud() {
+        super("TargetHUD", ModuleCategory.VISUAL);
+    }
 
     @Listener
     public void onRender2D(EventRender2D event) {

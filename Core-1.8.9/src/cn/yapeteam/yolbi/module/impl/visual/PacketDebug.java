@@ -9,7 +9,6 @@ import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.font.AbstractFontRenderer;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 
@@ -17,9 +16,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Optional;
 
-@ModuleInfo(name = "PacketDebug", category = ModuleCategory.VISUAL)
 public class PacketDebug extends Module {
     ArrayList<Group<Class<?>, String, Long>> list = new ArrayList<>();
+
+    protected PacketDebug() {
+        super("PacketDebug", ModuleCategory.VISUAL);
+    }
 
     @Listener
     private void onLoadWorld(EventLoadWorld e) {

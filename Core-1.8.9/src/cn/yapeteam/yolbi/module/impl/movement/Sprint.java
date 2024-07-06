@@ -5,7 +5,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
@@ -13,8 +12,11 @@ import cn.yapeteam.yolbi.utils.player.RotationsUtil;
 import cn.yapeteam.yolbi.utils.vector.Vector2f;
 
 
-@ModuleInfo(name = "Sprint", category = ModuleCategory.MOVEMENT)
 public class Sprint extends Module {
+
+    protected Sprint() {
+        super("Sprint", ModuleCategory.MOVEMENT);
+    }
 
     @Listener
     private void onStrafe(EventStrafe event) {
