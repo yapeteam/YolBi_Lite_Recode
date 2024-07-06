@@ -8,6 +8,7 @@
 -dontshrink
 -dontoptimize
 -printmapping build/injection-1.12.2.mapping
+-obfuscationdictionary dictionary.txt
 -overloadaggressively
 -dontusemixedcaseclassnames
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,LineNumberTable,LocalVariable*Table,*Annotation*,Synthetic,EnclosingMethod

@@ -198,7 +198,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = false;
+    private static final boolean advanced_mode = true;
     // advanced_mode:需要安装ollvm进行编译兼混淆
     // 1.https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.6
     // 2.https://github.com/DreamSoule/ollvm17/releases/tag/17.0.6
@@ -333,7 +333,7 @@ public class Builder {
                         }
                         break;
                     }
-                    case "obfuscate": {
+                    case "native-obfuscate": {
                         Node artifact = element.getAttributes().getNamedItem("artifact");
                         Node black = element.getAttributes().getNamedItem("black");
                         Node white = element.getAttributes().getNamedItem("white");
