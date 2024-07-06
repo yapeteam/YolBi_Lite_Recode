@@ -302,6 +302,7 @@ public class Builder {
                         File output_file = new File(output_dir, artifact_name);
                         boolean ignored = output_file.getParentFile().mkdirs();
                         Node proguard_cfg = element.getAttributes().getNamedItem("proguard-config");
+                        Node mosey_cfg = element.getAttributes().getNamedItem("mosey-config");
                         System.out.printf("building artifact %s...%n", artifact_name);
                         ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(output_file.toPath()));
                         List<Node> includes_list = new ArrayList<>();
@@ -331,6 +332,8 @@ public class Builder {
                             } catch (ExitException ignored1) {
                             }
                         }
+                        if (mosey_cfg != null)
+                            rip.hippo.mosey.Main$.MODULE$.main(new String[]{String.format("-config%s", mosey_cfg.getNodeValue())});
                         break;
                     }
                     case "native-obfuscate": {

@@ -1,5 +1,5 @@
 -injars build/injection-1.8.9/injection-1.8.9.jar
--outjars build/injection-1.8.9.jar
+-outjars build/injection-1.8.9/injection-1.8.9-o.jar
 
 -libraryjars minecraft/minecraft-1.8.9.jar
 
@@ -26,10 +26,6 @@
 
 -keep class cn.yapeteam.yolbi.Loader {
     public static void start();
-}
-
--keep class cn.yapeteam.yolbi.module.ModuleInfo {
-    <methods>;
 }
 
 -keep,allowshrinking class cn.yapeteam.yolbi.mixin.injection.** {
