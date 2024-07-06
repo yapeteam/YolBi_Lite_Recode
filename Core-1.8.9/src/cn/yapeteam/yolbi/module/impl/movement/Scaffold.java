@@ -35,7 +35,7 @@ public class Scaffold extends Module {
     private double startY;
 
     public Scaffold() {
-        super("Scaffold", ModuleCategory.COMBAT);
+        super("Scaffold", ModuleCategory.MOVEMENT);
         NumberValue.setBound(minRotationSpeed, maxRotationSpeed);
         NumberValue.setBound(minPlaceDelay, maxPlaceDelay);
         addValues(sameY, minRotationSpeed, maxRotationSpeed, minPlaceDelay, maxPlaceDelay);

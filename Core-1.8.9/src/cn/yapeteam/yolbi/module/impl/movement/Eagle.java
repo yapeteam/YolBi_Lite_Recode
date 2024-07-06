@@ -21,7 +21,7 @@ public class Eagle extends Module {
     private final BooleanValue onlyground = new BooleanValue("Only Ground", false);
 
     public Eagle() {
-        super("Eagle", ModuleCategory.COMBAT);
+        super("Eagle", ModuleCategory.MOVEMENT);
         addValues(onlyblocks, onlybackwards, onlyground);
     }
 

@@ -18,7 +18,7 @@ public class ClickUI extends Module {
     private final NumberValue<Integer> blurRadius = new NumberValue<>("blurRadius", blur::getValue, 3, 0, 50, 1);
 
     public ClickUI() {
-        super("ClickUI", ModuleCategory.VISUAL, Keyboard.KEY_RSHIFT);
+        super("ClickUI", ModuleCategory.VISUAL, Keyboard.KEY_RCONTROL);
         if (ReflectUtil.hasOptifine)
             blur.setCallback((oldV, newV) -> /*!mc.gameSettings.ofFastRender &&*/ newV);
         else blur.setVisibility(() -> true);
