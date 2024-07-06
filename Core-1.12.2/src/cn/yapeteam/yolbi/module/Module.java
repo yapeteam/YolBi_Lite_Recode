@@ -27,6 +27,7 @@ public abstract class Module {
         this.name = name;
         this.category = category;
         this.key = key;
+        YolBi.instance.getConfigManager().registerConfig(getConfig());
     }
 
     protected Module(String name, ModuleCategory category) {
