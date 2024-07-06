@@ -3,6 +3,7 @@ package cn.yapeteam.builder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import proguard.ProGuard;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -297,8 +298,10 @@ public class Builder {
                 switch (element.getTagName()) {
                     case "artifact": {
                         String artifact_name = element.getAttribute("name");
+                        String artifact_id = artifact_name.substring(0, artifact_name.lastIndexOf("."));
                         File output_file = new File(output_dir, artifact_name);
                         boolean ignored = output_file.getParentFile().mkdirs();
+                        Node proguard_cfg = element.getAttributes().getNamedItem("proguard-config");
                         System.out.printf("building artifact %s...%n", artifact_name);
                         ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(output_file.toPath()));
                         List<Node> includes_list = new ArrayList<>();
@@ -315,6 +318,19 @@ public class Builder {
                             System.out.printf("artifact %s: included %s, %s of %s%n", artifact_name, include.getNodeName(), j + 1, includes_list.size());
                         }
                         output.close();
+                        if (proguard_cfg != null) {
+                            File build_dir = new File(output_dir, artifact_id);
+                            if (build_dir.exists())
+                                deleteFileByStream(build_dir.getAbsolutePath());
+                            boolean ignored0 = build_dir.mkdirs();
+                            File tobe_proguard = new File(build_dir, artifact_name);
+                            File artifact_file = new File(output_dir, artifact_name);
+                            copyStream(Files.newOutputStream(tobe_proguard.toPath()), Files.newInputStream(artifact_file.toPath()));
+                            try {
+                                ProGuard.main(new String[]{"@" + proguard_cfg.getNodeValue()});
+                            } catch (ExitException ignored1) {
+                            }
+                        }
                         break;
                     }
                     case "obfuscate": {
