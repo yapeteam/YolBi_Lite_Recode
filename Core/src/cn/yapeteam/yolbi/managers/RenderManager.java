@@ -2,6 +2,7 @@ package cn.yapeteam.yolbi.managers;
 
 
 import cn.yapeteam.loader.Natives;
+import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
@@ -161,8 +162,41 @@ public class RenderManager implements IMinecraft {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.setProperty("java.base","true");
-        new JFXPanel(); // Initialize JavaFX toolkit
+//        try {
+//            //set everything in the sun package accessible to unamed modules to prevent
+//            /*
+//            java.lang.IllegalAccessError thrown!
+//           Message: class javafx.embed.swing.JFXPanel (in unnamed module @0x1a000fff) cannot access class sun.util.logging.PlatformLogger (in module java.base) because module java.base does not export sun.util.logging to unnamed module @0x1a000fff
+//           StackTrace:
+//               Genesis//javafx.embed.swing.JFXPanel.<clinit>(JFXPanel.java:141)
+//               Genesis//cn.yapeteam.yolbi.managers.RenderManager.initwindow(RenderManager.java:175)
+//               Genesis//cn.yapeteam.yolbi.YolBi.initialize(YolBi.java:83)
+//               Genesis//cn.yapeteam.yolbi.Loader.start(Loader.java:26)
+//               Genesis//cn.yapeteam.loader.BootStrap.loadInjection(Native Method)
+//               Genesis//cn.yapeteam.loader.BootStrap.lambda$initHook$0(BootStrap.java:35)
+//               java.base/java.lang.Thread.run(Unknown Source)
+//             */
+//            // Check if the current Java version is 9 or later
+//            if (Float.parseFloat(System.getProperty("java.specification.version")) >= 9) {
+//                // Obtain the reference to this class's module
+//                Module thisModule = RenderManager.class.getModule();
+//                // Obtain the reference to the module of sun.util.logging.PlatformLogger
+//                Module targetModule = sun.util.logging.PlatformLogger.class.getModule();
+//                // Obtain the reference to the addOpens method of the Module class
+//                Method addOpensMethod = Module.class.getDeclaredMethod("implAddOpens", String.class, Module.class);
+//                addopensMethod.setAccessible(true);
+//                // Open sun.util.logging package of java.base module to javafx.embed.swing module
+//                addOpensMethod.invoke(targetModule, "sun.util.logging", thisModule);
+//            }
+//        }catch (Exception e){
+//            Logger.exception(e);
+//        }
+        try{
+            new JFXPanel(); // Initialize JavaFX toolkit
+        }catch(Exception e){
+            Logger.exception(e);
+        }
+
         shapesMap = new HashMap<>();
         modifiedidbuffer = new ArrayList<>(); // Corrected initialization
         root = new Pane(); // reference to the root pane

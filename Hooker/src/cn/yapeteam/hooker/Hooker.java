@@ -121,13 +121,6 @@ public class Hooker {
             if (shouldHook(name)) {
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
-                if (name.startsWith("javafx.") && !classes.containsKey(name)) {
-                    if (System.getProperty("java.version").startsWith("1.8"))
-                        Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "dependencies/jfxrt/jfxrt.jar"));
-                    else
-                        for (File file : Objects.requireNonNull(new File(Hooker.YOLBI_DIR, "dependencies/javafx").listFiles()))
-                            Hooker.cacheJar(file);
-                }
                 byte[] bytes = Hooker.classes.get(name);
                 if (bytes == null) {
                     System.out.println("Failed to find class: " + name);
