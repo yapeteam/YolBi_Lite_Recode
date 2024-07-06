@@ -114,7 +114,7 @@ import java.awt.*;
 public class TargetHud extends Module {
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    protected TargetHud() {
+    public TargetHud() {
         super("TargetHUD", ModuleCategory.VISUAL);
     }
 

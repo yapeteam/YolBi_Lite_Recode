@@ -5,14 +5,12 @@ import cn.yapeteam.yolbi.event.impl.network.EventPacketReceive;
 import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 
-@ModuleInfo(name = "Velocity", category = ModuleCategory.COMBAT)
 public class BlatantVelocity extends Module {
     private final ModeValue<String> mode = new ModeValue<>("Mode", "Vanilla", "Vanilla", "Vulcan");
     private final NumberValue<Double>
@@ -20,6 +18,7 @@ public class BlatantVelocity extends Module {
             vertically = new NumberValue<>("Vertically", () -> mode.is("Vanilla"), 0.0, 0.0, 100.0, 1.0);
 
     public BlatantVelocity() {
+        super("BlatantVelocity", ModuleCategory.COMBAT);
         addValues(mode, horizontal, vertically);
     }
 

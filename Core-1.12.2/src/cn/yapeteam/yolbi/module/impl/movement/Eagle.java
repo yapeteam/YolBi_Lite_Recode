@@ -5,7 +5,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
@@ -14,7 +13,6 @@ import net.minecraft.block.BlockAir;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.EnumHand;
 
-@ModuleInfo(name = "Eagle", category = ModuleCategory.MOVEMENT)
 public class Eagle extends Module {
 
     private final BooleanValue onlyblocks = new BooleanValue("Only Blocks", true);
@@ -24,6 +22,7 @@ public class Eagle extends Module {
     private final BooleanValue onlyground = new BooleanValue("Only Ground", false);
 
     public Eagle() {
+        super("Eagle", ModuleCategory.COMBAT);
         addValues(onlyblocks, onlybackwards, onlyground);
     }
 

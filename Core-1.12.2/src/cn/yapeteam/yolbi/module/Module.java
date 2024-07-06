@@ -19,9 +19,19 @@ import java.util.Arrays;
 @Setter
 public abstract class Module {
     protected static final Minecraft mc = Minecraft.getMinecraft();
-    private String name = null;
-    private ModuleCategory category = null;
-    private int key = 0;
+    private final String name;
+    private final ModuleCategory category;
+    private int key;
+
+    protected Module(String name, ModuleCategory category, int key) {
+        this.name = name;
+        this.category = category;
+        this.key = key;
+    }
+
+    protected Module(String name, ModuleCategory category) {
+        this(name, category, 0);
+    }
 
     protected boolean enabled = false;
 

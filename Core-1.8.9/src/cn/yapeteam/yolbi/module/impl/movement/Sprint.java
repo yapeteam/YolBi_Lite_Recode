@@ -14,7 +14,7 @@ import cn.yapeteam.yolbi.utils.vector.Vector2f;
 
 public class Sprint extends Module {
 
-    protected Sprint() {
+    public Sprint() {
         super("Sprint", ModuleCategory.MOVEMENT);
     }
 

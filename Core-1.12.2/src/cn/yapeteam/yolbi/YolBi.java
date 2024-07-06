@@ -14,7 +14,7 @@ import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.notification.NotificationType;
-import cn.yapeteam.yolbi.render.JFrameRenderer;
+import cn.yapeteam.yolbi.render.ExternalFrame;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.animation.Easing;
@@ -39,7 +39,7 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private JFrameRenderer jFrameRenderer;
+    private ExternalFrame jFrameRenderer;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -63,7 +63,7 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
+        instance.jFrameRenderer = new ExternalFrame(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();

@@ -100,7 +100,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -113,8 +112,11 @@ import java.awt.*;
 import java.util.Objects;
 
 // code by wzhy233
-@ModuleInfo(name = "TargetHUD", category = ModuleCategory.VISUAL)
 public class TargetHud extends Module {
+    public TargetHud() {
+        super("TargetHUD", ModuleCategory.VISUAL);
+    }
+
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Listener

@@ -11,7 +11,7 @@ import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 public class WTap extends Module {
     private boolean unSprint, canDo;
 
-    protected WTap() {
+    public WTap() {
         super("WTap", ModuleCategory.COMBAT);
     }
 

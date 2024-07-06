@@ -7,7 +7,6 @@ import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.event.impl.render.EventRender3D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
@@ -24,7 +23,6 @@ import net.minecraft.network.play.client.CPacketEntityAction;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@ModuleInfo(name = "FakeLag", category = ModuleCategory.COMBAT)
 public class FakeLag extends Module {
     private final NumberValue<Double> delay = new NumberValue<>("Lag Delay", 100.0, 50.0, 2000.0, 50.0);
     private final BooleanValue render = new BooleanValue("Render", false);
@@ -39,6 +37,7 @@ public class FakeLag extends Module {
     private boolean attacked = false;
 
     public FakeLag() {
+        super("FakeLag", ModuleCategory.COMBAT);
         addValues(delay, render);
     }
 

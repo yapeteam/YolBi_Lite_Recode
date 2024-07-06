@@ -4,7 +4,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.network.EventPacketSend;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.utils.network.PacketUtil;
 import io.netty.buffer.Unpooled;
@@ -15,7 +14,6 @@ import net.minecraft.network.play.client.CPacketCustomPayload;
 
 import java.util.Objects;
 
-@ModuleInfo(name = "ClientSpoof", category = ModuleCategory.MISC)
 public class ClientSpoof extends Module {
     private final ModeValue<String> mode = new ModeValue<String>("Spoof Client", "Vanilla",
             "Lunar",
@@ -28,6 +26,7 @@ public class ClientSpoof extends Module {
     );
 
     public ClientSpoof() {
+        super("ClientSpoof", ModuleCategory.MISC);
         addValues(mode);
     }
 

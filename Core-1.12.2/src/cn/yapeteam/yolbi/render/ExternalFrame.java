@@ -3,7 +3,7 @@ package cn.yapeteam.yolbi.render;
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
-import cn.yapeteam.yolbi.module.impl.visual.ExternalRender;
+import cn.yapeteam.yolbi.module.impl.visual.JFrameRenderer;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
@@ -14,10 +14,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class JFrameRenderer extends JFrame {
+public class ExternalFrame extends JFrame {
     private final TransparentPanel transparentPanel = new TransparentPanel();
 
-    public JFrameRenderer(int x, int y, int width, int height) {
+    public ExternalFrame(int x, int y, int width, int height) {
         super("External Window");
         setUndecorated(true);
         setPosition(x, y);
@@ -40,7 +40,7 @@ public class JFrameRenderer extends JFrame {
     }
 
     public void display() {
-        externalRenderModule = YolBi.instance.getModuleManager().getModule(ExternalRender.class);
+        externalRenderModule = YolBi.instance.getModuleManager().getModule(JFrameRenderer.class);
         YolBi.instance.getEventManager().register(this);
         setVisible(true);
         Natives.SetWindowsTransparent(true, getTitle());
@@ -53,7 +53,7 @@ public class JFrameRenderer extends JFrame {
 
     @Getter
     private final CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
-    private ExternalRender externalRenderModule;
+    private JFrameRenderer externalRenderModule;
 
     class TransparentPanel extends JPanel {
         public TransparentPanel() {

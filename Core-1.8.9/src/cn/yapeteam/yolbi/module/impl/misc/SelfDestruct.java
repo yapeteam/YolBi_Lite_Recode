@@ -11,7 +11,7 @@ import cn.yapeteam.yolbi.utils.animation.Easing;
 import java.io.IOException;
 
 public class SelfDestruct extends Module {
-    protected SelfDestruct() {
+    public SelfDestruct() {
         super("SelfDestruct", ModuleCategory.MISC);
     }
 

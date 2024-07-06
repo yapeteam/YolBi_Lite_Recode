@@ -19,7 +19,7 @@ import java.util.Optional;
 public class PacketDebug extends Module {
     ArrayList<Group<Class<?>, String, Long>> list = new ArrayList<>();
 
-    protected PacketDebug() {
+    public PacketDebug() {
         super("PacketDebug", ModuleCategory.VISUAL);
     }
 

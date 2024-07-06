@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.font.AbstractFontRenderer;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.utils.render.RenderUtil;
@@ -16,7 +15,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ModuleInfo(name = "HUD", category = ModuleCategory.VISUAL)
 public class HeadUpDisplay extends Module {
     private ClientTheme theme = null;
     private final BooleanValue waterMark = new BooleanValue("Water Mark", true);
@@ -24,6 +22,7 @@ public class HeadUpDisplay extends Module {
     private final ModeValue<String> font = new ModeValue<>("Font", "PingFang", "Jello", "PingFang", "default");
 
     public HeadUpDisplay() {
+        super("HUD", ModuleCategory.VISUAL);
         addValues(waterMark, moduleList, font);
     }
 

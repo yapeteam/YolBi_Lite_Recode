@@ -14,7 +14,7 @@ import java.awt.*;
 public class ESP extends Module {
     private ClientTheme theme;
 
-    protected ESP() {
+    public ESP() {
         super("ESP", ModuleCategory.VISUAL);
     }
 
