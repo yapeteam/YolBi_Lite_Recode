@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Minecraft-1.12.2" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="Start" />
+    <module name="Minecraft-1.12.2" />
+    <option name="VM_PARAMETERS" value="-Djava.library.path=1.12.2/natives" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Minecraft-1.12.2/run" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
