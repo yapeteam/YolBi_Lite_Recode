@@ -3,6 +3,25 @@ package cn.yapeteam.yolbi.utils.render;
 import java.awt.*;
 
 public class ColorUtil {
+    public static Color colorFromInt(int color) {
+        Color c = new Color(color);
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), 255);
+    }
+
+    public static Color blend(Color color1, Color color2, double ratio) {
+        float r = (float) ratio;
+        float ir = 1.0f - r;
+        float[] rgb1 = new float[3];
+        float[] rgb2 = new float[3];
+        color1.getColorComponents(rgb1);
+        color2.getColorComponents(rgb2);
+        return new Color(rgb1[0] * r + rgb2[0] * ir, rgb1[1] * r + rgb2[1] * ir, rgb1[2] * r + rgb2[2] * ir);
+    }
+
+    public static Color blend(Color color1, Color color2) {
+        return ColorUtil.blend(color1, color2, 0.5);
+    }
+
     public static int reAlpha(int color, float alpha) {
         return reAlpha(new Color(color), alpha).getRGB();
     }

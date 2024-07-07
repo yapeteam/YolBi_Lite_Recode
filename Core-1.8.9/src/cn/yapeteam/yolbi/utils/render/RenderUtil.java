@@ -3,8 +3,6 @@ package cn.yapeteam.yolbi.utils.render;
 import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.yolbi.shader.GaussianFilter;
 import cn.yapeteam.yolbi.shader.impl.ShaderScissor;
-import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -14,10 +12,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Timer;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -26,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -275,25 +269,7 @@ public class RenderUtil {
     }
 
     public static void drawImage(int image, float x, float y, float width, float height, int color) {
-        /*GlStateManager.enableBlend();
-        GlStateManager.enableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.color((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, (color >> 24 & 0xFF) / 255.0F);
-        GlStateManager.bindTexture(image);
-        drawModalRectWithCustomSizedTexture(x, y, 0.0f, 0.0f, width, height, width, height);
-        GlStateManager.disableBlend();
-        GlStateManager.disableTexture2D();*/
-        /*GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glEnable(GL_BLEND);
-        GL11.glDepthMask(false);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        GL11.glColor4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, (color >> 24 & 0xFF) / 255.0F);
-        GL11.glBindTexture(GL_TEXTURE_2D, image);
-        drawModalRectWithCustomSizedTexture(x, y, 0.0f, 0.0f, width, height, width, height);
-        GL11.glDepthMask(true);
-        GL11.glDisable(GL_BLEND);
-        GL11.glEnable(GL_DEPTH_TEST);*/
-
+        enableGL2D();
         glPushMatrix();
         GlStateManager.alphaFunc(GL11.GL_GREATER, 0.01f);
         glEnable(GL11.GL_TEXTURE_2D);
@@ -324,18 +300,19 @@ public class RenderUtil {
 
         glEnable(GL_CULL_FACE);
         glPopMatrix();
+        disableGL2D();
     }
 
     public static void drawModalRectWithCustomSizedTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
         float f = 1.0F / textureWidth;
         float f1 = 1.0F / textureHeight;
         Tessellator tessellator = Tessellator.getInstance();
-        WorldRenderer worldrenderer = tessellator.getWorldRenderer();
-        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        worldrenderer.pos(x, y + height, 0.0).tex(u * f, (v + height) * f1).endVertex();
-        worldrenderer.pos(x + width, y + height, 0.0).tex((u + width) * f, (v + height) * f1).endVertex();
-        worldrenderer.pos(x + width, y, 0.0).tex((u + width) * f, v * f1).endVertex();
-        worldrenderer.pos(x, y, 0.0).tex(u * f, v * f1).endVertex();
+        WorldRenderer bufferbuilder = tessellator.getWorldRenderer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, y + height, 0.0).tex(u * f, (v + height) * f1).endVertex();
+        bufferbuilder.pos(x + width, y + height, 0.0).tex((u + width) * f, (v + height) * f1).endVertex();
+        bufferbuilder.pos(x + width, y, 0.0).tex((u + width) * f, v * f1).endVertex();
+        bufferbuilder.pos(x, y, 0.0).tex(u * f, v * f1).endVertex();
         tessellator.draw();
     }
 
@@ -553,6 +530,36 @@ public class RenderUtil {
         resetCaps();
     }
 
+    public static void drawGradientRectTB(float x, float y, float x1, float y1, int topColor, int bottomColor) {
+        enableGL2D();
+        GL11.glShadeModel(7425);
+        GL11.glBegin(7);
+        color(topColor);
+        GL11.glVertex2f(x, y1);
+        GL11.glVertex2f(x1, y1);
+        color(bottomColor);
+        GL11.glVertex2f(x1, y);
+        GL11.glVertex2f(x, y);
+        GL11.glEnd();
+        GL11.glShadeModel(7424);
+        disableGL2D();
+    }
+
+    public static void drawGradientRectLR(float x, float y, float x1, float y1, int leftColor, int rightColor) {
+        enableGL2D();
+        GL11.glShadeModel(7425);
+        GL11.glBegin(7);
+        color(leftColor);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x, y1);
+        color(rightColor);
+        GL11.glVertex2f(x1, y1);
+        GL11.glVertex2f(x1, y);
+        GL11.glEnd();
+        GL11.glShadeModel(7424);
+        disableGL2D();
+    }
+
     public static void drawEntityBox(AxisAlignedBB entityBox, double lastTickPosX, double lastTickPosY, double lastTickPosZ, double posX, double posY, double posZ, final Color color, final boolean outline, final boolean box, final float outlineWidth, float partialTicks) {
         final RenderManager renderManager = mc.getRenderManager();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -566,7 +573,6 @@ public class RenderUtil {
                 - getRenderPos(renderPosY, renderManager);
         final double z = lastTickPosZ + (posZ - lastTickPosZ) * partialTicks
                 - getRenderPos(renderPosZ, renderManager);
-        ;
         final AxisAlignedBB axisAlignedBB = new AxisAlignedBB(
                 entityBox.minX - posX + x - 0.05D,
                 entityBox.minY - posY + y,
@@ -801,10 +807,18 @@ public class RenderUtil {
     }
 
     public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, Color color, boolean scissor) {
-        drawBloomShadow(x, y, width, height, blurRadius, 0, color, scissor);
+        drawBloomShadow(x, y, width, height, blurRadius, 0, color.getRGB(), scissor, false, false, false, false);
     }
 
-    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, Color color, boolean scissor) {
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int color, boolean scissor) {
+        drawBloomShadow(x, y, width, height, blurRadius, 0, color, scissor, false, false, false, false);
+    }
+
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, int color, boolean scissor) {
+        drawBloomShadow(x, y, width, height, blurRadius, roundRadius, color, scissor, false, false, false, false);
+    }
+
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, int color, boolean scissor, boolean cut_top, boolean cut_bottom, boolean cut_left, boolean cut_right) {
         width = width + blurRadius * 2;
         height = height + blurRadius * 2;
         x -= blurRadius + 0.75f;
@@ -821,56 +835,28 @@ public class RenderUtil {
             g.dispose();
             GaussianFilter op = new GaussianFilter(blurRadius);
             BufferedImage blurred = op.filter(original, null);
+            int cut_x = blurRadius, cut_y = blurRadius, cut_w = (int) (width - blurRadius * 2), cut_h = (int) (height - blurRadius * 2);
+            if (cut_top) {
+                cut_y = 0;
+                cut_h = (int) (height - blurRadius);
+            }
+
+            if (cut_bottom) {
+                cut_h = (int) (height - blurRadius);
+            }
+
+            if (cut_left) {
+                cut_x = 0;
+                cut_w = (int) (width - blurRadius);
+            }
+
+            if (cut_right) {
+                cut_w = (int) (width - blurRadius);
+            }
             if (scissor)
-                blurred = new ShaderScissor(blurRadius, blurRadius, (int) (width - blurRadius * 2), (int) (height - blurRadius * 2), blurred, 1, false, false).generate();
+                blurred = new ShaderScissor(cut_x, cut_y, cut_w, cut_h, blurred, 1, false, false).generate();
             shadowCache.put(identifier, TextureUtil.uploadTextureImageAllocate(TextureUtil.glGenTextures(), blurred, true, false));
         }
-        drawImage(shadowCache.get(identifier), x, y, width, height, color.getRGB());
-    }
-
-    public static void drawBlockBox(final BlockPos blockPos, final Color color, final boolean outline, final boolean box, final float outlineWidth) {
-        final RenderManager renderManager = mc.getRenderManager();
-        final Timer timer = Objects.requireNonNull(ReflectUtil.Minecraft$getTimer(mc));
-
-
-        final double x = blockPos.getX() - ReflectUtil.GetRenderManager$renderPosX(renderManager);
-        final double y = blockPos.getY() - ReflectUtil.GetRenderManager$renderPosY(renderManager);
-        final double z = blockPos.getZ() - ReflectUtil.GetRenderManager$renderPosZ(renderManager);
-
-        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(x, y, z, x + 1.0, y + 1.0, z + 1.0);
-        final Block block = mc.theWorld.getBlockState(blockPos).getBlock();
-
-        if (block != null) {
-            final EntityPlayer player = mc.thePlayer;
-
-            final double posX = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) timer.renderPartialTicks;
-            final double posY = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) timer.renderPartialTicks;
-            final double posZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) timer.renderPartialTicks;
-            axisAlignedBB = block.getSelectedBoundingBox(mc.theWorld, blockPos)
-                    .expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D)
-                    .offset(-posX, -posY, -posZ);
-        }
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        enableGlCap(GL_BLEND);
-        disableGlCap(GL_TEXTURE_2D, GL_DEPTH_TEST);
-        glDepthMask(false);
-
-        if (box) {
-            glColor(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() != 255 ? color.getAlpha() : outline ? 26 : 35);
-            drawFilledBox(axisAlignedBB);
-        }
-
-        if (outline) {
-            glLineWidth(outlineWidth);
-            enableGlCap(GL_LINE_SMOOTH);
-            glColor(color);
-
-            drawSelectionBoundingBox(axisAlignedBB);
-        }
-
-        GlStateManager.resetColor();
-        glDepthMask(true);
-        resetCaps();
+        drawImage(shadowCache.get(identifier), x, y, width, height, color);
     }
 }
