@@ -106,6 +106,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -122,9 +123,8 @@ public class TargetHud extends Module {
     @Listener
     public void onRender2D(EventRender2D event) {
         EntityLivingBase target = getTarget();
-        if (target == null) {
+        if (!(target instanceof EntityPlayer))
             return;
-        }
 
         int x = 200; // HUD 的 X 位置
         int y = 200; // HUD 的 Y 位置

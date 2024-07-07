@@ -46,7 +46,7 @@ public class HeadUpDisplay extends Module {
 
         public void update() {
             gradientBlur.getPixels();
-            gradientBlur.update();
+            gradientBlur.update(GradientBlur.ColorMode.TOP_RIGHT);
         }
     }
 

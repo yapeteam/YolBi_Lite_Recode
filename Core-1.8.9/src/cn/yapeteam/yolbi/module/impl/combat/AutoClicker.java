@@ -2,21 +2,17 @@ package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
+import lombok.Getter;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.MovingObjectPosition;
 
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class AutoClicker extends Module {
     private final NumberValue<Integer> cps = new NumberValue<>("cps", 17, 1, 100, 1);
@@ -28,6 +24,40 @@ public class AutoClicker extends Module {
 
     private final BooleanValue nomine = new BooleanValue("No Click When Mining", true);
     private final ModeValue<String> clickprio = new ModeValue<>("Click Priority", "Left", "Left", "Right");
+    private double delay = 1;
+
+    @Override
+    public void onEnable() {
+        delay = generate(cps.getValue(), range.getValue());
+    }
+
+    @Getter
+    private final Thread clickThread = new Thread(() -> {
+        while (true) {
+            try {
+                if (isEnabled() && mc.currentScreen != null) {
+                    delay = generate(cps.getValue(), range.getValue());
+                    if (clickprio.is("Left")) {
+                        if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                            sendClick(0);
+                        }
+                        if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                            sendClick(1);
+                        }
+                    } else {
+                        if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
+                            sendClick(1);
+                        }
+                        if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
+                            sendClick(0);
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.exception(ex);
+            }
+        }
+    });
 
     public AutoClicker() {
         super("AutoClicker", ModuleCategory.COMBAT);
@@ -36,14 +66,7 @@ public class AutoClicker extends Module {
             Natives.SendLeft(false);
             Natives.SendRight(false);
         }));
-    }
-
-    private double delay = 0, time = 0;
-
-    @Override
-    public void onEnable() {
-        delay = generate(cps.getValue(), range.getValue());
-        time = System.currentTimeMillis();
+        clickThread.start();
     }
 
     private final Random random = new Random();
@@ -74,54 +97,22 @@ public class AutoClicker extends Module {
         return noise;
     }
 
-    public void sendClick(int button) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
+    public void sendClick(int button) throws InterruptedException {
         // Simulate left click
         if (button == 0) {
             Natives.SendLeft(true);
-            // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendLeft(false), (int) delay, TimeUnit.MILLISECONDS);
+            Thread.sleep((long) (1000 / delay * 0.8));
+            Natives.SendLeft(false);
+            Thread.sleep((long) (1000 / delay * 0.2));
         }
         // Simulate right click
         else if (button == 1) {
             Natives.SendRight(true);
-            // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendRight(false), (int) delay, TimeUnit.MILLISECONDS);
+            Thread.sleep((long) (1000 / delay * 0.8));
+            Natives.SendRight(false);
+            Thread.sleep((long) (1000 / delay * 0.2));
         }
     }
-
-    @Listener
-    private void onRender2D(EventRender2D e) {
-        try {
-            delay = generate(cps.getValue(), range.getValue());
-            if (mc.currentScreen != null) return;
-            if (System.currentTimeMillis() - time >= (1000 / delay)) {
-                if (clickprio.is("Left")) {
-                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                        time = System.currentTimeMillis();
-                        sendClick(0);
-                    }
-                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !(mc.thePlayer.getHeldItem() != null && (mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                        time = System.currentTimeMillis();
-                        sendClick(1);
-                    }
-                } else {
-                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !(mc.thePlayer.getHeldItem() != null && (mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                        time = System.currentTimeMillis();
-                        sendClick(1);
-                    }
-                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                        time = System.currentTimeMillis();
-                        sendClick(0);
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Logger.exception(ex);
-        }
-    }
-
 
     @Override
     public String getSuffix() {

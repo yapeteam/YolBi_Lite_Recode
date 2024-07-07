@@ -54,7 +54,15 @@ public class GradientBlur {
         setDelay(delay);
     }
 
-    public void update() {
+    public enum ColorMode {
+        TOP,
+        TOP_RIGHT,
+        BOTTOM,
+        BOTTOM_RIGHT,
+        MIXED
+    }
+
+    public void update(ColorMode mode) {
         lasttRed = tRed;
         lasttGreen = tGreen;
         lasttBlue = tBlue;
@@ -63,8 +71,31 @@ public class GradientBlur {
         lastbGreen = bGreen;
         lastbBlue = bBlue;
 
-        Color top = ColorUtil.blend(ColorUtil.colorFromInt(colorTop), ColorUtil.colorFromInt(colorTopRight));
-        Color bottom = ColorUtil.blend(ColorUtil.colorFromInt(colorBottom), ColorUtil.colorFromInt(colorBottomRight));
+        Color top, bottom;
+        switch (mode) {
+            default:
+            case MIXED:
+                top = ColorUtil.blend(ColorUtil.colorFromInt(colorTop), ColorUtil.colorFromInt(colorTopRight));
+                bottom = ColorUtil.blend(ColorUtil.colorFromInt(colorBottom), ColorUtil.colorFromInt(colorBottomRight));
+                break;
+            case TOP:
+                top = ColorUtil.colorFromInt(colorTop);
+                bottom = ColorUtil.colorFromInt(colorBottom);
+                break;
+            case TOP_RIGHT:
+                top = ColorUtil.colorFromInt(colorTopRight);
+                bottom = ColorUtil.colorFromInt(colorBottomRight);
+                break;
+            case BOTTOM:
+                top = ColorUtil.colorFromInt(colorBottom);
+                bottom = ColorUtil.colorFromInt(colorTop);
+                break;
+            case BOTTOM_RIGHT:
+                top = ColorUtil.colorFromInt(colorBottomRight);
+                bottom = ColorUtil.colorFromInt(colorTopRight);
+                break;
+        }
+
 
         bRed += (int) (((bottom.getRed() - bRed) / (5)) + 0.1);
         bGreen += (int) (((bottom.getGreen() - bGreen) / (5)) + 0.1);
