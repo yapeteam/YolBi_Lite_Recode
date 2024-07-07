@@ -1,3 +1,5 @@
+// noinspection ES6ConvertVarToLetConst,DuplicatedCode
+
 /*
  * Mosey is a free and open source java bytecode obfuscator.
  *     Copyright (C) 2020  Hippo
@@ -54,9 +56,9 @@ var logLibraries = false;
  * - StringEncryption
  */
 var transformers = [
-  "StringEncryption",
-  "ReverseJump",
-  "FakeTryCatches",
+    "StringEncryption",
+    "ReverseJump",
+    "FakeTryCatches",
 ];
 
 // Add the path to all the library jars your jar depends on
@@ -72,33 +74,33 @@ var exclude = ["cn/yapeteam/yolbi/mixin/injection"];
 var include = [];
 
 var FakeTryCatches = {
-  // The chance it will wrap around an instruction
-  chance: 80,
+    // The chance it will wrap around an instruction
+    chance: 80,
 };
 
 var FakeJump = {
-  // The chance it will insert a jump
-  chance: 90,
+    // The chance it will insert a jump
+    chance: 90,
 };
 
 var ConfusingSwitch = {
-  // If it will confuse constants
-  constants: true,
-  // The chance the switch will be inserted
-  chance: 80,
+    // If it will confuse constants
+    constants: true,
+    // The chance the switch will be inserted
+    chance: 80,
 };
 
 var BadAttribute = {
-  // If to use bad annotation default attributes
-  annotation: true,
-  // If to use bad code attributes
-  code: true,
-  // If to use bad module attributes
-  module: true,
-  // If to use bad nest host attributes
-  nest: true,
+    // If to use bad annotation default attributes
+    annotation: true,
+    // If to use bad code attributes
+    code: true,
+    // If to use bad module attributes
+    module: true,
+    // If to use bad nest host attributes
+    nest: true,
 };
 
 var StringEncryption = {
-  intensity: "light",
+    intensity: "light",
 };
