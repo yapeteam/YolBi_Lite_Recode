@@ -18,6 +18,7 @@ import java.util.Random;
 public class AutoClicker extends Module {
     private final NumberValue<Integer> cps = new NumberValue<>("cps", 17, 1, 100, 1);
     private final NumberValue<Double> range = new NumberValue<>("cps range", 1.5, 0.1d, 2.5d, 0.1);
+    private final NumberValue<Integer> pressPercentage = new NumberValue<>("Press Percentage", 20, 0, 100, 1);
     private final BooleanValue leftClick = new BooleanValue("leftClick", true),
             rightClick = new BooleanValue("rightClick", false);
 
@@ -62,7 +63,7 @@ public class AutoClicker extends Module {
 
     public AutoClicker() {
         super("AutoClicker", ModuleCategory.COMBAT);
-        addValues(cps, range, leftClick, rightClick, noeat, nomine, clickprio);
+        addValues(cps, range, pressPercentage, leftClick, rightClick, noeat, nomine, clickprio);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Natives.SendLeft(false);
             Natives.SendRight(false);
@@ -99,19 +100,20 @@ public class AutoClicker extends Module {
     }
 
     public void sendClick(int button) throws InterruptedException {
+        float pressPercentageValue = pressPercentage.getValue() / 100f;
         // Simulate left click
         if (button == 0) {
             Natives.SendLeft(true);
-            Thread.sleep((long) (1000 / delay * 0.8));
+            Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendLeft(false);
-            Thread.sleep((long) (1000 / delay * 0.2));
+            Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
         }
         // Simulate right click
         else if (button == 1) {
             Natives.SendRight(true);
-            Thread.sleep((long) (1000 / delay * 0.8));
+            Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendRight(false);
-            Thread.sleep((long) (1000 / delay * 0.2));
+            Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
         }
     }
 
