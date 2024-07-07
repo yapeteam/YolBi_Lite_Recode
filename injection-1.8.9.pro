@@ -1,7 +1,7 @@
 -injars build/injection-1.8.9/injection-1.8.9.jar
 -outjars build/injection-1.8.9/injection-1.8.9-o.jar
 
--libraryjars minecraft/minecraft-1.8.9.jar
+-libraryjars minecraft-lib/minecraft-1.8.9.jar
 
 -target 1.8
 -forceprocessing
