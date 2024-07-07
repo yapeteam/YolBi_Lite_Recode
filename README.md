@@ -19,15 +19,19 @@ C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
 
 [MinGW](https://winlibs.com/#download-release)
 
-### Debug
+### Debug Build
 
 Run `DEBUG`
+
+### Release Build
+
+Run `RELEASE`
 
 ### Build
 
 1. Open this project
 
-2. Run `BUILD`
+2. Run `DEBUG` or `RELEASE`
 
 3. Your jar will appear in `./build`
 

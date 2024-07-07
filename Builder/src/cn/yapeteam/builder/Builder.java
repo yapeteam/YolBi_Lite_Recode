@@ -198,7 +198,7 @@ public class Builder {
         outputFile.close();
     }
 
-    private static final boolean advanced_mode = false;
+    private static boolean advanced_mode;
     // advanced_mode:需要安装ollvm进行编译兼混淆
     // 1.https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.6
     // 2.https://github.com/DreamSoule/ollvm17/releases/tag/17.0.6
@@ -282,6 +282,8 @@ public class Builder {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length != 1) return;
+        advanced_mode = args[0].equals("release");
         System.setSecurityManager(new NoExitSecurityManager());
         buildDLL();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -319,6 +321,7 @@ public class Builder {
                             System.out.printf("artifact %s: included %s, %s of %s%n", artifact_name, include.getNodeName(), j + 1, includes_list.size());
                         }
                         output.close();
+                        if (!advanced_mode) break;
                         if (proguard_cfg != null) {
                             File build_dir = new File(output_dir, artifact_id);
                             if (build_dir.exists())
@@ -337,6 +340,7 @@ public class Builder {
                         break;
                     }
                     case "native-obfuscate": {
+                        if (!advanced_mode) break;
                         Node artifact = element.getAttributes().getNamedItem("artifact");
                         Node black = element.getAttributes().getNamedItem("black");
                         Node white = element.getAttributes().getNamedItem("white");
