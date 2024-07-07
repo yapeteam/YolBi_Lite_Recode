@@ -36,7 +36,7 @@ public class AutoClicker extends Module {
     private final Thread clickThread = new Thread(() -> {
         while (true) {
             try {
-                if (isEnabled() && mc.currentScreen != null) {
+                if (isEnabled() && mc.currentScreen == null) {
                     delay = generate(cps.getValue(), range.getValue());
                     if (clickprio.is("Left")) {
                         if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)) {
@@ -117,6 +117,6 @@ public class AutoClicker extends Module {
 
     @Override
     public String getSuffix() {
-        return cps.getValue() + "-" + (cps.getValue() + range.getValue());
+        return (cps.getValue() - range.getValue()) + " ~ " + (cps.getValue() + range.getValue());
     }
 }
