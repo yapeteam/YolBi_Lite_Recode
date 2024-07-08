@@ -43,7 +43,7 @@ JNIEXPORT void JNICALL Init(JNIEnv *env, jclass _, jint pid)
     if (processHandle == NULL)
     {
         printf("Failed to open process with PID %u\n", pid);
-        return -1;
+        return;
     }
 
     EnumWindows(EnumWindowsProc, (LPARAM)pid);
