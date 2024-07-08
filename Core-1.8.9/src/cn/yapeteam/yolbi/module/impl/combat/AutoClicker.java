@@ -30,35 +30,28 @@ public class AutoClicker extends Module {
     @Override
     public void onEnable() {
         delay = generate(cps.getValue(), range.getValue());
+        clickThread = new Thread(() -> {
+            while (true) {
+                try {
+                    delay = generate(cps.getValue(), range.getValue());
+                    sendClick();
+                } catch (Exception ex) {
+                    //noinspection ConstantValue
+                    if (!(ex instanceof InterruptedException))
+                        Logger.exception(ex);
+                }
+            }
+        });
+        clickThread.start();
+    }
+
+    @Override
+    protected void onDisable() {
+        clickThread.interrupt();
     }
 
     @Getter
-    private final Thread clickThread = new Thread(() -> {
-        while (true) {
-            try {
-                if (isEnabled() && mc.currentScreen == null) {
-                    delay = generate(cps.getValue(), range.getValue());
-                    if (clickprio.is("Left")) {
-                        if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                            sendClick(0);
-                        }
-                        if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                            sendClick(1);
-                        }
-                    } else {
-                        if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())) {
-                            sendClick(1);
-                        }
-                        if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)) {
-                            sendClick(0);
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.exception(ex);
-            }
-        }
-    });
+    private Thread clickThread = null;
 
     public AutoClicker() {
         super("AutoClicker", ModuleCategory.COMBAT);
@@ -67,7 +60,6 @@ public class AutoClicker extends Module {
             Natives.SendLeft(false);
             Natives.SendRight(false);
         }));
-        clickThread.start();
     }
 
     private final Random random = new Random();
@@ -98,21 +90,50 @@ public class AutoClicker extends Module {
         return noise;
     }
 
-    public void sendClick(int button) throws InterruptedException {
-        float pressPercentageValue = pressPercentage.getValue() / 100f;
-        // Simulate left click
-        if (button == 0) {
+    private final Runnable leftClickRunnable = () -> {
+        try {
+            float pressPercentageValue = pressPercentage.getValue() / 100f;
             Natives.SendLeft(true);
             Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendLeft(false);
             Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
+        } catch (InterruptedException e) {
+            Logger.exception(e);
         }
-        // Simulate right click
-        else if (button == 1) {
+    };
+
+
+    private final Runnable rightClickRunnable = () -> {
+        try {
+            float pressPercentageValue = pressPercentage.getValue() / 100f;
             Natives.SendRight(true);
             Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendRight(false);
             Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
+        } catch (InterruptedException e) {
+            Logger.exception(e);
+        }
+    };
+
+    public void sendClick() {
+        if (!isEnabled() || mc.currentScreen != null) return;
+
+        boolean left = leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON);
+        if (nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
+            left = false;
+        boolean right = rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON);
+        if ((mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ItemFood) && noeat.getValue())
+            right = false;
+        if (clickprio.getValue().equals("Left") && left) {
+            leftClickRunnable.run();
+        } else if (right) {
+            rightClickRunnable.run();
+            return;
+        }
+        if (clickprio.getValue().equals("Right") && right) {
+            rightClickRunnable.run();
+        } else if (left) {
+            leftClickRunnable.run();
         }
     }
 
