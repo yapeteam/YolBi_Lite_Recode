@@ -123,7 +123,8 @@ public class AutoClicker extends Module {
         if (nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
             left = false;
         boolean right = rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON);
-        if ((mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemFood) && noeat.getValue())
+        //noinspection ConstantValue
+        if ((mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemFood) && noeat.getValue())
             right = false;
         if (clickprio.getValue().equals("Left") && left) {
             leftClickRunnable.run();
