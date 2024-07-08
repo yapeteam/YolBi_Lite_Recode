@@ -1,12 +1,9 @@
 package cn.yapeteam.yolbi;
 
-import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.command.CommandManager;
 import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
@@ -73,7 +70,6 @@ public class YolBi {
         instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
-        instance.eventManager.register(YolBi.class);
         instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
         try {
@@ -90,11 +86,6 @@ public class YolBi {
                         15000, NotificationType.INIT
                 )
         );
-    }
-
-    @Listener
-    private static void onTick(EventTick e) {
-        if (!Natives.initialized) Natives.Init();
     }
 
     public void shutdown() {

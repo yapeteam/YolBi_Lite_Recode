@@ -36,9 +36,7 @@ public class AutoClicker extends Module {
                     delay = generate(cps.getValue(), range.getValue());
                     sendClick();
                 } catch (Exception ex) {
-                    //noinspection ConstantValue
-                    if (!(ex instanceof InterruptedException))
-                        Logger.exception(ex);
+                    Logger.exception(ex);
                 }
             }
         });
@@ -97,8 +95,7 @@ public class AutoClicker extends Module {
             Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendLeft(false);
             Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
-        } catch (InterruptedException e) {
-            Logger.exception(e);
+        } catch (InterruptedException ignored) {
         }
     };
 
@@ -110,8 +107,7 @@ public class AutoClicker extends Module {
             Thread.sleep((long) (1000 / delay * pressPercentageValue));
             Natives.SendRight(false);
             Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
-        } catch (InterruptedException e) {
-            Logger.exception(e);
+        } catch (InterruptedException ignored) {
         }
     };
 

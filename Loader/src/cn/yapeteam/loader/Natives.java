@@ -1,6 +1,6 @@
 package cn.yapeteam.loader;
 
-import org.lwjgl.opengl.Display;
+import java.lang.management.ManagementFactory;
 
 /**
  * native used
@@ -10,11 +10,11 @@ public class Natives {
 
     public static void Init() {
         if (!initialized)
-            Init(Display.getTitle());
+            Init(Integer.parseInt(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]));
         initialized = true;
     }
 
-    private static native void Init(String windowTitle);
+    private static native void Init(int pid);
 
     public static native void SetWindowsTransparent(boolean transparent, String windowTitle);
 

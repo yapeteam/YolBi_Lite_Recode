@@ -14,7 +14,7 @@ import net.minecraft.item.ItemBlock;
 
 public class Eagle extends Module {
 
-    private final BooleanValue onlyblocks = new BooleanValue("Only Blocks", true);
+    private final BooleanValue onlyblocks = new BooleanValue("Only Holding Blocks", true);
 
     private final BooleanValue onlybackwards = new BooleanValue("Only Backwards", true);
 
@@ -36,7 +36,7 @@ public class Eagle extends Module {
             return;
         }
         if (mc.thePlayer.isInWater() || mc.thePlayer.isInLava()) return;
-        if ((mc.thePlayer.getHeldItem() == null || (mc.thePlayer.getHeldItem().getItem() instanceof ItemBlock)) && onlyblocks.getValue())
+        if (mc.thePlayer.getHeldItem() != null && !(mc.thePlayer.getHeldItem().getItem() instanceof ItemBlock) && onlyblocks.getValue())
             return;
         if ((mc.thePlayer.onGround || !onlyground.getValue()) &&
                 (getBlockUnderPlayer() instanceof BlockAir) &&

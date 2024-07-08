@@ -5,6 +5,8 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventChat;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
+import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.utils.player.RotationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -23,19 +25,19 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         super(p_i47378_1_, p_i47378_2_, p_i47378_3_, p_i47378_4_, p_i47378_5_);
     }
 
-    //  @Inject(
-    //          method = "onUpdate", desc = "()V",
-    //          target = @Target(
-    //                  value = "INVOKEVIRTUAL",
-    //                  target = "net/minecraft/client/entity/EntityPlayerSP.isRiding()Z",
-    //                  shift = Target.Shift.BEFORE
-    //          )
-    //  )
-    //  public void onUpdate() {
-    //      RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
-    //      RotationManager.renderPitchHead = rotationPitch;
-    //      YolBi.instance.getEventManager().post(new EventUpdate());
-    //  }
+    @Inject(
+            method = "onUpdate", desc = "()V",
+            target = @Target(
+                    value = "INVOKEVIRTUAL",
+                    target = "net/minecraft/client/entity/EntityPlayerSP.isRiding()Z",
+                    shift = Target.Shift.BEFORE
+            )
+    )
+    public void onUpdate() {
+        RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
+        RotationManager.renderPitchHead = rotationPitch;
+        YolBi.instance.getEventManager().post(new EventUpdate());
+    }
 
     @Shadow
     public double posX;
@@ -180,7 +182,7 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         YolBi.instance.getEventManager().post(new EventPostMotion(this.posX, this.getEntityBoundingBox().minY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround));
     }
 
-    @Inject(method = "sendChatMessage", desc = "(Ljava/lang/String;)V",target = @Target("HEAD"))
+    @Inject(method = "sendChatMessage", desc = "(Ljava/lang/String;)V", target = @Target("HEAD"))
     public void sendChatMessage(@NotNull String message) {
         EventChat event = new EventChat(message);
         YolBi.instance.getEventManager().post(event);

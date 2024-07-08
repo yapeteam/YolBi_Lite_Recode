@@ -15,7 +15,7 @@ import net.minecraft.util.EnumHand;
 
 public class Eagle extends Module {
 
-    private final BooleanValue onlyblocks = new BooleanValue("Only Blocks", true);
+    private final BooleanValue onlyblocks = new BooleanValue("Only Holding Blocks", true);
 
     private final BooleanValue onlybackwards = new BooleanValue("Only Backwards", true);
 
@@ -37,7 +37,8 @@ public class Eagle extends Module {
             return;
         }
         if (mc.player.isInWater() || mc.player.isInLava()) return;
-        if ((mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue())
+        //noinspection ConstantValue
+        if (mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && !(mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue())
             return;
         if ((mc.player.onGround || !onlyground.getValue()) &&
                 (getBlockUnderPlayer() instanceof BlockAir) &&

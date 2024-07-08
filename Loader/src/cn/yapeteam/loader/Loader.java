@@ -16,6 +16,7 @@ public class Loader {
         Logger.init();
         try {
             Logger.info("Start PreLoading...");
+            Natives.Init();
             Logger.warn("ClassLoader: " + BootStrap.client_thread.getContextClassLoader().getClass().getName());
             SocketSender.init();
             try {
