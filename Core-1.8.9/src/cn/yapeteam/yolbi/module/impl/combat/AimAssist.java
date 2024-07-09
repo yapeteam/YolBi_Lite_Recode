@@ -62,15 +62,9 @@ public class AimAssist extends Module {
                 this.target = target;
             }
             if (target != null && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
-                if (aimPath.size() > 1000) aimPath.clear();
                 val vector2fs = WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target));
-                int max = 250;
-                if (vector2fs.size() < max)
-                    aimPath.addAll(vector2fs);
-                else {
-                    aimPath.clear();
-                    aimPath.addAll(vector2fs.subList(vector2fs.size() - max, vector2fs.size()));
-                }
+                aimPath.addAll(vector2fs);
+                // no checks needed since we only use the first few points
             }
         } catch (Throwable ex) {
             Logger.exception(ex);
