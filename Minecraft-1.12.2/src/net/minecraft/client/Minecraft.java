@@ -566,7 +566,8 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
         new Thread(() -> {
             try {
                 Thread.sleep(2000L);
-                cn.yapeteam.injector.Main.main(new String[]{ManagementFactory.getRuntimeMXBean().getName().split("@")[0]});
+                Class<?> injector = Class.forName("cn.yapeteam.injector.Main");
+                injector.getMethod("main", String[].class).invoke(null, new Object[]{new String[]{ManagementFactory.getRuntimeMXBean().getName().split("@")[0]}});
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
