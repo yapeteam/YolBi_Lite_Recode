@@ -1,0 +1,18 @@
+# Inventory names
+inventory.cosmeticwings:wings.name=翅膀
+inventory.cosmeticwings:wings.label.list=选择翅膀
+inventory.cosmeticwings:wings.label.scale=翅膀尺寸
+inventory.cosmeticwings:wings.spawnParticles.name=启用粒子效果
+
+# Wings
+wings.cosmeticwings:none.name=无
+wings.cosmeticwings:black.name=黑色
+wings.cosmeticwings:white.name=白色
+wings.cosmeticwings:shana.name=夏娜
+wings.cosmeticwings:flandre.name=芙兰朵露
+wings.cosmeticwings:metal.name=金属
+wings.cosmeticwings:kuroyukihime.name=黑雪姬
+
+# Keybindings
+keys.cosmeticwings:category=Cosmetic Wings
+keys.cosmeticwings.wingsGui=打开翅膀界面

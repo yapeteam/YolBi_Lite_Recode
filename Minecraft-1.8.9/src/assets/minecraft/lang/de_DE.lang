@@ -1,0 +1,28 @@
+# Inventory names
+inventory.cosmeticwings:wings.name=Flügel
+inventory.cosmeticwings:wings.label.list=Flügel Auswählen
+inventory.cosmeticwings:wings.label.scale=Flügelgröße 
+inventory.cosmeticwings:wings.spawnParticles.name=Partikel spawnen?
+inventory.cosmeticwings:wings.label.centre=Versatz vertikal
+inventory.cosmeticwings:wings.label.height=Versatz horizontal
+inventory.cosmeticwings:wings.label.hue=Farbton
+inventory.cosmeticwings:wings.label.saturation=Sättigung
+inventory.cosmeticwings:wings.label.brightness=Helligkeit
+
+# Wings
+wings.cosmeticwings:none.name=Keine
+wings.cosmeticwings:black.name=Schwarz
+wings.cosmeticwings:angel.name=Engel
+wings.cosmeticwings:shana.name=Shana
+wings.cosmeticwings:flandre.name=Flandre
+wings.cosmeticwings:metal.name=Metall
+wings.cosmeticwings:kuroyukihime.name=Kuroyukihime
+wings.cosmeticwings:small_mech.name=Mech, klein
+wings.cosmeticwings:mech.name=Mech
+
+# Flavour
+#wings.cosmeticwings:none.flavour=Test flavour text
+
+# Keybindings
+keys.cosmeticwings:category=Kosmetische Flügel
+keys.cosmeticwings.wingsGui=Öffne Flügel GUI
