@@ -137,9 +137,6 @@ public class AutoClicker extends Module {
 
     @Override
     public String getSuffix() {
-        return (cps.getValue() - range.getValue()) + " ~ " + (cps.getValue() + range.getValue()) +
-                " - " + "clicking: " + Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) + ", " + Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) +
-                " - " + mc.objectMouseOver.typeOfHit + " ! " + (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) &&
-                !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK));
+        return (cps.getValue() - range.getValue()) + " ~ " + (cps.getValue() + range.getValue());
     }
 }
