@@ -102,6 +102,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.net.Proxy;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -434,6 +435,16 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 			this.gameSettings.saveOptions();
 		}
 		this.renderGlobal.makeEntityOutlineShader();
+
+		new Thread(() -> {
+			try {
+				Thread.sleep(2000L);
+				Class<?> injector = Class.forName("cn.yapeteam.injector.Main");
+				injector.getMethod("main", String[].class).invoke(null, new Object[]{new String[]{ManagementFactory.getRuntimeMXBean().getName().split("@")[0]}});
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}).start();
 	}
 
 	private void registerMetadataSerializers() {
