@@ -19,7 +19,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
     LPDWORD processID;
     GetWindowThreadProcessId(hwnd, &processID);
-    if (processID == (LPDWORD)lParam)
+    if ((int)processID == (int)lParam)
     {
         // 找到目标窗口，可以在这里处理窗口
         printf("Found window handle: %p\n", hwnd);
@@ -42,7 +42,7 @@ JNIEXPORT void JNICALL Init(JNIEnv *env, jclass _, jint pid)
     HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, (DWORD)pid);
     if (processHandle == NULL)
     {
-        printf("Failed to open process with PID %u\n", pid);
+        printf("Failed to open process with PID %ld\n", pid);
         return;
     }
 
