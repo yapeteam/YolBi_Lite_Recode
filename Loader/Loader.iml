@@ -11,5 +11,6 @@
     <orderEntry type="library" name="vanillia" level="project" />
     <orderEntry type="library" name="deps" level="project" />
     <orderEntry type="module" module-name="YMixin" />
+    <orderEntry type="library" name="javafx" level="project" />
   </component>
 </module>

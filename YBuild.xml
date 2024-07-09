@@ -15,28 +15,43 @@
                     <dir name="injection">
                         <archive name="injection.jar">
                             <files>out/production/Core</files>
+                            <files>javafx</files>
+                            <file>deps/jfxrt.jar</file>
+                            <file>deps/jfxswt.jar</file>
                         </archive>
                     </dir>
                     <dir name="dependencies">
-                        <file>deps/asm-all-9.2.jar</file>
-                        <file>deps/flatlaf.jar</file>
-                        <file>deps/flatlaf-intellij-themes.jar</file>
-                        <file>deps/jfxswt.jar</file>
-                        <file>deps/jfxrt.jar</file>
-                        <files>javafx</files>
+                        <files>deps</files>
+                        <dir name="javafx">
+                            <files>javafx</files>
+                            <file>deps/jfxrt.jar</file>
+                            <file>deps/jfxswt.jar</file>
+                        </dir>
                     </dir>
                     <archive name="loader.jar">
                         <files>out/production/Loader</files>
+                        <files>javafx</files>
+                        <file>deps/jfxrt.jar</file>
+                        <file>deps/jfxswt.jar</file>
                     </archive>
                     <archive name="hooker.jar">
                         <files>out/production/Hooker</files>
+                        <files>javafx</files>
+                        <file>deps/jfxrt.jar</file>
+                        <file>deps/jfxswt.jar</file>
                     </archive>
                     <archive name="ymixin.jar">
                         <files>out/production/YMixin</files>
+                        <files>javafx</files>
+                        <file>deps/jfxrt.jar</file>
+                        <file>deps/jfxswt.jar</file>
                     </archive>
                     <archive name="agent.jar">
                         <dir>Agent/META-INF</dir>
                         <files>out/production/Agent</files>
+                        <files>javafx</files>
+                        <file>deps/jfxrt.jar</file>
+                        <file>deps/jfxswt.jar</file>
                     </archive>
                     <file>Loader/dll/build/libinjection.dll</file>
                     <file>Loader/dll/build/libapi.dll</file>

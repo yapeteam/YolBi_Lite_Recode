@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -119,6 +120,7 @@ public class Hooker {
     public static Class<?> onFindClass(ClassLoader cl, String name) {
         try {
             if (shouldHook(name)) {
+                System.out.println(name);
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
                 byte[] bytes = Hooker.classes.get(name);
@@ -152,6 +154,7 @@ public class Hooker {
         }
         try {
             for (File file : Objects.requireNonNull(new File(YOLBI_DIR, "dependencies").listFiles())) {
+                System.out.println(Arrays.toString(new File(YOLBI_DIR, "dependencies").listFiles()));
                 cacheJar(file);
             }
         } catch (Exception ignored) {

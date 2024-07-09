@@ -12,5 +12,6 @@
     <orderEntry type="module" module-name="Loader" />
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="vanillia" level="project" />
+    <orderEntry type="library" name="javafx" level="project" />
   </component>
 </module>
