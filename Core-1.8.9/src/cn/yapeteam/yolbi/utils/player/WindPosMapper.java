@@ -1,9 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
-
-
 import cn.yapeteam.yolbi.utils.vector.Vector2f;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,6 +22,17 @@ public class WindPosMapper {
         return value;
     }
 
+    // New method to calculate the shortest angle difference
+    private static float shortestAngleDifference(float angle1, float angle2) {
+        float difference = wrapAngleTo180_float(angle1 - angle2);
+        if (difference > 180) {
+            difference -= 360;
+        } else if (difference < -180) {
+            difference += 360;
+        }
+        return difference;
+    }
+
     public static List<Vector2f> generatePath(Vector2f start, Vector2f end) {
         List<Vector2f> path = new ArrayList<>();
         float wind = 6.0f;
@@ -36,65 +44,27 @@ public class WindPosMapper {
         float currentY = start.y;
 
         while (Math.hypot(currentX - end.x, currentY - end.y) > 1) {
-            float deltaX = end.x - currentX;
-            float deltaY = end.y - currentY;
-            float distance = (float) Math.hypot(deltaX, deltaY);
-            float randomDist = Math.min(maxStep, distance);
-            float stepSize = Math.max(0.1f, randomDist / targetArea);
+            float angleToTarget = (float) Math.atan2(end.y - currentY, end.x - currentX);
+            float currentAngle = (float) Math.atan2(currentY - start.y, currentX - start.x);
+            float angleDifference = shortestAngleDifference((float) Math.toDegrees(angleToTarget), (float) Math.toDegrees(currentAngle));
+
+            float stepSize = (float) Math.max(0.1f, Math.min(maxStep, Math.hypot(end.x - currentX, end.y - currentY)) / targetArea);
             float windX = (random.nextFloat() * 2 - 1) * wind;
             float windY = (random.nextFloat() * 2 - 1) * wind;
-            float newX = currentX + deltaX / distance * stepSize + windX;
-            float newY = currentY + deltaY / distance * stepSize + windY;
 
-            currentX = newX;
-            currentY = newY;
+            // Adjusting deltaX and deltaY using the shortest angle difference
+            float deltaX = (float) (Math.cos(Math.toRadians(angleDifference)) * stepSize) + windX;
+            float deltaY = (float) (Math.sin(Math.toRadians(angleDifference)) * stepSize) + windY;
+
+            currentX += deltaX;
+            currentY += deltaY;
             path.add(new Vector2f(currentX, currentY));
 
             wind = Math.max(0.0f, wind - wind / 3.0f);
-            wind += (random.nextFloat() * 2 - 1) * gravity * distance / 1000.0f;
+            wind += (random.nextFloat() * 2 - 1) * gravity * Math.hypot(end.x - currentX, end.y - currentY) / 1000.0f;
         }
 
         path.add(end);
         return path;
     }
-
-//    public static List<Vector2f> generatePath(Vector2f start, Vector2f end) {
-//        double rotationSpeed = 1;
-//        List<Vector2f> path = new ArrayList<>();
-//
-//        // first get the difference for the yaw and pitch
-//        float deltaYaw = (end.x - start.x);
-//        float deltaPitch = (end.y - start.y);
-//
-//        // now separate them into points
-//        float currentYaw = start.x;
-//        float currentPitch = start.y;
-//
-//        while (Math.abs(deltaYaw) > rotationSpeed || Math.abs(deltaPitch) > rotationSpeed) {
-//            if (Math.abs(deltaYaw) > rotationSpeed) {
-//                // now apply wind and gravity to the path
-//                double gravity = Math.signum(deltaYaw) * rotationSpeed;
-//                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
-//                System.out.println(wind);
-//                currentYaw += gravity + wind;
-//                deltaYaw -= gravity + wind;
-//            }
-//
-//            if (Math.abs(deltaPitch) > rotationSpeed) {
-//                // now apply wind and gravity to the path
-//                double gravity = Math.signum(deltaPitch) * rotationSpeed;
-//                float wind = (float) ((random.nextFloat() * 2 - 1) * Math.abs(deltaYaw) * rotationSpeed * Math.random());
-//                System.out.println(wind);
-//                currentPitch += gravity + wind;
-//                deltaPitch -= gravity + wind;
-//            }
-//
-//            path.add(new Vector2f(currentYaw, currentPitch));
-//        }
-//
-//        // add the end point to the path
-//        path.add(end);
-//
-//        return path;
-//    }
 }
