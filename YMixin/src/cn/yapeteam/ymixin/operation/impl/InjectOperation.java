@@ -8,6 +8,7 @@ import cn.yapeteam.ymixin.operation.Operation;
 import cn.yapeteam.ymixin.utils.ASMUtils;
 import cn.yapeteam.ymixin.utils.DescParser;
 import cn.yapeteam.ymixin.utils.Mapper;
+import cn.yapeteam.ymixin.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm_9_2.Label;
 import org.objectweb.asm_9_2.MethodVisitor;
@@ -228,9 +229,9 @@ public class InjectOperation implements Operation {
     }
 
     private static String[] parseOpe(String ope) {
-        String[] owner_name$desc = ASMUtils.split(ope, ".");
+        String[] owner_name$desc = StringUtil.split(ope, ".");
         String owner = owner_name$desc[0];
-        String name = ope.contains(" ") ? ASMUtils.split(owner_name$desc[1], " ")[0] : ASMUtils.split(owner_name$desc[1], "(")[0];
+        String name = ope.contains(" ") ? StringUtil.split(owner_name$desc[1], " ")[0] : StringUtil.split(owner_name$desc[1], "(")[0];
         String desc = owner_name$desc[1].replace(name, "").replace(" ", "");
         return new String[]{owner, name, desc};
     }

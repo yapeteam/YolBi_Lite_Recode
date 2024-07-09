@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="minecraft">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/minecraft-lib/minecraft.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

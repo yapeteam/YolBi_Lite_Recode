@@ -8,9 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="vanillia" level="project" />
     <orderEntry type="library" name="deps" level="project" />
     <orderEntry type="module" module-name="YMixin" />
-    <orderEntry type="library" name="javafx" level="project" />
+    <orderEntry type="library" name="minecraft" level="project" />
   </component>
 </module>

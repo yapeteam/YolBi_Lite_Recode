@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RELEASE" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="cn.yapeteam.builder.Builder" />
+    <module name="Builder" />
+    <option name="PROGRAM_PARAMETERS" value="release" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

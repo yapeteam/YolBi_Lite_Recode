@@ -2,61 +2,50 @@
 <root>
     <rootdir>./</rootdir>
     <output>build</output>
-    <artifacts>
-        <artifact name="injector.jar">
-            <binary>out/production/Injector</binary>
-            <includes>
-                <dir>Injector/META-INF</dir>
-                <extract>deps/jna.jar</extract>
-                <extract>deps/flatlaf.jar</extract>
-                <extract>deps/flatlaf-intellij-themes.jar</extract>
-                <archive name="injection.zip">
-                    <dir>resources</dir>
-                    <dir name="injection">
-                        <archive name="injection.jar">
-                            <files>out/production/Core</files>
-                            <files>javafx</files>
-                            <file>deps/jfxrt.jar</file>
-                            <file>deps/jfxswt.jar</file>
-                        </archive>
-                    </dir>
-                    <dir name="dependencies">
-                        <files>deps</files>
-                        <dir name="javafx">
-                            <files>javafx</files>
-                            <file>deps/jfxrt.jar</file>
-                            <file>deps/jfxswt.jar</file>
-                        </dir>
-                    </dir>
-                    <archive name="loader.jar">
-                        <files>out/production/Loader</files>
-                        <files>javafx</files>
-                        <file>deps/jfxrt.jar</file>
-                        <file>deps/jfxswt.jar</file>
-                    </archive>
-                    <archive name="hooker.jar">
-                        <files>out/production/Hooker</files>
-                        <files>javafx</files>
-                        <file>deps/jfxrt.jar</file>
-                        <file>deps/jfxswt.jar</file>
-                    </archive>
-                    <archive name="ymixin.jar">
-                        <files>out/production/YMixin</files>
-                        <files>javafx</files>
-                        <file>deps/jfxrt.jar</file>
-                        <file>deps/jfxswt.jar</file>
-                    </archive>
-                    <archive name="agent.jar">
-                        <dir>Agent/META-INF</dir>
-                        <files>out/production/Agent</files>
-                        <files>javafx</files>
-                        <file>deps/jfxrt.jar</file>
-                        <file>deps/jfxswt.jar</file>
-                    </archive>
-                    <file>Loader/dll/build/libinjection.dll</file>
-                    <file>Loader/dll/build/libapi.dll</file>
-                </archive>
-            </includes>
+    <build>
+        <artifact name="loader.jar">
+            <files>out/production/Loader</files>
         </artifact>
-    </artifacts>
+        <artifact name="hooker.jar">
+            <files>out/production/Hooker</files>
+        </artifact>
+        <artifact name="ymixin.jar">
+            <files>out/production/YMixin</files>
+        </artifact>
+        <artifact name="injection-1.8.9.jar" proguard-config="injection-1.8.9.pro" mosey-config="injection-1.8.9.js">
+            <files>out/production/Core-1.8.9</files>
+        </artifact>
+        <artifact name="injection-1.12.2.jar" proguard-config="injection-1.12.2.pro" mosey-config="injection-1.12.2.js">
+            <files>out/production/Core-1.12.2</files>
+        </artifact>
+        <native-obfuscate artifact="hooker.jar"/>
+        <native-obfuscate artifact="loader.jar" black="cn.yapeteam.loader.ClassMapper"/>
+        <artifact name="injector.jar">
+            <files>out/production/Injector</files>
+            <dir>Injector/META-INF</dir>
+            <extract>deps/jna.jar</extract>
+            <extract>deps/flatlaf.jar</extract>
+            <extract>deps/flatlaf-intellij-themes.jar</extract>
+            <archive name="injection.zip">
+                <dir>resources</dir>
+                <dir name="injection">
+                    <file>build/injection-1.8.9.jar</file>
+                    <file>build/injection-1.12.2.jar</file>
+                </dir>
+                <dir name="dependencies">
+                    <file>deps/asm-all-9.2.jar</file>
+                    <file>deps/flatlaf.jar</file>
+                    <file>deps/flatlaf-intellij-themes.jar</file>
+                    <file>deps/tools.jar</file>
+                    <file>deps/jProcesses-1.6.4.jar</file>
+                </dir>
+                <file>build/loader.jar</file>
+                <file>build/hooker.jar</file>
+                <file>build/ymixin.jar</file>
+                <file>Loader/dll/build/libinjection.dll</file>
+                <file>Loader/dll/build/libapi.dll</file>
+                <file>Builder/g++.zip</file>
+            </archive>
+        </artifact>
+    </build>
 </root>

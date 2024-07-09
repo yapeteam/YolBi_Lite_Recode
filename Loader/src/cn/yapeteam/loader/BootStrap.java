@@ -1,26 +1,23 @@
 package cn.yapeteam.loader;
 
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.loader.utils.ASMUtils;
 import cn.yapeteam.loader.utils.ClassUtils;
-import cn.yapeteam.ymixin.Transformer;
+import cn.yapeteam.loader.utils.Pair;
 import cn.yapeteam.ymixin.YMixin;
-import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.ymixin.utils.ASMUtils;
 import cn.yapeteam.ymixin.utils.Mapper;
-import lombok.val;
-import org.objectweb.asm_9_2.tree.ClassNode;
+import lombok.Getter;
+import org.objectweb.asm_9_2.Opcodes;
+import org.objectweb.asm_9_2.Type;
+import org.objectweb.asm_9_2.tree.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Objects;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import static cn.yapeteam.ymixin.utils.ASMUtils.node;
-
+/**
+ * native used
+ * native invoked
+ */
 @SuppressWarnings("unused")
 public class BootStrap {
     private static native void loadInjection();
@@ -37,44 +34,31 @@ public class BootStrap {
         }
     }
 
-    private static byte[] readStream(InputStream inStream) throws Exception {
-        val outStream = new ByteArrayOutputStream();
-        val buffer = new byte[1024];
-        int len;
-        while ((len = inStream.read(buffer)) != -1)
-            outStream.write(buffer, 0, len);
-        outStream.close();
-        return outStream.toByteArray();
-    }
-
-    private static byte[] getInitHook() throws Throwable {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    String name = entry.getName().replace('/', '.');
-                    name = name.substring(0, name.length() - 6);
-                    if (name.equals(InitHookMixin.class.getName())) return readStream(zis);
-                }
-            }
-        }
-        return null;
-    }
-
-
     public static Thread client_thread = null;
 
-    public static Mapper.Mode guessMappingMode() {
-        Class<?> clazz = ClassUtils.getClass("net.minecraft.client.Minecraft");
-        if (clazz == null) return Mapper.Mode.Vanilla;
-        byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
-        ClassNode node = node(bytes);
-        if (node.methods.stream().anyMatch(m -> m.name.equals("runTick")))
-            return Mapper.Mode.None;
-        return Mapper.Mode.Searge;
+    private static Pair<Version, Mapper.Mode> getMinecraftVersion() {
+        Mapper.Mode mode;
+        Version version = Version.get();
+        Class<?> clazz = ClassUtils.getClass(("net.minecraft.client.Minecraft"));
+        if (clazz != null) {
+            byte[] bytes = JVMTIWrapper.instance.getClassBytes(clazz);
+            if (bytes != null) {
+                ClassNode node = ASMUtils.node(bytes);
+                if (node.methods.stream().anyMatch(method -> method.name.equals("runTick")))
+                    mode = Mapper.Mode.None;
+                else mode = Mapper.Mode.Searge;
+            } else return null;
+        } else mode = Mapper.Mode.Vanilla;
+        return new Pair<>(version, mode);
     }
 
     public static boolean hasLaunchClassLoader = true;
+    @Getter
+    private static Pair<Version, Mapper.Mode> version;
+
+    private static ClassNode getMinecraftClassNode() {
+        return ASMUtils.node(JVMTIWrapper.instance.getClassBytes(ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"))));
+    }
 
     public static void entry() {
         try {
@@ -92,7 +76,6 @@ public class BootStrap {
             } catch (ClassNotFoundException e) {
                 hasLaunchClassLoader = false;
             }
-            Mapper.Mode mode = guessMappingMode();
             YMixin.init(
                     name -> {
                         try {
@@ -127,22 +110,63 @@ public class BootStrap {
                         }
                     }
             );
+            version = getMinecraftVersion();
+            if (version == null || version.first == null || version.second == null) {
+                Logger.error("Failed to get Minecraft version.");
+                if (version != null) {
+                    Logger.error("Version: {}, Mode: {}", version.first, version.second);
+                    Logger.error("java.library.path: {}, sun.java.command: {}", System.getProperty("java.library.path"), System.getProperty("sun.java.command"));
+                } else Logger.error("Version: null, Mode: null");
+                SocketSender.send("CLOSE");
+                return;
+            }
+            String branch = "null";
+            switch (version.second) {
+                case Vanilla:
+                    branch = "vanilla";
+                    break;
+                case Searge:
+                    branch = "forge";
+                    break;
+                case None:
+                    branch = "mcp";
+            }
+            Logger.info("Minecraft version: {} ({})", version.first.getVersion(), branch);
+            Mapper.Mode mode = version.second;
+
             Logger.info("Reading mappings, mode: {}", mode.name());
             Mapper.setMode(mode);
-            String vanilla = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/vanilla.srg")), StandardCharsets.UTF_8);
-            String forge = new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/1.8.9/forge.srg")), StandardCharsets.UTF_8);
-            Mapper.readMappings(vanilla, forge);
+            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8), Mapper.getVanilla());
+            Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
 
             Logger.warn("Loading Hooks...");
-            Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
 
-            byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()))));
-            ClassNode initHookNode = ASMUtils.node(initHook);
-            Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
-            transformer.addMixin(initHookNode);
+            ClassNode target;
+            try {
+                target = getMinecraftClassNode();
+            } catch (Exception e) {
+                Thread.sleep(500);
+                target = getMinecraftClassNode();
+            }
+            if (target == null) {
+                Logger.error("Failed to get Minecraft class node.");
+                SocketSender.send("CLOSE");
+                return;
+            }
+            String targetMethod = Mapper.map("net/minecraft/client/Minecraft", "runGameLoop", "()V", Mapper.Type.Method);
+            for (MethodNode method : target.methods) {
+                if (method.name.equals(targetMethod) && method.desc.equals("()V")) {
+                    LabelNode labelNode = new LabelNode();
+                    InsnList insnList = new InsnList();
+                    insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(BootStrap.class), "initHook", "()V"));
+                    insnList.add(labelNode);
+                    method.instructions.insert(insnList);
+                    break;
+                }
+            }
+            Class<?> MinecraftClass = ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"));
 
-            val map = transformer.transform();
-            Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
+            Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, ASMUtils.rewriteClass(target)));
         } catch (Throwable e) {
             Logger.exception(e);
         }

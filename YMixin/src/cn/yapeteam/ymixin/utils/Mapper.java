@@ -25,8 +25,6 @@ public class Mapper {
         None, Vanilla, Searge
     }
 
-
-
     /**
      * friendly→obf
      **/
@@ -60,8 +58,8 @@ public class Mapper {
                     break;
                 case "FD":
                     if (values.length == 4) {
-                        obf = ASMUtils.split(values[0], "/");
-                        friendly = ASMUtils.split(values[2], "/");
+                        obf = StringUtil.split(values[0], "/");
+                        friendly = StringUtil.split(values[2], "/");
                         dest.add(new Map(
                                 values[2].replace("/" + friendly[friendly.length - 1], ""),
                                 friendly[friendly.length - 1],
@@ -70,8 +68,8 @@ public class Mapper {
                                 Mapper.Type.Field
                         ));
                     } else if (values.length == 2) {
-                        obf = ASMUtils.split(values[0], "/");
-                        friendly = ASMUtils.split(values[1], "/");
+                        obf = StringUtil.split(values[0], "/");
+                        friendly = StringUtil.split(values[1], "/");
                         dest.add(new Map(
                                 values[1].replace("/" + friendly[friendly.length - 1], ""),
                                 friendly[friendly.length - 1],
@@ -95,11 +93,6 @@ public class Mapper {
                     );
             }
         }
-    }
-
-    public static void readMappings(String vanilla, String forge) {
-        readMapping(vanilla, getVanilla());
-        readMapping(forge, getSearges());
     }
 
     @Getter
@@ -141,6 +134,7 @@ public class Mapper {
             case None:
                 break;
         }
+        cache.clear();
     }
 
     public static String applyMode(Map map) {

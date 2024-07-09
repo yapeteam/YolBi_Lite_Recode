@@ -12,16 +12,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm_9_2.ClassWriter.COMPUTE_MAXS;
 
+/**
+ * native used
+ * native invoked
+ */
 @SuppressWarnings("unused")
 public class Hooker {
     public static final String YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi").getAbsolutePath();
@@ -30,6 +31,7 @@ public class Hooker {
         return name.startsWith("cn.yapeteam.") ||
                 name.startsWith("org.objectweb.") ||
                 name.startsWith("com.formdev.") ||
+                name.split("\\.")[0].endsWith("_yolbi") ||
                 name.startsWith("javafx.") ||
                 name.startsWith("com.sun.glass.") ||
                 name.startsWith("com.sun.javafx.") ||
@@ -120,9 +122,15 @@ public class Hooker {
     public static Class<?> onFindClass(ClassLoader cl, String name) {
         try {
             if (shouldHook(name)) {
-                System.out.println(name);
                 if (name.startsWith("cn.yapeteam.yolbi.") && !classes.containsKey(name))
                     Hooker.cacheJar(new File(Hooker.YOLBI_DIR, "injection.jar"));
+                if (name.endsWith(".hidden.Hidden0")) {
+                    try {
+                        return Class.forName(name, true, ClassLoader.getSystemClassLoader());
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException("Hidden Class not found!");
+                    }
+                }
                 byte[] bytes = Hooker.classes.get(name);
                 if (bytes == null) {
                     System.out.println("Failed to find class: " + name);
@@ -154,7 +162,6 @@ public class Hooker {
         }
         try {
             for (File file : Objects.requireNonNull(new File(YOLBI_DIR, "dependencies").listFiles())) {
-                System.out.println(Arrays.toString(new File(YOLBI_DIR, "dependencies").listFiles()));
                 cacheJar(file);
             }
         } catch (Exception ignored) {
@@ -175,8 +182,14 @@ public class Hooker {
         }
         if (hasLaunchClassLoader) {
             try {
-                byte[] targetBytes = getClassBytes(client_thread.getContextClassLoader().getClass());
-                ClassNode targetNode = node(targetBytes);
+                ClassNode targetNode = null;
+                while (targetNode == null) {
+                    try {
+                        targetNode = node(getClassBytes(client_thread.getContextClassLoader().getClass()));
+                    } catch (Exception e) {
+                        Thread.sleep(500);
+                    }
+                }
                 for (MethodNode method : targetNode.methods) {
                     if (method.name.equals("findClass") && method.desc.equals("(Ljava/lang/String;)Ljava/lang/Class;")) {
                         LabelNode labelNode = new LabelNode();

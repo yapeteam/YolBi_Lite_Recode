@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="forge-1.12.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/minecraft-lib/forge-1.12.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

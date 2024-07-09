@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="obf">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Builder/libs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/Builder/libs" recursive="false" />
+  </library>
+</component>

@@ -30,10 +30,9 @@ public class Utils {
         return sb.toString();
     }
 
-
-    public static ArrayList<Pair<String, Integer>> getMinecraftProcesses() {
+    public static ArrayList<Pair<String, Integer>> getProcessesByClass(String className) {
         ArrayList<Pair<String, Integer>> list = new ArrayList<>();
-        WinDef.HWND hWND = user32.FindWindow("LWJGL", null);
+        WinDef.HWND hWND = user32.FindWindow(className, null);
         while (hWND != null) {
             if (hWND.getPointer() != Pointer.NULL) {
                 IntByReference pid = new IntByReference(-1);
@@ -41,11 +40,19 @@ public class Utils {
                 user32.GetWindowThreadProcessId(hWND, pid);
                 list.add(new Pair<>(title, pid.getValue()));
             }
-            hWND = user32.FindWindowEx(null, hWND, "LWJGL", null);
+            hWND = user32.FindWindowEx(null, hWND, className, null);
         }
         return list;
     }
 
+    public static ArrayList<Pair<String, Integer>> getMinecraftProcesses() {
+        ArrayList<Pair<String, Integer>> list = new ArrayList<>();
+        list.addAll(getProcessesByClass("LWJGL"));
+        list.addAll(getProcessesByClass("GLFW30"));
+        return list;
+    }
+
+    @Deprecated
     public static void loadLibrary(WinNT.HANDLE hdl, String path) {
         Memory pathMemory = new Memory((long) path.length() + 1L);
         pathMemory.setString(0L, path);
@@ -91,17 +98,5 @@ public class Utils {
             return;
         mkdir(file.getParentFile());
         boolean ignored = file.mkdir();
-    }
-
-    public static byte[] readStream(InputStream inStream) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        try (InputStream input = inStream;
-             ByteArrayOutputStream output = outStream) {
-            while ((len = input.read(buffer)) != -1)
-                output.write(buffer, 0, len);
-            return output.toByteArray();
-        }
     }
 }

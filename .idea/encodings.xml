@@ -8,12 +8,13 @@
     <file url="file://$PROJECT_DIR$/Builder/src" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Builder/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Builder/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Core/src" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Core/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/Core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Core-1.8.9/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Core-1.8.9/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Core-1.8.9/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Injector/src" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Injector/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Injector/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Loader/dll/src/dll/AntiLeak.cpp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Loader/src" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Loader/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Loader/src/main/resources" charset="UTF-8" />
