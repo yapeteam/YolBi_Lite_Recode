@@ -10,5 +10,7 @@
 /run/optionsof.txt
 /run/servers.dat
 /run/usercache.json
-/run/agent.jar
+/run/libgcc_s_seh-1.dll
+/run/libstdc++-6.dll
+/run/libwinpthread-1.dll
 *.log
