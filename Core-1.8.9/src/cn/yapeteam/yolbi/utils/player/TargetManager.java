@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.utils.player;
 
 import cn.yapeteam.yolbi.managers.BotManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.Comparator;
@@ -19,7 +18,7 @@ public class TargetManager {
                 // not ourselves
                 .filter(entity -> entity != mc.thePlayer)
                 // no dead entities
-                .filter(entity -> BotManager.bots.contains(entity))
+                .filter(entity -> !BotManager.bots.contains(entity))
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 .filter(entity -> !entity.isInvisibleToPlayer(mc.thePlayer))

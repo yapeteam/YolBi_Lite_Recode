@@ -20,7 +20,7 @@ public class TargetManager implements IMinecraft {
                 // must be in distance
                 .filter(entity -> mc.player.getDistanceToEntity(entity) <= range)
                 // no bots
-                .filter(entity -> BotManager.bots.contains(entity))
+                .filter(entity -> !BotManager.bots.contains(entity))
                 // sort usin distance
                 .sorted(Comparator.comparingDouble(entity -> mc.player.getDistanceToEntity(entity)))
                 // return a list
