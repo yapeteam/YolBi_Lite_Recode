@@ -10,6 +10,7 @@ import cn.yapeteam.yolbi.module.impl.misc.NoteBot;
 import cn.yapeteam.yolbi.module.impl.misc.SelfDestruct;
 import cn.yapeteam.yolbi.module.impl.movement.Eagle;
 import cn.yapeteam.yolbi.module.impl.movement.KeepSprint;
+import cn.yapeteam.yolbi.module.impl.movement.MoveFix;
 import cn.yapeteam.yolbi.module.impl.movement.Sprint;
 import cn.yapeteam.yolbi.module.impl.visual.*;
 import cn.yapeteam.yolbi.notification.Notification;
@@ -55,6 +56,7 @@ public class ModuleManager {
         modules.add(new PacketDebug());
         modules.add(new Rotations());
         modules.add(new TargetHud());
+        modules.add(new MoveFix());
 
         modules.sort((m1, m2) -> -Integer.compare(m2.getName().charAt(0), m1.getName().charAt(0)));
     }
