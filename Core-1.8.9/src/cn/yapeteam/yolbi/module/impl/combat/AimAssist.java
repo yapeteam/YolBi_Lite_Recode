@@ -30,12 +30,13 @@ public class AimAssist extends Module {
     private final BooleanValue View = new BooleanValue("In View", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
 
-    private final NumberValue<Float> Speed = new NumberValue<>("Speed", 50f, 40f, 100f, 0.5f);
+    private final NumberValue<Float> calcSpeed = new NumberValue<>("Speed", 50f, 40f, 100f, 0.5f);
 
+    private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 100f, 0f, 100f, 1f);
 
     public AimAssist() {
         super("AimAssist", ModuleCategory.COMBAT);
-        addValues(Range, TargetPriority, ClickAim, View, Speed);
+        addValues(Range, TargetPriority, ClickAim, View, calcSpeed, rotSpeed);
     }
 
     private final List<Vector2f> aimPath = new ArrayList<>();
@@ -74,19 +75,19 @@ public class AimAssist extends Module {
     @Listener
     public void onRender(EventRender2D event) {
         try {
-            if (mc.currentScreen != null) return;
-            if (!aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
-                int length = (int) (aimPath.size() * Speed.getValue() / 100);
+            if (mc.currentScreen == null && !aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
+                int length = (int) (aimPath.size() * calcSpeed.getValue() / 100);
                 if (length > aimPath.size())
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
                     Vector2f rotations = aimPath.get(i);
-                    mc.thePlayer.rotationYaw = rotations.x;
-                    mc.thePlayer.rotationPitch = rotations.y;
-                    RotationManager.setRotations(rotations, Speed.getValue(), MovementFix.NORMAL);
+                    RotationManager.setRotations(rotations, rotSpeed.getValue(), MovementFix.NORMAL);
                     RotationManager.smooth();
                 }
                 aimPath.subList(0, length).clear();
+            } else {
+                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotSpeed.getValue(), MovementFix.NORMAL);
+                RotationManager.smooth();
             }
         } catch (Throwable e) {
             Logger.exception(e);
@@ -95,7 +96,7 @@ public class AimAssist extends Module {
 
     @Override
     public String getSuffix() {
-        return "Cache: " + aimPath.size();
+        return "Cache: " + aimPath.size() + " Yaw: " + mc.thePlayer.rotationYaw + " Pitch: " + mc.thePlayer.rotationPitch;
     }
 
     public Entity getTargets() {

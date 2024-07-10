@@ -17,14 +17,14 @@ public class WindPosMapperVisualizer extends Application {
         stage.setTitle("WindPosMapper Visualizer");
 
         // Create start and end points
-        Vector2f start = new Vector2f(0.0f, 90.0f);
-        Vector2f end = new Vector2f(180f, 90.0f);
+        Vector2f start = new Vector2f(-370, 90.0f);
+        Vector2f end = new Vector2f(1800, 90.0f);
 
         // Define rotation speed
         double rotationSpeed = 10.0;
 
         // Generate path
-        List<Vector2f> path = WindPosMapper.generatePath(start, end);
+        List<Vector2f> path = WindPosMapper.generatePath(start, end);// WindPosMapper.generatePath(start, end);
         System.out.println("Generated path with " + path.size());
 
         // Create dataset
