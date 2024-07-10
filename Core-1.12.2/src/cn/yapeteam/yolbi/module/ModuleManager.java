@@ -10,6 +10,7 @@ import cn.yapeteam.yolbi.module.impl.misc.NoteBot;
 import cn.yapeteam.yolbi.module.impl.misc.SelfDestruct;
 import cn.yapeteam.yolbi.module.impl.movement.Eagle;
 import cn.yapeteam.yolbi.module.impl.movement.KeepSprint;
+import cn.yapeteam.yolbi.module.impl.movement.MoveFix;
 import cn.yapeteam.yolbi.module.impl.movement.Sprint;
 import cn.yapeteam.yolbi.module.impl.visual.*;
 import cn.yapeteam.yolbi.notification.Notification;
@@ -44,6 +45,7 @@ public class ModuleManager {
         modules.add(new SelfDestruct());
         modules.add(new Eagle());
         modules.add(new KeepSprint());
+        modules.add(new MoveFix());
         // modules.add(new Scaffold());
         modules.add(new Sprint());
         modules.add(new ClickUI());
