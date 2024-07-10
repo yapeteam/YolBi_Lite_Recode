@@ -114,7 +114,7 @@ public class AimAssist extends Module {
         if (TargetPriority.is("Distance"))
             targets.sort(Comparator.comparingDouble(o -> mc.player.getDistanceToEntity(o)));
         else if (TargetPriority.is("Health"))
-            targets.sort(Comparator.comparingDouble(o -> ((EntityLivingBase) o).getHealth()).reversed());
+            targets.sort(Comparator.comparingDouble(o -> ((EntityLivingBase) o).getHealth()));
         else if (TargetPriority.is("Angle"))
             targets.sort(Comparator.comparingDouble(entity -> RotationManager.getRotationsNeeded(entity)[0]));
         return targets.isEmpty() ? null : targets.get(0);
