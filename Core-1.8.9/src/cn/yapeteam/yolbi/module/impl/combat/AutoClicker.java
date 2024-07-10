@@ -60,9 +60,9 @@ public class AutoClicker extends Module {
         }));
     }
 
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
-    public double generateNoise(double min, double max) {
+    public static double generateNoise(double min, double max) {
         double u1, u2, v1, v2, s;
         do {
             u1 = random.nextDouble() * 2 - 1;
@@ -77,7 +77,7 @@ public class AutoClicker extends Module {
         return (v1 + v2) / 2 * (max - min) / 4 + (max + min) / 2;
     }
 
-    private double generate(double cps, double range) {
+    public static double generate(double cps, double range) {
         double noise = cps;
         for (int j = 0; j < 10; j++) {
             double newNoise = generateNoise(0, cps * 2);
