@@ -1,9 +1,8 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
-import cn.yapeteam.ymixin.annotations.Mixin;
-import cn.yapeteam.ymixin.annotations.Overwrite;
-import cn.yapeteam.ymixin.annotations.Shadow;
+import cn.yapeteam.ymixin.annotations.*;
 import cn.yapeteam.yolbi.YolBi;
+import cn.yapeteam.yolbi.event.impl.player.EventMove;
 import cn.yapeteam.yolbi.event.impl.player.EventPostStrafe;
 import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import net.minecraft.client.Minecraft;
@@ -12,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
+@SuppressWarnings({"ConstantValue", "UnusedAssignment"})
 @Mixin(Entity.class)
 public class MixinEntity extends Entity {
     @Shadow
@@ -74,6 +74,26 @@ public class MixinEntity extends Entity {
             final EventPostStrafe event = new EventPostStrafe();
 
             YolBi.instance.getEventManager().post(event);
+        }
+    }
+
+    @Inject(method = "moveEntity", desc = "(DDD)V", target = @Target("HEAD"))
+    public void moveEntity(
+            @Local(source = "x", index = 1) double x,
+            @Local(source = "y", index = 3) double y,
+            @Local(source = "z", index = 5) double z
+    ) {
+        if (((Entity) this) == Minecraft.getMinecraft().thePlayer) {
+            final EventMove event = new EventMove(x, y, z);
+
+            YolBi.instance.getEventManager().post(event);
+
+            if (event.isCancelled())
+                return;
+
+            x = event.getPosX();
+            y = event.getPosY();
+            z = event.getPosZ();
         }
     }
 

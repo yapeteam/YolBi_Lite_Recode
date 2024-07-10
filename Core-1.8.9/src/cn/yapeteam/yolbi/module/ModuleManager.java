@@ -39,6 +39,7 @@ public class ModuleManager {
         modules.add(new SelfDestruct());
         modules.add(new Eagle());
         modules.add(new NoSlow());
+        modules.add(new MoveFix());
         modules.add(new Scaffold());
         modules.add(new Sprint());
         modules.add(new ClickUI());

@@ -172,4 +172,5 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
             this.sendQueue.addToSendQueue(new C01PacketChatMessage(message));
         }
     }
+
 }
