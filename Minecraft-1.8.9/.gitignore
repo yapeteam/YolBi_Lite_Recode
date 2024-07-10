@@ -14,3 +14,4 @@
 /run/libstdc++-6.dll
 /run/libwinpthread-1.dll
 *.log
+/run/optionsshaders.txt
