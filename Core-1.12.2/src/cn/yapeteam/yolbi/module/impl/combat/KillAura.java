@@ -92,9 +92,6 @@ public class KillAura extends Module {
 
                     RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
                     RotationManager.smooth();
-
-                    mc.player.rotationYaw = RotationManager.rotations.x;
-                    mc.player.rotationPitch = RotationManager.rotations.y;
                 }
             }
 

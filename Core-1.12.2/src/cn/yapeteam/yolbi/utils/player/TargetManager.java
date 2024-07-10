@@ -18,7 +18,7 @@ public class TargetManager {
                 // not ourselves
                 .filter(entity -> entity != mc.player)
                 // no dead entities
-                .filter(entity -> BotManager.bots.contains(entity))
+                .filter(entity -> !BotManager.bots.contains(entity))
                 // must be in distance
                 .filter(entity -> mc.player.getDistanceToEntity(entity) <= range)
                 .filter(entity -> !entity.isInvisibleToPlayer(mc.player))
