@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 
 @UtilityClass
 public class RotationManager implements IMinecraft {
-    private static boolean active;
+    public static boolean active;
     public static Vector2f rotations, lastRotations, targetRotations, lastServerRotations;
     private static double rotationSpeed;
     private static MovementFix correctMovement;
