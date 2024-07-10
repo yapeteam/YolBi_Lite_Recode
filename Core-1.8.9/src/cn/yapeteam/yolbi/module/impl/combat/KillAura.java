@@ -53,6 +53,7 @@ public class KillAura extends Module {
         try {
             if (mc.theWorld == null || mc.thePlayer == null) return;
             if (mc.theWorld.loadedEntityList.isEmpty()) return;
+            if (mc.currentScreen != null) return;
             target = null;
             if (!autoBlock.getValue())
                 blocking = false;
