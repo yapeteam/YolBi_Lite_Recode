@@ -14,12 +14,32 @@ public class MoveFix extends Module {
 
     @Listener
     private void onStrafe(EventStrafe event) {
+        if (!RotationManager.active) return;
         if ((event.getForward() * event.getForward() + event.getStrafe() * event.getStrafe()) != 0) {
-            EventStrafe e = yawToStrafe(RotationManager.rotations.x, direction(event.getYaw()));
+            float yaw = RotationManager.rotations.x;
+            EventStrafe e = yawToStrafe(yaw, direction(event.getYaw()));
             event.setStrafe(e.getStrafe() * 0.98f);
             event.setForward(e.getForward() * 0.98f);
-            event.setYaw(RotationManager.rotations.x);
+            event.setYaw(yaw);
         }
+    }
+
+    public double direction(float rotationYaw, final double moveForward, final double moveStrafing) {
+        if (moveForward < 0F) rotationYaw += 180F;
+
+        float forward = 1F;
+
+        if (moveForward < 0F) forward = -0.5F;
+        else if (moveForward > 0F) forward = 0.5F;
+
+        if (moveStrafing > 0F) rotationYaw -= 90F * forward;
+        if (moveStrafing < 0F) rotationYaw += 90F * forward;
+
+        return Math.toRadians(rotationYaw);
+    }
+
+    public double speed() {
+        return Math.hypot(mc.thePlayer.motionX, mc.thePlayer.motionZ);
     }
 
     public static float direction(float yaw) {

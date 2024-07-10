@@ -30,7 +30,7 @@ import org.lwjgl.input.Keyboard;
 
 public class KillAura extends Module {
     public KillAura() {
-        super("KillAura",ModuleCategory.COMBAT, Keyboard.KEY_R);
+        super("KillAura", ModuleCategory.COMBAT, Keyboard.KEY_R);
         minCps.setCallback((oldV, newV) -> newV > maxCps.getValue() ? oldV : newV);
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
@@ -82,19 +82,11 @@ public class KillAura extends Module {
             // Rotations
             if (target != null) {
                 float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
-                if (maxRotationSpeed.getValue().equals(180.0) && minRotationSpeed.getValue().equals(180.0)) {
-                    mc.thePlayer.rotationYaw = rotation[0];
-                    mc.thePlayer.rotationPitch = rotation[1];
-                } else {
-                    double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
-                    Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
+                double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
+                Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
 
-                    RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
-                    RotationManager.smooth();
-
-                    mc.thePlayer.rotationYaw = RotationManager.rotations.x;
-                    mc.thePlayer.rotationPitch = RotationManager.rotations.y;
-                }
+                RotationManager.setRotations(rotationVec, rotationSpeed / 18, MovementFix.NORMAL);
+                RotationManager.smooth();
             }
 
             // Attack & AutoRod
@@ -137,7 +129,8 @@ public class KillAura extends Module {
                     }
                 }
             } else {
-                RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+                double rotationSpeed = maxRotationSpeed.getValue().equals(minRotationSpeed.getValue()) ? maxRotationSpeed.getValue() : MathUtils.getRandom(minCps.getValue(), maxCps.getValue());
+                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotationSpeed, MovementFix.NORMAL);
                 stopBlock();
             }
         } catch (Exception e) {

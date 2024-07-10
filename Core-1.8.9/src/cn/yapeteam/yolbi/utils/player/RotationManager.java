@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.utils.player;
 
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
@@ -18,7 +17,7 @@ import net.minecraft.util.Vec3;
 
 @UtilityClass
 public class RotationManager implements IMinecraft {
-    private static boolean active;
+    public static boolean active;
     public static Vector2f rotations, lastRotations, targetRotations, lastServerRotations;
     private static double rotationSpeed;
     private static MovementFix correctMovement;
@@ -58,12 +57,12 @@ public class RotationManager implements IMinecraft {
     }
 
 
-    @Listener
-    public void onStrafe(EventStrafe event) {
-        if (active && (correctMovement == MovementFix.NORMAL || correctMovement == MovementFix.TRADITIONAL) && rotations != null) {
-            event.setYaw(rotations.x);
-        }
-    }
+    //  @Listener
+    //  public void onStrafe(EventStrafe event) {
+    //      if (active && (correctMovement == MovementFix.NORMAL || correctMovement == MovementFix.TRADITIONAL) && rotations != null) {
+    //          event.setYaw(rotations.x);
+    //      }
+    //  }
 
 
     @Listener
@@ -185,8 +184,8 @@ public class RotationManager implements IMinecraft {
             for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
 
                 if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
-                    yaw += (Math.random() - 0.5) / 1000;
-                    pitch -= Math.random() / 200;
+                    yaw += (float) ((Math.random() - 0.5) / 1000);
+                    pitch -= (float) (Math.random() / 200);
                 }
 
                 /*
@@ -233,8 +232,8 @@ public class RotationManager implements IMinecraft {
         final double diffX = diff.getX();
         final double diffY = diff.getY();
         final double diffZ = diff.getZ();
-        float yaw = (float) (from.getX() + MathHelper.wrapAngleTo180_float((float) ((float)(Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
-        float pitch = clamp((float) (from.getY() + MathHelper.wrapAngleTo180_float((float) ((float)(-(Math.atan2(diffY, MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
+        float yaw = (float) (from.getX() + MathHelper.wrapAngleTo180_float((float) ((float) (Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
+        float pitch = clamp((float) (from.getY() + MathHelper.wrapAngleTo180_float((float) ((float) (-(Math.atan2(diffY, MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
         return new Vector2f(yaw, pitch);
     }
 
