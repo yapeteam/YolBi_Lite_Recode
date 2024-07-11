@@ -72,11 +72,8 @@ public class RotationManager implements IMinecraft {
 
             lastServerRotations = new Vector2f(yaw, pitch);
 
-            if (Math.abs((rotations.x - mc.thePlayer.rotationYaw) % 360) < 1 && Math.abs((rotations.y - mc.thePlayer.rotationPitch)) < 1) {
-                active = false;
-
-                correctDisabledRotations();
-            }
+            if (Math.abs((rotations.x - mc.thePlayer.rotationYaw) % 360) < 1 && Math.abs((rotations.y - mc.thePlayer.rotationPitch)) < 1)
+                stop();
 
             lastRotations = rotations;
         } else {
@@ -250,5 +247,10 @@ public class RotationManager implements IMinecraft {
     public static void reset() {
         setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), 100);
         smooth();
+    }
+
+    public static void stop() {
+        active = false;
+        correctDisabledRotations();
     }
 }

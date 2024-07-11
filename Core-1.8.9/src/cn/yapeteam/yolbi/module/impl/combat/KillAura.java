@@ -70,7 +70,6 @@ public class KillAura extends Module {
 
                 RotationManager.setRotations(rotationVec, rotationSpeed);
                 RotationManager.smooth();
-                mc.thePlayer.setSprinting(false);
             }
 
             // Attack & AutoRod
@@ -114,8 +113,8 @@ public class KillAura extends Module {
                     }
                 }
             } else {
-                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotationSpeed);
-                RotationManager.smooth();
+                if (RotationManager.active)
+                    RotationManager.stop();
                 stopBlock();
             }
         } catch (Exception e) {
@@ -151,6 +150,8 @@ public class KillAura extends Module {
     protected void onDisable() {
         if (mc.theWorld == null || mc.thePlayer == null) return;
         stopBlock();
+        if (RotationManager.active)
+            RotationManager.stop();
     }
 
     private boolean shouldAttack(int cps) {

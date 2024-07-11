@@ -11,16 +11,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 
 public class MoveFix extends Module {
-    private static final BooleanValue silent = new BooleanValue("silent", false);
+    private final BooleanValue silent = new BooleanValue("Silent", false);
+    private final BooleanValue allowSprint = new BooleanValue("Allow Sprint", false);
 
     public MoveFix() {
         super("MoveFix", ModuleCategory.MOVEMENT);
-        this.addValues(silent);
+        this.addValues(silent, allowSprint);
     }
 
     @Listener
     private void onStrafe(EventStrafe event) {
         if (!RotationManager.active) return;
+        if (!allowSprint.getValue())
+            mc.thePlayer.setSprinting(false);
         runStrafeFixLoop(silent.getValue(), event);
     }
 

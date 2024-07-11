@@ -45,6 +45,8 @@ public class AimAssist extends Module {
     @Override
     protected void onDisable() {
         aimPath.clear();
+        if (RotationManager.active)
+            RotationManager.stop();
     }
 
     private Entity target = null;
@@ -87,10 +89,8 @@ public class AimAssist extends Module {
                     mc.thePlayer.setSprinting(false);
                 }
                 aimPath.subList(0, length).clear();
-            } else {
-                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotSpeed.getValue());
-                RotationManager.smooth();
-            }
+            } else if (RotationManager.active)
+                RotationManager.stop();
         } catch (Throwable e) {
             Logger.exception(e);
         }
