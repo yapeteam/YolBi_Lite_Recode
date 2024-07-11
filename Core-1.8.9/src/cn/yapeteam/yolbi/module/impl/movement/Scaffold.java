@@ -67,7 +67,7 @@ public class Scaffold extends Module {
         float rotationSpeed = (float) MathUtils.getRandom(minRotationSpeed, maxRotationSpeed);
 
         if (rotationSpeed != 0) {
-            RotationManager.setRotations(new Vector2f(targetYaw, targetPitch), rotationSpeed, MovementFix.OFF);
+            RotationManager.setRotations(new Vector2f(targetYaw, targetPitch), rotationSpeed);
         }
     }
 
