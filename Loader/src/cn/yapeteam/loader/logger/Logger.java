@@ -64,7 +64,7 @@ public class Logger {
         return builder.toString();
     }
 
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     public static void log(String str, String color, Object... o) {
         for (Object o1 : o)

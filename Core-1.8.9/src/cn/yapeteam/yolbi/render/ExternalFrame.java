@@ -12,8 +12,10 @@ import org.lwjgl.opengl.Display;
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public class ExternalFrame extends JFrame {
+    @Getter
     private final TransparentPanel transparentPanel = new TransparentPanel();
 
     public ExternalFrame(int x, int y, int width, int height) {
@@ -43,33 +45,50 @@ public class ExternalFrame extends JFrame {
         YolBi.instance.getEventManager().register(this);
         setVisible(true);
         Natives.SetWindowsTransparent(true, getTitle());
+        transparentPanel.start();
     }
 
     public void close() {
         YolBi.instance.getEventManager().unregister(this);
         setVisible(false);
+        transparentPanel.stop();
     }
 
     @Getter
     private final CopyOnWriteArrayList<Drawable> drawables = new CopyOnWriteArrayList<>();
     private cn.yapeteam.yolbi.module.impl.visual.JFrameRenderer JFrameRendererModule;
 
-    class TransparentPanel extends JPanel {
+    @Getter
+    public class TransparentPanel extends JPanel {
+        private int fps = 0;
+        private long lastTime = 0;
+        private int fpsCount = 0;
+        private CountDownLatch latch;
+        private final Runnable repaintTask = () -> {
+            if (transparentPanel != null && isVisible()) {
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastTime >= 1000) {
+                    fps = fpsCount;
+                    fpsCount = 0;
+                    lastTime = currentTime;
+                }
+                latch = new CountDownLatch(1);
+                transparentPanel.repaint();
+                try {
+                    latch.await();
+                    if (!JFrameRendererModule.getLimitFps().getValue()) return;
+                    long waitTime = 1000 / JFrameRendererModule.getFps().getValue() - (System.currentTimeMillis() - currentTime);
+                    if (waitTime > 0)
+                        Thread.sleep(waitTime);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        };
+
+        private Thread repaintThread;
+
         public TransparentPanel() {
             setOpaque(false);
-            new Thread(() -> {
-                while (true) {
-                    //noinspection ConstantValue
-                    if (transparentPanel == null || !isVisible()) continue;
-                    long time = System.currentTimeMillis();
-                    transparentPanel.repaint();
-                    try {
-                        if (JFrameRendererModule != null && JFrameRendererModule.getLimitFps().getValue())
-                            Thread.sleep(Math.max(0, 1000 / JFrameRendererModule.getFps().getValue() - (System.currentTimeMillis() - time)));
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }).start();
             new Timer(1000 / 10, e -> {
                 int titleBarHeight = 30;
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
@@ -79,12 +98,26 @@ public class ExternalFrame extends JFrame {
             }).start();
         }
 
+        public void start() {
+            if (repaintThread != null && repaintThread.isAlive()) return;
+            repaintThread = new Thread(() -> {
+                while (true) repaintTask.run();
+            });
+            repaintThread.start();
+        }
+
+        public void stop() {
+            if (repaintThread != null && repaintThread.isAlive()) repaintThread.interrupt();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             YolBi.instance.getEventManager().post(new EventExternalRender(g));
             if (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiChat)
                 drawables.forEach(drawable -> drawable.getDrawableListeners().forEach(action -> action.onDrawableUpdate(g)));
+            fpsCount++;
+            latch.countDown();
         }
     }
 }

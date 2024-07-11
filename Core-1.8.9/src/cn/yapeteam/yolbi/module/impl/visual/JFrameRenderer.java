@@ -26,4 +26,9 @@ public class JFrameRenderer extends Module {
     protected void onDisable() {
         YolBi.instance.getJFrameRender().close();
     }
+
+    @Override
+    public String getSuffix() {
+        return "FPS: " + YolBi.instance.getJFrameRender().getTransparentPanel().getFps() + " Render thread: " + YolBi.instance.getJFrameRender().getTransparentPanel().getRepaintThread().isAlive();
+    }
 }
