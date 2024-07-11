@@ -42,17 +42,8 @@ public class RotationManager implements IMinecraft {
             rotations = lastRotations = targetRotations = lastServerRotations = new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         }
 
-        if (active) {
+        if (active)
             smooth(lastRotations, targetRotations, rotationSpeed);
-        }
-
-        //backward sprint fix
-        if (active) {
-            if (Math.abs(rotations.x - Math.toDegrees(PlayerUtil.direction())) > 45) {
-                ReflectUtil.SetPressed(mc.gameSettings.keyBindSprint, false);
-                mc.thePlayer.setSprinting(false);
-            }
-        }
     }
 
 
