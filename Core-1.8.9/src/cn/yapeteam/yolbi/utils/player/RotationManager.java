@@ -1,8 +1,9 @@
 package cn.yapeteam.yolbi.utils.player;
 
 import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.player.EventMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.event.Priority;
+import cn.yapeteam.yolbi.event.impl.player.*;
+import cn.yapeteam.yolbi.event.impl.render.EventRotationsRender;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import cn.yapeteam.yolbi.utils.vector.Vector2f;
@@ -55,6 +56,34 @@ public class RotationManager implements IMinecraft {
         }
     }
 
+    @Listener(Priority.LOWER)
+    public void onRender(EventRotationsRender event) {
+        if (active && rotations != null) {
+            event.setYaw(rotations.x);
+
+            event.setPitch(rotations.y);
+        }
+    }
+
+    @Listener
+    private void onMoveInput(EventMoveInput event) {
+        if (active && rotations != null) {
+            final float yaw = rotations.x;
+            MoveUtil.fixMovement(event, yaw);
+        }
+    }
+
+    @Listener
+    private void onJump(EventJump event) {
+        if (active && rotations != null)
+            event.setYaw(rotations.x);
+    }
+
+    @Listener
+    private void onLook(EventLook event) {
+        if (active && rotations != null)
+            event.setRotation(rotations);
+    }
 
     @Listener
     public void onPreMotion(EventMotion event) {
@@ -69,7 +98,6 @@ public class RotationManager implements IMinecraft {
             mc.thePlayer.rotationYawHead = yaw;
             //todo: fix this
             renderPitchHead = pitch;
-            mc.thePlayer.rotationPitch = pitch;
 
             lastServerRotations = new Vector2f(yaw, pitch);
 

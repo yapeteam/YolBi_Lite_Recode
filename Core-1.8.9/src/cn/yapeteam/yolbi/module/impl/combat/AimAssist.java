@@ -86,7 +86,6 @@ public class AimAssist extends Module {
                     Vector2f rotations = aimPath.get(i);
                     RotationManager.setRotations(rotations, rotSpeed.getValue());
                     RotationManager.smooth();
-                    mc.thePlayer.setSprinting(false);
                 }
                 aimPath.subList(0, length).clear();
             } else if (RotationManager.active)
