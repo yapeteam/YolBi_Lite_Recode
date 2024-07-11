@@ -11,7 +11,6 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
-import cn.yapeteam.yolbi.utils.player.MovementFix;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.player.RotationsUtil;
 import cn.yapeteam.yolbi.utils.vector.Vector2f;
@@ -69,8 +68,7 @@ public class KillAura extends Module {
                 float[] rotation = RotationsUtil.getRotationsToEntity(target, true);
                 Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
 
-                RotationManager.setRotations(rotationVec, rotationSpeed, MovementFix.NORMAL);
-                RotationManager.smooth();
+                RotationManager.setRotations(rotationVec, rotationSpeed);
                 mc.thePlayer.setSprinting(false);
             }
 
@@ -115,8 +113,7 @@ public class KillAura extends Module {
                     }
                 }
             } else {
-                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotationSpeed, MovementFix.NORMAL);
-                RotationManager.smooth();
+                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotationSpeed);
                 stopBlock();
             }
         } catch (Exception e) {
@@ -152,7 +149,7 @@ public class KillAura extends Module {
     protected void onDisable() {
         if (mc.theWorld == null || mc.thePlayer == null) return;
         stopBlock();
-        RotationManager.resetRotation(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
+        RotationManager.reset();
     }
 
     private boolean shouldAttack(int cps) {

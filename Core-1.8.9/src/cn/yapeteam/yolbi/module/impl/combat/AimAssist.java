@@ -45,6 +45,8 @@ public class AimAssist extends Module {
     @Override
     protected void onDisable() {
         aimPath.clear();
+        if (mc.theWorld == null || mc.thePlayer == null) return;
+        RotationManager.reset();
     }
 
     private Entity target = null;
@@ -82,14 +84,12 @@ public class AimAssist extends Module {
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
                     Vector2f rotations = aimPath.get(i);
-                    RotationManager.setRotations(rotations, rotSpeed.getValue(), MovementFix.NORMAL);
-                    RotationManager.smooth();
+                    RotationManager.setRotations(rotations, rotSpeed.getValue());
                     mc.thePlayer.setSprinting(false);
                 }
                 aimPath.subList(0, length).clear();
             } else {
-                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotSpeed.getValue(), MovementFix.NORMAL);
-                RotationManager.smooth();
+                RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotSpeed.getValue());
             }
         } catch (Throwable e) {
             Logger.exception(e);
@@ -98,7 +98,7 @@ public class AimAssist extends Module {
 
     @Override
     public String getSuffix() {
-        return "Cache: " + aimPath.size() + " Yaw: " + mc.thePlayer.rotationYaw + " Pitch: " + mc.thePlayer.rotationPitch;
+        return " Path: " + aimPath.size() + " Yaw: " + mc.thePlayer.rotationYaw + " Pitch: " + mc.thePlayer.rotationPitch;
     }
 
     public Entity getTargets() {
