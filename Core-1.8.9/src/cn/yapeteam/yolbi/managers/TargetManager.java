@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.managers;
 
 import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.module.impl.combat.AntiBot;
 import cn.yapeteam.yolbi.module.impl.combat.Target;
 import cn.yapeteam.yolbi.utils.IMinecraft;
@@ -17,10 +16,13 @@ import java.util.stream.Collectors;
 
 public class TargetManager implements IMinecraft {
     private static Target targetModule = null;
+    private static AntiBot antiBotModule = null;
 
     public static List<Entity> getTargets(double range) {
         if (targetModule == null)
             targetModule = YolBi.instance.getModuleManager().getModule(Target.class);
+        if (antiBotModule == null)
+            antiBotModule = YolBi.instance.getModuleManager().getModule(AntiBot.class);
         return mc.theWorld.loadedEntityList.stream()
                 .filter(
                         entity -> (targetModule.getPlayers().getValue() && entity instanceof EntityPlayer) ||
@@ -35,7 +37,7 @@ public class TargetManager implements IMinecraft {
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 // not bots
-                .filter(entity -> !BotManager.bots.contains(entity) && YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled())
+                .filter(entity -> !(antiBotModule.isEnabled() & BotManager.bots.contains(entity)))
                 // sort by distance
                 .sorted(Comparator.comparingDouble(entity -> mc.thePlayer.getDistanceToEntity(entity)))
                 .collect(Collectors.toList());

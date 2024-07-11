@@ -21,17 +21,17 @@ C compiler: MinGW-W64 x86_64-ucrt-posix-seh 11.2.0
 
 ### Debug Build
 
-Run `DEBUG`
+Run `DEBUG BUILD`
 
 ### Release Build
 
-Run `RELEASE`
+Run `RELEASE BUILD`
 
 ### Build
 
 1. Open this project
 
-2. Run `DEBUG` or `RELEASE`
+2. Run `DEBUG BUILD` or `RELEASE BUILD`
 
 3. Your jar will appear in `./build`
 

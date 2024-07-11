@@ -1,9 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="BUILD" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
+  <configuration default="false" name="RELEASE BUILD" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="cn.yapeteam.builder.Builder" />
     <module name="Builder" />
+    <option name="PROGRAM_PARAMETERS" value="release" />
     <method v="2">
+      <option name="Make" enabled="true" />
       <option name="MakeProject" enabled="true" />
     </method>
   </configuration>
