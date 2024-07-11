@@ -7,10 +7,10 @@ import lombok.Getter;
 
 @Getter
 public class Target extends Module {
-    private final BooleanValue players = new BooleanValue("Players", false);
-    private final BooleanValue animals = new BooleanValue("Animals", false);
-    private final BooleanValue mobs = new BooleanValue("Mobs", false);
-    private final BooleanValue villagers = new BooleanValue("Villagers", false);
+    private final BooleanValue players = new BooleanValue("Players", true);
+    private final BooleanValue animals = new BooleanValue("Animals", true);
+    private final BooleanValue mobs = new BooleanValue("Mobs", true);
+    private final BooleanValue villagers = new BooleanValue("Villagers", true);
 
     public Target() {
         super("Target", ModuleCategory.COMBAT);

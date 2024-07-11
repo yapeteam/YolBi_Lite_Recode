@@ -67,6 +67,7 @@ public class AimAssist extends Module {
             }
             if (target != null && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
                 val vector2fs = WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target));
+                aimPath.clear();
                 aimPath.addAll(vector2fs);
                 // no checks needed since we only use the first few points
             }
@@ -114,6 +115,7 @@ public class AimAssist extends Module {
             targets.sort(Comparator.comparingDouble(o -> ((EntityLivingBase) o).getHealth()));
         else if (TargetPriority.is("Angle"))
             targets.sort(Comparator.comparingDouble(entity -> RotationManager.getRotationsNeeded(entity)[0]));
+        Logger.info("Targets: " + (targets.isEmpty() ? null : targets.get(0)));
         return targets.isEmpty() ? null : targets.get(0);
     }
 }

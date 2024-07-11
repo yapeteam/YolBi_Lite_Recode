@@ -1,6 +1,8 @@
 package cn.yapeteam.yolbi.managers;
 
 import cn.yapeteam.yolbi.YolBi;
+import cn.yapeteam.yolbi.module.ModuleManager;
+import cn.yapeteam.yolbi.module.impl.combat.AntiBot;
 import cn.yapeteam.yolbi.module.impl.combat.Target;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import net.minecraft.entity.Entity;
@@ -33,7 +35,7 @@ public class TargetManager implements IMinecraft {
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 // not bots
-                .filter(entity -> !BotManager.bots.contains(entity))
+                .filter(entity -> !BotManager.bots.contains(entity) && YolBi.instance.getModuleManager().getModule(AntiBot.class).isEnabled())
                 // sort by distance
                 .sorted(Comparator.comparingDouble(entity -> mc.thePlayer.getDistanceToEntity(entity)))
                 .collect(Collectors.toList());

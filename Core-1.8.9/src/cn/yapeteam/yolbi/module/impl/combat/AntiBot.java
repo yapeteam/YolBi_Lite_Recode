@@ -6,6 +6,7 @@ import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -27,9 +28,19 @@ public class AntiBot extends Module {
 
                 if (entity.getName().contains("\u00A7") || (entity.hasCustomName() && entity.getCustomNameTag().contains(entity.getName())) || (entity.getName().equals(mc.thePlayer.getName()) && entity != mc.thePlayer)) {
                     BotManager.addBot(entity);
-                    mc.theWorld.removeEntity(entity);
                 }
             }
         }
+    }
+
+    public static boolean isBot(EntityPlayer entity) {
+        // must have a player info
+        final NetworkPlayerInfo info = mc.getNetHandler().getPlayerInfo(entity.getUniqueID());
+        return info == null;
+    }
+
+    @Override
+    public void onDisable() {
+        BotManager.bots.clear();
     }
 }
