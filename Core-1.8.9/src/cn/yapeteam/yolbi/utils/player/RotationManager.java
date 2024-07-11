@@ -248,6 +248,6 @@ public class RotationManager implements IMinecraft {
     }
 
     public static void reset() {
-        setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), 10);
+        setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), 100);
     }
 }
