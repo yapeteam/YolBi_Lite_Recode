@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.utils.player;
 
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
@@ -21,7 +20,6 @@ public class RotationManager implements IMinecraft {
     public static boolean active;
     public static Vector2f rotations, lastRotations, targetRotations, lastServerRotations;
     private static double rotationSpeed;
-    private static MovementFix correctMovement;
 
     public float renderPitchHead;
 
@@ -30,10 +28,9 @@ public class RotationManager implements IMinecraft {
     /*
      * This method must be called on Pre Update Event to work correctly
      */
-    public static void setRotations(final Vector2f rotations, final double rotationSpeed, final MovementFix correctMovement) {
+    public static void setRotations(final Vector2f rotations, final double rotationSpeed) {
         RotationManager.targetRotations = rotations;
         RotationManager.rotationSpeed = rotationSpeed * 18;
-        RotationManager.correctMovement = correctMovement;
         active = true;
 
         smooth(rotations, targetRotations, rotationSpeed);
@@ -49,19 +46,12 @@ public class RotationManager implements IMinecraft {
             smooth(lastRotations, targetRotations, rotationSpeed);
         }
 
-        if (correctMovement == MovementFix.BACKWARDS_SPRINT && active) {
+        //backward sprint fix
+        if (active) {
             if (Math.abs(rotations.x - Math.toDegrees(PlayerUtil.direction())) > 45) {
                 ReflectUtil.SetPressed(mc.gameSettings.keyBindSprint, false);
                 mc.player.setSprinting(false);
             }
-        }
-    }
-
-
-    @Listener
-    public void onStrafe(EventStrafe event) {
-        if (active && (correctMovement == MovementFix.NORMAL || correctMovement == MovementFix.TRADITIONAL) && rotations != null) {
-            event.setYaw(rotations.x);
         }
     }
 
@@ -96,6 +86,20 @@ public class RotationManager implements IMinecraft {
         targetRotations = new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch);
     }
 
+    public static float wrapAngleTo180_float(float value) {
+        value = value % 360.0F;
+
+        if (value >= 180.0F) {
+            value -= 360.0F;
+        }
+
+        if (value < -180.0F) {
+            value += 360.0F;
+        }
+
+        return value;
+    }
+
     private void correctDisabledRotations() {
         final Vector2f rotations = new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch);
         final Vector2f fixedRotations = RotationManager.resetRotation(applySensitivityPatch(rotations));
@@ -117,7 +121,7 @@ public class RotationManager implements IMinecraft {
         if (speed != 0) {
             final float rotationSpeed = (float) speed;
 
-            final double deltaYaw = MathHelper.wrapDegrees(targetRotation.x - lastRotation.x);
+            final double deltaYaw = wrapAngleTo180_float(targetRotation.x - lastRotation.x);
             final double deltaPitch = pitch - lastPitch;
 
             final double distance = Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
@@ -157,63 +161,14 @@ public class RotationManager implements IMinecraft {
         rotations = new Vector2f(yaw, pitch);
     }
 
-    public static Vector2f getsmoothrot(final Vector2f lastRotation, final Vector2f targetRotation, final double speed) {
-        float yaw = targetRotation.x;
-        float pitch = targetRotation.y;
-        final float lastYaw = lastRotation.x;
-        final float lastPitch = lastRotation.y;
-
-        if (speed != 0) {
-            final float rotationSpeed = (float) speed;
-
-            final double deltaYaw = MathHelper.wrapDegrees(targetRotation.x - lastRotation.x);
-            final double deltaPitch = pitch - lastPitch;
-
-            final double distance = Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
-            final double distributionYaw = Math.abs(deltaYaw / distance);
-            final double distributionPitch = Math.abs(deltaPitch / distance);
-
-            final double maxYaw = rotationSpeed * distributionYaw;
-            final double maxPitch = rotationSpeed * distributionPitch;
-
-            final float moveYaw = (float) Math.max(Math.min(deltaYaw, maxYaw), -maxYaw);
-            final float movePitch = (float) Math.max(Math.min(deltaPitch, maxPitch), -maxPitch);
-
-            yaw = lastYaw + moveYaw;
-            pitch = lastPitch + movePitch;
-
-            for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
-
-                if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
-                    yaw += (Math.random() - 0.5) / 1000;
-                    pitch -= Math.random() / 200;
-                }
-
-                /*
-                 * Fixing GCD
-                 */
-                final Vector2f rotations = new Vector2f(yaw, pitch);
-                final Vector2f fixedRotations = RotationManager.applySensitivityPatch(rotations);
-
-                /*
-                 * Setting rotations
-                 */
-                yaw = fixedRotations.x;
-                pitch = Math.max(-90, Math.min(90, fixedRotations.y));
-            }
-        }
-
-        return new Vector2f(yaw, pitch);
-    }
-
 
     public static double[] getDistance(double x, double z, double y) {
         final double distance = MathHelper.sqrt(x * x + z * z), // @off
                 yaw = Math.atan2(z, x) * 180.0D / Math.PI - 90.0F,
                 pitch = -(Math.atan2(y, distance) * 180.0D / Math.PI); // @on
 
-        return new double[]{mc.player.rotationYaw + MathHelper.wrapDegrees(
-                (float) (yaw - mc.player.rotationYaw)), mc.player.rotationPitch + MathHelper.wrapDegrees(
+        return new double[]{mc.player.rotationYaw + wrapAngleTo180_float(
+                (float) (yaw - mc.player.rotationYaw)), mc.player.rotationPitch + wrapAngleTo180_float(
                 (float) (pitch - mc.player.rotationPitch))};
     }
 
@@ -233,8 +188,8 @@ public class RotationManager implements IMinecraft {
         final double diffX = diff.getX();
         final double diffY = diff.getY();
         final double diffZ = diff.getZ();
-        float yaw = (float) (from.getX() + MathHelper.wrapDegrees((float) ((float)(Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
-        float pitch = clamp((float) (from.getY() + MathHelper.wrapDegrees((float) ((float)(-(Math.atan2(diffY, MathHelper.sqrt(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
+        float yaw = (float) (from.getX() + wrapAngleTo180_float((float) ((float) (Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
+        float pitch = clamp((float) (from.getY() + wrapAngleTo180_float((float) ((float) (-(Math.atan2(diffY, MathHelper.sqrt(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
         return new Vector2f(yaw, pitch);
     }
 
@@ -293,19 +248,21 @@ public class RotationManager implements IMinecraft {
 
     public Vector2f relateToPlayerRotation(final Vector2f rotation) {
         final Vector2f previousRotation = getPreviousRotation(mc.player);
-        final float yaw = previousRotation.x + MathHelper.wrapDegrees(rotation.x - previousRotation.x);
+        final float yaw = previousRotation.x + wrapAngleTo180_float(rotation.x - previousRotation.x);
         final float pitch = MathHelper.clamp(rotation.y, -90, 90);
         return new Vector2f(yaw, pitch);
     }
 
     public Vector2f resetRotation(final Vector2f rotation) {
-        if (rotation == null) {
+        if (rotation == null)
             return null;
-        }
-
-        final float yaw = rotation.x + MathHelper.wrapDegrees(mc.player.rotationYaw - rotation.x);
+        final float yaw = rotation.x + wrapAngleTo180_float(mc.player.rotationYaw - rotation.x);
         final float pitch = mc.player.rotationPitch;
         return new Vector2f(yaw, pitch);
     }
 
+    public static void reset() {
+        setRotations(new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch), 100);
+        smooth();
+    }
 }

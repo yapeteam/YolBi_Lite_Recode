@@ -5,6 +5,7 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
+import cn.yapeteam.yolbi.managers.TargetManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
@@ -30,9 +31,9 @@ public class AimAssist extends Module {
     private final BooleanValue View = new BooleanValue("In View", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
 
-    private final NumberValue<Float> calcSpeed = new NumberValue<>("Speed", 50f, 40f, 100f, 0.5f);
+    private final NumberValue<Float> calcSpeed = new NumberValue<>("Calculation Speed", 50f, 40f, 100f, 0.5f);
 
-    private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 100f, 0f, 100f, 1f);
+    private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 100f, 1f, 180f, .5f);
 
     public AimAssist() {
         super("AimAssist", ModuleCategory.COMBAT);
@@ -73,7 +74,7 @@ public class AimAssist extends Module {
     }
 
     @Listener
-    public void onRender(EventRender2D event) {
+    public void onUpdate(EventRender2D event) {
         try {
             if (mc.currentScreen == null && !aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
                 int length = (int) (aimPath.size() * calcSpeed.getValue() / 100);
@@ -81,12 +82,13 @@ public class AimAssist extends Module {
                     length = aimPath.size();
                 for (int i = 0; i < length; i++) {
                     Vector2f rotations = aimPath.get(i);
-                    RotationManager.setRotations(rotations, rotSpeed.getValue(), MovementFix.NORMAL);
+                    RotationManager.setRotations(rotations, rotSpeed.getValue());
                     RotationManager.smooth();
+                    mc.player.setSprinting(false);
                 }
                 aimPath.subList(0, length).clear();
             } else {
-                RotationManager.setRotations(new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch), rotSpeed.getValue(), MovementFix.NORMAL);
+                RotationManager.setRotations(new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch), rotSpeed.getValue());
                 RotationManager.smooth();
             }
         } catch (Throwable e) {
@@ -96,7 +98,7 @@ public class AimAssist extends Module {
 
     @Override
     public String getSuffix() {
-        return "Cache: " + aimPath.size() + " Yaw: " + mc.player.rotationYaw + " Pitch: " + mc.player.rotationPitch;
+        return " Path: " + aimPath.size() + " Yaw: " + mc.player.rotationYaw + " Pitch: " + mc.player.rotationPitch;
     }
 
     public Entity getTargets() {
