@@ -57,19 +57,18 @@ public class AimAssist extends Module {
             if (mc.thePlayer == null)
                 return;
             if (mc.currentScreen != null) return;
-            Entity target;
+            if (target != null && (target.isDead | target.getDistanceSqToEntity(mc.thePlayer) > Range.getValue()))
+                target = null;
+            Entity lastTarget = target;
             if (TargetPriority.is("Clip"))
                 target = PlayerUtil.getMouseOver(1, Range.getValue());
-            else target = getTargets();
-            if (this.target != target) {
+            else if (target == null)
+                target = getTargets();
+            if (this.target != lastTarget)
                 aimPath.clear();
-                this.target = target;
-            }
             if (target != null && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
                 val vector2fs = WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target));
-                aimPath.clear();
                 aimPath.addAll(vector2fs);
-                // no checks needed since we only use the first few points
             }
         } catch (Throwable ex) {
             Logger.exception(ex);

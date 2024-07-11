@@ -4,7 +4,9 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.module.impl.combat.AntiBot;
 import cn.yapeteam.yolbi.module.impl.combat.Target;
 import cn.yapeteam.yolbi.utils.IMinecraft;
+import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityVillager;
@@ -24,8 +26,10 @@ public class TargetManager implements IMinecraft {
         if (antiBotModule == null)
             antiBotModule = YolBi.instance.getModuleManager().getModule(AntiBot.class);
         return mc.theWorld.loadedEntityList.stream()
+                .filter(entity -> entity instanceof EntityLivingBase)
                 .filter(
-                        entity -> (targetModule.getPlayers().getValue() && entity instanceof EntityPlayer) ||
+                        entity -> (targetModule.getPlayers().getValue() && entity instanceof EntityPlayer &&
+                                !(targetModule.getNotTeamMates().getValue() && PlayerUtil.sameTeam((EntityPlayer) entity))) ||
                                 (targetModule.getAnimals().getValue() && entity instanceof EntityAnimal) ||
                                 (targetModule.getMobs().getValue() && entity instanceof EntityMob) ||
                                 (targetModule.getVillagers().getValue() && entity instanceof EntityVillager)
@@ -37,7 +41,7 @@ public class TargetManager implements IMinecraft {
                 // must be in distance
                 .filter(entity -> mc.thePlayer.getDistanceToEntity(entity) <= range)
                 // not bots
-                .filter(entity -> !(antiBotModule.isEnabled() & BotManager.bots.contains(entity)))
+                .filter(entity -> !(antiBotModule.isEnabled() && BotManager.bots.contains(entity)))
                 // sort by distance
                 .sorted(Comparator.comparingDouble(entity -> mc.thePlayer.getDistanceToEntity(entity)))
                 .collect(Collectors.toList());

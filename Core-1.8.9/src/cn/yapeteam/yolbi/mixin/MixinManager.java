@@ -30,7 +30,6 @@ public class MixinManager {
         add("MixinEntityRenderer");
         add("MixinEntityLivingBase");
         add("MixinRendererLivingEntity");
-        add("MixinMovementInputFromOptions");
         add("MixinNetworkManager");
         add("MixinPlayerControllerMP");
         add("MixinEntityPlayer");
