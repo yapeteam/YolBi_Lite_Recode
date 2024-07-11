@@ -117,7 +117,8 @@ public class ExternalFrame extends JFrame {
             if (Minecraft.getMinecraft().currentScreen == null || Minecraft.getMinecraft().currentScreen instanceof GuiChat)
                 drawables.forEach(drawable -> drawable.getDrawableListeners().forEach(action -> action.onDrawableUpdate(g)));
             fpsCount++;
-            latch.countDown();
+            if (latch != null)
+                latch.countDown();
         }
     }
 }
