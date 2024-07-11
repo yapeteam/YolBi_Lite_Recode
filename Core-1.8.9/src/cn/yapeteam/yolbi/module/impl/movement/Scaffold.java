@@ -68,6 +68,7 @@ public class Scaffold extends Module {
 
         if (rotationSpeed != 0) {
             RotationManager.setRotations(new Vector2f(targetYaw, targetPitch), rotationSpeed);
+            RotationManager.smooth();
         }
     }
 

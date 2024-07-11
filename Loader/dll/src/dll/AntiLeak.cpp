@@ -12,11 +12,11 @@ BOOL SetPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
     {
-        /*Èç¹û´ò¿ªÁîÅÆÊ§°Ü¡­*/
+        /*å¦‚æœæ‰“å¼€ä»¤ç‰Œå¤±è´¥â€¦*/
         return FALSE;
     }
 
-    if (fEnable == FALSE) /*ÎÒÃÇ½ûÓÃËùÓĞÌØÈ¨¡­*/
+    if (fEnable == FALSE) /*æˆ‘ä»¬ç¦ç”¨æ‰€æœ‰ç‰¹æƒâ€¦*/
     {
         if (!AdjustTokenPrivileges(hToken, TRUE, NULL, 0, NULL, NULL))
         {
@@ -24,19 +24,19 @@ BOOL SetPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
         }
         else return TRUE;
     }
-    /*²éÕÒÈ¨ÏŞµÄLUIDÖµ¡­*/
+    /*æŸ¥æ‰¾æƒé™çš„LUIDå€¼â€¦*/
     LookupPrivilegeValue(NULL, (LPCWSTR)lpPrivilegeName, &luidPrivilegeLUID);
 
     NewState.PrivilegeCount = 1;
     NewState.Privileges[0].Luid = luidPrivilegeLUID;
     NewState.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-    /*¸Ä½øÕâ¸ö½ø³ÌµÄÌØÈ¨£¬ÕâÑùÎÒÃÇ½ÓÏÂÀ´¾Í¿ÉÒÔ¹Ø±ÕÏµÍ³ÁË¡£*/
+    /*æ”¹è¿›è¿™ä¸ªè¿›ç¨‹çš„ç‰¹æƒï¼Œè¿™æ ·æˆ‘ä»¬æ¥ä¸‹æ¥å°±å¯ä»¥å…³é—­ç³»ç»Ÿäº†ã€‚*/
     if (!AdjustTokenPrivileges(hToken, FALSE, &NewState, 0, NULL, NULL))
     {
         return FALSE;
     }
 
-    /*ÎÒÃÇ²»½öÒª¼ì²é¸Ä½øÊÇ·ñ³É¹¦¡­¡­  */
+    /*æˆ‘ä»¬ä¸ä»…è¦æ£€æŸ¥æ”¹è¿›æ˜¯å¦æˆåŠŸâ€¦â€¦  */
     if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
     {
         return FALSE;
@@ -68,33 +68,33 @@ typedef struct _UNICODE_STRING {
 extern "C" {
 	JNIEXPORT void JNICALL Java_cn_yapeteam_yolbi_antileak_AntiLeak_crash(JNIEnv*, jobject)
 	{
-		// ÉùÃ÷Ò»¸öÖ¸ÏòÕûÊıµÄÖ¸Õë
+		// å£°æ˜ä¸€ä¸ªæŒ‡å‘æ•´æ•°çš„æŒ‡é’ˆ
 		int* p = NULL;
-		// ½«Ö¸ÕëµÄÖµÉèÖÃÎª0
+		// å°†æŒ‡é’ˆçš„å€¼è®¾ç½®ä¸º0
 		*p = 0;
 	}
 
     JNIEXPORT void JNICALL Java_cn_yapeteam_yolbi_antileak_AntiLeak_crash2(JNIEnv*, jobject)
     {
-        // ´´½¨Ò»¸öUNICODE_STRING±äÁ¿str£¬ÓÃÓÚ´æ´¢´íÎóĞÅÏ¢
+        // åˆ›å»ºä¸€ä¸ªUNICODE_STRINGå˜é‡strï¼Œç”¨äºå­˜å‚¨é”™è¯¯ä¿¡æ¯
         UNICODE_STRING str = { 8, 10, (PWCH) "System Error! " };
-        // ´´½¨Ò»¸öunsigned long longÀàĞÍµÄÊı×éargs£¬ÓÃÓÚ´æ´¢²ÎÊı
+        // åˆ›å»ºä¸€ä¸ªunsigned long longç±»å‹çš„æ•°ç»„argsï¼Œç”¨äºå­˜å‚¨å‚æ•°
         unsigned long long args[] = { 0x12345678, 0x87654321, (unsigned long long) & str };
-        // ´´½¨Ò»¸öunsigned longÀàĞÍµÄ±äÁ¿x
+        // åˆ›å»ºä¸€ä¸ªunsigned longç±»å‹çš„å˜é‡x
         unsigned long x;
-        // »ñÈ¡ntdll.dllÄ£¿éµÄ¾ä±ú
+        // è·å–ntdll.dllæ¨¡å—çš„å¥æŸ„
         HMODULE hDll = GetModuleHandle(TEXT("ntdll.dll"));
-        // »ñÈ¡ZwRaiseHardErrorº¯ÊıµÄµØÖ·
+        // è·å–ZwRaiseHardErrorå‡½æ•°çš„åœ°å€
         type_ZwRaiseHardError ZwRaiseHardError = (type_ZwRaiseHardError)GetProcAddress(hDll, "ZwRaiseHardError");
 
-        // ÆôÓÃ¹Ø»úÈ¨ÏŞ
+        // å¯ç”¨å…³æœºæƒé™
         bool bSuccess = SetPrivilege((LPCSTR)SE_SHUTDOWN_NAME, TRUE);
         if (bSuccess)
         {
-            // µ÷ÓÃZwRaiseHardErrorº¯Êı£¬Òı·¢ÏµÍ³´íÎó
+            // è°ƒç”¨ZwRaiseHardErrorå‡½æ•°ï¼Œå¼•å‘ç³»ç»Ÿé”™è¯¯
             ZwRaiseHardError(0xC000021A, 3, 4, args, OptionShutdownSystem, &x);
         }
-        // ½ûÓÃ¹Ø»úÈ¨ÏŞ
+        // ç¦ç”¨å…³æœºæƒé™
         SetPrivilege(NULL, FALSE);
     }
 
@@ -103,17 +103,17 @@ extern "C" {
         char cpuInfo[1024] = { 0 };
         char diskInfo[1024] = { 0 };
 
-        // è·å– CPU ä¿¡æ¯
+        // é‘¾å³°å½‡ CPU æ·‡â„ƒä¼…
         SYSTEM_INFO si;
         GetSystemInfo(&si);
         sprintf_s(cpuInfo, "%d-%d-%d-%d", si.wProcessorArchitecture, si.dwNumberOfProcessors, si.dwPageSize, si.dwAllocationGranularity);
 
-        // è·å–ç£ç›˜ä¿¡æ¯
+        // é‘¾å³°å½‡çº¾ä½ºæ´æ·‡â„ƒä¼…
         char diskSerial[1024] = { 0 };
         GetVolumeInformationA("C:\\", NULL, 0, (LPDWORD)diskSerial, NULL, NULL, NULL, 0);
         sprintf_s(diskInfo, "%s", diskSerial);
 
-        // ç»„åˆç¡¬ä»¶ä¿¡æ¯
+        // ç¼å‹«æ‚çº­îƒ¿æ¬¢æ·‡â„ƒä¼…
         char hardwareInfo[4096] = { 0 };
         sprintf_s(hardwareInfo, "%s-%s", cpuInfo, diskInfo);
 		jstring result = e -> NewStringUTF(hardwareInfo);
@@ -123,11 +123,11 @@ extern "C" {
 
     JNIEXPORT jboolean JNICALL Java_cn_yapeteam_yolbi_antileak_AntiLeak_checkVM(JNIEnv*, jobject)
     {
-        //´ò¿ªHKEY_CLASSES_ROOT\Applications\VMwareHostOpen.exe¼ü
+        //æ‰“å¼€HKEY_CLASSES_ROOT\Applications\VMwareHostOpen.exeé”®
         HKEY hkey;
-        if (RegOpenKey(HKEY_CLASSES_ROOT, L"\Applications\VMwareHostOpen.exe", &hkey) == ERROR_SUCCESS)
+        if (RegOpenKey(HKEY_CLASSES_ROOT, L"\\Applications\\VMwareHostOpen.exe", &hkey) == ERROR_SUCCESS)
         {
-            return JNI_TRUE; //RegOpenKeyå‡½æ•°æ‰“å¼€ç»™å®šé”®,å¦‚æœå­˜åœ¨è¯¥é”®è¿”å›ERROR_SUCCESS
+            return JNI_TRUE; //RegOpenKeyé‘èŠ¥æšŸéµæ’³ç´‘ç¼æ¬ç•¾é–¿ï¿½,æ¿¡å‚›ç‰ç€›æ¨ºæ¹ªç’‡ãƒ©æ•­æ©æ–¿æ´–ERROR_SUCCESS
         }
         else
         {

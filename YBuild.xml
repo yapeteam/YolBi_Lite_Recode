@@ -36,8 +36,6 @@
                     <file>deps/asm-all-9.2.jar</file>
                     <file>deps/flatlaf.jar</file>
                     <file>deps/flatlaf-intellij-themes.jar</file>
-                    <file>deps/tools.jar</file>
-                    <file>deps/jProcesses-1.6.4.jar</file>
                 </dir>
                 <file>build/loader.jar</file>
                 <file>build/hooker.jar</file>

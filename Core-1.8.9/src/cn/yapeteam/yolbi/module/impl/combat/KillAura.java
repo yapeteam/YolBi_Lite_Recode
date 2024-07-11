@@ -69,6 +69,7 @@ public class KillAura extends Module {
                 Vector2f rotationVec = new Vector2f(rotation[0], rotation[1]);
 
                 RotationManager.setRotations(rotationVec, rotationSpeed);
+                RotationManager.smooth();
                 mc.thePlayer.setSprinting(false);
             }
 
@@ -114,6 +115,7 @@ public class KillAura extends Module {
                 }
             } else {
                 RotationManager.setRotations(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotationSpeed);
+                RotationManager.smooth();
                 stopBlock();
             }
         } catch (Exception e) {
@@ -149,7 +151,6 @@ public class KillAura extends Module {
     protected void onDisable() {
         if (mc.theWorld == null || mc.thePlayer == null) return;
         stopBlock();
-        RotationManager.reset();
     }
 
     private boolean shouldAttack(int cps) {
@@ -163,6 +164,6 @@ public class KillAura extends Module {
 
     @Override
     public String getSuffix() {
-        return searchRange.getValue() + " | " + target + " | " + (cps.getValue() - cpsRange.getValue()) + " ~ " + (cps.getValue() + cpsRange.getValue());
+        return searchRange.getValue() + " | " + (cps.getValue() - cpsRange.getValue()) + " ~ " + (cps.getValue() + cpsRange.getValue());
     }
 }
