@@ -8,16 +8,18 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 
 public class StrafeFix extends Module {
-    private static final BooleanValue silent = new BooleanValue("silent", false);
+    private final BooleanValue allowSprint = new BooleanValue("Allow Sprint", false);
 
     public StrafeFix() {
         super("StrafeFix", ModuleCategory.MOVEMENT);
-        this.addValues(silent);
+        this.addValues(allowSprint);
     }
 
     @Listener
     private void onStrafe(EventStrafe event) {
         if (!RotationManager.active) return;
+        if (!allowSprint.getValue())
+            mc.player.setSprinting(false);
         event.setYaw(RotationManager.rotations.x);
     }
 }
