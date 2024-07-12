@@ -25,13 +25,14 @@ public class ClickUI extends Module {
     }
 
     @Getter
-    private final ImplScreen screen = new ImplScreen();
+    private ImplScreen screen = null;
 
     @Override
     protected void onEnable() {
         setEnabled(false);
         if (ReflectUtil.hasOptifine && mc.gameSettings.ofFastRender)
             blur.setValue(false);
+        if (screen == null) screen = new ImplScreen();
         mc.displayGuiScreen(screen);
     }
 }

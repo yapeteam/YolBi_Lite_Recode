@@ -34,6 +34,8 @@ public class MixinMovementInputFromOptions {
         YolBi.instance.getEventManager().post(event);
         final double sneakMultiplier = event.getSneakSlowDownMultiplier();
         ObjectStore.objects.put("sneakMultiplier", sneakMultiplier);
+        ObjectStore.objects.put("moveStrafe", this.moveStrafe);
+        ObjectStore.objects.put("moveForward", this.moveForward);
         this.moveForward = event.getForward();
         this.moveStrafe = event.getStrafe();
         this.jump = event.isJump();
@@ -48,8 +50,8 @@ public class MixinMovementInputFromOptions {
     public void updatePlayerMoveStateReturn() {
         final double sneakMultiplier = (double) ObjectStore.objects.get("sneakMultiplier");
         if (this.sneak) {
-            this.moveStrafe = (float) ((double) this.moveStrafe * sneakMultiplier);
-            this.moveForward = (float) ((double) this.moveForward * sneakMultiplier);
+            this.moveStrafe = (float) ((double) ObjectStore.objects.get("moveStrafe") * sneakMultiplier);
+            this.moveForward = (float) ((double) ObjectStore.objects.get("moveForward") * sneakMultiplier);
         }
     }
 }
