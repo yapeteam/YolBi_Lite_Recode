@@ -8,13 +8,14 @@ import lombok.Getter;
 @Getter
 public class Target extends Module {
     private final BooleanValue players = new BooleanValue("Players", false);
+    private final BooleanValue notTeamMates = new BooleanValue("No Team Mates", players::getValue, true);
     private final BooleanValue animals = new BooleanValue("Animals", false);
     private final BooleanValue mobs = new BooleanValue("Mobs", false);
     private final BooleanValue villagers = new BooleanValue("Villagers", false);
 
     public Target() {
         super("Target", ModuleCategory.COMBAT);
-        addValues(players, animals, mobs, villagers);
+        addValues(players, notTeamMates, animals, mobs, villagers);
     }
 
     @Override
