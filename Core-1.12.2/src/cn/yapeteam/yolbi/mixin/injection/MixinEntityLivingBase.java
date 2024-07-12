@@ -7,6 +7,7 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventJump;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
@@ -14,8 +15,6 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.Objects;
 
 /**
  * @author yuxiangll
@@ -80,18 +79,16 @@ public class MixinEntityLivingBase extends EntityLivingBase {
             desc = "()V"
     )
     protected void jump() {
-        double jumpY = this.getJumpUpwardsMotion();
+        this.motionY = this.getJumpUpwardsMotion();
 
-        //todo jump potion id
-        if (this.isPotionActive(Potion.getPotionById(16))) {
-            jumpY += (float) (Objects.requireNonNull(this.getActivePotionEffect(Potion.getPotionById(16))).getAmplifier() + 1) * 0.1F;
+        if (this.isPotionActive(MobEffects.JUMP_BOOST)) {
+            this.motionY += (float) (this.getActivePotionEffect(MobEffects.JUMP_BOOST).getAmplifier() + 1) * 0.1F;
         }
 
-        EventJump event = new EventJump(jumpY, this.rotationYaw, this.isSprinting());
+        EventJump event = new EventJump(motionY, this.rotationYaw, this.isSprinting());
         //noinspection ConstantValue
         if ((EntityLivingBase) this == Minecraft.getMinecraft().player)
             YolBi.instance.getEventManager().post(event);
-
         this.motionY = event.getMotionY();
 
         if (event.isBoosting()) {

@@ -16,8 +16,8 @@ public class MixinModelBiped {
     @Inject(
             method = "setRotationAngles", desc = "(FFFFFFLnet/minecraft/entity/Entity;)V",
             target = @Target(
-                    value = "INVOKESTATIC",
-                    target = "net/minecraft/util/MathHelper.cos(F)F",
+                    value = "GETFIELD",
+                    target = "net/minecraft/client/model/ModelBiped.bipedBody Lnet/minecraft/client/model/ModelRenderer;",
                     shift = Target.Shift.BEFORE
             )
     )

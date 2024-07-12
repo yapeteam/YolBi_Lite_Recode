@@ -10,13 +10,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public final class EventStrafe extends CancellableEvent implements IMinecraft {
-    public float forward;
     public float strafe;
+    public float up;
+    public float forward;
     public float friction;
     public float yaw;
-
-    public EventStrafe() {
-    }
 
     public void setSpeed(final double speed, final double motionMultiplier) {
         setFriction((float) (getForward() != 0 && getStrafe() != 0 ? speed * 0.98F : speed));

@@ -4,7 +4,6 @@ import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.annotations.Overwrite;
 import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.event.impl.player.EventPostStrafe;
 import cn.yapeteam.yolbi.event.impl.player.EventStrafe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -12,14 +11,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
+@SuppressWarnings("ConstantValue")
 @Mixin(Entity.class)
 public class MixinEntity extends Entity {
     @Shadow
     public float rotationYaw;
-
     @Shadow
     public double motionX;
-
+    @Shadow
+    public double motionY;
     @Shadow
     public double motionZ;
 
@@ -32,48 +32,33 @@ public class MixinEntity extends Entity {
 
     }
 
-    @Overwrite(method = "moveFlying", desc = "(FFF)V")
-    public void moveFlying(float strafe, float forward, float friction) {
+    // moveRelative
+    @Overwrite(method = "func_191958_b", desc = "(FFFF)V")
+    public void moveRelative(float strafe, float up, float forward, float friction) {
         boolean player = ((Entity) this) == Minecraft.getMinecraft().player;
-        float yaw = this.rotationYaw;
-
-        if (player) {
-            final EventStrafe event = new EventStrafe(forward, strafe, friction, rotationYaw);
-
-            YolBi.instance.getEventManager().post(event);
-
-            if (event.isCancelled()) {
-                return;
-            }
-
-            forward = event.getForward();
-            strafe = event.getStrafe();
-            friction = event.getFriction();
-            yaw = event.getYaw();
-        }
-
-        float f = strafe * strafe + forward * forward;
-
+        EventStrafe event = new EventStrafe(strafe, up, forward, friction, rotationYaw);
+        if (player) YolBi.instance.getEventManager().post(event);
+        if (event.isCancelled()) return;
+        strafe = event.getStrafe();
+        up = event.getUp();
+        forward = event.getForward();
+        friction = event.getFriction();
+        float f = strafe * strafe + up * up + forward * forward;
         if (f >= 1.0E-4F) {
             f = MathHelper.sqrt(f);
-
             if (f < 1.0F) {
                 f = 1.0F;
             }
 
             f = friction / f;
-            strafe = strafe * f;
-            forward = forward * f;
-            float f1 = MathHelper.sin(yaw * (float) Math.PI / 180.0F);
-            float f2 = MathHelper.cos(yaw * (float) Math.PI / 180.0F);
+            strafe *= f;
+            up *= f;
+            forward *= f;
+            float f1 = MathHelper.sin(event.getYaw() * 0.017453292F);
+            float f2 = MathHelper.cos(event.getYaw() * 0.017453292F);
             this.motionX += strafe * f2 - forward * f1;
+            this.motionY += up;
             this.motionZ += forward * f2 + strafe * f1;
-        }
-
-        if (player) {
-            final EventPostStrafe event = new EventPostStrafe();
-
-            YolBi.instance.getEventManager().post(event);
         }
     }
 

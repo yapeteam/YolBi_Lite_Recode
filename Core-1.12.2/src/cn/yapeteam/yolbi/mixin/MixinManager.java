@@ -27,15 +27,18 @@ public class MixinManager {
         add("MixinMinecraft");
         add("MixinEntityPlayerSP");
         add("MixinEntityRenderer");
-        // add("MixinEntityLivingBase");
+        add("MixinEntityLivingBase");
         // add("MixinRendererLivingEntity");
         add("MixinNetworkManager");
         // add("MixinPlayerControllerMP");
         add("MixinEntityPlayer");
         add("MixinBlockNote");
         // add("MixinBlock");
-        // add("MixinEntity");
-        // add("MixinModelBiped");
+        add("MixinEntity");
+        add("MixinModelBiped");
+        add("MixinEntityPlayerSPForEventLook");
+        add("MixinEntityLivingBaseForEventLook");
+        add("MixinAbstractClientPlayerForEventLook");
     }
 
     public static void destroyClient() throws IOException {
