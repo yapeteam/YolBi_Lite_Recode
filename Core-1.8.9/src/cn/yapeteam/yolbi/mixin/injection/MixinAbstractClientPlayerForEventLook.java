@@ -6,12 +6,12 @@ import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.impl.player.EventLook;
 import cn.yapeteam.yolbi.utils.vector.Vector2f;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.util.Vec3;
 
-// for lunar
-@Mixin(EntityPlayerSP.class)
-public class MixinEntityPlayerSPForEventLook {
+// for forge
+@Mixin(AbstractClientPlayer.class)
+public class MixinAbstractClientPlayerForEventLook {
     @Shadow
     public float rotationYaw;
     @Shadow

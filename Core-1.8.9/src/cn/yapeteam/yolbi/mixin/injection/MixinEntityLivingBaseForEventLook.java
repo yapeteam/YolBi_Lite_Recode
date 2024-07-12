@@ -9,6 +9,7 @@ import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.Vec3;
 
+// for vanilla/mcp
 @Mixin(EntityLivingBase.class)
 public class MixinEntityLivingBaseForEventLook {
     @Shadow

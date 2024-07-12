@@ -7,9 +7,6 @@ import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.ymixin.Transformer;
 import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.utils.ASMUtils;
-import cn.yapeteam.ymixin.utils.Mapper;
-import lombok.val;
-import net.minecraft.client.entity.EntityPlayerSP;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
 import javax.swing.*;
@@ -27,27 +24,23 @@ public class MixinManager {
 
     public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
+        add("MixinBlock");
+        add("MixinEntity");
+        add("MixinBlockNote");
         add("MixinMinecraft");
         add("MixinGuiIngame");
+        add("MixinModelBiped");
+        add("MixinEntityPlayer");
+        add("MixinNetworkManager");
         add("MixinEntityPlayerSP");
         add("MixinEntityRenderer");
         add("MixinEntityLivingBase");
+        add("MixinPlayerControllerMP");
         add("MixinRendererLivingEntity");
         add("MixinMovementInputFromOptions");
-        add("MixinNetworkManager");
-        add("MixinPlayerControllerMP");
-        add("MixinEntityPlayer");
-        add("MixinBlockNote");
-        add("MixinBlock");
-        add("MixinEntity");
-        add("MixinModelBiped");
-
-        val entityPlayerSPBytes = JVMTIWrapper.instance.getClassBytes(EntityPlayerSP.class);
-        ClassNode entityPlayerSPNode = ASMUtils.node(entityPlayerSPBytes);
-        String obfGetLook = Mapper.map("net.minecraft.client.entity.AbstractClientPlayer", "getLook", "(F)Lnet/minecraft/util/Vec3;", Mapper.Type.Method);
-        if (entityPlayerSPNode.methods.stream().anyMatch(m -> m.name.equals(obfGetLook)))
-            add("MixinEntityPlayerSPForEventLook");
-        else add("MixinEntityLivingBaseForEventLook");
+        add("MixinEntityPlayerSPForEventLook");
+        add("MixinEntityLivingBaseForEventLook");
+        add("MixinAbstractClientPlayerForEventLook");
     }
 
     public static void destroyClient() throws IOException {

@@ -65,6 +65,8 @@ public class MixinEntityLivingBase extends EntityLivingBase {
 
     @Shadow
     public float rotationYaw;
+    @Shadow
+    public float rotationPitch;
 
     @Shadow
     public boolean isSprinting() {
