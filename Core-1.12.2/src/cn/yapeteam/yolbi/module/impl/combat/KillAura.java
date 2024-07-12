@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi.module.impl.combat;
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
+import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.managers.TargetManager;
 import cn.yapeteam.yolbi.module.Module;
@@ -144,14 +145,22 @@ public class KillAura extends Module {
 
     @Override
     protected void onEnable() {
-        // if (mc.world == null || mc.player == null) return;
-        // RotationManager.resetRotation(new Vector2f(mc.player.rotationYaw, mc.player.rotationPitch));
+        if (mc.world == null || mc.player == null) {
+            setEnabled(false);
+        }
     }
 
     @Override
     protected void onDisable() {
         if (mc.world == null || mc.player == null) return;
         stopBlock();
+        if (RotationManager.active)
+            RotationManager.stop();
+    }
+
+    @Listener
+    private void onWorldLoad(EventLoadWorld e) {
+        setEnabled(false);
     }
 
     private boolean shouldAttack(int cps) {

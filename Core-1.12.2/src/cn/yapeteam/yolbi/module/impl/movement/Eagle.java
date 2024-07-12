@@ -10,6 +10,7 @@ import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.EnumHand;
 
@@ -32,26 +33,32 @@ public class Eagle extends Module {
 
     @Listener
     public void onUpdate(EventUpdate event) {
-        if (mc.currentScreen != null) {
+        if (mc.currentScreen != null)
+            return;
+        if (mc.player.isInWater() || mc.player.isInLava()) {
             reset();
             return;
         }
-        if (mc.player.isInWater() || mc.player.isInLava()) return;
-        //noinspection ConstantValue
-        if (mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && !(mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue())
+        if (mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && !(mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue()) {
+            reset();
             return;
+        }
         if ((mc.player.onGround || !onlyground.getValue()) &&
                 (getBlockUnderPlayer() instanceof BlockAir) &&
-                (mc.gameSettings.keyBindBack.isKeyDown() || !onlybackwards.getValue())) {
-            Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, true);
-        } else if (!(getBlockUnderPlayer() instanceof BlockAir)) {
-            reset();
-        }
+                (mc.gameSettings.keyBindBack.isKeyDown() || !onlybackwards.getValue())
+        ) {
+            setSneak(true);
+        } else if ((mc.gameSettings.keyBindBack.isKeyDown() || !onlybackwards.getValue())) reset();
+        else if (mc.gameSettings.keyBindForward.isKeyDown()) reset();
+    }
+
+    private void setSneak(boolean sneak) {
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), sneak);
     }
 
     private void reset() {
-        if (Natives.IsKeyDown(VirtualKeyBoard.VK_LSHIFT))
-            Natives.SetKeyBoard(VirtualKeyBoard.VK_LSHIFT, false);
+        if (!Natives.IsKeyDown(VirtualKeyBoard.VK_LSHIFT))
+            setSneak(false);
     }
 
     @Override
