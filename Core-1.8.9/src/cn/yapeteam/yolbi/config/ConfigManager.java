@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class ConfigManager {
-    public static final File file = new File(YolBi.YOLBI_DIR, "config.json");
+    public static final File file = new File(YolBi.YOLBI_DIR, "config-1.8.9.json");
     private final ArrayList<Config> configs = new ArrayList<>();
 
     public void registerConfig(Config config) {
