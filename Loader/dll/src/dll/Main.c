@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <wchar.h>
+#include <locale.h>
 #include "Native.c"
 #include "utils.h"
 #include "unzip.h"
@@ -731,6 +733,7 @@ void Inject_fla_bcf_()
 
 void HookMain()
 {
+    setlocale(LC_ALL, "");
     printf("1\n");
     HMODULE jvmHandle = GetModuleHandle(("jvm.dll"));
     if (!jvmHandle)
