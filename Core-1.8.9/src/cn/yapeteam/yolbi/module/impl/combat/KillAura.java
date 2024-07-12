@@ -10,6 +10,7 @@ import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
@@ -36,7 +37,7 @@ public class KillAura extends Module {
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
-        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, player, monster, animal, villager, invisibility, death);
+        addValues(maxCps, minCps, searchRange, autoBlock, mode, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, player, monster, animal, villager, invisibility, death);
     }
 
     private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
@@ -45,6 +46,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 5.0);
     private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 5.0);
     private final BooleanValue autoBlock = new BooleanValue("AutoBlock", false);
+    private final ModeValue<String> mode = new ModeValue<>("Autoblock method.", "Balant", "Balant", "Anticheat");
     private final NumberValue<Double> blockDelay = new NumberValue<>("BlockDelay", autoBlock::getValue, 2.0, 1.0, 10.0, 1.0);
     private final BooleanValue autoRod = new BooleanValue("AutoRod", false);
     private final BooleanValue player = new BooleanValue("Player", true);

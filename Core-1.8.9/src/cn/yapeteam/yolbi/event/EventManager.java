@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EventManager {
@@ -14,11 +15,18 @@ public class EventManager {
     private final ArrayList<Class<?>> listeningClasses = new ArrayList<>();
     private final CopyOnWriteArrayList<ListeningMethod> listeningMethods = new CopyOnWriteArrayList<>();
 
+    private static final HashMap<Class, Event> instances = new HashMap<>();
+
+
     public void register(Object o) {
         if (!listeningObjects.contains(o))
             listeningObjects.add(o);
 
         updateListeningMethods();
+    }
+
+    public static Event getInstance(Class eventClass) {
+        return EventManager.instances.get(eventClass);
     }
 
     public void unregister(Object o) {

@@ -1,5 +1,7 @@
 package cn.yapeteam.yolbi.module.impl.movement;
 
+import cn.yapeteam.ymixin.annotations.Mixin;
+import cn.yapeteam.yolbi.mixin.injection.MixinEntityPlayerSP;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
@@ -15,19 +17,24 @@ import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import cn.yapeteam.yolbi.utils.vector.Vector3d;
 import lombok.AllArgsConstructor;
 import net.minecraft.block.BlockAir;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
+
 
 @ModuleInfo(name = "Scaffold", category = ModuleCategory.MOVEMENT)
 public class Scaffold extends Module {
     private final ModeValue<String> sameY = new ModeValue<>("Same Y", "Off", "Off", "On", "Auto Jump");
+    private final ModeValue<String> mode = new ModeValue<>("Bypasss mode.", "Balant", "Balant", "Bypass");
     private final NumberValue<Integer> minRotationSpeed = new NumberValue<>("Min Rotation Speed", 0, 0, 10, 1);
     private final NumberValue<Integer> maxRotationSpeed = new NumberValue<>("Max Rotation Speed", 5, 0, 10, 1);
     private final NumberValue<Integer> minPlaceDelay = new NumberValue<>("Min Place Delay", 0, 0, 5, 1);
     private final NumberValue<Integer> maxPlaceDelay = new NumberValue<>("Max Place Delay", 0, 0, 5, 1);
+    BlockData oldData;
 
     private Vec3 targetBlock;
     private EnumFacingOffset enumFacing;
@@ -35,11 +42,11 @@ public class Scaffold extends Module {
     private float targetYaw, targetPitch;
     private int ticksOnAir;
     private double startY;
-
+    public static double keepYCoord;
     public Scaffold() {
         NumberValue.setBound(minRotationSpeed, maxRotationSpeed);
         NumberValue.setBound(minPlaceDelay, maxPlaceDelay);
-        addValues(sameY, minRotationSpeed, maxRotationSpeed, minPlaceDelay, maxPlaceDelay);
+        addValues(sameY, mode, minRotationSpeed, maxRotationSpeed, minPlaceDelay, maxPlaceDelay);
     }
 
 
@@ -72,10 +79,9 @@ public class Scaffold extends Module {
         }
     }
 
-
+    float[] rot;
     @Listener
-    public void onPreUpdate(EventUpdate event) {
-        //Used to detect when to place a block, if over air, allow placement of blocks
+    public void onPreUpdate(EventUpdate eu) {
         if (PlayerUtil.blockRelativeToPlayer(0, -1, 0) instanceof BlockAir) {
             ticksOnAir++;
             ReflectUtil.SetPressed(mc.gameSettings.keyBindSneak, true);
@@ -160,7 +166,6 @@ public class Scaffold extends Module {
             found = true;
             // target yaw and pitch stays the same
         }
-
     }
 
     @AllArgsConstructor
@@ -224,5 +229,17 @@ public class Scaffold extends Module {
         }
 
         return hitVec;
+    }
+
+    private class BlockData {
+
+        public BlockPos position;
+        public EnumFacing face;
+
+        private BlockData(BlockPos position, EnumFacing face) {
+            this.position = position;
+            this.face = face;
+        }
+
     }
 }

@@ -10,6 +10,7 @@ import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
+import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
@@ -27,7 +28,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.input.Keyboard;
 
 @ModuleInfo(name = "KillAura", category = ModuleCategory.COMBAT, key = Keyboard.KEY_R)
@@ -37,7 +41,7 @@ public class KillAura extends Module {
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
-        addValues(maxCps, minCps, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, player, monster, animal, villager, invisibility, death);
+        addValues(maxCps, minCps, searchRange, autoBlock, mode, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, player, monster, animal, villager, invisibility, death);
     }
 
     private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
@@ -46,6 +50,7 @@ public class KillAura extends Module {
     private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 5.0);
     private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 5.0);
     private final BooleanValue autoBlock = new BooleanValue("AutoBlock", false);
+    private final ModeValue<String> mode = new ModeValue<>("Autoblock methods.", "Balant", "Balant", "Anticheat");
     private final NumberValue<Double> blockDelay = new NumberValue<>("BlockDelay", autoBlock::getValue, 2.0, 1.0, 10.0, 1.0);
     private final BooleanValue autoRod = new BooleanValue("AutoRod", false);
     private final BooleanValue player = new BooleanValue("Player", true);
@@ -149,18 +154,30 @@ public class KillAura extends Module {
 
     private void startBlock() {
         if (autoBlock.getValue() && !blocking) {
-            if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
-                Natives.SendRight(true);
-                blocking = true;
+            blocking = true;
+            if (this.mode.is("Balant")) {
+                if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
+                    Natives.SendRight(true);
+                }
+            } else if (this.mode.is("Anticheat")) {
+                mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem % 8 + 1));
+                mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                mc.getConnection().sendPacket(new CPacketPlayerTryUseItemOnBlock());
             }
         }
     }
 
     private void stopBlock() {
         if (autoBlock.getValue() && blocking) {
+            blocking = false;
             if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
-                Natives.SendRight(false);
-                blocking = false;
+                if (this.mode.is("Balant")) {
+                    Natives.SendRight(false);
+                } else if (this.mode.is("Anticheat")) {
+                    mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem % 8 + 1));
+                    mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
+                    Natives.SendRight(false);
+                }
             }
         }
     }

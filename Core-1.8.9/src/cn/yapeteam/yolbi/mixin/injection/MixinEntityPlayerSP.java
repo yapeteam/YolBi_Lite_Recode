@@ -2,6 +2,7 @@ package cn.yapeteam.yolbi.mixin.injection;
 
 import cn.yapeteam.ymixin.annotations.*;
 import cn.yapeteam.yolbi.YolBi;
+import cn.yapeteam.yolbi.event.EventManager;
 import cn.yapeteam.yolbi.event.impl.player.EventChat;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
@@ -76,6 +77,10 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
     private boolean serverSprintState;
     @Shadow
     private boolean serverSneakState;
+    @Shadow
+    public int offGroundTicks;
+    @Shadow
+    public int onGroundTicks;
 
     @Shadow
     public AxisAlignedBB getEntityBoundingBox() {
@@ -172,4 +177,17 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
             this.sendQueue.addToSendQueue(new C01PacketChatMessage(message));
         }
     }
+
+    @Overwrite(method = "motionUpdates", desc = "")
+    public void motionUpdates() {
+        if (this.onGround) {
+            onGroundTicks++;
+            offGroundTicks = 0;
+        } else {
+            offGroundTicks++;
+            onGroundTicks = 0;
+        }
+        EventUpdate em = (EventUpdate) EventManager.getInstance(EventUpdate.class);
+    }
+
 }
