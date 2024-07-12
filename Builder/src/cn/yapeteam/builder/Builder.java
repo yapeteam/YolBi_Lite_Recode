@@ -236,8 +236,7 @@ public class Builder {
             terminal.execute(new String[]{"clang-cl",
                     "-mllvm", "-fla", "-mllvm", "-bcf", "-mllvm", "-bcf_prob=80",
                     "-mllvm", "-bcf_loop=2", "-mllvm", "-sobf", "-mllvm", "-icall",
-                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-split",
-                    "-mllvm", "-split_num=1", "-mllvm", "-igv",
+                    "-mllvm", "-sub", "-mllvm", "-sub_loop=2", "-mllvm", "-igv",
                     target, "-c", "../src/dll/Main.c", "-o", "Main.o",});
             terminal.execute(new String[]{"clang", target, "-c", "../src/dll/ReflectiveLoader.c", "-o", "ReflectiveLoader.o"});
             terminal.execute(new String[]{"clang-cl",
