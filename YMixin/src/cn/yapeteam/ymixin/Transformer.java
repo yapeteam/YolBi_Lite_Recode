@@ -47,7 +47,10 @@ public class Transformer {
                 continue;
             }
             String name = mixin.getTarget().name.replace('/', '.');
-            oldBytes.put(name, mixin.getTargetOldBytes());
+            if (!oldBytes.containsKey(name))
+                oldBytes.put(name, mixin.getTargetOldBytes());
+            if (classMap.containsKey(name))
+                mixin.setTarget(ASMUtils.node(classMap.get(name)));
             for (Operation operation : operations)
                 operation.dispose(mixin);
             try {

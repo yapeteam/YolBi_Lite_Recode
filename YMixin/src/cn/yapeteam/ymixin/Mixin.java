@@ -2,6 +2,7 @@ package cn.yapeteam.ymixin;
 
 import cn.yapeteam.ymixin.utils.ASMUtils;
 import lombok.Getter;
+import lombok.Setter;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
 import static cn.yapeteam.ymixin.YMixin.Logger;
@@ -10,6 +11,7 @@ import static cn.yapeteam.ymixin.YMixin.Logger;
 public class Mixin {
     private byte[] targetOldBytes = null;
     private final ClassNode source;
+    @Setter
     private ClassNode target;
     private final String targetName;
 

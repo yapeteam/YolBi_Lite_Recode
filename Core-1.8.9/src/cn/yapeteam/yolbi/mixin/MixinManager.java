@@ -7,6 +7,9 @@ import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.ymixin.Transformer;
 import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.utils.ASMUtils;
+import cn.yapeteam.ymixin.utils.Mapper;
+import lombok.val;
+import net.minecraft.client.entity.EntityPlayerSP;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
 import javax.swing.*;
@@ -30,7 +33,6 @@ public class MixinManager {
         add("MixinEntityRenderer");
         add("MixinEntityLivingBase");
         add("MixinRendererLivingEntity");
-        add("MixinAbstractClientPlayer");
         add("MixinMovementInputFromOptions");
         add("MixinNetworkManager");
         add("MixinPlayerControllerMP");
@@ -39,6 +41,13 @@ public class MixinManager {
         add("MixinBlock");
         add("MixinEntity");
         add("MixinModelBiped");
+
+        val entityPlayerSPBytes = JVMTIWrapper.instance.getClassBytes(EntityPlayerSP.class);
+        ClassNode entityPlayerSPNode = ASMUtils.node(entityPlayerSPBytes);
+        String obfGetLook = Mapper.map("net.minecraft.client.entity.AbstractClientPlayer", "getLook", "()Lnet/minecraft/util/Vec3;", Mapper.Type.Method);
+        if (entityPlayerSPNode.methods.stream().anyMatch(m -> m.name.equals(obfGetLook)))
+            add("MixinEntityPlayerSPForEventLook");
+        else add("MixinAbstractClientPlayerForEventLook");
     }
 
     public static void destroyClient() throws IOException {
