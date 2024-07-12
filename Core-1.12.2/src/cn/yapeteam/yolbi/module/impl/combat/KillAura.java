@@ -8,6 +8,7 @@ import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -24,18 +25,23 @@ import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemFishingRod;
+import net.minecraft.item.ItemShield;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.lwjgl.input.Keyboard;
 
+import static net.minecraft.util.EnumHand.OFF_HAND;
+
+@ModuleInfo(name = "KillAura", category = ModuleCategory.COMBAT, key = Keyboard.KEY_R)
 public class KillAura extends Module {
     public KillAura() {
-        super("KillAura", ModuleCategory.COMBAT, Keyboard.KEY_R);
         minCps.setCallback((oldV, newV) -> newV > maxCps.getValue() ? oldV : newV);
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
@@ -64,6 +70,7 @@ public class KillAura extends Module {
     private boolean blocking = false;
     private boolean fishingRodThrow = false;
     private int fishingRodSwitchOld = 0;
+
 
     @Listener
     private void onTick(EventMotion event) {
@@ -152,22 +159,33 @@ public class KillAura extends Module {
     }
 
     private void startBlock() {
-        if (autoBlock.getValue() && !blocking) {
-            blocking = true;
+
+        if (autoBlock.getValue()) {
             if (this.mode.is("Balant")) {
                 if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
                     Natives.SendRight(true);
                 }
             } else if (this.mode.is("Anticheat")) {
+                if (!blocking) {
+                    ItemStack shield = new ItemStack(Items.SHIELD);
+                    if (mc.player.getHeldItemMainhand().getItem() instanceof ItemSword) {
+                        mc.player.inventory.offHandInventory.set(0, shield);
+                    }
+                }
                 mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem % 8 + 1));
                 mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
-                mc.getConnection().sendPacket(new CPacketPlayerTryUseItemOnBlock());
+                mc.getConnection().sendPacket(new CPacketPlayerTryUseItem(OFF_HAND));
             }
+            blocking = true;
+
         }
     }
 
     private void stopBlock() {
         if (autoBlock.getValue() && blocking) {
+            if (mc.player.getHeldItemOffhand().getItem() instanceof ItemShield) {
+                mc.player.inventory.offHandInventory.set(0, ItemStack.field_190927_a);
+            }
             blocking = false;
             if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
                 if (this.mode.is("Balant")) {
@@ -175,7 +193,6 @@ public class KillAura extends Module {
                 } else if (this.mode.is("Anticheat")) {
                     mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem % 8 + 1));
                     mc.getConnection().sendPacket(new CPacketHeldItemChange(mc.player.inventory.currentItem));
-                    Natives.SendRight(false);
                 }
             }
         }
