@@ -147,7 +147,7 @@ void js2w(JNIEnv *env, jstring jstr, wchar_t *dst)
     }
 
     wcscpy(dst, ptmp);
-    // free(ptmp);
+    free(ptmp);
     (*env)->ReleaseStringChars(env, jstr, pjstr);
 }
 
@@ -171,7 +171,7 @@ jstring w2js(JNIEnv *env, wchar_t *src)
     }
 
     jstring dst = (*env)->NewString(env, dest, src_len);
-    // free(dest);
+    free(dest);
     return dst;
 }
 
@@ -746,9 +746,9 @@ void HookMain()
     printf("3\n");
     printf("%d\n", num);
     printf("%d\n", num1);
-    char userProfile[MAX_PATH];
-    GetEnvironmentVariableA(("USERPROFILE"), userProfile, MAX_PATH);
-    yolbiPath = format_wchar(L"%ls\\.yolbi", char2wchar(userProfile));
+    wchar_t userProfile[MAX_PATH];
+    GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH);
+    yolbiPath = format_wchar(L"%ls\\.yolbi", userProfile);
     wprintf(L"yolbiPath: %ls\n", yolbiPath);
     Inject_fla_bcf_();
 }
@@ -786,7 +786,7 @@ JVM_MonitorNotify MonitorNotify = NULL;
 
 void MonitorNotify_Hook(JNIEnv *env, jobject obj)
 {
-    UnHookFunction64(("jvm.dll"), ("JVM_MonitorNotify"));
+    UnHookFunction64("jvm.dll", "JVM_MonitorNotify");
     MonitorNotify(env, obj);
 
     jniEnv = env;
@@ -795,9 +795,9 @@ void MonitorNotify_Hook(JNIEnv *env, jobject obj)
 
 PVOID WINAPI remote()
 {
-    HookFunction64(("jvm.dll"), ("JVM_MonitorNotify"), (PROC)MonitorNotify_Hook);
-    HMODULE jvm = GetModuleHandle(("jvm.dll"));
-    MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, ("JVM_MonitorNotify"));
+    HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    HMODULE jvm = GetModuleHandleW(L"jvm.dll");
+    MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, "JVM_MonitorNotify");
     return NULL;
 }
 
