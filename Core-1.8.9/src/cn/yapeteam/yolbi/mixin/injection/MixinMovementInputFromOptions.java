@@ -50,8 +50,8 @@ public class MixinMovementInputFromOptions {
     public void updatePlayerMoveStateReturn() {
         final double sneakMultiplier = (double) ObjectStore.objects.get("sneakMultiplier");
         if (this.sneak) {
-            this.moveStrafe = (float) ((double) ObjectStore.objects.get("moveStrafe") * sneakMultiplier);
-            this.moveForward = (float) ((double) ObjectStore.objects.get("moveForward") * sneakMultiplier);
+            this.moveStrafe = (float) ((double) ((Float) ObjectStore.objects.get("moveStrafe")) * sneakMultiplier);
+            this.moveForward = (float) ((double) ((Float) ObjectStore.objects.get("moveForward")) * sneakMultiplier);
         }
     }
 }
