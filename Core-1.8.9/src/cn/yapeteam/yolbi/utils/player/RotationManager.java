@@ -33,19 +33,17 @@ public class RotationManager implements IMinecraft {
         RotationManager.targetRotations = rotations;
         RotationManager.rotationSpeed = rotationSpeed * 18;
         active = true;
-
         smooth(rotations, targetRotations, rotationSpeed);
     }
 
     @Listener
-    public static void OnPreUpdate(EventUpdate event) {
+    public static void onPreUpdate(EventUpdate event) {
         if (!active || rotations == null || lastRotations == null || targetRotations == null || lastServerRotations == null) {
             rotations = lastRotations = targetRotations = lastServerRotations = new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         }
 
-        if (active) {
+        if (active)
             smooth(lastRotations, targetRotations, rotationSpeed);
-        }
 
         //backward sprint fix
         if (active) {
@@ -60,16 +58,7 @@ public class RotationManager implements IMinecraft {
     public void onRender(EventRotationsRender event) {
         if (active && rotations != null) {
             event.setYaw(rotations.x);
-
             event.setPitch(rotations.y);
-        }
-    }
-
-    @Listener
-    private void onMoveInput(EventMoveInput event) {
-        if (active && rotations != null) {
-            final float yaw = rotations.x;
-            MoveUtil.fixMovement(event, yaw);
         }
     }
 
