@@ -8,7 +8,7 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 
 public class StrafeFix extends Module {
-    private final BooleanValue allowSprint = new BooleanValue("Allow Sprint", false);
+    private final BooleanValue allowSprint = new BooleanValue("Allow Sprint", true);
 
     public StrafeFix() {
         super("StrafeFix", ModuleCategory.MOVEMENT);
