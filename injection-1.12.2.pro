@@ -2,6 +2,7 @@
 -outjars build/injection-1.12.2/injection-1.12.2-o.jar
 
 -libraryjars minecraft-lib/minecraft-1.12.2.jar
+-libraryjars Builder/libs/rt.jar
 
 -target 1.8
 -forceprocessing
