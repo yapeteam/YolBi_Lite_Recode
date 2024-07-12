@@ -124,6 +124,126 @@ jbyteArray unsignedCharArrayToJByteArray(JNIEnv *env, const unsigned char *unsig
     return byteArray;
 }
 
+void js2w(JNIEnv *env, jstring jstr, wchar_t *dst)
+{
+    // 获取java字符串的长度
+    jsize jstr_len = (*env)->GetStringLength(env, jstr);
+    // 获取java字符串的jchar指针
+    const jchar *pjstr = (*env)->GetStringChars(env, jstr, 0);
+
+    wchar_t *ptmp = (wchar_t *)malloc((jstr_len + 1) * sizeof(wchar_t));
+    if (ptmp == NULL)
+    {
+        return; // 处理内存分配失败的情况
+    }
+    memset(ptmp, 0, (jstr_len + 1) * sizeof(wchar_t));
+
+    // 转换 以数组的形式把 jchar转换到wchar_t
+    for (int i = 0; i < jstr_len; i++)
+    {
+        memcpy(&ptmp[i], &pjstr[i], sizeof(wchar_t));
+    }
+
+    wcscpy(dst, ptmp);
+    // free(ptmp);
+    (*env)->ReleaseStringChars(env, jstr, pjstr);
+}
+
+// wchar_t 转换成 jstring
+// env :JNIEnv jni操作 不可或缺的
+// src：wchar_t 源字符 四字节似乎linux专用
+// return :  转换完成以后的结果jstring
+jstring w2js(JNIEnv *env, wchar_t *src)
+{
+    int src_len = wcslen(src);
+    jchar *dest = (jchar *)malloc((src_len + 1) * sizeof(jchar));
+    if (dest == NULL)
+    {
+        return NULL; // 处理内存分配失败的情况
+    }
+    memset(dest, 0, (src_len + 1) * sizeof(jchar));
+
+    for (int i = 0; i < src_len; i++)
+    {
+        memcpy(&dest[i], &src[i], sizeof(jchar));
+    }
+
+    jstring dst = (*env)->NewString(env, dest, src_len);
+    // free(dest);
+    return dst;
+}
+
+wchar_t *char2wchar(const char *src)
+{
+    if (src == NULL)
+    {
+        return NULL;
+    }
+
+    // 计算宽字符字符串的长度
+    size_t len = mbstowcs(NULL, src, 0) + 1;
+    if (len == (size_t)-1)
+    {
+        perror("mbstowcs() error");
+        return NULL;
+    }
+
+    // 分配足够的内存来存储宽字符字符串
+    wchar_t *dst = (wchar_t *)malloc(len * sizeof(wchar_t));
+    if (dst == NULL)
+    {
+        perror("malloc() error");
+        return NULL;
+    }
+
+    // 将多字节字符串转换为宽字符字符串
+    if (mbstowcs(dst, src, len) == (size_t)-1)
+    {
+        perror("mbstowcs() error");
+        free(dst);
+        return NULL;
+    }
+
+    return dst;
+}
+
+wchar_t *get_current_directory_w()
+{
+    // 获取当前工作目录的多字节字符串
+    char buffer[1024];
+    if (getcwd(buffer, sizeof(buffer)) == NULL)
+    {
+        perror("getcwd() error");
+        return NULL;
+    }
+
+    // 计算宽字符字符串的长度
+    size_t len = mbstowcs(NULL, buffer, 0) + 1;
+    if (len == (size_t)-1)
+    {
+        perror("mbstowcs() error");
+        return NULL;
+    }
+
+    // 分配足够的内存来存储宽字符字符串
+    wchar_t *wbuffer = (wchar_t *)malloc(len * sizeof(wchar_t));
+    if (wbuffer == NULL)
+    {
+        perror("malloc() error");
+        return NULL;
+    }
+
+    // 将多字节字符串转换为宽字符字符串
+    if (mbstowcs(wbuffer, buffer, len) == (size_t)-1)
+    {
+        perror("mbstowcs() error");
+        free(wbuffer);
+        return NULL;
+    }
+
+    return wbuffer;
+}
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"
 
@@ -247,13 +367,13 @@ JNIEXPORT jclass JNICALL DefineClass(JNIEnv *env, jclass _, jobject classLoader,
     return (jclass)classDefined;
 }
 
-void loadJar(JNIEnv *env, const char *path, jobject loader)
+void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
 {
     jclass urlClassLoader = (*env)->FindClass(env, "java/net/URLClassLoader");
     jclass fileClass = (*env)->FindClass(env, "java/io/File");
     jmethodID init = (*env)->GetMethodID(env, fileClass, "<init>", "(Ljava/lang/String;)V");
     jmethodID addURL = (*env)->GetMethodID(env, urlClassLoader, "addURL", "(Ljava/net/URL;)V");
-    jstring filePath = (*env)->NewStringUTF(env, path);
+    jstring filePath = w2js(env, path);
     jobject file = (*env)->NewObject(env, fileClass, init, filePath);
     jmethodID toURI = (*env)->GetMethodID(env, fileClass, "toURI", "()Ljava/net/URI;");
     jobject uri = (*env)->CallObjectMethod(env, file, toURI);
@@ -267,17 +387,42 @@ void loadJar(JNIEnv *env, const char *path, jobject loader)
     }
     else
     {
-        printf("jvmti:%d\n", (*jvmti)->AddToSystemClassLoaderSearch(jvmti, path));
+        char mbPath[1024];
+        wcstombs(mbPath, path, 1024);
+        printf("jvmti:%d\n", (*jvmti)->AddToSystemClassLoaderSearch(jvmti, mbPath));
     }
 }
 
+wchar_t *format_wchar(const wchar_t *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int size = vswprintf(NULL, 0, format, args);
+    if (size < 0)
+    {
+        va_end(args);
+        return NULL;
+    }
+
+    wchar_t *buffer = (wchar_t *)malloc((size + 1) * sizeof(wchar_t));
+    if (buffer == NULL)
+    {
+        va_end(args);
+        return NULL;
+    }
+
+    vswprintf(buffer, size + 1, format, args);
+    va_end(args);
+    buffer[size] = '\0'; // Ensure null-termination
+    return buffer;
+}
+
 jobject classLoader;
-char yolbiPath[MAX_PATH];
+wchar_t *yolbiPath;
 
 JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
 {
-    char injectionOutPath[260];
-    sprintf_s(injectionOutPath, 260, ("%s\\injection.jar"), yolbiPath);
+    wchar_t *injectionOutPath = format_wchar(L"%ls\\injection.jar", yolbiPath);
     loadJar(env, injectionOutPath, classLoader);
     jniEnv = env;
     jclass Start = findThreadClass(("cn.yapeteam.yolbi.Loader"), classLoader);
@@ -385,16 +530,14 @@ void Inject_fla_bcf_()
     jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, ("getSystemClassLoader"), ("()Ljava/lang/ClassLoader;"));
     jobject systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
 
-    char zip_path[260];
-    sprintf_s(zip_path, 260, "%s\\g++.zip", yolbiPath);
-    char zip_out[260];
-    getcwd(zip_out, sizeof(zip_out));
-    jstring jzip_out = (*jniEnv)->NewStringUTF(jniEnv, zip_out);
-    jstring jzip_path = (*jniEnv)->NewStringUTF(jniEnv, zip_path);
-    printf("zip_path:%s\n", zip_path);
-    printf("zip_out:%s\n", zip_out);
+    wchar_t *zip_path = format_wchar(L"%ls\\g++.zip", yolbiPath);
+    wchar_t *zip_out = get_current_directory_w();
+    jstring jzip_out = w2js(jniEnv, zip_out);
+    jstring jzip_path = w2js(jniEnv, zip_path);
+    wprintf(L"zip_path:%ls\n", zip_path);
+    wprintf(L"zip_out:%ls\n", zip_out);
     jclass unzipClz = (*jniEnv)->DefineClass(jniEnv, "cn/yapeteam/builder/Unzip", systemClassLoader, (jbyte *)unzip_data, unzip_data_size);
-    if(!unzipClz)
+    if (!unzipClz)
     {
         printf("Failed to define Unzip class\n");
         return;
@@ -465,8 +608,7 @@ void Inject_fla_bcf_()
     if (hasLaunchClassLoader)
         printf("LaunchClassLoader found\n");
 
-    char jarPath[260];
-    sprintf_s(jarPath, 260, "%s\\dependencies\\asm-all-9.2.jar", yolbiPath);
+    wchar_t *jarPath = format_wchar(L"%ls\\dependencies\\asm-all-9.2.jar", yolbiPath);
     loadJar(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
         loadJar(jniEnv, jarPath, classLoaderLoader);
@@ -491,8 +633,7 @@ void Inject_fla_bcf_()
     (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
-    char hookerPath[260];
-    sprintf_s(hookerPath, 260, "%s\\hooker.jar", yolbiPath);
+    wchar_t *hookerPath = format_wchar(L"%ls\\hooker.jar", yolbiPath);
 
     if (hasLaunchClassLoader)
         loadJar(jniEnv, hookerPath, classLoaderLoader);
@@ -519,29 +660,27 @@ void Inject_fla_bcf_()
     jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, ("hook"), ("()V"));
     (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
 
-    char depsPath[MAX_PATH];
-    sprintf_s(depsPath, MAX_PATH, ("%s\\dependencies"), yolbiPath);
+    wchar_t *depsPath = format_wchar(L"%ls\\dependencies", yolbiPath);
 
-    DIR *dir = opendir(depsPath);
+    char mbPath[1024];
+    wcstombs(mbPath, depsPath, 1024);
+    DIR *dir = opendir(mbPath);
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL)
     {
         if (str_endwith(entry->d_name, (".jar")))
         {
-            char jarPath[260];
-            sprintf_s(jarPath, 260, "%s\\%s", depsPath, entry->d_name);
+            wchar_t *jarPath = format_wchar(L"%ls\\%ls", depsPath, char2wchar(entry->d_name));
             loadJar(jniEnv, jarPath, systemClassLoader);
-            printf(("loaded: %s\n"), jarPath);
+            wprintf(L"loaded: %ls\n", jarPath);
         }
     }
     closedir(dir);
 
-    char ymixinPath[260];
-    sprintf_s(ymixinPath, 260, ("%s\\ymixin.jar"), yolbiPath);
+    wchar_t *ymixinPath = format_wchar(L"%ls\\ymixin.jar", yolbiPath);
     loadJar(jniEnv, ymixinPath, classLoader);
 
-    char loaderPath[260];
-    sprintf_s(loaderPath, 260, ("%s\\loader.jar"), yolbiPath);
+    wchar_t *loaderPath = format_wchar(L"%ls\\loader.jar", yolbiPath);
     loadJar(jniEnv, loaderPath, classLoader);
 
     printf(("All jars loaded\n"));
@@ -606,7 +745,8 @@ void HookMain()
     printf("%d\n", num1);
     char userProfile[MAX_PATH];
     GetEnvironmentVariableA(("USERPROFILE"), userProfile, MAX_PATH);
-    sprintf_s(yolbiPath, MAX_PATH, ("%s\\.yolbi"), userProfile);
+    yolbiPath = format_wchar(L"%ls\\.yolbi", char2wchar(userProfile));
+    wprintf(L"yolbiPath: %ls\n", yolbiPath);
     Inject_fla_bcf_();
 }
 

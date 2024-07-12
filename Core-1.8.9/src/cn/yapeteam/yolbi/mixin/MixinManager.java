@@ -44,10 +44,10 @@ public class MixinManager {
 
         val entityPlayerSPBytes = JVMTIWrapper.instance.getClassBytes(EntityPlayerSP.class);
         ClassNode entityPlayerSPNode = ASMUtils.node(entityPlayerSPBytes);
-        String obfGetLook = Mapper.map("net.minecraft.client.entity.AbstractClientPlayer", "getLook", "()Lnet/minecraft/util/Vec3;", Mapper.Type.Method);
+        String obfGetLook = Mapper.map("net.minecraft.client.entity.AbstractClientPlayer", "getLook", "(F)Lnet/minecraft/util/Vec3;", Mapper.Type.Method);
         if (entityPlayerSPNode.methods.stream().anyMatch(m -> m.name.equals(obfGetLook)))
             add("MixinEntityPlayerSPForEventLook");
-        else add("MixinAbstractClientPlayerForEventLook");
+        else add("MixinEntityLivingBaseForEventLook");
     }
 
     public static void destroyClient() throws IOException {
