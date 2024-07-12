@@ -5,7 +5,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
@@ -14,16 +13,16 @@ import net.minecraft.block.BlockAir;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.util.EnumHand;
 
-@ModuleInfo(name = "Eagle", category = ModuleCategory.MOVEMENT)
 public class Eagle extends Module {
 
-    private final BooleanValue onlyblocks = new BooleanValue("Only Blocks", true);
+    private final BooleanValue onlyblocks = new BooleanValue("Only Holding Blocks", true);
 
     private final BooleanValue onlybackwards = new BooleanValue("Only Backwards", true);
 
     private final BooleanValue onlyground = new BooleanValue("Only Ground", false);
 
     public Eagle() {
+        super("Eagle", ModuleCategory.MOVEMENT);
         addValues(onlyblocks, onlybackwards, onlyground);
     }
 
@@ -38,7 +37,8 @@ public class Eagle extends Module {
             return;
         }
         if (mc.player.isInWater() || mc.player.isInLava()) return;
-        if ((mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue())
+        //noinspection ConstantValue
+        if (mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && !(mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemBlock) && onlyblocks.getValue())
             return;
         if ((mc.player.onGround || !onlyground.getValue()) &&
                 (getBlockUnderPlayer() instanceof BlockAir) &&

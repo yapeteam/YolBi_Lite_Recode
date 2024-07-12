@@ -6,11 +6,13 @@ import cn.yapeteam.yolbi.event.impl.player.EventAttack;
 import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 
-@ModuleInfo(name = "WTap", category = ModuleCategory.COMBAT)
 public class WTap extends Module {
+    public WTap() {
+        super("WTap", ModuleCategory.COMBAT);
+    }
+
     private boolean unSprint, canDo;
 
     @Listener

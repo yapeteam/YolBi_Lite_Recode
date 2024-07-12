@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.render.Drawable;
 import cn.yapeteam.yolbi.render.GraphicsUtils;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
@@ -20,8 +19,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("SameParameterValue")
-@ModuleInfo(name = "JFrameESP2D", category = ModuleCategory.VISUAL)
 public class JFrameESP2D extends Module implements Drawable {
+    public JFrameESP2D() {
+        super("JFrameESP2D", ModuleCategory.VISUAL);
+    }
+
     private static final Color firstColor = Color.RED, secondColor = Color.BLUE, thirdColor = Color.PINK, fourthColor = Color.WHITE;
 
     @Override

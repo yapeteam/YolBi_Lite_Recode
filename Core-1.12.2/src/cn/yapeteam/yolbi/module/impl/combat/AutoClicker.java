@@ -2,28 +2,23 @@ package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
+import lombok.Getter;
 import net.minecraft.item.ItemFood;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.RayTraceResult;
 
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-@ModuleInfo(name = "AutoClicker", category = ModuleCategory.COMBAT)
 public class AutoClicker extends Module {
     private final NumberValue<Integer> cps = new NumberValue<>("cps", 17, 1, 100, 1);
     private final NumberValue<Double> range = new NumberValue<>("cps range", 1.5, 0.1d, 2.5d, 0.1);
+    private final NumberValue<Integer> pressPercentage = new NumberValue<>("Press Percentage", 20, 0, 100, 1);
     private final BooleanValue leftClick = new BooleanValue("leftClick", true),
             rightClick = new BooleanValue("rightClick", false);
 
@@ -31,21 +26,39 @@ public class AutoClicker extends Module {
 
     private final BooleanValue nomine = new BooleanValue("No Click When Mining", true);
     private final ModeValue<String> clickprio = new ModeValue<>("Click Priority", "Left", "Left", "Right");
-
-    public AutoClicker() {
-        addValues(cps, range, leftClick, rightClick, noeat, nomine, clickprio);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Natives.SendLeft(false);
-            Natives.SendRight(false);
-        }));
-    }
-
-    private double delay = 0, time = 0;
+    private double delay = 1;
 
     @Override
     public void onEnable() {
         delay = generate(cps.getValue(), range.getValue());
-        time = System.currentTimeMillis();
+        clickThread = new Thread(() -> {
+            while (true) {
+                try {
+                    delay = generate(cps.getValue(), range.getValue());
+                    sendClick();
+                } catch (Exception ex) {
+                    Logger.exception(ex);
+                }
+            }
+        });
+        clickThread.start();
+    }
+
+    @Override
+    protected void onDisable() {
+        clickThread.interrupt();
+    }
+
+    @Getter
+    private Thread clickThread = null;
+
+    public AutoClicker() {
+        super("AutoClicker", ModuleCategory.COMBAT);
+        addValues(cps, range, pressPercentage, leftClick, rightClick, noeat, nomine, clickprio);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Natives.SendLeft(false);
+            Natives.SendRight(false);
+        }));
     }
 
     private final Random random = new Random();
@@ -76,57 +89,57 @@ public class AutoClicker extends Module {
         return noise;
     }
 
-    public void sendClick(int button) {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-        // Simulate left click
-        if (button == 0) {
-            Natives.SendLeft(true);
-            // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendLeft(false), (int) delay, TimeUnit.MILLISECONDS);
-        }
-        // Simulate right click
-        else if (button == 1) {
-            Natives.SendRight(true);
-            // Schedule the release of the click to be executed after the delay
-            executor.schedule(() -> Natives.SendRight(false), (int) delay, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    @Listener
-    private void onRender2D(EventRender2D e) {
+    private final Runnable leftClickRunnable = () -> {
         try {
-            delay = generate(cps.getValue(), range.getValue());
-            if (mc.currentScreen != null) return;
-            if (System.currentTimeMillis() - time >= (1000 / delay)) {
-                if (clickprio.is("Left")) {
-                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)) {
-                        time = System.currentTimeMillis();
-                        sendClick(0);
-                    }
-                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !( (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemFood) && noeat.getValue())) {
-                        time = System.currentTimeMillis();
-                        sendClick(1);
-                    }
-                } else {
-                    if (rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) && !((mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemFood) && noeat.getValue())) {
-                        time = System.currentTimeMillis();
-                        sendClick(1);
-                    }
-                    if (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) && !(nomine.getValue() && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)) {
-                        time = System.currentTimeMillis();
-                        sendClick(0);
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            Logger.exception(ex);
+            float pressPercentageValue = pressPercentage.getValue() / 100f;
+            Natives.SendLeft(true);
+            Thread.sleep((long) (1000 / delay * pressPercentageValue));
+            Natives.SendLeft(false);
+            Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
+        } catch (InterruptedException ignored) {
+        }
+    };
+
+
+    private final Runnable rightClickRunnable = () -> {
+        try {
+            float pressPercentageValue = pressPercentage.getValue() / 100f;
+            Natives.SendRight(true);
+            Thread.sleep((long) (1000 / delay * pressPercentageValue));
+            Natives.SendRight(false);
+            Thread.sleep((long) (1000 / delay * (1 - pressPercentageValue)));
+        } catch (InterruptedException ignored) {
+        }
+    };
+
+    public void sendClick() {
+        if (!isEnabled() || mc.currentScreen != null) return;
+
+        boolean left = leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON);
+        if (nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+            left = false;
+        boolean right = rightClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON);
+        //noinspection ConstantValue
+        if ((mc.player.getHeldItem(EnumHand.MAIN_HAND) != null && mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemFood) && noeat.getValue())
+            right = false;
+        if (clickprio.getValue().equals("Left") && left) {
+            leftClickRunnable.run();
+        } else if (right) {
+            rightClickRunnable.run();
+            return;
+        }
+        if (clickprio.getValue().equals("Right") && right) {
+            rightClickRunnable.run();
+        } else if (left) {
+            leftClickRunnable.run();
         }
     }
-
 
     @Override
     public String getSuffix() {
-        return cps.getValue() + "-" + (cps.getValue() + range.getValue());
+        return (cps.getValue() - range.getValue()) + " ~ " + (cps.getValue() + range.getValue()) +
+                " - " + "clicking: " + Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) + ", " + Natives.IsKeyDown(VirtualKeyBoard.VK_RBUTTON) +
+                " - " + mc.objectMouseOver.typeOfHit + " ! " + (leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON) &&
+                !(nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK));
     }
 }

@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="minecraft">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/minecraft/minecraft.jar!/" />
+      <root url="jar://$PROJECT_DIR$/minecraft-lib/minecraft.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

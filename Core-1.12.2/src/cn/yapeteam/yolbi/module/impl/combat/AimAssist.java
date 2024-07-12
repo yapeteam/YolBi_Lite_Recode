@@ -7,7 +7,6 @@ import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -23,7 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ModuleInfo(name = "AimAssist", category = ModuleCategory.COMBAT)
 public class AimAssist extends Module {
     private final NumberValue<Integer> Range = new NumberValue<>("Aim Range", 5, 3, 10, 1);
 
@@ -36,6 +34,7 @@ public class AimAssist extends Module {
 
 
     public AimAssist() {
+        super("AimAssist", ModuleCategory.COMBAT);
         addValues(Range, TargetPriority, ClickAim, View, Speed);
     }
 

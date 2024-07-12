@@ -3,22 +3,16 @@ package cn.yapeteam.loader;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.loader.utils.ClassUtils;
 import cn.yapeteam.loader.utils.Pair;
-import cn.yapeteam.loader.utils.StreamUtils;
-import cn.yapeteam.ymixin.Transformer;
 import cn.yapeteam.ymixin.YMixin;
-import cn.yapeteam.ymixin.annotations.Mixin;
 import cn.yapeteam.ymixin.utils.ASMUtils;
 import cn.yapeteam.ymixin.utils.Mapper;
 import lombok.Getter;
-import lombok.val;
-import org.objectweb.asm_9_2.tree.ClassNode;
+import org.objectweb.asm_9_2.Opcodes;
+import org.objectweb.asm_9_2.Type;
+import org.objectweb.asm_9_2.tree.*;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Objects;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * native used
@@ -38,20 +32,6 @@ public class BootStrap {
                 loadInjection();
             }).start();
         }
-    }
-
-    private static byte[] getInitHook() throws Throwable {
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(new File(Loader.YOLBI_DIR, "loader.jar").toPath()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    String name = entry.getName().replace('/', '.');
-                    name = name.substring(0, name.length() - 6);
-                    if (name.equals(InitHookMixin.class.getName())) return StreamUtils.readStream(zis);
-                }
-            }
-        }
-        return null;
     }
 
     public static Thread client_thread = null;
@@ -75,6 +55,10 @@ public class BootStrap {
     public static boolean hasLaunchClassLoader = true;
     @Getter
     private static Pair<Version, Mapper.Mode> version;
+
+    private static ClassNode getMinecraftClassNode() {
+        return ASMUtils.node(JVMTIWrapper.instance.getClassBytes(ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"))));
+    }
 
     public static void entry() {
         try {
@@ -156,15 +140,33 @@ public class BootStrap {
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
 
             Logger.warn("Loading Hooks...");
-            Transformer transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
 
-            byte[] initHook = ASMUtils.rewriteClass(Objects.requireNonNull(ClassMapper.map(ASMUtils.node(getInitHook()), ClassMapper.MapMode.Annotation)));
-            ClassNode initHookNode = ASMUtils.node(initHook);
-            Class<?> MinecraftClass = Objects.requireNonNull(Mixin.Helper.getAnnotation(initHookNode)).value();
-            transformer.addMixin(initHookNode);
+            ClassNode target;
+            try {
+                target = getMinecraftClassNode();
+            } catch (Exception e) {
+                Thread.sleep(500);
+                target = getMinecraftClassNode();
+            }
+            if (target == null) {
+                Logger.error("Failed to get Minecraft class node.");
+                SocketSender.send("CLOSE");
+                return;
+            }
+            String targetMethod = Mapper.map("net/minecraft/client/Minecraft", "runGameLoop", "()V", Mapper.Type.Method);
+            for (MethodNode method : target.methods) {
+                if (method.name.equals(targetMethod) && method.desc.equals("()V")) {
+                    LabelNode labelNode = new LabelNode();
+                    InsnList insnList = new InsnList();
+                    insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(BootStrap.class), "initHook", "()V"));
+                    insnList.add(labelNode);
+                    method.instructions.insert(insnList);
+                    break;
+                }
+            }
+            Class<?> MinecraftClass = ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"));
 
-            val map = transformer.transform();
-            Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, map.get(MinecraftClass.getName())));
+            Logger.info("Redefined {} ReturnCode: {}", MinecraftClass, JVMTIWrapper.instance.redefineClass(MinecraftClass, ASMUtils.rewriteClass(target)));
         } catch (Throwable e) {
             Logger.exception(e);
         }

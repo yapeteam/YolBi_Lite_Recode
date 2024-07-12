@@ -61,8 +61,12 @@ public class EventManager {
             listeningMethods.forEach(m -> Arrays.stream(m.method.getParameters()).filter(p -> p.getType().equals(e.getClass())).forEach(p -> {
                 try {
                     m.method.invoke(m.instance, e);
-                } catch (IllegalAccessException | InvocationTargetException ex) {
+                } catch (InvocationTargetException ex) {
                     Logger.error("Error while posting event: {} in class: {}", e.getClass().getName(), m.method.getDeclaringClass().getName());
+                    Logger.exception(ex);
+                    Logger.exception(ex.getCause());
+                    Logger.exception(ex.getTargetException());
+                } catch (IllegalAccessException ex) {
                     Logger.exception(ex);
                 }
             }));

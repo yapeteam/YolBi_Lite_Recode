@@ -1,12 +1,9 @@
 package cn.yapeteam.yolbi;
 
-import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.command.CommandManager;
 import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
@@ -14,7 +11,7 @@ import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.notification.NotificationType;
-import cn.yapeteam.yolbi.render.JFrameRenderer;
+import cn.yapeteam.yolbi.render.ExternalFrame;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.animation.Easing;
@@ -29,7 +26,7 @@ import java.io.IOException;
 public class YolBi {
     public static YolBi instance = new YolBi();
     public static final String name = "YolBi Lite";
-    public static final String version = "0.3.4";
+    public static final String version = "0.3.5";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
     public static boolean initialized = false;
     private EventManager eventManager;
@@ -39,7 +36,7 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private JFrameRenderer jFrameRenderer;
+    private ExternalFrame jFrameRenderer;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -63,7 +60,7 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
+        instance.jFrameRenderer = new ExternalFrame(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();
@@ -73,7 +70,6 @@ public class YolBi {
         instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
-        instance.eventManager.register(YolBi.class);
         instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
         try {
@@ -87,14 +83,9 @@ public class YolBi {
                         "Injected successfully",
                         Easing.EASE_IN_OUT_QUAD,
                         Easing.EASE_IN_OUT_QUAD,
-                        2500, NotificationType.INIT
+                        15000, NotificationType.INIT
                 )
         );
-    }
-
-    @Listener
-    private static void onTick(EventTick e) {
-        if (!Natives.initialized) Natives.Init();
     }
 
     public void shutdown() {

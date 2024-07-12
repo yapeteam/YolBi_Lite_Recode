@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.render.EventExternalRender;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.render.Drawable;
 import cn.yapeteam.yolbi.render.GraphicsUtils;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
@@ -20,18 +19,25 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @SuppressWarnings("SameParameterValue")
-@ModuleInfo(name = "JFrameESP2D", category = ModuleCategory.VISUAL)
 public class JFrameESP2D extends Module implements Drawable {
+
     private static final Color firstColor = Color.RED, secondColor = Color.BLUE, thirdColor = Color.PINK, fourthColor = Color.WHITE;
+
+    public JFrameESP2D() {
+        super("JFrameESP2D", ModuleCategory.VISUAL);
+    }
 
     @Override
     protected void onEnable() {
-        YolBi.instance.getJFrameRenderer().getDrawables().add(this);
+        Module jFrameRenderer = YolBi.instance.getModuleManager().getModule(JFrameRenderer.class);
+        if (!jFrameRenderer.isEnabled())
+            jFrameRenderer.toggle();
+        YolBi.instance.getJFrameRender().getDrawables().add(this);
     }
 
     @Override
     protected void onDisable() {
-        YolBi.instance.getJFrameRenderer().getDrawables().remove(this);
+        YolBi.instance.getJFrameRender().getDrawables().remove(this);
     }
 
     private final List<DrawableListener> cache = new CopyOnWriteArrayList<>();

@@ -58,22 +58,35 @@ public class AntiLeak {
         }
     }
 
-    @SuppressWarnings("all")
+   // 抑制所有警告
+ @SuppressWarnings("all")
     public void doCrash() {
+        // 执行垃圾回收
         Runtime.getRuntime().gc();
+        // 设置随机硬件ID
         HwidUtils.hwid = GenRandomString.generateRandomString();
+        // 设置随机用户名
         userName = GenRandomString.generateRandomString();
+        // 设置随机版本号
         latestVersion = GenRandomString.generateRandomString();
+        // 设置是否为VIP
         isPremium = false;
+        // 设置随机IP地址
         hwidUrl = GenFakeIP.generateRandomIP(4);
         latestVersionUrl = GenFakeIP.generateRandomIP(4);
+        // 设置加密密钥
         ENCODE_KEY = "FuckYouCrackerLL";
+        // 执行垃圾回收
         Runtime.getRuntime().gc();
         try {
+            // 执行崩溃
             crash();
+            // 再次执行崩溃
             doCrash();
         } catch (Exception e) {
+            // 执行崩溃
             crash();
+            // 再次执行崩溃
             doCrash();
         }
     }

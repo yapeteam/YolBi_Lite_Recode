@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.network.EventPacket;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
@@ -19,7 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@ModuleInfo(name = "Legit Velocity", category = ModuleCategory.COMBAT)
 public class Velocity extends Module {
 
     //probability for having a perfect jump
@@ -37,6 +35,7 @@ public class Velocity extends Module {
 
 
     public Velocity() {
+        super("Velocity", ModuleCategory.COMBAT);
         NumberValue.setBound(minJumpDelay, maxJumpDelay);
         NumberValue.setBound(minJumpHold, maxJumpHold);
         addValues(probability, maxJumpDelay, minJumpDelay, maxJumpHold, minJumpHold);

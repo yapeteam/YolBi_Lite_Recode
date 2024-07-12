@@ -269,25 +269,7 @@ public class RenderUtil {
     }
 
     public static void drawImage(int image, float x, float y, float width, float height, int color) {
-        /*GlStateManager.enableBlend();
-        GlStateManager.enableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-        GlStateManager.color((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, (color >> 24 & 0xFF) / 255.0F);
-        GlStateManager.bindTexture(image);
-        drawModalRectWithCustomSizedTexture(x, y, 0.0f, 0.0f, width, height, width, height);
-        GlStateManager.disableBlend();
-        GlStateManager.disableTexture2D();*/
-        /*GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glEnable(GL_BLEND);
-        GL11.glDepthMask(false);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        GL11.glColor4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, (color >> 24 & 0xFF) / 255.0F);
-        GL11.glBindTexture(GL_TEXTURE_2D, image);
-        drawModalRectWithCustomSizedTexture(x, y, 0.0f, 0.0f, width, height, width, height);
-        GL11.glDepthMask(true);
-        GL11.glDisable(GL_BLEND);
-        GL11.glEnable(GL_DEPTH_TEST);*/
-
+        enableGL2D();
         glPushMatrix();
         GlStateManager.alphaFunc(GL11.GL_GREATER, 0.01f);
         glEnable(GL11.GL_TEXTURE_2D);
@@ -318,6 +300,7 @@ public class RenderUtil {
 
         glEnable(GL_CULL_FACE);
         glPopMatrix();
+        disableGL2D();
     }
 
     public static void drawModalRectWithCustomSizedTexture(float x, float y, float u, float v, float width, float height, float textureWidth, float textureHeight) {
@@ -545,6 +528,36 @@ public class RenderUtil {
         GlStateManager.resetColor();
         glDepthMask(true);
         resetCaps();
+    }
+
+    public static void drawGradientRectTB(float x, float y, float x1, float y1, int topColor, int bottomColor) {
+        enableGL2D();
+        GL11.glShadeModel(7425);
+        GL11.glBegin(7);
+        color(topColor);
+        GL11.glVertex2f(x, y1);
+        GL11.glVertex2f(x1, y1);
+        color(bottomColor);
+        GL11.glVertex2f(x1, y);
+        GL11.glVertex2f(x, y);
+        GL11.glEnd();
+        GL11.glShadeModel(7424);
+        disableGL2D();
+    }
+
+    public static void drawGradientRectLR(float x, float y, float x1, float y1, int leftColor, int rightColor) {
+        enableGL2D();
+        GL11.glShadeModel(7425);
+        GL11.glBegin(7);
+        color(leftColor);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x, y1);
+        color(rightColor);
+        GL11.glVertex2f(x1, y1);
+        GL11.glVertex2f(x1, y);
+        GL11.glEnd();
+        GL11.glShadeModel(7424);
+        disableGL2D();
     }
 
     public static void drawEntityBox(AxisAlignedBB entityBox, double lastTickPosX, double lastTickPosY, double lastTickPosZ, double posX, double posY, double posZ, final Color color, final boolean outline, final boolean box, final float outlineWidth, float partialTicks) {
@@ -795,10 +808,18 @@ public class RenderUtil {
     }
 
     public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, Color color, boolean scissor) {
-        drawBloomShadow(x, y, width, height, blurRadius, 0, color, scissor);
+        drawBloomShadow(x, y, width, height, blurRadius, 0, color.getRGB(), scissor, false, false, false, false);
     }
 
-    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, Color color, boolean scissor) {
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int color, boolean scissor) {
+        drawBloomShadow(x, y, width, height, blurRadius, 0, color, scissor, false, false, false, false);
+    }
+
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, int color, boolean scissor) {
+        drawBloomShadow(x, y, width, height, blurRadius, roundRadius, color, scissor, false, false, false, false);
+    }
+
+    public static void drawBloomShadow(float x, float y, float width, float height, int blurRadius, int roundRadius, int color, boolean scissor, boolean cut_top, boolean cut_bottom, boolean cut_left, boolean cut_right) {
         width = width + blurRadius * 2;
         height = height + blurRadius * 2;
         x -= blurRadius + 0.75f;
@@ -815,10 +836,28 @@ public class RenderUtil {
             g.dispose();
             GaussianFilter op = new GaussianFilter(blurRadius);
             BufferedImage blurred = op.filter(original, null);
+            int cut_x = blurRadius, cut_y = blurRadius, cut_w = (int) (width - blurRadius * 2), cut_h = (int) (height - blurRadius * 2);
+            if (cut_top) {
+                cut_y = 0;
+                cut_h = (int) (height - blurRadius);
+            }
+
+            if (cut_bottom) {
+                cut_h = (int) (height - blurRadius);
+            }
+
+            if (cut_left) {
+                cut_x = 0;
+                cut_w = (int) (width - blurRadius);
+            }
+
+            if (cut_right) {
+                cut_w = (int) (width - blurRadius);
+            }
             if (scissor)
-                blurred = new ShaderScissor(blurRadius, blurRadius, (int) (width - blurRadius * 2), (int) (height - blurRadius * 2), blurred, 1, false, false).generate();
+                blurred = new ShaderScissor(cut_x, cut_y, cut_w, cut_h, blurred, 1, false, false).generate();
             shadowCache.put(identifier, TextureUtil.uploadTextureImageAllocate(TextureUtil.glGenTextures(), blurred, true, false));
         }
-        drawImage(shadowCache.get(identifier), x, y, width, height, color.getRGB());
+        drawImage(shadowCache.get(identifier), x, y, width, height, color);
     }
 }

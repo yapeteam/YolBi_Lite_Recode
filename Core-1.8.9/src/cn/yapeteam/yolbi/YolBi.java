@@ -1,12 +1,9 @@
 package cn.yapeteam.yolbi;
 
-import cn.yapeteam.loader.Natives;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.command.CommandManager;
 import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
@@ -14,7 +11,7 @@ import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
 import cn.yapeteam.yolbi.notification.NotificationType;
-import cn.yapeteam.yolbi.render.JFrameRenderer;
+import cn.yapeteam.yolbi.render.ExternalFrame;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
 import cn.yapeteam.yolbi.utils.animation.Easing;
@@ -39,7 +36,7 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private JFrameRenderer jFrameRenderer;
+    private ExternalFrame jFrameRender;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -63,7 +60,7 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.jFrameRenderer = new JFrameRenderer(0, 0, 0, 0);
+        instance.jFrameRender = new ExternalFrame(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();
@@ -73,7 +70,6 @@ public class YolBi {
         instance.eventManager.register(instance.targetManager);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
-        instance.eventManager.register(YolBi.class);
         instance.eventManager.register(RotationManager.class);
         instance.moduleManager.load();
         try {
@@ -92,14 +88,9 @@ public class YolBi {
         );
     }
 
-    @Listener
-    private static void onTick(EventTick e) {
-        if (!Natives.initialized) Natives.Init();
-    }
-
     public void shutdown() {
         try {
-            instance.jFrameRenderer.close();
+            instance.jFrameRender.close();
             configManager.save();
             WebServer.stop();
             instance = new YolBi();

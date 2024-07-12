@@ -8,7 +8,6 @@ import cn.yapeteam.yolbi.event.impl.player.EventMotion;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -30,9 +29,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import org.lwjgl.input.Keyboard;
 
-@ModuleInfo(name = "KillAura", category = ModuleCategory.COMBAT, key = Keyboard.KEY_R)
 public class KillAura extends Module {
     public KillAura() {
+        super("KillAura",ModuleCategory.COMBAT, Keyboard.KEY_R);
         minCps.setCallback((oldV, newV) -> newV > maxCps.getValue() ? oldV : newV);
         maxCps.setCallback((oldV, newV) -> newV < minCps.getValue() ? oldV : newV);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);

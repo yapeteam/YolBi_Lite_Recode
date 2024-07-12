@@ -6,7 +6,7 @@
 #include "../jvm/jni.h"
 #include "../jvm/jvmti.h"
 
-HWND hwnd = NULL;
+HWND WindowHwnd = NULL;
 
 const char *jstringToChar(JNIEnv *env, jstring jstr)
 {
@@ -15,9 +15,39 @@ const char *jstringToChar(JNIEnv *env, jstring jstr)
     return str;
 }
 
-JNIEXPORT void JNICALL Init(JNIEnv *env, jclass _, jstring windowTitle)
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
-    hwnd = FindWindowA(NULL, (LPCSTR)jstringToChar(env, windowTitle));
+    LPDWORD processID;
+    GetWindowThreadProcessId(hwnd, &processID);
+    if (processID == (LPDWORD)lParam)
+    {
+        // 找到目标窗口，可以在这里处理窗口
+        printf("Found window handle: %p\n", hwnd);
+        char className[256];
+        GetClassName(hwnd, className, sizeof(className));
+        if (strcmp(className, "LWJGL") == 0 || strcmp(className, "GLFW30") == 0)
+        {
+            WindowHwnd = hwnd;
+            char windowTitle[256];
+            GetWindowText(hwnd, windowTitle, sizeof(windowTitle));
+            printf("Found window title: %s\n", windowTitle);
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+JNIEXPORT void JNICALL Init(JNIEnv *env, jclass _, jint pid)
+{
+    HANDLE processHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, (DWORD)pid);
+    if (processHandle == NULL)
+    {
+        printf("Failed to open process with PID %u\n", pid);
+        return;
+    }
+
+    EnumWindows(EnumWindowsProc, (LPARAM)pid);
+    CloseHandle(processHandle);
 }
 
 JNIEXPORT void JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean transparent, jstring windowTitle)
@@ -33,25 +63,25 @@ JNIEXPORT void JNICALL SetWindowsTransparent(JNIEnv *env, jclass _, jboolean tra
 
 JNIEXPORT void JNICALL SetKeyBoard(JNIEnv *env, jclass _, jint keycode, jboolean pressed)
 {
-    INPUT input;
-    input.type = INPUT_KEYBOARD;
-    input.ki.wVk = (WORD)keycode;
-    input.ki.wScan = 0;
-    input.ki.time = 0;
-    input.ki.dwExtraInfo = 0;
-    input.ki.dwFlags = pressed ? 0 : KEYEVENTF_KEYUP;
-    SendInput(1, &input, sizeof(INPUT));
+    if (pressed)
+    {
+        keybd_event(keycode, 0, 0, 0);
+    }
+    else
+    {
+        keybd_event(keycode, 0, KEYEVENTF_KEYUP, 0);
+    }
 }
 
 JNIEXPORT void JNICALL SendLeft(JNIEnv *env, jclass _, jboolean pressed)
 {
     if (pressed)
     {
-        SendMessage(hwnd, WM_LBUTTONDOWN, 0, 0);
+        SendMessage(WindowHwnd, WM_LBUTTONDOWN, 0, 0);
     }
     else
     {
-        SendMessage(hwnd, WM_LBUTTONUP, 0, 0);
+        SendMessage(WindowHwnd, WM_LBUTTONUP, 0, 0);
     }
 }
 
@@ -59,11 +89,11 @@ JNIEXPORT void JNICALL SendRight(JNIEnv *env, jclass _, jboolean pressed)
 {
     if (pressed)
     {
-        SendMessage(hwnd, WM_RBUTTONDOWN, 0, 0);
+        SendMessage(WindowHwnd, WM_RBUTTONDOWN, 0, 0);
     }
     else
     {
-        SendMessage(hwnd, WM_RBUTTONUP, 0, 0);
+        SendMessage(WindowHwnd, WM_RBUTTONUP, 0, 0);
     }
 }
 
@@ -79,7 +109,7 @@ JNIEXPORT jboolean JNICALL IsKeyDown(JNIEnv *env, jclass _, jint key)
 void register_native_methods(JNIEnv *env, jclass clazz)
 {
     JNINativeMethod methods[] = {
-        {"Init", "(Ljava/lang/String;)V", (void *)&Init},
+        {"Init", "(I)V", (void *)&Init},
         {"SetWindowsTransparent", "(ZLjava/lang/String;)V", (void *)&SetWindowsTransparent},
         {"SetKeyBoard", "(IZ)V", (void *)&SetKeyBoard},
         {"SendLeft", "(Z)V", (void *)&SendLeft},

@@ -4,8 +4,6 @@ import cn.yapeteam.ymixin.utils.ASMUtils;
 import lombok.Getter;
 import org.objectweb.asm_9_2.tree.ClassNode;
 
-import java.util.Objects;
-
 import static cn.yapeteam.ymixin.YMixin.Logger;
 
 @Getter
@@ -17,7 +15,15 @@ public class Mixin {
 
     public Mixin(ClassNode source, ClassBytesProvider provider) throws Throwable {
         this.source = source;
-        Class<?> targetClass = Objects.requireNonNull(cn.yapeteam.ymixin.annotations.Mixin.Helper.getAnnotation(source)).value();
+        Class<?> targetClass = null;
+        while (targetClass == null) {
+            try {
+                cn.yapeteam.ymixin.annotations.Mixin targetAnnotation = cn.yapeteam.ymixin.annotations.Mixin.Helper.getAnnotation(source);
+                if (targetAnnotation != null)
+                    targetClass = targetAnnotation.value();
+            } catch (Exception ignored) {
+            }
+        }
         targetName = targetClass.getName().replace('.', '/');
         Logger.info("Loading mixin {} target class {}", source.name, targetName);
         int try_count = 0;

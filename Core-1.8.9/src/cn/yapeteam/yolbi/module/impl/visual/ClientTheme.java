@@ -2,7 +2,6 @@ package cn.yapeteam.yolbi.module.impl.visual;
 
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
-import cn.yapeteam.yolbi.module.ModuleInfo;
 import cn.yapeteam.yolbi.module.values.impl.ColorValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -10,16 +9,16 @@ import cn.yapeteam.yolbi.utils.render.ColorUtil;
 
 import java.awt.*;
 
-@ModuleInfo(name = "ClientTheme", category = ModuleCategory.VISUAL)
 public class ClientTheme extends Module {
     public final ModeValue<String> color = new ModeValue<>("Color", "Custom fade", "White", "Blue", "Vape", "Custom static", "Custom fade", "Custom 3 colors", "Rainbow");
     private final ColorValue color1 = new ColorValue("Color1", () -> color.getValue().startsWith("Custom"), new Color(210, 80, 105).getRGB());
-    private final ColorValue color2 = new ColorValue("Color2", () -> color.getValue().startsWith("Custom"), new Color(135, 190, 255).getRGB());
-    private final ColorValue color3 = new ColorValue("Color3", () -> color.getValue().startsWith("Custom"), new Color(0, 255, 255).getRGB());
+    private final ColorValue color2 = new ColorValue("Color2", () -> color.is("Custom fade") || color.is("Custom 3 colors"), new Color(135, 190, 255).getRGB());
+    private final ColorValue color3 = new ColorValue("Color3", () -> color.is("Custom 3 colors"), new Color(0, 255, 255).getRGB());
     private final NumberValue<Double> saturation = new NumberValue<>("Saturation", () -> color.is("Rainbow"), 0.9, 0.05, 1.0, 0.05);
     private final NumberValue<Double> brightness = new NumberValue<>("Brightness", () -> color.is("Rainbow"), 0.9, 0.05, 1.0, 0.05);
 
     public ClientTheme() {
+        super("ClientTheme", ModuleCategory.VISUAL);
         this.addValues(color, color1, color2, color3, saturation, brightness);
     }
 
