@@ -66,7 +66,7 @@ jclass JNICALL loadClass(JNIEnv *jniEnv, const char *name, jobject classloader)
     return (jclass)(*jniEnv)->CallObjectMethod(jniEnv, classloader, loadClass, (*jniEnv)->NewStringUTF(jniEnv, name));
 }
 
-jclass findThreadClass(const char *name, jobject classLoader)
+jclass findClass(const char *name, jobject classLoader)
 {
     jclass result = NULL;
     replace(name, "/", ".");
@@ -307,7 +307,7 @@ void *allocate(jlong size)
 
 JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject loader)
 {
-    return findThreadClass(jstringToChar(jniEnv, name), loader);
+    return findClass(jstringToChar(jniEnv, name), loader);
 }
 
 JNIEXPORT jbyteArray JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
@@ -369,7 +369,7 @@ JNIEXPORT jclass JNICALL DefineClass(JNIEnv *env, jclass _, jobject classLoader,
     return (jclass)classDefined;
 }
 
-void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
+void loadJar2URL(JNIEnv *env, wchar_t *path, jobject loader)
 {
     jclass urlClassLoader = (*env)->FindClass(env, "java/net/URLClassLoader");
     jclass fileClass = (*env)->FindClass(env, "java/io/File");
@@ -420,14 +420,44 @@ wchar_t *format_wchar(const wchar_t *format, ...)
 }
 
 jobject classLoader;
+jobject systemClassLoader;
 wchar_t *yolbiPath;
+
+jclass JarLoader;
+jmethodID loadJarMethod;
+
+boolean hasLaunchClassLoader = TRUE;
+boolean hasCPW = TRUE;
+
+void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
+{
+    if (JarLoader == NULL)
+    {
+        wchar_t *definderPath = format_wchar(L"%ls\\definer.jar", yolbiPath);
+        wprintf(L"Loading definder.jar from %ls\n", definderPath);
+        loadJar2URL(env, definderPath, systemClassLoader);
+        JarLoader = findClass("cn.yapeteam.definer.JarLoader", systemClassLoader);
+        loadJarMethod = (*env)->GetStaticMethodID(env, JarLoader, "loadJar", "(Ljava/lang/String;Ljava/lang/ClassLoader;)V");
+        JNINativeMethod HookerMethods[] = {
+            {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
+        };
+        (*env)->RegisterNatives(env, JarLoader, HookerMethods, 1);
+    }
+    (*env)->CallStaticVoidMethod(env, JarLoader, loadJarMethod, w2js(env, path), loader);
+}
 
 JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
 {
     wchar_t *injectionOutPath = format_wchar(L"%ls\\injection.jar", yolbiPath);
-    loadJar(env, injectionOutPath, classLoader);
+    if (!hasCPW)
+        loadJar2URL(jniEnv, injectionOutPath, classLoader);
+    else
+    {
+        loadJar(jniEnv, injectionOutPath, classLoader);
+        loadJar2URL(jniEnv, injectionOutPath, systemClassLoader);
+    }
     jniEnv = env;
-    jclass Start = findThreadClass(("cn.yapeteam.yolbi.Loader"), classLoader);
+    jclass Start = findClass(("cn.yapeteam.yolbi.Loader"), classLoader);
     if (!Start)
     {
         printf(("Failed to find Loader class\n"));
@@ -523,7 +553,7 @@ void Inject_fla_bcf_()
 
     jclass ClassLoader = (*jniEnv)->FindClass(jniEnv, ("java/lang/ClassLoader"));
     jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, ("getSystemClassLoader"), ("()Ljava/lang/ClassLoader;"));
-    jobject systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
+    systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
 
     wchar_t *zip_path = format_wchar(L"%ls\\g++.zip", yolbiPath);
     wchar_t *zip_out = get_current_directory_w();
@@ -566,20 +596,32 @@ void Inject_fla_bcf_()
     jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, ("forName"), ("(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"));
     jstring className = (*jniEnv)->NewStringUTF(jniEnv, ("net.minecraft.launchwrapper.LaunchClassLoader"));
     (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
-    boolean hasLaunchClassLoader = TRUE;
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {
         (*jniEnv)->ExceptionDescribe(jniEnv);
         (*jniEnv)->ExceptionClear(jniEnv);
         hasLaunchClassLoader = FALSE;
     }
+    className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
+    (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionDescribe(jniEnv);
+        (*jniEnv)->ExceptionClear(jniEnv);
+        hasCPW = FALSE;
+    }
 
     if (hasLaunchClassLoader)
         printf("LaunchClassLoader found\n");
+    if (hasCPW)
+        printf("CPW ModuleClassLoader found\n");
 
     wchar_t *jarPath = format_wchar(L"%ls\\dependencies\\asm-all-9.2.jar", yolbiPath);
-    loadJar(jniEnv, jarPath, systemClassLoader);
+    loadJar2URL(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
+        loadJar2URL(jniEnv, jarPath, classLoaderLoader);
+    if (hasCPW)
         loadJar(jniEnv, jarPath, classLoaderLoader);
 
     jvmtiCapabilities capabilities = {0};
@@ -602,32 +644,32 @@ void Inject_fla_bcf_()
     (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
-    wchar_t *hookerPath = format_wchar(L"%ls\\hooker.jar", yolbiPath);
-
-    if (hasLaunchClassLoader)
-        loadJar(jniEnv, hookerPath, classLoaderLoader);
-    else
-        loadJar(jniEnv, hookerPath, systemClassLoader);
-
-    JNINativeMethod HookerMethods[] = {
-        {("getClassBytes"), ("(Ljava/lang/Class;)[B"), (void *)&GetClassBytes},
-        {("defineClass"), ("(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;"), (void *)&DefineClass},
-        {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
-    };
-
-    jclass Hooker = findThreadClass("cn/yapeteam/hooker/Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
-
-    if (!Hooker)
+    if (!hasCPW)
     {
-        printf(("Failed to find Hooker class\n"));
-        return;
+        wchar_t *hookerPath = format_wchar(L"%ls\\hooker.jar", yolbiPath);
+
+        if (hasLaunchClassLoader)
+            loadJar2URL(jniEnv, hookerPath, classLoaderLoader);
+        else
+            loadJar2URL(jniEnv, hookerPath, systemClassLoader);
+        jclass Hooker = findClass("cn/yapeteam/hooker/Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
+        JNINativeMethod HookerMethods[] = {
+            {("getClassBytes"), ("(Ljava/lang/Class;)[B"), (void *)&GetClassBytes},
+            {("defineClass"), ("(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;"), (void *)&DefineClass},
+            {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
+        };
+        if (!Hooker)
+        {
+            printf(("Failed to find Hooker class\n"));
+            return;
+        }
+
+        printf(("Hooker class found\n"));
+        (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
+
+        jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
+        (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
     }
-
-    printf(("Hooker class found\n"));
-    (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
-
-    jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
 
     wchar_t *depsPath = format_wchar(L"%ls\\dependencies", yolbiPath);
 
@@ -637,23 +679,37 @@ void Inject_fla_bcf_()
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (str_endwith(entry->d_name, (".jar")))
+        if (str_endwith(entry->d_name, ".jar"))
         {
             wchar_t *jarPath = format_wchar(L"%ls\\%ls", depsPath, char2wchar(entry->d_name));
-            loadJar(jniEnv, jarPath, systemClassLoader);
+            // if (hasCPW)
+            //     loadJar(jniEnv, jarPath, systemClassLoader);
+            loadJar2URL(jniEnv, jarPath, systemClassLoader);
             wprintf(L"loaded: %ls\n", jarPath);
         }
     }
     closedir(dir);
 
     wchar_t *ymixinPath = format_wchar(L"%ls\\ymixin.jar", yolbiPath);
-    loadJar(jniEnv, ymixinPath, classLoader);
+    if (!hasCPW)
+        loadJar2URL(jniEnv, ymixinPath, classLoader);
+    else
+    {
+        loadJar(jniEnv, ymixinPath, classLoader);
+        loadJar2URL(jniEnv, ymixinPath, systemClassLoader);
+    }
 
     wchar_t *loaderPath = format_wchar(L"%ls\\loader.jar", yolbiPath);
-    loadJar(jniEnv, loaderPath, classLoader);
+    if (!hasCPW)
+        loadJar2URL(jniEnv, loaderPath, classLoader);
+    else
+    {
+        loadJar(jniEnv, loaderPath, classLoader);
+        loadJar2URL(jniEnv, loaderPath, systemClassLoader);
+    }
 
     printf(("All jars loaded\n"));
-    jclass wrapperClass = findThreadClass(("cn.yapeteam.loader.NativeWrapper"), classLoader);
+    jclass wrapperClass = findClass(("cn.yapeteam.loader.NativeWrapper"), classLoader);
     printf(("NativeWrapper\n"));
     if (!wrapperClass)
     {
@@ -668,7 +724,7 @@ void Inject_fla_bcf_()
         {("FindClass"), ("(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Class;"), (void *)&FindClass},
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
-    jclass natvieClass = findThreadClass(("cn.yapeteam.loader.Natives"), classLoader);
+    jclass natvieClass = findClass("cn.yapeteam.loader.Natives", classLoader);
     if (!natvieClass)
     {
         printf(("Failed to find Natives class\n"));
@@ -677,12 +733,7 @@ void Inject_fla_bcf_()
     register_native_methods(jniEnv, natvieClass);
     printf(("Native methods registered\n"));
 
-    jclass BootStrap = findThreadClass(("cn.yapeteam.loader.BootStrap"), classLoader);
-    if ((*jniEnv)->ExceptionCheck(jniEnv))
-    {
-        (*jniEnv)->ExceptionDescribe(jniEnv);
-        (*jniEnv)->ExceptionClear(jniEnv);
-    }
+    jclass BootStrap = findClass(("cn.yapeteam.loader.BootStrap"), classLoader);
     if (!BootStrap)
     {
         printf(("Failed to find BootStrap class\n"));
@@ -718,6 +769,11 @@ void HookMain()
     yolbiPath = format_wchar(L"%ls\\.yolbi", userProfile);
     wprintf(L"yolbiPath: %ls\n", yolbiPath);
     Inject_fla_bcf_();
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionDescribe(jniEnv);
+        (*jniEnv)->ExceptionClear(jniEnv);
+    }
 }
 
 BYTE OldCode[12] = {0x00};

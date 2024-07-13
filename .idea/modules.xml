@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" filepath="$PROJECT_DIR$/Core-1.8.9/Core-1.8.9.iml" />
       <module fileurl="file://$PROJECT_DIR$/Hooker/Hooker.iml" filepath="$PROJECT_DIR$/Hooker/Hooker.iml" />
       <module fileurl="file://$PROJECT_DIR$/Injector/Injector.iml" filepath="$PROJECT_DIR$/Injector/Injector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JarLoader/JarLoader.iml" filepath="$PROJECT_DIR$/JarLoader/JarLoader.iml" />
       <module fileurl="file://$PROJECT_DIR$/Loader/Loader.iml" filepath="$PROJECT_DIR$/Loader/Loader.iml" />
       <module fileurl="file://$PROJECT_DIR$/Minecraft-1.12.2/Minecraft-1.12.2.iml" filepath="$PROJECT_DIR$/Minecraft-1.12.2/Minecraft-1.12.2.iml" />
       <module fileurl="file://$PROJECT_DIR$/Minecraft-1.8.9/Minecraft-1.8.9.iml" filepath="$PROJECT_DIR$/Minecraft-1.8.9/Minecraft-1.8.9.iml" />

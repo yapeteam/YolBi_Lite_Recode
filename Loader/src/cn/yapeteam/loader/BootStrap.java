@@ -74,12 +74,12 @@ public class BootStrap {
         try {
             if (JVMTIWrapper.instance == null)
                 JVMTIWrapper.instance = new NativeWrapper();
+            System.setProperty("java.awt.headless", "true");
             client_thread = getThreadByName("Client thread");
             if (client_thread == null)
                 client_thread = getThreadByName("Render thread");
             if (client_thread == null) {
-                Logger.error("Failed to get client thread.");
-                JOptionPane.showMessageDialog(null, "Failed to find target thread.", "Error", JOptionPane.ERROR_MESSAGE);
+                Logger.error("Failed to get target thread.");
                 SocketSender.send("CLOSE");
                 return;
             }
@@ -125,7 +125,6 @@ public class BootStrap {
             version = getMinecraftVersion();
             if (version == null || version.first == null || version.second == null) {
                 Logger.error("Unsupported Minecraft version.");
-                JOptionPane.showMessageDialog(null, "The Minecraft version is not supported.", "Error", JOptionPane.ERROR_MESSAGE);
                 SocketSender.send("CLOSE");
                 return;
             }
@@ -159,7 +158,6 @@ public class BootStrap {
             }
             if (target == null) {
                 Logger.error("Failed to get Minecraft class node.");
-                JOptionPane.showMessageDialog(null, "Failed to load initialize Hook.", "Error", JOptionPane.ERROR_MESSAGE);
                 SocketSender.send("CLOSE");
                 return;
             }
