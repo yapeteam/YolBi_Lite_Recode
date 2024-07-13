@@ -16,7 +16,8 @@ import java.util.regex.Pattern;
 @Getter
 public enum Version {
     V1_8_9("1.8.9", "net/minecraft/client/multiplayer/ServerData", "bde"),
-    V1_12_2("1.12.2", "net/minecraft/client/multiplayer/ServerData", "bse");
+    V1_12_2("1.12.2", "net/minecraft/client/multiplayer/ServerData", "bse"),
+    V1_18_1("1.18.1");
 
     private final String version;
     private final String[] serverDataClasses;
@@ -57,8 +58,8 @@ public enum Version {
 
     public static Version get() {
         for (Version value : values()) {
-            // if (System.getProperty("java.library.path").contains(value.version)) return value;
-            // if (System.getProperty("sun.java.command").contains(" " + value.version.substring(0, 3))) return value;
+            if (System.getProperty("java.library.path").contains(value.version)) return value;
+            if (System.getProperty("sun.java.command").contains(" " + value.version.substring(0, 3))) return value;
             for (String clz : value.serverDataClasses) {
                 val versionByServerData = getVersionByServerData(clz);
                 if (versionByServerData != null) return versionByServerData;
