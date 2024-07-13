@@ -36,7 +36,7 @@ public class YolBi {
     private FontManager fontManager;
     private NotificationManager notificationManager;
     private BotManager botManager;
-    private ExternalFrame jFrameRender;
+    private ExternalFrame jFrameRenderer;
     private TargetManager targetManager;
 
     public EventManager getEventManager() {
@@ -60,7 +60,7 @@ public class YolBi {
         instance.commandManager = new CommandManager();
         instance.configManager = new ConfigManager();
         instance.moduleManager = new ModuleManager();
-        instance.jFrameRender = new ExternalFrame(0, 0, 0, 0);
+        instance.jFrameRenderer = new ExternalFrame(0, 0, 0, 0);
         instance.botManager = new BotManager();
         instance.targetManager = new TargetManager();
         instance.notificationManager = new NotificationManager();
@@ -90,7 +90,7 @@ public class YolBi {
 
     public void shutdown() {
         try {
-            instance.jFrameRender.close();
+            instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
             instance = new YolBi();

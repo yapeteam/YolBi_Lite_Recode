@@ -11,6 +11,7 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
+import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -112,11 +113,8 @@ public class BootStrap {
             );
             version = getMinecraftVersion();
             if (version == null || version.first == null || version.second == null) {
-                Logger.error("Failed to get Minecraft version.");
-                if (version != null) {
-                    Logger.error("Version: {}, Mode: {}", version.first, version.second);
-                    Logger.error("java.library.path: {}, sun.java.command: {}", System.getProperty("java.library.path"), System.getProperty("sun.java.command"));
-                } else Logger.error("Version: null, Mode: null");
+                Logger.error("Unsupported Minecraft version.");
+                JOptionPane.showMessageDialog(null, "The Minecraft version is not supported.", "Error", JOptionPane.ERROR_MESSAGE);
                 SocketSender.send("CLOSE");
                 return;
             }
@@ -139,7 +137,7 @@ public class BootStrap {
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8), Mapper.getVanilla());
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
 
-            Logger.warn("Loading Hooks...");
+            Logger.warn("Loading Minecraft Hook...");
 
             ClassNode target;
             try {
@@ -150,6 +148,7 @@ public class BootStrap {
             }
             if (target == null) {
                 Logger.error("Failed to get Minecraft class node.");
+                JOptionPane.showMessageDialog(null, "Failed to load initialize Hook.", "Error", JOptionPane.ERROR_MESSAGE);
                 SocketSender.send("CLOSE");
                 return;
             }

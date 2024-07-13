@@ -183,7 +183,7 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
     }
 
     @Inject(method = "sendChatMessage", desc = "(Ljava/lang/String;)V", target = @Target("HEAD"))
-    public void sendChatMessage(@NotNull String message) {
+    public void sendChatMessage(String message) {
         EventChat event = new EventChat(message);
         YolBi.instance.getEventManager().post(event);
         if (event.isCancelled())
