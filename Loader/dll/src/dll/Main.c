@@ -615,7 +615,7 @@ void Inject_fla_bcf_()
         {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
     };
 
-    jclass Hooker = (*jniEnv)->DefineClass(jniEnv, "cn/yapeteam/hooker/Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader, (jbyte *)hooker_data, hooker_data_size);
+    jclass Hooker = findThreadClass("cn/yapeteam/hooker/Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
 
     if (!Hooker)
     {
