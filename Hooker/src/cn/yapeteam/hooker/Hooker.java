@@ -149,6 +149,14 @@ public class Hooker {
         return null;
     }
 
+    private static Thread getThreadByName(String name) {
+        for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
+            Thread thread = (Thread) o;
+            if (thread.getName().equals(name))
+                return thread;
+        }
+        return null;
+    }
 
     @SuppressWarnings("unused")
     public static void hook() {
@@ -166,12 +174,13 @@ public class Hooker {
             }
         } catch (Exception ignored) {
         }
-        for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
-            Thread thread = (Thread) o;
-            if (thread.getName().equals("Client thread")) {
-                client_thread = thread;
-                break;
-            }
+
+        client_thread = getThreadByName("Client thread");
+        if (client_thread == null)
+            client_thread = getThreadByName("Render thread");
+        if (client_thread == null) {
+            System.err.println("Failed to find target thread!");
+            return;
         }
 
         boolean hasLaunchClassLoader = true;

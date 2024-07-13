@@ -61,16 +61,27 @@ public class BootStrap {
         return ASMUtils.node(JVMTIWrapper.instance.getClassBytes(ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"))));
     }
 
+    private static Thread getThreadByName(String name) {
+        for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
+            Thread thread = (Thread) o;
+            if (thread.getName().equals(name))
+                return thread;
+        }
+        return null;
+    }
+
     public static void entry() {
         try {
             if (JVMTIWrapper.instance == null)
                 JVMTIWrapper.instance = new NativeWrapper();
-            for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
-                Thread thread = (Thread) o;
-                if (thread.getName().equals("Client thread")) {
-                    client_thread = thread;
-                    break;
-                }
+            client_thread = getThreadByName("Client thread");
+            if (client_thread == null)
+                client_thread = getThreadByName("Render thread");
+            if (client_thread == null) {
+                Logger.error("Failed to get client thread.");
+                JOptionPane.showMessageDialog(null, "Failed to find target thread.", "Error", JOptionPane.ERROR_MESSAGE);
+                SocketSender.send("CLOSE");
+                return;
             }
             try {
                 Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
