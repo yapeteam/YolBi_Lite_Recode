@@ -21,6 +21,9 @@
         <artifact name="injection-1.12.2.jar" proguard-config="injection-1.12.2.pro" mosey-config="injection-1.12.2.js">
             <files>out/production/Core-1.12.2</files>
         </artifact>
+        <artifact name="injection-1.18.1.jar" proguard-config="injection-1.18.1.pro" mosey-config="injection-1.18.1.js">
+            <files>out/production/Core-1.12.2</files>
+        </artifact>
         <native-obfuscate artifact="hooker.jar"/>
         <native-obfuscate artifact="loader.jar" black="cn.yapeteam.loader.ClassMapper"/>
         <artifact name="injector.jar">

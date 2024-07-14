@@ -59,7 +59,8 @@ public enum Version {
     public static Version get() {
         for (Version value : values()) {
             if (System.getProperty("java.library.path").contains(value.version)) return value;
-            if (System.getProperty("sun.java.command").contains(" " + value.version.substring(0, 3))) return value;
+            if (System.getProperty("sun.java.command").contains(" " + value.version.substring(0, value.version.lastIndexOf("."))))
+                return value;
             for (String clz : value.serverDataClasses) {
                 val versionByServerData = getVersionByServerData(clz);
                 if (versionByServerData != null) return versionByServerData;
