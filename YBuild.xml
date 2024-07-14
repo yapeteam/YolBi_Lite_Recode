@@ -37,6 +37,7 @@
                 <dir name="injection">
                     <file>build/injection-1.8.9.jar</file>
                     <file>build/injection-1.12.2.jar</file>
+                    <file>build/injection-1.18.1.jar</file>
                 </dir>
                 <dir name="dependencies">
                     <file>deps/asm-all-9.2.jar</file>
