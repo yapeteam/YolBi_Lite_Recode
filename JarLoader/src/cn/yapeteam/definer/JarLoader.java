@@ -77,9 +77,9 @@ public class JarLoader {
         System.out.println("sortClasses: " + (System.currentTimeMillis() - start) + "ms");
         for (Pair aClass : list)
             try {
-                System.out.println(aClass.node.name + ":" + (defineClass(classLoader, aClass.bytes) != null));
-            } catch (LinkageError e) {
-                System.out.println("duplicate class: " + aClass.node.name);
+                defineClass(classLoader, aClass.bytes);
+                //System.out.println(aClass.node.name + ":" + (defineClass(classLoader, aClass.bytes) != null));
+            } catch (Throwable ignored) {
             }
     }
 

@@ -55,7 +55,7 @@ public class JarMapper {
                         Shadow.Helper.processShadow(node);
                         ClassMapper.map(node, mode);
                         bytes = ASMUtils.rewriteClass(node);
-                        ResourceManager.resources.res.put(se.getName().replace(".class", "").replace('/', '.'), bytes);
+                        ResourceManager.resources.res.put(se.getName().substring(0, se.getName().length() - 6).replace('/', '.'), bytes);
                     } else {
                         ClassMapper.map(node, mode);
                         bytes = ASMUtils.rewriteClass(node);

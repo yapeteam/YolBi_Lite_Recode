@@ -18,6 +18,6 @@ public class ClassUtils {
     }
 
     public static byte[] getClassBytes(String name) {
-        return ResourceManager.resources.get(name.replace('.', '/') + ".class");
+        return ResourceManager.resources.get(name.replace('/', '.'));
     }
 }
