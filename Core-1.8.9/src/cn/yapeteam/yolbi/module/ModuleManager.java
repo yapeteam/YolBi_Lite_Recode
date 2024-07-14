@@ -31,7 +31,7 @@ public class ModuleManager {
         modules.add(new FakeLag());
         modules.add(new KillAura());
         // modules.add(new Reach());
-        modules.add(new Target());
+        modules.add(new CombatSettings());
         modules.add(new Velocity());
         modules.add(new WTap());
         modules.add(new AntiInvisible());

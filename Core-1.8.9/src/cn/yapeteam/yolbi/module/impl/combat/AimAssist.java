@@ -27,17 +27,16 @@ public class AimAssist extends Module {
     private final NumberValue<Integer> Range = new NumberValue<>("Aim Range", 5, 3, 10, 1);
 
     public final ModeValue<String> TargetPriority = new ModeValue<>("Target Priority", "Distance", "Distance", "Health", "Angle", "Clip");
-
     private final BooleanValue View = new BooleanValue("In View", true);
+    private final BooleanValue WeaponOnly = new BooleanValue("Weapon Only", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
-
-    private final NumberValue<Float> calcSpeed = new NumberValue<>("Calculation Speed", 50f, 40f, 100f, 0.5f);
-
     private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 100f, 1f, 180f, .5f);
+
+
 
     public AimAssist() {
         super("AimAssist", ModuleCategory.COMBAT);
-        addValues(Range, TargetPriority, ClickAim, View, calcSpeed, rotSpeed);
+        addValues(Range, TargetPriority, ClickAim, View, rotSpeed);
     }
 
     private final List<Vector2f> aimPath = new ArrayList<>();
@@ -45,53 +44,39 @@ public class AimAssist extends Module {
     @Override
     protected void onDisable() {
         aimPath.clear();
-        if (RotationManager.active)
-            RotationManager.stop();
     }
 
     private Entity target = null;
 
     @Listener
     private void onTick(EventTick e) {
-        try {
-            if (mc.thePlayer == null)
-                return;
-            if (mc.currentScreen != null) return;
-            if (target != null && (target.isDead | target.getDistanceSqToEntity(mc.thePlayer) > Range.getValue()))
-                target = null;
-            Entity lastTarget = target;
-            if (TargetPriority.is("Clip"))
-                target = PlayerUtil.getMouseOver(1, Range.getValue());
-            else if (target == null)
-                target = getTargets();
-            if (this.target != lastTarget)
-                aimPath.clear();
-            if (target != null && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
-                val vector2fs = WindPosMapper.generatePath(new Vector2f(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), RotationManager.calculate(target));
-                aimPath.addAll(vector2fs);
-            }
-        } catch (Throwable ex) {
-            Logger.exception(ex);
+        if (mc.thePlayer == null)
+            return;
+        if (mc.currentScreen != null) return;
+        if (target != null && (target.isDead | target.getDistanceSqToEntity(mc.thePlayer) > Range.getValue()))
+            target = null;
+        if (TargetPriority.is("Clip"))
+            target = PlayerUtil.getMouseOver(1, Range.getValue());
+        else{
+            target = getTargets();
         }
     }
 
     @Listener
     public void onUpdate(EventRender2D event) {
-        try {
-            if (mc.currentScreen == null && !aimPath.isEmpty() && !(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
-                int length = (int) (aimPath.size() * calcSpeed.getValue() / 100);
-                if (length > aimPath.size())
-                    length = aimPath.size();
-                for (int i = 0; i < length; i++) {
-                    Vector2f rotations = aimPath.get(i);
-                    RotationManager.setRotations(rotations, rotSpeed.getValue());
-                    RotationManager.smooth();
+        if (mc.currentScreen == null && mc.inGameHasFocus) {
+            if (!WeaponOnly.getValue() || PlayerUtil.holdingWeapon()) {
+                if (!(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
+                    if (target != null) {
+                        double n = PlayerUtil.calculateHorizontalAngleDifference(target);
+                        if (n > 1.0D || n < -1.0D) {
+                            float val = (float) (-(n / (101.0D - (rotSpeed.getValue()))));
+                            mc.thePlayer.rotationYaw += val;
+                        }
+                    }
+
                 }
-                aimPath.subList(0, length).clear();
-            } else if (RotationManager.active)
-                RotationManager.stop();
-        } catch (Throwable e) {
-            Logger.exception(e);
+            }
         }
     }
 
@@ -113,7 +98,6 @@ public class AimAssist extends Module {
             targets.sort(Comparator.comparingDouble(o -> ((EntityLivingBase) o).getHealth()));
         else if (TargetPriority.is("Angle"))
             targets.sort(Comparator.comparingDouble(entity -> RotationManager.getRotationsNeeded(entity)[0]));
-        Logger.info("Targets: " + (targets.isEmpty() ? null : targets.get(0)));
         return targets.isEmpty() ? null : targets.get(0);
     }
 }

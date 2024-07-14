@@ -6,17 +6,20 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import lombok.Getter;
 
 @Getter
-public class Target extends Module {
+public class CombatSettings extends Module {
     private final BooleanValue players = new BooleanValue("Players", true);
     private final BooleanValue notTeamMates = new BooleanValue("No Team Mates", players::getValue, true);
     private final BooleanValue animals = new BooleanValue("Animals", true);
     private final BooleanValue mobs = new BooleanValue("Mobs", true);
     private final BooleanValue villagers = new BooleanValue("Villagers", true);
+    // for weapons
+    private final BooleanValue rod = new BooleanValue("Rod as Weapon", true);
+    private final BooleanValue axe = new BooleanValue("Axe as Weapon", false);
+    private final BooleanValue stick = new BooleanValue("Stick as Weapon", false);
 
-
-    public Target() {
-        super("Target", ModuleCategory.COMBAT);
-        addValues(players, notTeamMates, animals, mobs, villagers);
+    public CombatSettings() {
+        super("Combat Settings", ModuleCategory.COMBAT);
+        addValues(players, notTeamMates, animals, mobs, villagers, rod, axe, stick);
     }
 
     @Override

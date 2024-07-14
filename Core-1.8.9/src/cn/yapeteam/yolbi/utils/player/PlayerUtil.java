@@ -1,5 +1,6 @@
 package cn.yapeteam.yolbi.utils.player;
 
+import cn.yapeteam.yolbi.module.impl.combat.CombatSettings;
 import cn.yapeteam.yolbi.utils.IMinecraft;
 import com.google.common.base.Predicates;
 import lombok.experimental.UtilityClass;
@@ -12,6 +13,11 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemFishingRod;
+import net.minecraft.item.ItemSword;
 import net.minecraft.util.*;
 
 import java.util.ArrayList;
@@ -35,6 +41,8 @@ public class PlayerUtil implements IMinecraft {
         put(3, 11); // Haste
         put(13, 12); // Water Breathing
     }};
+
+    CombatSettings settings = new CombatSettings();
 
     private int getPing(Entity entity) {
         val uniqueID = mc.getNetHandler().getPlayerInfo(entity.getUniqueID());
@@ -181,6 +189,24 @@ public class PlayerUtil implements IMinecraft {
         return null;
     }
 
+    public static double calculateHorizontalAngleDifference(Entity en) {
+        return ((double) (mc.thePlayer.rotationYaw - getYaw(en)) % 360.0D + 540.0D) % 360.0D - 180.0D;
+    }
+
+    public static float getYaw(Entity ent) {
+        double x = ent.posX - mc.thePlayer.posX;
+        double z = ent.posZ - mc.thePlayer.posZ;
+        double yaw = Math.atan2(x, z) * 57.29577951308232;
+        return (float) (yaw * -1.0D);
+    }
+
+    public static boolean holdingWeapon() {
+        if (mc.thePlayer.getHeldItem() == null) {
+            return false;
+        }
+        Item getItem = mc.thePlayer.getHeldItem().getItem();
+        return getItem instanceof ItemSword || (settings.getAxe().getValue() && getItem instanceof ItemAxe) || (settings.getRod().getValue() && getItem instanceof ItemFishingRod) || (settings.getStick().getValue() && getItem == Items.stick);
+    }
 
     /**
      * Finds what block or object the mouse is over at the specified partial tick time. Args: partialTickTime
