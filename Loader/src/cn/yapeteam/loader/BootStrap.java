@@ -11,6 +11,7 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
+import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -60,16 +61,27 @@ public class BootStrap {
         return ASMUtils.node(JVMTIWrapper.instance.getClassBytes(ClassUtils.getClass(Mapper.getObfClass("net.minecraft.client.Minecraft"))));
     }
 
+    private static Thread getThreadByName(String name) {
+        for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
+            Thread thread = (Thread) o;
+            if (thread.getName().equals(name))
+                return thread;
+        }
+        return null;
+    }
+
     public static void entry() {
         try {
             if (JVMTIWrapper.instance == null)
                 JVMTIWrapper.instance = new NativeWrapper();
-            for (Object o : Thread.getAllStackTraces().keySet().toArray()) {
-                Thread thread = (Thread) o;
-                if (thread.getName().equals("Client thread")) {
-                    client_thread = thread;
-                    break;
-                }
+            System.setProperty("java.awt.headless", "true");
+            client_thread = getThreadByName("Client thread");
+            if (client_thread == null)
+                client_thread = getThreadByName("Render thread");
+            if (client_thread == null) {
+                Logger.error("Failed to get target thread.");
+                SocketSender.send("CLOSE");
+                return;
             }
             try {
                 Class.forName("net.minecraft.launchwrapper.LaunchClassLoader", true, client_thread.getContextClassLoader());
@@ -112,11 +124,7 @@ public class BootStrap {
             );
             version = getMinecraftVersion();
             if (version == null || version.first == null || version.second == null) {
-                Logger.error("Failed to get Minecraft version.");
-                if (version != null) {
-                    Logger.error("Version: {}, Mode: {}", version.first, version.second);
-                    Logger.error("java.library.path: {}, sun.java.command: {}", System.getProperty("java.library.path"), System.getProperty("sun.java.command"));
-                } else Logger.error("Version: null, Mode: null");
+                Logger.error("Unsupported Minecraft version.");
                 SocketSender.send("CLOSE");
                 return;
             }
@@ -139,7 +147,7 @@ public class BootStrap {
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/vanilla.srg")), StandardCharsets.UTF_8), Mapper.getVanilla());
             Mapper.readMapping(new String(Objects.requireNonNull(ResourceManager.resources.get("mappings/" + version.first.getVersion() + "/forge.srg")), StandardCharsets.UTF_8), Mapper.getSearges());
 
-            Logger.warn("Loading Hooks...");
+            Logger.warn("Loading Minecraft Hook...");
 
             ClassNode target;
             try {

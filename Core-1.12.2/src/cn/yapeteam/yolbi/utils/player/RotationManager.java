@@ -55,14 +55,6 @@ public class RotationManager implements IMinecraft {
         }
     }
 
-    //  @Listener(Priority.LOWER)
-    //  public void onRender(EventRotationsRender event) {
-    //      if (active && rotations != null) {
-    //          event.setYaw(rotations.x);
-    //          event.setPitch(rotations.y);
-    //      }
-    //  }
-
     @Listener
     private void onJump(EventJump event) {
         if (active && rotations != null)

@@ -17,7 +17,6 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedParameter"
 JavaVM *jvm;
-JNIEnv *jniEnv;
 jvmtiEnv *jvmti;
 
 struct Callback
@@ -66,7 +65,7 @@ jclass JNICALL loadClass(JNIEnv *jniEnv, const char *name, jobject classloader)
     return (jclass)(*jniEnv)->CallObjectMethod(jniEnv, classloader, loadClass, (*jniEnv)->NewStringUTF(jniEnv, name));
 }
 
-jclass findThreadClass(const char *name, jobject classLoader)
+jclass findClass(JNIEnv *jniEnv, const char *name, jobject classLoader)
 {
     jclass result = NULL;
     replace(name, "/", ".");
@@ -307,7 +306,7 @@ void *allocate(jlong size)
 
 JNIEXPORT jclass JNICALL FindClass(JNIEnv *env, jclass _, jstring name, jobject loader)
 {
-    return findThreadClass(jstringToChar(jniEnv, name), loader);
+    return findClass(env, jstringToChar(env, name), loader);
 }
 
 JNIEXPORT jbyteArray JNICALL GetClassBytes(JNIEnv *env, jclass _, jclass clazz)
@@ -369,7 +368,7 @@ JNIEXPORT jclass JNICALL DefineClass(JNIEnv *env, jclass _, jobject classLoader,
     return (jclass)classDefined;
 }
 
-void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
+void loadJar2URL(JNIEnv *env, wchar_t *path, jobject loader)
 {
     jclass urlClassLoader = (*env)->FindClass(env, "java/net/URLClassLoader");
     jclass fileClass = (*env)->FindClass(env, "java/io/File");
@@ -420,14 +419,43 @@ wchar_t *format_wchar(const wchar_t *format, ...)
 }
 
 jobject classLoader;
+jobject systemClassLoader;
 wchar_t *yolbiPath;
+
+jclass JarLoader;
+jmethodID loadJarMethod;
+
+BOOL hasLaunchClassLoader = FALSE;
+BOOL defineMode = TRUE;
+
+void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
+{
+    if (JarLoader == NULL)
+    {
+        wchar_t *definderPath = format_wchar(L"%ls\\definer.jar", yolbiPath);
+        wprintf(L"Loading definder.jar from %ls\n", definderPath);
+        loadJar2URL(env, definderPath, systemClassLoader);
+        JarLoader = findClass(env, "cn.yapeteam.definer.JarLoader", systemClassLoader);
+        loadJarMethod = (*env)->GetStaticMethodID(env, JarLoader, "loadJar", "(Ljava/lang/String;Ljava/lang/ClassLoader;)V");
+        JNINativeMethod HookerMethods[] = {
+            {"defineClass", "(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;", (void *)&DefineClass},
+        };
+        (*env)->RegisterNatives(env, JarLoader, HookerMethods, 1);
+    }
+    (*env)->CallStaticVoidMethod(env, JarLoader, loadJarMethod, w2js(env, path), loader);
+}
 
 JNIEXPORT void JNICALL loadInjection(JNIEnv *env, jclass _)
 {
     wchar_t *injectionOutPath = format_wchar(L"%ls\\injection.jar", yolbiPath);
-    loadJar(env, injectionOutPath, classLoader);
-    jniEnv = env;
-    jclass Start = findThreadClass(("cn.yapeteam.yolbi.Loader"), classLoader);
+    if (!defineMode)
+        loadJar2URL(env, injectionOutPath, classLoader);
+    else
+    {
+        loadJar(env, injectionOutPath, classLoader);
+        loadJar2URL(env, injectionOutPath, systemClassLoader);
+    }
+    jclass Start = findClass(env, "cn.yapeteam.yolbi.Loader", classLoader);
     if (!Start)
     {
         printf(("Failed to find Loader class\n"));
@@ -459,78 +487,71 @@ int str_endwith(const char *str, const char *reg)
     return 0;
 }
 
-void Inject_fla_bcf_()
+jobject getThreadByName(JNIEnv *env, const char *name)
 {
-    const char *water00 = ".--------------------------------------------------------------------------------------------------------------------.";
-    const char *water01 = "|            :::   :::     :::     :::::::::  :::::::::: ::::::::::: ::::::::::     :::     ::::    ::::             |";
-    const char *water02 = "|            :+:   :+:   :+: :+:   :+:    :+: :+:            :+:     :+:          :+: :+:   +:+:+: :+:+:+            |";
-    const char *water03 = "|             +:+ +:+   +:+   +:+  +:+    +:+ +:+            +:+     +:+         +:+   +:+  +:+ +:+:+ +:+            |";
-    const char *water04 = "|              +#++:   +#++:++#++: +#++:++#+  +#++:++#       +#+     +#++:++#   +#++:++#++: +#+  +:+  +#+            |";
-    const char *water05 = "|               +#+    +#+     +#+ +#+        +#+            +#+     +#+        +#+     +#+ +#+       +#+            |";
-    const char *water06 = "|               #+#    #+#     #+# #+#        #+#            #+#     #+#        #+#     #+# #+#       #+#            |";
-    const char *water07 = "|               ###    ###     ### ###        ##########     ###     ########## ###     ### ###       ###            |";
-    const char *water08 = "|  :::::::::  :::::::::   ::::::::  :::::::::  :::    :::  ::::::::  ::::::::::: :::::::::::  ::::::::  ::::    :::  |";
-    const char *water09 = "|  :+:    :+: :+:    :+: :+:    :+: :+:    :+: :+:    :+: :+:    :+:     :+:         :+:     :+:    :+: :+:+:   :+:  |";
-    const char *water10 = "|  +:+    +:+ +:+    +:+ +:+    +:+ +:+    +:+ +:+    +:+ +:+            +:+         +:+     +:+    +:+ :+:+:+  +:+  |";
-    const char *water11 = "|  +#++:++#+  +#++:++#:  +#+    +:+ +#+    +:+ +#+    +:+ +#+            +#+         +#+     +#+    +:+ +#+ +:+ +#+  |";
-    const char *water12 = "|  +#+        +#+    +#+ +#+    +#+ +#+    +#+ +#+    +#+ +#+            +#+         +#+     +#+    +#+ +#+  +#+#+#  |";
-    const char *water13 = "|  #+#        #+#    #+# #+#    #+# #+#    #+# #+#    #+# #+#    #+#     #+#         #+#     #+#    #+# #+#   #+#+#  |";
-    const char *water14 = "|  ###        ###    ###  ########  #########   ########   ########      ###     ###########  ########  ###    ####  |";
-    const char *water15 = "|====================================================================================================================|";
-    const char *water16 = "|                 **    **     **     *******  ******** ********** ********     **     ****     ****                 |";
-    const char *water17 = "|                //**  **     ****   /**////**/**///// /////**/// /**/////     ****   /**/**   **/**                 |";
-    const char *water18 = "|                 //****     **//**  /**   /**/**          /**    /**         **//**  /**//** ** /**                 |";
-    const char *water19 = "|                  //**     **  //** /******* /*******     /**    /*******   **  //** /** //***  /**                 |";
-    const char *water20 = "|                   /**    **********/**////  /**////      /**    /**////   **********/**  //*   /**                 |";
-    const char *water21 = "|                   /**   /**//////**/**      /**          /**    /**      /**//////**/**   /    /**                 |";
-    const char *water22 = "|                   /**   /**     /**/**      /********    /**    /********/**     /**/**        /**                 |";
-    const char *water23 = "|                   //    //      // //       ////////     //     //////// //      // //         //                  |";
-    const char *water24 = "|         *******  *******     *******   *******   **     **   ******  ********** **   *******   ****     **         |";
-    const char *water25 = "|        /**////**/**////**   **/////** /**////** /**    /**  **////**/////**/// /**  **/////** /**/**   /**         |";
-    const char *water26 = "|        /**   /**/**   /**  **     //**/**    /**/**    /** **    //     /**    /** **     //**/**//**  /**         |";
-    const char *water27 = "|        /******* /*******  /**      /**/**    /**/**    /**/**           /**    /**/**      /**/** //** /**         |";
-    const char *water28 = "|        /**////  /**///**  /**      /**/**    /**/**    /**/**           /**    /**/**      /**/**  //**/**         |";
-    const char *water29 = "|        /**      /**  //** //**     ** /**    ** /**    /**//**    **    /**    /**//**     ** /**   //****         |";
-    const char *water30 = "|        /**      /**   //** //*******  /*******  //*******  //******     /**    /** //*******  /**    //***         |";
-    const char *water31 = "|        //       //     //   ///////   ///////    ///////    //////      //     //   ///////   //      ///          |";
-    const char *water32 = "*--------------------------------------------------------------------------------------------------------------------*";
-    printf("%s\n", water00);
-    printf("%s\n", water01);
-    printf("%s\n", water02);
-    printf("%s\n", water03);
-    printf("%s\n", water04);
-    printf("%s\n", water05);
-    printf("%s\n", water06);
-    printf("%s\n", water07);
-    printf("%s\n", water08);
-    printf("%s\n", water09);
-    printf("%s\n", water10);
-    printf("%s\n", water11);
-    printf("%s\n", water12);
-    printf("%s\n", water13);
-    printf("%s\n", water14);
-    printf("%s\n", water15);
-    printf("%s\n", water16);
-    printf("%s\n", water17);
-    printf("%s\n", water18);
-    printf("%s\n", water19);
-    printf("%s\n", water20);
-    printf("%s\n", water21);
-    printf("%s\n", water22);
-    printf("%s\n", water23);
-    printf("%s\n", water24);
-    printf("%s\n", water25);
-    printf("%s\n", water26);
-    printf("%s\n", water27);
-    printf("%s\n", water28);
-    printf("%s\n", water29);
-    printf("%s\n", water30);
-    printf("%s\n", water31);
-    printf("%s\n", water32);
+    jclass threadClass = (*env)->FindClass(env, "java/lang/Thread");
+    jmethodID getName = (*env)->GetMethodID(env, threadClass, "getName", "()Ljava/lang/String;");
+    jmethodID getAllStackTraces = (*env)->GetStaticMethodID(env, threadClass, "getAllStackTraces", "()Ljava/util/Map;");
+    jobject threadMap = (*env)->CallStaticObjectMethod(env, threadClass, getAllStackTraces);
+    jclass Set = (*env)->FindClass(env, "java/util/Set");
+    jclass Map = (*env)->FindClass(env, "java/util/Map");
+    jmethodID keySet = (*env)->GetMethodID(env, Map, "keySet", "()Ljava/util/Set;");
+    jobject keySetObj = (*env)->CallObjectMethod(env, threadMap, keySet);
+    jmethodID toArray = (*env)->GetMethodID(env, Set, "toArray", "()[Ljava/lang/Object;");
+    jobjectArray array = (jobjectArray)(*env)->CallObjectMethod(env, keySetObj, toArray);
+    jsize length = (*env)->GetArrayLength(env, array);
+    for (jsize i = 0; i < length; i++)
+    {
+        jobject thread = (*env)->GetObjectArrayElement(env, array, i);
+        jstring threadName = (jstring)(*env)->CallObjectMethod(env, thread, getName);
+        const char *threadNameChars = jstringToChar(env, threadName);
+        if (!strcmp(threadNameChars, name))
+        {
+            return thread;
+        }
+    }
+    return NULL;
+}
+
+void Inject_fla_bcf_(JNIEnv *jniEnv)
+{
+    printf(".--------------------------------------------------------------------------------------------------------------------.\n");
+    printf("|            :::   :::     :::     :::::::::  :::::::::: ::::::::::: ::::::::::     :::     ::::    ::::             |\n");
+    printf("|            :+:   :+:   :+: :+:   :+:    :+: :+:            :+:     :+:          :+: :+:   +:+:+: :+:+:+            |\n");
+    printf("|             +:+ +:+   +:+   +:+  +:+    +:+ +:+            +:+     +:+         +:+   +:+  +:+ +:+:+ +:+            |\n");
+    printf("|              +#++:   +#++:++#++: +#++:++#+  +#++:++#       +#+     +#++:++#   +#++:++#++: +#+  +:+  +#+            |\n");
+    printf("|               +#+    +#+     +#+ +#+        +#+            +#+     +#+        +#+     +#+ +#+       +#+            |\n");
+    printf("|               #+#    #+#     #+# #+#        #+#            #+#     #+#        #+#     #+# #+#       #+#            |\n");
+    printf("|               ###    ###     ### ###        ##########     ###     ########## ###     ### ###       ###            |\n");
+    printf("|  :::::::::  :::::::::   ::::::::  :::::::::  :::    :::  ::::::::  ::::::::::: :::::::::::  ::::::::  ::::    :::  |\n");
+    printf("|  :+:    :+: :+:    :+: :+:    :+: :+:    :+: :+:    :+: :+:    :+:     :+:         :+:     :+:    :+: :+:+:   :+:  |\n");
+    printf("|  +:+    +:+ +:+    +:+ +:+    +:+ +:+    +:+ +:+    +:+ +:+            +:+         +:+     +:+    +:+ :+:+:+  +:+  |\n");
+    printf("|  +#++:++#+  +#++:++#:  +#+    +:+ +#+    +:+ +#+    +:+ +#+            +#+         +#+     +#+    +:+ +#+ +:+ +#+  |\n");
+    printf("|  +#+        +#+    +#+ +#+    +#+ +#+    +#+ +#+    +#+ +#+            +#+         +#+     +#+    +#+ +#+  +#+#+#  |\n");
+    printf("|  #+#        #+#    #+# #+#    #+# #+#    #+# #+#    #+# #+#    #+#     #+#         #+#     #+#    #+# #+#   #+#+#  |\n");
+    printf("|  ###        ###    ###  ########  #########   ########   ########      ###     ###########  ########  ###    ####  |\n");
+    printf("|====================================================================================================================|\n");
+    printf("|                 **    **     **     *******  ******** ********** ********     **     ****     ****                 |\n");
+    printf("|                //**  **     ****   /**////**/**///// /////**/// /**/////     ****   /**/**   **/**                 |\n");
+    printf("|                 //****     **//**  /**   /**/**          /**    /**         **//**  /**//** ** /**                 |\n");
+    printf("|                  //**     **  //** /******* /*******     /**    /*******   **  //** /** //***  /**                 |\n");
+    printf("|                   /**    **********/**////  /**////      /**    /**////   **********/**  //*   /**                 |\n");
+    printf("|                   /**   /**//////**/**      /**          /**    /**      /**//////**/**   /    /**                 |\n");
+    printf("|                   /**   /**     /**/**      /********    /**    /********/**     /**/**        /**                 |\n");
+    printf("|                   //    //      // //       ////////     //     //////// //      // //         //                  |\n");
+    printf("|         *******  *******     *******   *******   **     **   ******  ********** **   *******   ****     **         |\n");
+    printf("|        /**////**/**////**   **/////** /**////** /**    /**  **////**/////**/// /**  **/////** /**/**   /**         |\n");
+    printf("|        /**   /**/**   /**  **     //**/**    /**/**    /** **    //     /**    /** **     //**/**//**  /**         |\n");
+    printf("|        /******* /*******  /**      /**/**    /**/**    /**/**           /**    /**/**      /**/** //** /**         |\n");
+    printf("|        /**////  /**///**  /**      /**/**    /**/**    /**/**           /**    /**/**      /**/**  //**/**         |\n");
+    printf("|        /**      /**  //** //**     ** /**    ** /**    /**//**    **    /**    /**//**     ** /**   //****         |\n");
+    printf("|        /**      /**   //** //*******  /*******  //*******  //******     /**    /** //*******  /**    //***         |\n");
+    printf("|        //       //     //   ///////   ///////    ///////    //////      //     //   ///////   //      ///          |\n");
+    printf("*--------------------------------------------------------------------------------------------------------------------*\n");
 
     jclass ClassLoader = (*jniEnv)->FindClass(jniEnv, ("java/lang/ClassLoader"));
     jmethodID getSystemClassLoader = (*jniEnv)->GetStaticMethodID(jniEnv, ClassLoader, ("getSystemClassLoader"), ("()Ljava/lang/ClassLoader;"));
-    jobject systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
+    systemClassLoader = (*jniEnv)->CallStaticObjectMethod(jniEnv, ClassLoader, getSystemClassLoader);
 
     wchar_t *zip_path = format_wchar(L"%ls\\g++.zip", yolbiPath);
     wchar_t *zip_out = get_current_directory_w();
@@ -547,41 +568,15 @@ void Inject_fla_bcf_()
     jmethodID unzip = (*jniEnv)->GetStaticMethodID(jniEnv, unzipClz, "unzip", "(Ljava/lang/String;Ljava/lang/String;)V");
     (*jniEnv)->CallStaticVoidMethod(jniEnv, unzipClz, unzip, jzip_path, jzip_out);
 
-    jclass threadClass = (*jniEnv)->FindClass(jniEnv, "java/lang/Thread");
-    jmethodID getAllStackTraces = (*jniEnv)->GetStaticMethodID(jniEnv, threadClass, ("getAllStackTraces"), ("()Ljava/util/Map;"));
-    if (!getAllStackTraces)
-        return;
-    jobjectArray threads = (jobjectArray)(*jniEnv)->CallObjectMethod(jniEnv, (*jniEnv)->CallObjectMethod(jniEnv, (*jniEnv)->CallStaticObjectMethod(jniEnv, threadClass, getAllStackTraces), (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->FindClass(jniEnv, "java/util/Map"), "keySet", "()Ljava/util/Set;")),
-                                                                     (*jniEnv)->GetMethodID(jniEnv,
-                                                                                            (*jniEnv)->FindClass(
-                                                                                                jniEnv,
-                                                                                                "java/util/Set"),
-                                                                                            "toArray",
-                                                                                            "()[Ljava/lang/Object;"));
-    if (!threads)
-        return;
-    jsize arrlength = (*jniEnv)->GetArrayLength(jniEnv, threads);
     jobject clientThread = NULL;
-    for (int i = 0; i < arrlength; i++)
-    {
-        jobject thread = (*jniEnv)->GetObjectArrayElement(jniEnv, threads, i);
-        if (thread == NULL)
-            continue;
-        threadClass = (*jniEnv)->GetObjectClass(jniEnv, thread);
-        jstring name = (*jniEnv)->CallObjectMethod(jniEnv, thread,
-                                                   (*jniEnv)->GetMethodID(jniEnv, threadClass, ("getName"),
-                                                                          ("()Ljava/lang/String;")));
-        const char *str = (*jniEnv)->GetStringUTFChars(jniEnv, name, 0);
-        if (!strcmp(str, ("Client thread")))
-        {
-            clientThread = thread;
-            (*jniEnv)->ReleaseStringUTFChars(jniEnv, name, str);
-            break;
-        }
-        (*jniEnv)->ReleaseStringUTFChars(jniEnv, name, str);
-    }
+    clientThread = getThreadByName(jniEnv, "Client thread");
     if (!clientThread)
+        clientThread = getThreadByName(jniEnv, "Render thread");
+    if (!clientThread)
+    {
+        printf(("Failed to find target thread\n"));
         return;
+    }
 
     classLoader = (*jniEnv)->CallObjectMethod(jniEnv, clientThread, (*jniEnv)->GetMethodID(jniEnv, (*jniEnv)->GetObjectClass(jniEnv, clientThread), ("getContextClassLoader"), ("()Ljava/lang/ClassLoader;")));
     if (!classLoader)
@@ -599,21 +594,28 @@ void Inject_fla_bcf_()
     jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, ("forName"), ("(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"));
     jstring className = (*jniEnv)->NewStringUTF(jniEnv, ("net.minecraft.launchwrapper.LaunchClassLoader"));
     (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
-    boolean hasLaunchClassLoader = TRUE;
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {
         (*jniEnv)->ExceptionDescribe(jniEnv);
         (*jniEnv)->ExceptionClear(jniEnv);
         hasLaunchClassLoader = FALSE;
     }
-
+    // className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
+    // (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    // if ((*jniEnv)->ExceptionCheck(jniEnv))
+    // {
+    //     (*jniEnv)->ExceptionDescribe(jniEnv);
+    //     (*jniEnv)->ExceptionClear(jniEnv);
+    //     defineMode = TRUE;
+    // }
     if (hasLaunchClassLoader)
         printf("LaunchClassLoader found\n");
-
     wchar_t *jarPath = format_wchar(L"%ls\\dependencies\\asm-all-9.2.jar", yolbiPath);
-    loadJar(jniEnv, jarPath, systemClassLoader);
+    loadJar2URL(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
-        loadJar(jniEnv, jarPath, classLoaderLoader);
+        loadJar2URL(jniEnv, jarPath, classLoaderLoader);
+    if (defineMode)
+        loadJar(jniEnv, jarPath, classLoader);
 
     jvmtiCapabilities capabilities = {0};
     memset(&capabilities, 0, sizeof(jvmtiCapabilities));
@@ -635,32 +637,32 @@ void Inject_fla_bcf_()
     (*jvmti)->SetEventCallbacks((jvmtiEnv *)jvmti, &callbacks, sizeof(jvmtiEventCallbacks));
     (*jvmti)->SetEventNotificationMode((jvmtiEnv *)jvmti, JVMTI_ENABLE, JVMTI_EVENT_CLASS_FILE_LOAD_HOOK, NULL);
 
-    wchar_t *hookerPath = format_wchar(L"%ls\\hooker.jar", yolbiPath);
-
-    if (hasLaunchClassLoader)
-        loadJar(jniEnv, hookerPath, classLoaderLoader);
-    else
-        loadJar(jniEnv, hookerPath, systemClassLoader);
-
-    JNINativeMethod HookerMethods[] = {
-        {("getClassBytes"), ("(Ljava/lang/Class;)[B"), (void *)&GetClassBytes},
-        {("defineClass"), ("(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;"), (void *)&DefineClass},
-        {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
-    };
-
-    jclass Hooker = findThreadClass("cn.yapeteam.hooker.Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
-
-    if (!Hooker)
+    if (!defineMode)
     {
-        printf(("Failed to find Hooker class\n"));
-        return;
+        wchar_t *hookerPath = format_wchar(L"%ls\\hooker.jar", yolbiPath);
+
+        if (hasLaunchClassLoader)
+            loadJar2URL(jniEnv, hookerPath, classLoaderLoader);
+        else
+            loadJar2URL(jniEnv, hookerPath, systemClassLoader);
+        jclass Hooker = findClass(jniEnv, "cn/yapeteam/hooker/Hooker", hasLaunchClassLoader ? classLoaderLoader : systemClassLoader);
+        JNINativeMethod HookerMethods[] = {
+            {("getClassBytes"), ("(Ljava/lang/Class;)[B"), (void *)&GetClassBytes},
+            {("defineClass"), ("(Ljava/lang/ClassLoader;[B)Ljava/lang/Class;"), (void *)&DefineClass},
+            {("redefineClass"), ("(Ljava/lang/Class;[B)I"), (void *)&RedefineClass},
+        };
+        if (!Hooker)
+        {
+            printf(("Failed to find Hooker class\n"));
+            return;
+        }
+
+        printf(("Hooker class found\n"));
+        (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
+
+        jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, "hook", "()V");
+        (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
     }
-
-    printf(("Hooker class found\n"));
-    (*jniEnv)->RegisterNatives(jniEnv, Hooker, HookerMethods, 3);
-
-    jmethodID hook = (*jniEnv)->GetStaticMethodID(jniEnv, Hooker, ("hook"), ("()V"));
-    (*jniEnv)->CallStaticVoidMethod(jniEnv, Hooker, hook);
 
     wchar_t *depsPath = format_wchar(L"%ls\\dependencies", yolbiPath);
 
@@ -670,23 +672,37 @@ void Inject_fla_bcf_()
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (str_endwith(entry->d_name, (".jar")))
+        if (str_endwith(entry->d_name, ".jar"))
         {
             wchar_t *jarPath = format_wchar(L"%ls\\%ls", depsPath, char2wchar(entry->d_name));
-            loadJar(jniEnv, jarPath, systemClassLoader);
+            if (defineMode)
+                loadJar(jniEnv, jarPath, classLoader);
+            loadJar2URL(jniEnv, jarPath, systemClassLoader);
             wprintf(L"loaded: %ls\n", jarPath);
         }
     }
     closedir(dir);
 
     wchar_t *ymixinPath = format_wchar(L"%ls\\ymixin.jar", yolbiPath);
-    loadJar(jniEnv, ymixinPath, classLoader);
+    if (!defineMode)
+        loadJar2URL(jniEnv, ymixinPath, classLoader);
+    else
+    {
+        loadJar(jniEnv, ymixinPath, classLoader);
+        loadJar2URL(jniEnv, ymixinPath, systemClassLoader);
+    }
 
     wchar_t *loaderPath = format_wchar(L"%ls\\loader.jar", yolbiPath);
-    loadJar(jniEnv, loaderPath, classLoader);
+    if (!defineMode)
+        loadJar2URL(jniEnv, loaderPath, classLoader);
+    else
+    {
+        loadJar(jniEnv, loaderPath, classLoader);
+        loadJar2URL(jniEnv, loaderPath, systemClassLoader);
+    }
 
     printf(("All jars loaded\n"));
-    jclass wrapperClass = findThreadClass(("cn.yapeteam.loader.NativeWrapper"), classLoader);
+    jclass wrapperClass = findClass(jniEnv, "cn.yapeteam.loader.NativeWrapper", classLoader);
     printf(("NativeWrapper\n"));
     if (!wrapperClass)
     {
@@ -701,7 +717,7 @@ void Inject_fla_bcf_()
         {("FindClass"), ("(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Class;"), (void *)&FindClass},
     };
     (*jniEnv)->RegisterNatives(jniEnv, wrapperClass, methods, 4);
-    jclass natvieClass = findThreadClass(("cn.yapeteam.loader.Natives"), classLoader);
+    jclass natvieClass = findClass(jniEnv, "cn.yapeteam.loader.Natives", classLoader);
     if (!natvieClass)
     {
         printf(("Failed to find Natives class\n"));
@@ -710,12 +726,7 @@ void Inject_fla_bcf_()
     register_native_methods(jniEnv, natvieClass);
     printf(("Native methods registered\n"));
 
-    jclass BootStrap = findThreadClass(("cn.yapeteam.loader.BootStrap"), classLoader);
-    if ((*jniEnv)->ExceptionCheck(jniEnv))
-    {
-        (*jniEnv)->ExceptionDescribe(jniEnv);
-        (*jniEnv)->ExceptionClear(jniEnv);
-    }
+    jclass BootStrap = findClass(jniEnv, "cn.yapeteam.loader.BootStrap", classLoader);
     if (!BootStrap)
     {
         printf(("Failed to find BootStrap class\n"));
@@ -731,7 +742,14 @@ void Inject_fla_bcf_()
 
 #include <windows.h>
 
-void HookMain()
+PVOID UnLoad(PVOID arg)
+{
+    HMODULE hModule = NULL;
+    GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPWSTR)&UnLoad, &hModule);
+    FreeLibraryAndExitThread(hModule, 0);
+}
+
+void HookMain(JNIEnv *env)
 {
     setlocale(LC_ALL, "");
     printf("1\n");
@@ -740,7 +758,7 @@ void HookMain()
         return;
     printf("2\n");
     typedef jint(JNICALL * fnJNI_GetCreatedJavaVMs)(JavaVM **, jsize, jsize *);
-    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs)GetProcAddress(jvmHandle, ("JNI_GetCreatedJavaVMs"));
+    fnJNI_GetCreatedJavaVMs JNI_GetCreatedJavaVMs = (fnJNI_GetCreatedJavaVMs)GetProcAddress(jvmHandle, "JNI_GetCreatedJavaVMs");
     jint num = JNI_GetCreatedJavaVMs(&jvm, 1, NULL);
     jint num1 = (*jvm)->GetEnv(jvm, (void **)(&jvmti), JVMTI_VERSION);
     printf("3\n");
@@ -750,7 +768,14 @@ void HookMain()
     GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH);
     yolbiPath = format_wchar(L"%ls\\.yolbi", userProfile);
     wprintf(L"yolbiPath: %ls\n", yolbiPath);
-    Inject_fla_bcf_();
+    Inject_fla_bcf_(env);
+    if ((*env)->ExceptionCheck(env))
+    {
+        (*env)->ExceptionDescribe(env);
+        (*env)->ExceptionClear(env);
+    }
+    (*jvm)->DetachCurrentThread(jvm);
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)UnLoad, NULL, 0, NULL);
 }
 
 BYTE OldCode[12] = {0x00};
@@ -786,18 +811,31 @@ JVM_MonitorNotify MonitorNotify = NULL;
 
 void MonitorNotify_Hook(JNIEnv *env, jobject obj)
 {
-    UnHookFunction64("jvm.dll", "JVM_MonitorNotify");
+    UnHookFunction64("jvm.dll", "JVM_NanoTime");
     MonitorNotify(env, obj);
+    HookMain(env);
+}
 
-    jniEnv = env;
-    HookMain();
+typedef jlong (*JVM_NanoTime)(JNIEnv *env, jclass ignored);
+
+JVM_NanoTime NanoTime = NULL;
+
+jlong NanoTime_Hook(JNIEnv *env, jclass ignored)
+{
+    UnHookFunction64("jvm.dll", "JVM_NanoTime");
+    jlong time = NanoTime(env, ignored);
+    HookMain(env);
+    return time;
 }
 
 PVOID WINAPI remote()
 {
-    HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    // HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    HookFunction64("jvm.dll", "JVM_NanoTime", (PROC)NanoTime_Hook);
     HMODULE jvm = GetModuleHandleW(L"jvm.dll");
     MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, "JVM_MonitorNotify");
+    NanoTime = (JVM_NanoTime)GetProcAddressPeb(jvm, "JVM_NanoTime");
+
     return NULL;
 }
 

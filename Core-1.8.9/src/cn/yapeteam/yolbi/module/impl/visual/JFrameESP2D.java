@@ -32,12 +32,12 @@ public class JFrameESP2D extends Module implements Drawable {
         Module jFrameRenderer = YolBi.instance.getModuleManager().getModule(JFrameRenderer.class);
         if (!jFrameRenderer.isEnabled())
             jFrameRenderer.toggle();
-        YolBi.instance.getJFrameRender().getDrawables().add(this);
+        YolBi.instance.getJFrameRenderer().getDrawables().add(this);
     }
 
     @Override
     protected void onDisable() {
-        YolBi.instance.getJFrameRender().getDrawables().remove(this);
+        YolBi.instance.getJFrameRenderer().getDrawables().remove(this);
     }
 
     private final List<DrawableListener> cache = new CopyOnWriteArrayList<>();

@@ -3,6 +3,9 @@
     <rootdir>./</rootdir>
     <output>build</output>
     <build>
+        <artifact name="definer.jar">
+            <files>out/production/JarLoader</files>
+        </artifact>
         <artifact name="loader.jar">
             <files>out/production/Loader</files>
         </artifact>
@@ -37,6 +40,7 @@
                     <file>deps/flatlaf.jar</file>
                     <file>deps/flatlaf-intellij-themes.jar</file>
                 </dir>
+                <file>build/definer.jar</file>
                 <file>build/loader.jar</file>
                 <file>build/hooker.jar</file>
                 <file>build/ymixin.jar</file>

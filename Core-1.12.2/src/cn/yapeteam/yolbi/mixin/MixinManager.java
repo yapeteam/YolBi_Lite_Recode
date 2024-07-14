@@ -24,18 +24,15 @@ public class MixinManager {
 
     public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
+        add("MixinEntity");
+        add("MixinBlockNote");
         add("MixinMinecraft");
+        add("MixinModelBiped");
+        add("MixinEntityPlayer");
+        add("MixinNetworkManager");
         add("MixinEntityPlayerSP");
         add("MixinEntityRenderer");
         add("MixinEntityLivingBase");
-        // add("MixinRendererLivingEntity");
-        add("MixinNetworkManager");
-        // add("MixinPlayerControllerMP");
-        add("MixinEntityPlayer");
-        add("MixinBlockNote");
-        // add("MixinBlock");
-        add("MixinEntity");
-        add("MixinModelBiped");
         add("MixinEntityPlayerSPForEventLook");
         add("MixinEntityLivingBaseForEventLook");
         add("MixinAbstractClientPlayerForEventLook");
