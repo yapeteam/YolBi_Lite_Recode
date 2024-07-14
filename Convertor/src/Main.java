@@ -54,7 +54,7 @@ public class Main {
                                 friendly[friendly.length - 1],
                                 values[3],
                                 obf[obf.length - 1],
-                                null, values[0].substring(0, values[0].lastIndexOf("/") - 1),
+                                null, values[0].substring(0, values[0].lastIndexOf("/")),
                                 Mapper.Type.Field
                         ));
                     } else if (values.length == 2) {
@@ -65,7 +65,7 @@ public class Main {
                                 friendly[friendly.length - 1],
                                 null,
                                 obf[obf.length - 1],
-                                null, values[0].substring(0, values[0].lastIndexOf("/") - 1),
+                                null, values[0].substring(0, values[0].lastIndexOf("/")),
                                 Mapper.Type.Field
                         ));
                     }
@@ -78,7 +78,7 @@ public class Main {
                             friendly[friendly.length - 1],
                             values[3],
                             obf[obf.length - 1],
-                            values[1], values[0].substring(0, values[0].lastIndexOf("/") - 1),
+                            values[1], values[0].substring(0, values[0].lastIndexOf("/")),
                             Mapper.Type.Method
                     ));
             }

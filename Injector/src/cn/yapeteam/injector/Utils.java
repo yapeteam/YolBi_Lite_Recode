@@ -36,7 +36,13 @@ public class Utils {
         while (hWND != null) {
             if (hWND.getPointer() != Pointer.NULL) {
                 IntByReference pid = new IntByReference(-1);
+                int maxLen = 20;
                 String title = getWindowText(hWND);
+                int len = title.length();
+                if (len > maxLen) {
+                    title = title.substring(0, maxLen);
+                    title += "...";
+                }
                 user32.GetWindowThreadProcessId(hWND, pid);
                 list.add(new Pair<>(title, pid.getValue()));
             }

@@ -19,6 +19,10 @@ public class MainFrame extends JFrame {
     private volatile float value1 = 0, value2 = 0;
 
     private ArrayList<Pair<String, Integer>> targets = new ArrayList<>();
+    private final Thread progressThread1;
+    private final Thread progressThread2;
+    private Thread serverThread;
+    private final Thread updateThread;
 
     public MainFrame() {
         super("Inject Your YolBi Lite");
@@ -46,25 +50,31 @@ public class MainFrame extends JFrame {
             if (!targets.isEmpty() && process.getSelectedIndex() != -1)
                 inject(targets.get(process.getSelectedIndex()).b);
         });
-        new Thread(() -> {
+        float speed = 0.1f;
+        int fps = 60;
+        progressThread1 = new Thread(() -> {
             float cache = 0;
             while (true) {
-                long time = System.currentTimeMillis();
-                while (true) if (time + 10 <= System.currentTimeMillis()) break;
-                cache += (value1 - cache) / 100f;
+                cache += (value1 - cache) * speed;
                 progressBar1.setValue((int) cache);
+                try {
+                    Thread.sleep((long) (1000 / fps));
+                } catch (InterruptedException ignored) {
+                }
             }
-        }).start();
-        new Thread(() -> {
+        });
+        progressThread2 = new Thread(() -> {
             float cache = 0;
             while (true) {
-                long time = System.currentTimeMillis();
-                while (true) if (time + 10 <= System.currentTimeMillis()) break;
-                cache += (value2 - cache) / 20f;
+                cache += (value2 - cache) * speed;
                 progressBar2.setValue((int) cache);
+                try {
+                    Thread.sleep((long) (1000 / fps));
+                } catch (InterruptedException ignored) {
+                }
             }
-        }).start();
-        new Thread(() -> {
+        });
+        serverThread = new Thread(() -> {
             try (ServerSocket serverSocket = new ServerSocket(Main.port)) {
                 while (true) {
                     Socket socket = serverSocket.accept();
@@ -87,15 +97,19 @@ public class MainFrame extends JFrame {
                                     }
                                 } else switch (message) {
                                     case "S1":
+                                        progressThread1.start();
                                         progressBar1.setVisible(true);
                                         break;
                                     case "S2":
+                                        progressThread2.start();
                                         progressBar2.setVisible(true);
                                         break;
                                     case "E1":
+                                        progressThread1.interrupt();
                                         progressBar1.setVisible(false);
                                         break;
                                     case "E2":
+                                        progressThread2.interrupt();
                                         progressBar2.setVisible(false);
                                         break;
                                     case "CLOSE":
@@ -104,6 +118,9 @@ public class MainFrame extends JFrame {
                                             socket.close();
                                             setVisible(false);
                                         } catch (ClassNotFoundException e) {
+                                            progressThread1.interrupt();
+                                            progressThread2.interrupt();
+                                            serverThread.interrupt();
                                             System.exit(0);
                                         }
                                 }
@@ -115,8 +132,8 @@ public class MainFrame extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
-        new Thread(() -> {
+        });
+        updateThread = new Thread(() -> {
             while (true) {
                 ArrayList<Pair<String, Integer>> minecraftProcesses = Utils.getMinecraftProcesses();
                 int selected = process.getSelectedIndex();
@@ -130,7 +147,13 @@ public class MainFrame extends JFrame {
                 long time = System.currentTimeMillis();
                 while (true) if (System.currentTimeMillis() - time >= 500) break;
             }
-        }).start();
+        });
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        if (b) updateThread.start();
     }
 
     public void inject(int pid) {
@@ -144,6 +167,8 @@ public class MainFrame extends JFrame {
     }
 
     public void inject_ui() {
+        updateThread.interrupt();
+        serverThread.start();
         process.setVisible(false);
         inject.setVisible(false);
     }

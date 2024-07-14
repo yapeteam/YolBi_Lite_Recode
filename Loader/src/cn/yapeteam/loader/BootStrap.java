@@ -11,7 +11,6 @@ import org.objectweb.asm_9_2.Opcodes;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
 
-import javax.swing.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -161,9 +160,13 @@ public class BootStrap {
                 SocketSender.send("CLOSE");
                 return;
             }
-            String targetMethod = Mapper.map("net/minecraft/client/Minecraft", "runGameLoop", "()V", Mapper.Type.Method);
+            String methodName = "runTick";
+            String desc = version.first != Version.V1_18_1 ? "()V" : "(Z)V";
+            String targetMethod = Mapper.map("net/minecraft/client/Minecraft", methodName, desc, Mapper.Type.Method);
+            Logger.info("Mapped target method: {} {}", targetMethod, desc);
             for (MethodNode method : target.methods) {
-                if (method.name.equals(targetMethod) && method.desc.equals("()V")) {
+                if (method.name.equals(targetMethod) && method.desc.equals(desc)) {
+                    Logger.info("Found target method: {} {}", method.name, method.desc);
                     LabelNode labelNode = new LabelNode();
                     InsnList insnList = new InsnList();
                     insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(BootStrap.class), "initHook", "()V"));
