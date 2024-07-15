@@ -7,7 +7,9 @@ import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class Mapper {
     @Getter
@@ -162,18 +164,29 @@ public class Mapper {
         ).forEach(m -> owners.put(m.owner, m));
         String mappedOwner = map(null, owner, null, Type.Class);
         Class<?> theClass = YMixin.classProvider.get(mappedOwner);
-        while (theClass != Object.class) {
-            if (theClass != null) {
-                Class<?> finalTheClass = theClass;
-                java.util.Map.Entry<String, Map> entry = owners.entrySet().stream()
-                        .filter(m -> map(null, m.getKey(), null, Type.Class).equals(finalTheClass.getName().replace('.', '/')))
-                        .findFirst().orElse(null);
-                if (entry != null) {
-                    cache.put(identifier, applyMode(entry.getValue()));
-                    return applyMode(entry.getValue());
-                }
-                theClass = theClass.getSuperclass();
+        List<Class<?>> classes = new ArrayList<>();
+        Class<?> superClz = theClass;
+        while (superClz != Object.class) {
+            if (superClz != null) {
+                classes.add(superClz);
+                superClz = superClz.getSuperclass();
             } else break;
+        }
+        Class<?> interfaceClz = theClass;
+        while (interfaceClz != Object.class) {
+            if (interfaceClz != null) {
+                classes.addAll(Arrays.asList(interfaceClz.getInterfaces()));
+                interfaceClz = interfaceClz.getSuperclass();
+            } else break;
+        }
+        for (Class<?> clz : classes) {
+            java.util.Map.Entry<String, Map> entry = owners.entrySet().stream()
+                    .filter(m -> map(null, m.getKey(), null, Type.Class).equals(clz.getName().replace('.', '/')))
+                    .findFirst().orElse(null);
+            if (entry != null) {
+                cache.put(identifier, applyMode(entry.getValue()));
+                return applyMode(entry.getValue());
+            }
         }
         return name;
     }

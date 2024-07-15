@@ -66,7 +66,10 @@ var libraries = [];
 
 // Add any classes you would like to exclude (not obfuscate), note that this is case sensitive
 // Adding "org" here would exclude any class beginning with "org" (including package names, eg org.someone.lib.LibClass)
-var exclude = ["cn/yapeteam/yolbi/mixin/injection"];
+var exclude = [
+    "cn/yapeteam/yolbi/mixin/injection",
+    "cn/yapeteam/yolbi/utils/network/PacketUtil"
+];
 
 // To include everything (subtracted by excludes) leave this array empty
 // If you only want to obfuscate specific classes add them here

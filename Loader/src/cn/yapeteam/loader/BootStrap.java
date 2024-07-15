@@ -91,7 +91,7 @@ public class BootStrap {
                     name -> {
                         try {
                             return Class.forName(name.replace("/", "."), true, client_thread.getContextClassLoader());
-                        } catch (ClassNotFoundException e) {
+                        } catch (Throwable e) {
                             return null;
                         }
                     }, new cn.yapeteam.ymixin.Logger() {

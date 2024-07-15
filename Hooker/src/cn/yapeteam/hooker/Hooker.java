@@ -134,7 +134,7 @@ public class Hooker {
                 byte[] bytes = Hooker.classes.get(name);
                 if (bytes == null) {
                     System.out.println("Failed to find class: " + name);
-                    throw new RuntimeException(name);
+                    throw new ClassNotFoundException(name);
                 }
                 Class<?> clz = cachedClasses.get(name);
                 if (clz != null)
