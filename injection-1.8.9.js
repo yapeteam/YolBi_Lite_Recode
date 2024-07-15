@@ -56,9 +56,7 @@ var logLibraries = false;
  * - StringEncryption
  */
 var transformers = [
-    "StringEncryption",
-    "ReverseJump",
-    "FakeTryCatches",
+    "FakeJump",
 ];
 
 // Add the path to all the library jars your jar depends on
@@ -68,7 +66,6 @@ var libraries = [];
 // Adding "org" here would exclude any class beginning with "org" (including package names, eg org.someone.lib.LibClass)
 var exclude = [
     "cn/yapeteam/yolbi/mixin/injection",
-    "cn/yapeteam/yolbi/utils/network/PacketUtil"
 ];
 
 // To include everything (subtracted by excludes) leave this array empty

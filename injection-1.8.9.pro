@@ -34,9 +34,6 @@
     <methods>;
 }
 
--keep class cn.yapeteam.yolbi.utils.network.PacketUtil {
-}
-
 # Keep - Applications. Keep all application classes, along with their 'main' methods.
 -keepclasseswithmembers public class * {
     public static void main(java.lang.String[]);
