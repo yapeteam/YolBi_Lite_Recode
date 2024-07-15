@@ -591,16 +591,18 @@ void Inject_fla_bcf_(JNIEnv *jniEnv)
     jobject classObject = (*jniEnv)->CallObjectMethod(jniEnv, classLoader, getClass);
     jobject classLoaderLoader = (*jniEnv)->CallObjectMethod(jniEnv, classObject, getClassLoader);
 
-    jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, ("forName"), ("(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"));
-    jstring className = (*jniEnv)->NewStringUTF(jniEnv, ("net.minecraft.launchwrapper.LaunchClassLoader"));
-    (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    // jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, ("forName"), ("(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"));
+    // jstring className = (*jniEnv)->NewStringUTF(jniEnv, ("net.minecraft.launchwrapper.LaunchClassLoader"));
+    //(*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    findClass(jniEnv, "net.minecraft.launchwrapper.LaunchClassLoader", classLoaderLoader);
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {
         (*jniEnv)->ExceptionClear(jniEnv);
         hasLaunchClassLoader = FALSE;
     }
-    className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
-    (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    // className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
+    //(*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    findClass(jniEnv, "net.minecraft.launchwrapper.LaunchClassLoader", classLoaderLoader);
     defineMode = TRUE;
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {

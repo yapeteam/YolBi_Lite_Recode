@@ -84,7 +84,6 @@ public class ChestStealer extends Module {
 
     @Listener
     public void onEvent(EventUpdate event) {
-        String currMode = mode.getValue();
         if (chestAura.getValue() && event.isPre()) {
             if (stealTimer.hasTimePassed(2000) && isStealing) {
                 stealTimer.reset();
@@ -155,7 +154,8 @@ public class ChestStealer extends Module {
                         ItemStack stack = lowerChestInventory.getStackInSlot(index);
                         int delay = 50 * delayNext.getValue().intValue();
                         if (stack != null && timer.hasTimePassed(delay) && !isBad(stack)) {
-                            if (currMode.equalsIgnoreCase("Hypixel")) {
+                            mc.playerController.windowClick(guiChest.inventorySlots.windowId, index, 0, !mode.is("Hypixel") && drop.getValue() ? 0 : 1, mc.thePlayer);
+                            if (mode.is("Hypixel")) {
                                 mc.playerController.windowClick(guiChest.inventorySlots.windowId, index, 0, 1, mc.thePlayer);
                                 mc.playerController.windowClick(guiChest.inventorySlots.windowId, index, 1, 1, mc.thePlayer);
                             } else if (drop.getValue()) {
