@@ -14,6 +14,7 @@ import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +30,9 @@ public class Velocity extends Module {
     private final NumberValue<Double> minJumpDelay = new NumberValue<>("Min Jump Delay", 0.0, 0.0, 1000.0, 10.0);
 
     // how long you hold the space bar
-    private final NumberValue<Double> maxJumpHold = new NumberValue<>("Max Jump Hold", 0.0, 0.0, 1000.0, 10.0);
+    private final NumberValue<Double> maxJumpHold = new NumberValue<>("Max Jump Hold", 400.0, 0.0, 1000.0, 10.0);
 
-    private final NumberValue<Double> minJumpHold = new NumberValue<>("Min Jump Hold", 0.0, 0.0, 1000.0, 10.0);
+    private final NumberValue<Double> minJumpHold = new NumberValue<>("Min Jump Hold", 400.0, 0.0, 1000.0, 10.0);
 
 
     public Velocity() {
@@ -48,7 +49,7 @@ public class Velocity extends Module {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
         // Generate a random delay in milliseconds
-        int delay = (int) MathUtils.getRandom(minJumpHold.getValue(), maxJumpDelay.getValue()); // replace 1000 with the maximum delay you want
+        int delay = (int) MathUtils.getRandom(minJumpHold.getValue(), maxJumpHold.getValue()); // replace 1000 with the maximum delay you want
 
         // Schedule a task to set the jump keybind to false after the delay
         executorService.schedule(() -> Natives.SetKeyBoard(VirtualKeyBoard.VK_SPACE, false), delay, TimeUnit.MILLISECONDS);
@@ -70,7 +71,7 @@ public class Velocity extends Module {
                     )
             );
 
-            if (Math.random() * 100 < probability.getValue()) {
+            if ((new Random((long) (Math.random() * 114514)).nextInt(101) <= probability.getValue())) {
                 jumpreset();
             } else {
                 // this means to delay the jump
