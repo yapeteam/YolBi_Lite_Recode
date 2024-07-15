@@ -9,7 +9,7 @@ import java.util.Random;
 public class WindPosMapper {
     public static void main(String[] args) {
         Vector2f start = new Vector2f(0, 90.0f);
-        Vector2f end = new Vector2f(360, 90.0f);
+        Vector2f end = new Vector2f(-180, 90.0f);
         List<Vector2f> path = generatePath(start, end); // 增加点的数量
         // 打印路径点
         for (Vector2f point : path) {
@@ -51,100 +51,36 @@ public class WindPosMapper {
         float maxStep = 7.0f;
         float targetArea = 5.0f;
 
-        float startYawOffset = start.x - start.x % 360.0f;
-        float startPitchOffset = start.y - start.y % 360.0f;
-
         start.x = wrapAngleTo180_float(start.x);
         start.y = wrapAngleTo180_float(start.y);
         end.x = wrapAngleTo180_float(end.x);
         end.y = wrapAngleTo180_float(end.y);
 
-        float currentX = start.x % 360.0f;
-        float currentY = start.y % 360.0f;
-        float targetX = end.x % 360.0f;
-        float targetY = end.y % 360.0f;
+        float currentX = start.x;
+        float currentY = start.y;
+        float targetX = end.x;
+        float targetY = end.y;
 
         while (Math.hypot(currentX - targetX, currentY - targetY) > 1) {
-            float deltaX = targetX - currentX;
-            float deltaY = targetY - currentY;
+            float deltaX = shortestAngleDifference(targetX, currentX);
+            float deltaY = shortestAngleDifference(targetY, currentY);
             float distance = (float) Math.hypot(deltaX, deltaY);
             float randomDist = Math.min(maxStep, distance);
             float stepSize = Math.max(0.1f, randomDist / targetArea);
             float windX = (random.nextFloat() * 2 - 1) * wind;
             float windY = (random.nextFloat() * 2 - 1) * wind;
-            float newX = currentX + deltaX / distance * stepSize + windX;
-            float newY = currentY + deltaY / distance * stepSize + windY;
+            float newX = wrapAngleTo180_float(currentX + deltaX / distance * stepSize + windX);
+            float newY = wrapAngleTo180_float(currentY + deltaY / distance * stepSize + windY);
 
             currentX = newX;
             currentY = newY;
-            path.add(new Vector2f(currentX + startYawOffset, currentY + startPitchOffset));
+            path.add(new Vector2f(currentX, currentY));
 
             wind = Math.max(0.0f, wind - wind / 3.0f);
             wind += (random.nextFloat() * 2 - 1) * gravity * distance / 1000.0f;
         }
 
-        path.add(new Vector2f(targetX + startYawOffset, targetY + startPitchOffset));
-        System.out.println(path.size());
-        return path;
-    }
-
-    public static List<Vector2f> generatePath2(Vector2f start, Vector2f end) {
-        float startYawOffset = start.x - start.x % 360.0f;
-        float startPitchOffset = start.y - start.y % 360.0f;
-
-        List<Vector2f> path = new ArrayList<>();
-        float wind = 6.0f;
-        float gravity = 19.0f;
-        float maxStep = 17.0f;
-        float targetArea = 1.0f;
-        float currentDistanceThreshold = .1f; // 用于控制循环的阈值
-
-        float currentX = start.x % 360.0f;
-        float currentY = start.y % 360.0f;
-
-        float targetX = end.x % 360.0f;
-        float targetY = end.y % 360.0f;
-
-        while (true) {
-            float distanceToTarget = (float) Math.hypot(targetX - currentX, targetY - currentY);
-            if (distanceToTarget < currentDistanceThreshold) {
-                path.add(new Vector2f(targetX + startYawOffset, targetY + startPitchOffset));
-                break;
-            }
-
-            float angleToTarget = (float) Math.atan2(targetY - currentY, targetX - currentX);
-            float stepSize = Math.min(maxStep, distanceToTarget / targetArea);
-
-            // 调整风力影响，添加随机性
-            float windX = (random.nextFloat() * 2 - 1) * wind;
-            float windY = (random.nextFloat() * 2 - 1) * wind;
-
-            float deltaX = (float) (Math.cos(angleToTarget) * stepSize) + windX;
-            float deltaY = (float) (Math.sin(angleToTarget) * stepSize) + windY;
-
-            float newX = currentX + deltaX;
-            float newY = currentY + deltaY;
-
-            Vector2f lastPoint = null;
-            if (!path.isEmpty()) lastPoint = path.get(path.size() - 1);
-
-            // 检查新点是否与现有点过于接近
-            if (!path.isEmpty() && !(lastPoint != null && Math.hypot(newX - lastPoint.x, newY - lastPoint.y) > currentDistanceThreshold)) {
-                // 如果点过于接近，调整步长或添加随机偏移
-                stepSize *= 0.9f; // 减小步长
-                newX = currentX + (float) (Math.cos(angleToTarget) * stepSize);
-                newY = currentY + (float) (Math.sin(angleToTarget) * stepSize);
-            }
-            path.add(new Vector2f(newX + startYawOffset, newY + startPitchOffset));
-            currentX = newX;
-            currentY = newY;
-
-            // 更新风力和重力影响
-            wind = Math.max(0.0f, wind - wind / 3.0f);
-            wind += (random.nextFloat() * 2 - 1) * gravity * distanceToTarget / 1000.0f;
-            currentDistanceThreshold *= 0.9f; // 逐渐减小阈值，实现平滑减速
-        }
-
+        path.add(new Vector2f(targetX, targetY));
         return path;
     }
 }

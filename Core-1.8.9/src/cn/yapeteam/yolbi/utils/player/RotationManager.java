@@ -16,6 +16,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
+import java.util.Random;
+
 @UtilityClass
 public class RotationManager implements IMinecraft {
     public static boolean active;
@@ -25,6 +27,8 @@ public class RotationManager implements IMinecraft {
     public float renderPitchHead;
 
     public float prevRenderPitchHead;
+
+    private static final Random random = new Random();
 
     /*
      * This method must be called on Pre Update Event to work correctly
@@ -119,10 +123,12 @@ public class RotationManager implements IMinecraft {
         final float lastYaw = lastRotation.x;
         final float lastPitch = lastRotation.y;
 
+        float wind = 6.0f;
+
         if (speed != 0) {
             final float rotationSpeed = (float) speed;
 
-            final double deltaYaw = MathHelper.wrapAngleTo180_float(targetRotation.x - lastRotation.x);
+            final double deltaYaw = ((double) (lastRotation.x - targetRotation.x) % 360.0D + 540.0D) % 360.0D - 180.0D;
             final double deltaPitch = pitch - lastPitch;
 
             final double distance = Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
@@ -135,28 +141,16 @@ public class RotationManager implements IMinecraft {
             final float moveYaw = (float) Math.max(Math.min(deltaYaw, maxYaw), -maxYaw);
             final float movePitch = (float) Math.max(Math.min(deltaPitch, maxPitch), -maxPitch);
 
-            yaw = lastYaw + moveYaw;
-            pitch = lastPitch + movePitch;
+            float windX = (random.nextFloat() * 2 - 1) * wind;
+            float windY = (random.nextFloat() * 2 - 1) * wind;
 
-            for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
+            yaw = (float) MathHelper.wrapAngleTo180_double(lastYaw + deltaYaw / distance * moveYaw + windX);
+            pitch = (float) MathHelper.wrapAngleTo180_double(lastPitch + deltaPitch / distance * movePitch + windY);
 
-                if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
-                    yaw += (float) ((Math.random() - 0.5) / 1000);
-                    pitch -= (float) (Math.random() / 200);
-                }
+            Vector2f fixedrot = applySensitivityPatch(new Vector2f(yaw,pitch));
 
-                /*
-                 * Fixing GCD
-                 */
-                final Vector2f rotations = new Vector2f(yaw, pitch);
-                final Vector2f fixedRotations = applySensitivityPatch(rotations);
-
-                /*
-                 * Setting rotations
-                 */
-                yaw = fixedRotations.x;
-                pitch = Math.max(-90, Math.min(90, fixedRotations.y));
-            }
+            yaw = fixedrot.x;
+            pitch = fixedrot.y;
         }
 
         rotations = new Vector2f(yaw, pitch);
@@ -190,7 +184,7 @@ public class RotationManager implements IMinecraft {
         final double diffY = diff.getY();
         final double diffZ = diff.getZ();
         float yaw = (float) (from.getX() + MathHelper.wrapAngleTo180_float((float) ((float) (Math.atan2(diffZ, diffX) * 57.295780181884766) - 90.0f - from.getX())));
-        float pitch = clamp((float) (from.getY() + MathHelper.wrapAngleTo180_float((float) ((float) (-(Math.atan2(diffY, MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ)) * 57.295780181884766)) - from.getY()))));
+        final float pitch = (float) (-(Math.atan2(diffY, Math.sqrt(diffX * diffX + diffZ * diffZ)) * 180.0D / Math.PI));
         return new Vector2f(yaw, pitch);
     }
 
