@@ -4,7 +4,8 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
-import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
+import cn.yapeteam.yolbi.event.impl.player.EventMotion;
+import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
@@ -83,8 +84,8 @@ public class ChestStealer extends Module {
     }
 
     @Listener
-    public void onEvent(EventUpdate event) {
-        if (chestAura.getValue() && event.isPre()) {
+    public void onEvent(EventMotion event) {
+        if (chestAura.getValue()) {
             if (stealTimer.hasTimePassed(2000) && isStealing) {
                 stealTimer.reset();
                 isStealing = false;
@@ -104,7 +105,12 @@ public class ChestStealer extends Module {
                     }
                 }
             }
-        } else if (mc.currentScreen instanceof GuiChest) {
+        }
+    }
+
+    @Listener
+    private void onPost(EventPostMotion e) {
+        if (mc.currentScreen instanceof GuiChest) {
             GuiChest guiChest = (GuiChest) mc.currentScreen;
             IInventory lowerChestInventory = getLowerChestInventory(guiChest);
             if (lowerChestInventory == null) {
@@ -174,7 +180,6 @@ public class ChestStealer extends Module {
                 isStealing = false;
             }
         } else {
-
             isStealing = false;
         }
     }
