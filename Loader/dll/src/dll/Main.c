@@ -749,8 +749,13 @@ PVOID UnLoad(PVOID arg)
     FreeLibraryAndExitThread(hModule, 0);
 }
 
+BOOL hooked = FALSE;
+
 void HookMain(JNIEnv *env)
 {
+    if (hooked)
+        return;
+    hooked = TRUE;
     setlocale(LC_ALL, "");
     printf("1\n");
     HMODULE jvmHandle = GetModuleHandle(("jvm.dll"));
@@ -805,13 +810,19 @@ void UnHookFunction64(char *lpModule, LPCSTR lpFuncName)
     VirtualProtect((LPVOID)FuncAddress, 12, OldProtect, &OldProtect);
 }
 
+void UnHookAll()
+{
+    UnHookFunction64("jvm.dll", "JVM_MonitorNotify");
+    UnHookFunction64("jvm.dll", "JVM_NanoTime");
+}
+
 typedef void (*JVM_MonitorNotify)(JNIEnv *env, jobject obj);
 
 JVM_MonitorNotify MonitorNotify = NULL;
 
 void MonitorNotify_Hook(JNIEnv *env, jobject obj)
 {
-    UnHookFunction64("jvm.dll", "JVM_NanoTime");
+    UnHookAll();
     MonitorNotify(env, obj);
     HookMain(env);
 }
@@ -822,15 +833,16 @@ JVM_NanoTime NanoTime = NULL;
 
 jlong NanoTime_Hook(JNIEnv *env, jclass ignored)
 {
-    UnHookFunction64("jvm.dll", "JVM_NanoTime");
+    UnHookAll();
     jlong time = NanoTime(env, ignored);
     HookMain(env);
     return time;
 }
 
+
 PVOID WINAPI remote()
 {
-    // HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
     HookFunction64("jvm.dll", "JVM_NanoTime", (PROC)NanoTime_Hook);
     HMODULE jvm = GetModuleHandleW(L"jvm.dll");
     MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, "JVM_MonitorNotify");
