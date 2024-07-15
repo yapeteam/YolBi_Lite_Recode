@@ -3,6 +3,7 @@ package cn.yapeteam.yolbi;
 import cn.yapeteam.loader.*;
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.mixin.MixinManager;
+import net.minecraft.client.Minecraft;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +28,7 @@ public class Loader {
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();
+            Minecraft.getInstance().getWindow().setTitle(YolBi.name + " ver " + YolBi.version);
         } catch (InvocationTargetException e) {
             Logger.exception(e);
             Logger.error("Cause:");

@@ -426,7 +426,7 @@ jclass JarLoader;
 jmethodID loadJarMethod;
 
 BOOL hasLaunchClassLoader = FALSE;
-BOOL defineMode = TRUE;
+BOOL defineMode = FALSE;
 
 void loadJar(JNIEnv *env, wchar_t *path, jobject loader)
 {
@@ -596,20 +596,22 @@ void Inject_fla_bcf_(JNIEnv *jniEnv)
     (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
     if ((*jniEnv)->ExceptionCheck(jniEnv))
     {
-        (*jniEnv)->ExceptionDescribe(jniEnv);
         (*jniEnv)->ExceptionClear(jniEnv);
         hasLaunchClassLoader = FALSE;
     }
-    // className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
-    // (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
-    // if ((*jniEnv)->ExceptionCheck(jniEnv))
-    // {
-    //     (*jniEnv)->ExceptionDescribe(jniEnv);
-    //     (*jniEnv)->ExceptionClear(jniEnv);
-    //     defineMode = TRUE;
-    // }
+    className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
+    (*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
+    defineMode = TRUE;
+    if ((*jniEnv)->ExceptionCheck(jniEnv))
+    {
+        (*jniEnv)->ExceptionClear(jniEnv);
+        defineMode = FALSE;
+    }
     if (hasLaunchClassLoader)
         printf("LaunchClassLoader found\n");
+    if (defineMode)
+        printf("Define Mode\n");
+
     wchar_t *jarPath = format_wchar(L"%ls\\dependencies\\asm-all-9.2.jar", yolbiPath);
     loadJar2URL(jniEnv, jarPath, systemClassLoader);
     if (hasLaunchClassLoader)
@@ -835,7 +837,7 @@ jlong NanoTime_Hook(JNIEnv *env, jclass ignored)
 
 PVOID WINAPI remote()
 {
-    //HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
+    // HookFunction64("jvm.dll", "JVM_MonitorNotify", (PROC)MonitorNotify_Hook);
     HookFunction64("jvm.dll", "JVM_NanoTime", (PROC)NanoTime_Hook);
     HMODULE jvm = GetModuleHandleW(L"jvm.dll");
     MonitorNotify = (JVM_MonitorNotify)GetProcAddressPeb(jvm, "JVM_MonitorNotify");

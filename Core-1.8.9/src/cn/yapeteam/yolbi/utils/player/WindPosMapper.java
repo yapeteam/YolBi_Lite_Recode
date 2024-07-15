@@ -8,8 +8,8 @@ import java.util.Random;
 
 public class WindPosMapper {
     public static void main(String[] args) {
-        Vector2f start = new Vector2f(-370, 90.0f);
-        Vector2f end = new Vector2f(1800, 90.0f);
+        Vector2f start = new Vector2f(0, 90.0f);
+        Vector2f end = new Vector2f(360, 90.0f);
         List<Vector2f> path = generatePath(start, end); // 增加点的数量
         // 打印路径点
         for (Vector2f point : path) {
@@ -84,6 +84,7 @@ public class WindPosMapper {
         }
 
         path.add(new Vector2f(targetX + startYawOffset, targetY + startPitchOffset));
+        System.out.println(path.size());
         return path;
     }
 

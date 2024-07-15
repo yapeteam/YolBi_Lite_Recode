@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
-import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
@@ -12,13 +11,12 @@ import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
-import cn.yapeteam.yolbi.utils.player.*;
-import cn.yapeteam.yolbi.utils.vector.Vector2f;
-import lombok.val;
+import cn.yapeteam.yolbi.utils.player.PlayerUtil;
+import cn.yapeteam.yolbi.utils.player.RayCastUtil;
+import cn.yapeteam.yolbi.utils.player.RotationManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,20 +28,12 @@ public class AimAssist extends Module {
     private final BooleanValue View = new BooleanValue("In View", true);
     private final BooleanValue WeaponOnly = new BooleanValue("Weapon Only", true);
     private final BooleanValue ClickAim = new BooleanValue("Click Aim", true);
-    private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 100f, 1f, 180f, .5f);
-
+    private final NumberValue<Float> rotSpeed = new NumberValue<>("Rotation Speed", 50f, 1f, 100f, .5f);
 
 
     public AimAssist() {
         super("AimAssist", ModuleCategory.COMBAT);
-        addValues(Range, TargetPriority, ClickAim, View, rotSpeed);
-    }
-
-    private final List<Vector2f> aimPath = new ArrayList<>();
-
-    @Override
-    protected void onDisable() {
-        aimPath.clear();
+        addValues(Range, TargetPriority, ClickAim, View, WeaponOnly, rotSpeed);
     }
 
     private Entity target = null;
@@ -57,32 +47,30 @@ public class AimAssist extends Module {
             target = null;
         if (TargetPriority.is("Clip"))
             target = PlayerUtil.getMouseOver(1, Range.getValue());
-        else{
+        else {
             target = getTargets();
         }
     }
 
     @Listener
     public void onUpdate(EventRender2D event) {
-        if (mc.currentScreen == null && mc.inGameHasFocus) {
-            if (!WeaponOnly.getValue() || PlayerUtil.holdingWeapon()) {
-                if (!(ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))) {
-                    if (target != null) {
-                        double n = PlayerUtil.calculateHorizontalAngleDifference(target);
-                        if (n > 1.0D || n < -1.0D) {
-                            float val = (float) (-(n / (101.0D - (rotSpeed.getValue()))));
-                            mc.thePlayer.rotationYaw += val;
-                        }
-                    }
-
-                }
-            }
+        if (mc.currentScreen != null || !mc.inGameHasFocus)
+            return;
+        if (WeaponOnly.getValue() && !PlayerUtil.holdingWeapon())
+            return;
+        if (target == null) return;
+        if (ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))
+            return;
+        double n = PlayerUtil.calculateHorizontalAngleDifference(target);
+        if (n > 1.0D || n < -1.0D) {
+            float val = (float) (-(n / (101.0D - (rotSpeed.getValue()))));
+            mc.thePlayer.rotationYaw += val;
         }
     }
 
     @Override
     public String getSuffix() {
-        return " Path: " + aimPath.size() + " Yaw: " + mc.thePlayer.rotationYaw + " Pitch: " + mc.thePlayer.rotationPitch;
+        return "Yaw: " + mc.thePlayer.rotationYaw + " Pitch: " + mc.thePlayer.rotationPitch;
     }
 
     public Entity getTargets() {

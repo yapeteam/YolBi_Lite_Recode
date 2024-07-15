@@ -32,10 +32,18 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
                     shift = Target.Shift.BEFORE
             )
     )
-    public void onUpdate() {
+    public void onPreUpdate() {
         RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
         RotationManager.renderPitchHead = rotationPitch;
-        YolBi.instance.getEventManager().post(new EventUpdate());
+        YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Pre));
+    }
+
+    @Inject(
+            method = "onUpdate", desc = "()V",
+            target = @Target("RETURN")
+    )
+    public void onPostUpdate() {
+        YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Post));
     }
 
     @Shadow
