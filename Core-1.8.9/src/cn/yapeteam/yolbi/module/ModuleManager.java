@@ -35,6 +35,7 @@ public class ModuleManager {
         modules.add(new Velocity());
         modules.add(new WTap());
         modules.add(new AntiInvisible());
+        modules.add(new AutoArmor());
         modules.add(new ChestStealer());
         modules.add(new ClientSpoof());
         modules.add(new NoteBot());
