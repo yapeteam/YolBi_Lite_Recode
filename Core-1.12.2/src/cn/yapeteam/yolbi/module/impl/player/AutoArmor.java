@@ -1,4 +1,4 @@
-package cn.yapeteam.yolbi.module.impl.misc;
+package cn.yapeteam.yolbi.module.impl.player;
 
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
@@ -11,10 +11,11 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Enchantments;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.C16PacketClientStatus;
-import net.minecraft.network.play.client.C16PacketClientStatus.EnumState;
+import net.minecraft.network.play.client.CPacketClientStatus;
 
 public class AutoArmor extends Module {
     private final TimerUtil timer = new TimerUtil();
@@ -22,7 +23,7 @@ public class AutoArmor extends Module {
     private final NumberValue<Integer> delay = new NumberValue<>("delay", 1, 0, 10, 1);
 
     public AutoArmor() {
-        super("AutoArmor", ModuleCategory.MISC);
+        super("AutoArmor", ModuleCategory.PLAYER);
         addValues(mode, delay);
     }
 
@@ -51,21 +52,17 @@ public class AutoArmor extends Module {
 
     public void getBestArmor() {
         for (int type = 1; type < 5; type++) {
-            if (mc.thePlayer.inventoryContainer.getSlot(4 + type).getHasStack()) {
-                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(4 + type).getStack();
+            if (mc.player.inventoryContainer.getSlot(4 + type).getHasStack()) {
+                ItemStack is = mc.player.inventoryContainer.getSlot(4 + type).getStack();
                 if (isBestArmor(is, type)) {
                     continue;
                 } else {
-                    if (mode.is("FakeInv")) {
-                        C16PacketClientStatus p = new C16PacketClientStatus(EnumState.OPEN_INVENTORY_ACHIEVEMENT);
-                        mc.thePlayer.sendQueue.addToSendQueue(p);
-                    }
                     drop(4 + type);
                 }
             }
             for (int i = 9; i < 45; i++) {
-                if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                    ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+                if (mc.player.inventoryContainer.getSlot(i).getHasStack()) {
+                    ItemStack is = mc.player.inventoryContainer.getSlot(i).getStack();
                     if (isBestArmor(is, type) && getProtection(is) > 0) {
                         shiftClick(i);
                         timer.reset();
@@ -93,8 +90,8 @@ public class AutoArmor extends Module {
             return false;
         }
         for (int i = 5; i < 45; i++) {
-            if (mc.thePlayer.inventoryContainer.getSlot(i).getHasStack()) {
-                ItemStack is = mc.thePlayer.inventoryContainer.getSlot(i).getStack();
+            if (mc.player.inventoryContainer.getSlot(i).getHasStack()) {
+                ItemStack is = mc.player.inventoryContainer.getSlot(i).getStack();
                 if (getProtection(is) > prot && is.getUnlocalizedName().contains(strType))
                     return false;
             }
@@ -103,23 +100,23 @@ public class AutoArmor extends Module {
     }
 
     public void shiftClick(int slot) {
-        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, 0, 1, mc.thePlayer);
+        mc.playerController.windowClick(mc.player.inventoryContainer.windowId, slot, 0, ClickType.QUICK_MOVE, mc.player);
     }
 
     public void drop(int slot) {
-        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, 1, 4, mc.thePlayer);
+        mc.playerController.windowClick(mc.player.inventoryContainer.windowId, slot, 1, ClickType.CLONE, mc.player);
     }
 
     public static float getProtection(ItemStack stack) {
         float protection = 0;
         if ((stack.getItem() instanceof ItemArmor)) {
             ItemArmor armor = (ItemArmor) stack.getItem();
-            protection += armor.damageReduceAmount + (100 - armor.damageReduceAmount) * EnchantmentHelper.getEnchantmentLevel(Enchantment.protection.effectId, stack) * 0.0075f;
-            protection += EnchantmentHelper.getEnchantmentLevel(Enchantment.blastProtection.effectId, stack) / 100f;
-            protection += EnchantmentHelper.getEnchantmentLevel(Enchantment.fireProtection.effectId, stack) / 100f;
-            protection += EnchantmentHelper.getEnchantmentLevel(Enchantment.thorns.effectId, stack) / 100f;
-            protection += EnchantmentHelper.getEnchantmentLevel(Enchantment.unbreaking.effectId, stack) / 50f;
-            protection += EnchantmentHelper.getEnchantmentLevel(Enchantment.projectileProtection.effectId, stack) / 100f;
+            protection += armor.damageReduceAmount + (100 - armor.damageReduceAmount) * EnchantmentHelper.getEnchantmentLevel(Enchantments.PROTECTION, stack) * 0.0075f;
+            protection += EnchantmentHelper.getEnchantmentLevel(Enchantments.BLAST_PROTECTION, stack) / 100f;
+            protection += EnchantmentHelper.getEnchantmentLevel(Enchantments.FIRE_PROTECTION, stack) / 100f;
+            protection += EnchantmentHelper.getEnchantmentLevel(Enchantments.THORNS, stack) / 100f;
+            protection += EnchantmentHelper.getEnchantmentLevel(Enchantments.UNBREAKING, stack) / 50f;
+            protection += EnchantmentHelper.getEnchantmentLevel(Enchantments.PROJECTILE_PROTECTION, stack) / 100f;
         }
         return protection;
     }
