@@ -38,14 +38,6 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
         YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Pre));
     }
 
-    @Inject(
-            method = "onUpdate", desc = "()V",
-            target = @Target("RETURN")
-    )
-    public void onPostUpdate() {
-        YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Post));
-    }
-
     @Shadow
     public double posX;
     @Shadow
@@ -153,6 +145,8 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
                 this.sendQueue.addToSendQueue(new C03PacketPlayer.C06PacketPlayerPosLook(this.motionX, -999.0D, this.motionZ, motionEvent.getYaw(), motionEvent.getPitch(), motionEvent.isOnGround()));
                 flag2 = false;
             }
+
+            YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Post));
 
             ++this.positionUpdateTicks;
 

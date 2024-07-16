@@ -12,10 +12,10 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Timer;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -32,7 +32,7 @@ public class ReflectUtil {
             ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
             EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
             ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ,
-            S12PacketEntityVelocity$motionX, S12PacketEntityVelocity$motionY, S12PacketEntityVelocity$motionZ;
+            S12PacketEntityVelocity$motionX, S12PacketEntityVelocity$motionY, S12PacketEntityVelocity$motionZ, C07PacketPlayerDigging$position, C07PacketPlayerDigging$facing, C03PacketPlayer$pitch;
 
 
     private static Method
@@ -204,6 +204,50 @@ public class ReflectUtil {
             S12PacketEntityVelocity$motionZ = S12PacketEntityVelocity.class.getDeclaredField(Mapper.map("net/minecraft/network/play/server/S12PacketEntityVelocity", "motionZ", null, Mapper.Type.Field));
             S12PacketEntityVelocity$motionZ.setAccessible(true);
         } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            C07PacketPlayerDigging$position = C07PacketPlayerDigging.class.getDeclaredField(Mapper.map("net/minecraft/network/play/client/C07PacketPlayerDigging", "position", null, Mapper.Type.Field));
+            C07PacketPlayerDigging$position.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+
+        try {
+            C07PacketPlayerDigging$facing = C07PacketPlayerDigging.class.getDeclaredField(Mapper.map("net/minecraft/network/play/client/C07PacketPlayerDigging", "facing", null, Mapper.Type.Field));
+            C07PacketPlayerDigging$facing.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+        try {
+            C03PacketPlayer$pitch = C03PacketPlayer.class.getDeclaredField(Mapper.map("net/minecraft/network/play/client/C03PacketPlayer", "pitch", null, Mapper.Type.Field));
+            C03PacketPlayer$pitch.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void C07PacketPlayerDigging$setPosition(C07PacketPlayerDigging obj, BlockPos position) {
+        try {
+            C07PacketPlayerDigging$position.set(obj, position);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void C07PacketPlayerDigging$setFacing(C07PacketPlayerDigging obj, EnumFacing facing) {
+        try {
+            C07PacketPlayerDigging$facing.set(obj, facing);
+        } catch (Exception e) {
+            Logger.exception(e);
+        }
+    }
+
+    public static void C03PacketPlayer$setPitch(C03PacketPlayer obj, float pitch) {
+        try {
+            C07PacketPlayerDigging$facing.setFloat(obj, pitch);
+        } catch (Exception e) {
             Logger.exception(e);
         }
     }

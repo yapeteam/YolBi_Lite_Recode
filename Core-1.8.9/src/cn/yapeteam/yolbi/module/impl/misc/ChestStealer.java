@@ -4,8 +4,7 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
-import cn.yapeteam.yolbi.event.impl.player.EventMotion;
-import cn.yapeteam.yolbi.event.impl.player.EventPostMotion;
+import cn.yapeteam.yolbi.event.impl.player.EventUpdate;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
@@ -84,7 +83,8 @@ public class ChestStealer extends Module {
     }
 
     @Listener
-    public void onEvent(EventMotion event) {
+    public void onEvent(EventUpdate event) {
+        if (!event.isPre()) return;
         if (chestAura.getValue()) {
             if (stealTimer.hasTimePassed(2000) && isStealing) {
                 stealTimer.reset();
@@ -109,7 +109,8 @@ public class ChestStealer extends Module {
     }
 
     @Listener
-    private void onPost(EventPostMotion e) {
+    private void onPost(EventUpdate e) {
+        if (!e.isPost()) return;
         if (mc.currentScreen instanceof GuiChest) {
             GuiChest guiChest = (GuiChest) mc.currentScreen;
             IInventory lowerChestInventory = getLowerChestInventory(guiChest);
@@ -123,19 +124,15 @@ public class ChestStealer extends Module {
                     "profile", "tele", "port", "map", "kit", "select", "lobby", "vault", "lock", "anticheat", "travel", "settings", "user", "preference",
                     "compass", "cake", "wars", "buy", "upgrade", "ranged", "potions", "utility"};
 
-
-            for (String str : list) {
+            for (String str : list)
                 if (name.contains(str))
                     return;
-            }
-            if (!isStealing) {
+            if (!isStealing)
                 first = 0;
-            }
             first++;
             isStealing = true;
-            if (first <= delayFirst.getValue().intValue()) {
+            if (first <= delayFirst.getValue().intValue())
                 return;
-            }
             boolean full = true;
             ItemStack[] arrayOfItemStack;
             int j = (arrayOfItemStack = mc.thePlayer.inventory.mainInventory).length;

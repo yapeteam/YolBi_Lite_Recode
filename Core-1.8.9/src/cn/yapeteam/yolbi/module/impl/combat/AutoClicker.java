@@ -112,7 +112,7 @@ public class AutoClicker extends Module {
     };
 
     public void sendClick() {
-        if (!isEnabled() || mc.currentScreen != null) return;
+        if (!isEnabled() || mc.currentScreen != null || mc.thePlayer == null) return;
 
         boolean left = leftClick.getValue() && Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON);
         if (nomine.getValue() && mc.objectMouseOver != null && mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
