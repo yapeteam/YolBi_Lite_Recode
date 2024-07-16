@@ -138,25 +138,13 @@ public class RotationManager implements IMinecraft {
             yaw = lastYaw + moveYaw;
             pitch = lastPitch + movePitch;
 
-            for (int i = 1; i <= (int) (Minecraft.getDebugFPS() / 20f + Math.random() * 10); ++i) {
+            final Vector2f fixedRotations = applySensitivityPatch(new Vector2f(yaw, pitch));
 
-                if (Math.abs(moveYaw) + Math.abs(movePitch) > 1) {
-                    yaw += (float) ((Math.random() - 0.5) / 1000);
-                    pitch -= (float) (Math.random() / 200);
-                }
-
-                /*
-                 * Fixing GCD
-                 */
-                final Vector2f rotations = new Vector2f(yaw, pitch);
-                final Vector2f fixedRotations = applySensitivityPatch(rotations);
-
-                /*
-                 * Setting rotations
-                 */
-                yaw = fixedRotations.x;
-                pitch = Math.max(-90, Math.min(90, fixedRotations.y));
-            }
+            /*
+             * Setting rotations
+             */
+            yaw = fixedRotations.x;
+            pitch = Math.max(-90, Math.min(90, fixedRotations.y));
         }
 
         rotations = new Vector2f(yaw, pitch);

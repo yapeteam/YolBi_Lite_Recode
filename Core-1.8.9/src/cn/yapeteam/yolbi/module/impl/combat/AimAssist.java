@@ -14,6 +14,7 @@ import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import cn.yapeteam.yolbi.utils.player.PlayerUtil;
 import cn.yapeteam.yolbi.utils.player.RayCastUtil;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
+import cn.yapeteam.yolbi.utils.vector.Vector2f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 
@@ -61,11 +62,7 @@ public class AimAssist extends Module {
         if (target == null) return;
         if (ClickAim.getValue() && !Natives.IsKeyDown(VirtualKeyBoard.VK_LBUTTON))
             return;
-        double n = PlayerUtil.calculateHorizontalAngleDifference(target);
-        if (n > 1.0D || n < -1.0D) {
-            float val = (float) (-(n / (101.0D - (rotSpeed.getValue()))));
-            mc.thePlayer.rotationYaw += val;
-        }
+        RotationManager.setRotations(new Vector2f((float) RotationManager.getRotationsNeeded(target)[0], (float) RotationManager.getRotationsNeeded(target)[1]), rotSpeed.getValue() * 0.1);
     }
 
     @Override
