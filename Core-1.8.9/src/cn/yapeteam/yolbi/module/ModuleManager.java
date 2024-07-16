@@ -7,7 +7,6 @@ import cn.yapeteam.yolbi.module.impl.combat.*;
 import cn.yapeteam.yolbi.module.impl.misc.*;
 import cn.yapeteam.yolbi.module.impl.movement.*;
 import cn.yapeteam.yolbi.module.impl.player.AutoArmor;
-import cn.yapeteam.yolbi.module.impl.player.ChestStealer;
 import cn.yapeteam.yolbi.module.impl.visual.*;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
@@ -38,7 +37,6 @@ public class ModuleManager {
         modules.add(new WTap());
         modules.add(new AntiInvisible());
         modules.add(new AutoArmor());
-        modules.add(new ChestStealer());
         modules.add(new ClientSpoof());
         modules.add(new NoteBot());
         modules.add(new SelfDestruct());
