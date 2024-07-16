@@ -8,6 +8,7 @@ import cn.yapeteam.yolbi.module.values.impl.*;
 
 import java.awt.*;
 
+@SuppressWarnings("unchecked")
 public class CommandValue extends AbstractCommand {
     public CommandValue() {
         super("value");
