@@ -36,7 +36,7 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
     public void onUpdate() {
         RotationManager.prevRenderPitchHead = RotationManager.renderPitchHead;
         RotationManager.renderPitchHead = rotationPitch;
-        YolBi.instance.getEventManager().post(new EventUpdate());
+        YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Pre));
     }
 
     @Shadow
@@ -161,6 +161,8 @@ public class MixinEntityPlayerSP extends EntityPlayerSP {
             } else if (this.prevOnGround != this.onGround) {
                 this.connection.sendPacket(new CPacketPlayer(motionEvent.isOnGround()));
             }
+
+            YolBi.instance.getEventManager().post(new EventUpdate(EventUpdate.Type.Post));
 
             ++this.positionUpdateTicks;
 
