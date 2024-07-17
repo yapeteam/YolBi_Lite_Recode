@@ -24,7 +24,7 @@ public class CommandLogin extends AbstractCommand {
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
-        MicrosoftLogin.instance.setUpdateStatusConsumer(AbstractCommand::printMessage);
+        MicrosoftLogin.setUpdateStatusConsumer(AbstractCommand::printMessage);
     }
 
     private Thread loginThread = null;
@@ -34,7 +34,7 @@ public class CommandLogin extends AbstractCommand {
         if (loginThread == null) {
             loginThread = new Thread(() -> {
                 try {
-                    if (MicrosoftLogin.instance.login().login((name, uuid, access_token, refresh_token) -> {
+                    if (new MicrosoftLogin().login().login((name, uuid, access_token, refresh_token) -> {
                         try {
                             printMessage(name);
                             printMessage(uuid.toString().replace("-", ""));
