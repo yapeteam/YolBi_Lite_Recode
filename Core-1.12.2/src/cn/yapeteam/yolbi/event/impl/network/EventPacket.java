@@ -11,6 +11,11 @@ import net.minecraft.network.Packet;
 public class EventPacket extends CancellableEvent {
     private Packet<? extends INetHandler> packet;
     private Type type;
+    private boolean outgoing;
+
+    public boolean isIncoming() {
+        return !outgoing;
+    }
 
     public enum Type {
         Send, Receive
