@@ -18,7 +18,7 @@ public class CommandBind extends AbstractCommand {
         if (args.length == 2) {
             Module module = YolBi.instance.getModuleManager().getModuleByName(args[0]);
             if (module == null) {
-                sendMessage(("Module not found " + args[0]));
+                printMessage(("Module not found " + args[0]));
                 return;
             }
             int code = 0;
@@ -33,9 +33,9 @@ public class CommandBind extends AbstractCommand {
                 Logger.exception(e);
             }
             if (code == 0)
-                sendMessage("Key not found " + args[1]);
+                printMessage("Key not found " + args[1]);
             module.setKey(code);
-            sendMessage("Bind " + module.getName() + " to Key " + code);
+            printMessage("Bind " + module.getName() + " to Key " + code);
         }
     }
 }
