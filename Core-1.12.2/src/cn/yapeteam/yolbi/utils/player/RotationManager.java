@@ -50,7 +50,6 @@ public class RotationManager implements IMinecraft {
         if (active) {
             if (Math.abs(rotations.x - Math.toDegrees(PlayerUtil.direction())) > 45) {
                 ReflectUtil.SetPressed(mc.gameSettings.keyBindSprint, false);
-                mc.player.setSprinting(false);
             }
         }
     }

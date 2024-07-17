@@ -8,6 +8,7 @@ import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import cn.yapeteam.yolbi.managers.TargetManager;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
+import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import cn.yapeteam.yolbi.module.values.impl.NumberValue;
@@ -80,7 +81,6 @@ public class KillAura extends Module {
 
                 RotationManager.setRotations(rotationVec, rotationSpeed);
                 RotationManager.smooth();
-                mc.player.setSprinting(false);
             }
 
             // Attack & AutoRod
@@ -134,7 +134,6 @@ public class KillAura extends Module {
     }
 
     private void startBlock() {
-
         if (autoBlock.getValue()) {
             if (this.mode.is("Balant")) {
                 if (mc.player.getHeldItem(EnumHand.MAIN_HAND).getItem() instanceof ItemSword) {
