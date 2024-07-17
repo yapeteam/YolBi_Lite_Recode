@@ -1,7 +1,6 @@
-package cn.yapeteam.yolbi.utils.font;
+package cn.yapeteam.yolbi.font.renderer;
 
-import com.fun.inject.Mappings;
-import com.fun.inject.utils.ReflectionUtils;
+import cn.yapeteam.yolbi.utils.reflect.ReflectUtils;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
@@ -136,7 +135,7 @@ class GlyphMap {
             int ow = bi.getWidth();
             int oh = bi.getHeight();
             NativeImage image = new NativeImage(RGBA, ow, oh, false);
-            long ptr = (long)ReflectionUtils.getFieldValue(image, Mappings.getObfField("f_84964_"));//(image).();
+            long ptr = ReflectUtils.NativeImage$pixels(image);
             IntBuffer backingBuffer = MemoryUtil.memIntBuffer(ptr, image.getWidth() * image.getHeight());
             int off = 0;
             Object _d;
@@ -144,15 +143,25 @@ class GlyphMap {
             ColorModel _cm = bi.getColorModel();
             int nbands = _ra.getNumBands();
             int dataType = _ra.getDataBuffer().getDataType();
-            _d = switch (dataType) {
-                case DataBuffer.TYPE_BYTE -> new byte[nbands];
-                case DataBuffer.TYPE_USHORT -> new short[nbands];
-                case DataBuffer.TYPE_INT -> new int[nbands];
-                case DataBuffer.TYPE_FLOAT -> new float[nbands];
-                case DataBuffer.TYPE_DOUBLE -> new double[nbands];
-                default -> throw new IllegalArgumentException("Unknown data buffer type: " +
-                        dataType);
-            };
+            switch (dataType) {
+                case DataBuffer.TYPE_BYTE:
+                    _d = new byte[nbands];
+                    break;
+                case DataBuffer.TYPE_USHORT:
+                    _d = new short[nbands];
+                    break;
+                case DataBuffer.TYPE_INT:
+                    _d = new int[nbands];
+                    break;
+                case DataBuffer.TYPE_FLOAT:
+                    _d = new float[nbands];
+                    break;
+                case DataBuffer.TYPE_DOUBLE:
+                    _d = new double[nbands];
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown data buffer type: " + dataType);
+            }
 
             for (int y = 0; y < oh; y++) {
                 for (int x = 0; x < ow; x++) {

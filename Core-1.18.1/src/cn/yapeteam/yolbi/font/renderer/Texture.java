@@ -1,4 +1,4 @@
-package cn.yapeteam.yolbi.utils.font;
+package cn.yapeteam.yolbi.font.renderer;
 
 import net.minecraft.resources.ResourceLocation;
 

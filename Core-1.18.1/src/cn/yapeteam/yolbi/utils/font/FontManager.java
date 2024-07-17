@@ -1,13 +1,9 @@
 package cn.yapeteam.yolbi.utils.font;
 
-
-
-
+import cn.yapeteam.yolbi.font.renderer.FontRenderer;
 
 import java.awt.*;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.jar.JarFile;
 
 public class FontManager {
     public static FontRenderer inkFree;
@@ -31,5 +27,4 @@ public class FontManager {
     public static FontRenderer createFontRenderer(InputStream font,int size) {
         return new FontRenderer(getFont(size,font),size/2f);
     }
-
 }

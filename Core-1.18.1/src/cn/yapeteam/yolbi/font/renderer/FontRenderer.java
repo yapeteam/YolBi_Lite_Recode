@@ -1,5 +1,6 @@
-package cn.yapeteam.yolbi.utils.font;
+package cn.yapeteam.yolbi.font.renderer;
 
+import cn.yapeteam.yolbi.font.AbstractFontRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
@@ -9,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import lombok.AllArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -30,10 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
-
-
-public class FontRenderer implements Closeable {
-    public static Minecraft mc=Minecraft.getInstance();
+public class FontRenderer implements Closeable, AbstractFontRenderer {
+    public static Minecraft mc = Minecraft.getInstance();
     private static final Char2IntArrayMap colorCodes = new Char2IntArrayMap() {{
         put('0', 0x000000);
         put('1', 0x0000AA);
@@ -149,22 +149,35 @@ public class FontRenderer implements Closeable {
         return allGlyphs.computeIfAbsent(glyph, this::locateGlyph0);
     }
 
+    @Override
     public void drawString(PoseStack stack, String s, double x, double y, int color) {
-        float r = ((color >> 16) & 0xff)/ 255f;
+        float r = ((color >> 16) & 0xff) / 255f;
         float g = ((color >> 8) & 0xff) / 255f;
         float b = ((color) & 0xff) / 255f;
-        
+
         float a = ((color >> 24) & 0xff) / 255f;
         drawString(stack, s, (float) x, (float) y, r, g, b, a);
     }
 
+    @Override
     public void drawString(PoseStack stack, String s, double x, double y, Color color) {
         drawString(stack, s, (float) x, (float) y, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha());
+    }
+
+    @Override
+    public double getHeight() {
+        return getStringHeight("A");
+    }
+
+    @Override
+    public Font getFont() {
+        return font;
     }
 
     public void drawString(PoseStack stack, String s, float x, float y, float r, float g, float b, float a) {
         drawString(stack, s, x, y, r, g, b, a, false, 0);
     }
+
     public static double roundToDecimal(double n, int point) {
         if (point == 0) {
             return Math.floor(n);
@@ -172,12 +185,13 @@ public class FontRenderer implements Closeable {
         double factor = Math.pow(10, point);
         return Math.round(n * factor) / factor;
     }
+
     public void drawString(PoseStack stack, String s, float x, float y, float r, float g, float b, float a, boolean gradient, int offset) {
         if (prebakeGlyphsFuture != null && !prebakeGlyphsFuture.isDone()) {
             try {
                 prebakeGlyphsFuture.get();
-            } catch (InterruptedException | ExecutionException ignored) {
-                ignored.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }
 
@@ -196,7 +210,7 @@ public class FontRenderer implements Closeable {
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);//getPositionTexColorProgram
 
-        Tesselator tesselator =Tesselator.getInstance();
+        Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
 
         Matrix4f mat = stack.last().pose();
@@ -227,7 +241,7 @@ public class FontRenderer implements Closeable {
                     continue;
                 }
 
-                if(gradient) {
+                if (gradient) {
                     Color color = Color.green;//HudEditor.getColor(i * offset);
                     r2 = color.getRed() / 255f;
                     g2 = color.getGreen() / 255f;
@@ -239,13 +253,13 @@ public class FontRenderer implements Closeable {
                     inSel = true;
                     continue;
                 } else if (c == '\n') {
-                    yOffset += getStringHeight(s.substring(lineStart, i)) * scaleMul;
+                    yOffset += (float) (getStringHeight(s.substring(lineStart, i)) * scaleMul);
                     xOffset = 0;
                     lineStart = i + 1;
                     continue;
                 }
                 Glyph glyph = locateGlyph1(c);
-                if(glyph != null) {
+                if (glyph != null) {
                     if (glyph.value() != ' ') {
                         ResourceLocation i1 = glyph.owner().bindToTexture;
                         DrawEntry entry = new DrawEntry(xOffset, yOffset, r2, g2, b2, glyph);
@@ -254,13 +268,10 @@ public class FontRenderer implements Closeable {
                     xOffset += glyph.width();
                 }
             }
-            System.out.println("1");
             for (ResourceLocation ResourceLocation : GLYPH_PAGE_CACHE.keySet()) {
                 RenderSystem.setShaderTexture(0, ResourceLocation);
                 List<DrawEntry> objects = GLYPH_PAGE_CACHE.get(ResourceLocation);
-                System.out.println("2");
                 bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);//POSITION_TEXTURE_COLOR
-                System.out.println("3");
                 for (DrawEntry object : objects) {
                     float xo = object.atX;
                     float yo = object.atY;
@@ -291,9 +302,9 @@ public class FontRenderer implements Closeable {
         RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 0.0F);
         stack.popPose();
         RenderSystem.bindTexture(0);
-        System.out.println("renderend");
     }
 
+    @Override
     public void drawCenteredString(PoseStack stack, String s, double x, double y, int color) {
         float r = ((color >> 16) & 0xff) / 255f;
         float g = ((color >> 8) & 0xff) / 255f;
@@ -302,15 +313,17 @@ public class FontRenderer implements Closeable {
         drawString(stack, s, (float) (x - getStringWidth(s) / 2f), (float) y, r, g, b, a);
     }
 
+    @Override
     public void drawCenteredString(PoseStack stack, String s, double x, double y, Color color) {
         drawString(stack, s, (float) (x - getStringWidth(s) / 2f), (float) y, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
     public void drawCenteredString(PoseStack stack, String s, float x, float y, float r, float g, float b, float a) {
-        drawString(stack, s, x - getStringWidth(s) / 2f, y, r, g, b, a);
+        drawString(stack, s, (float) (x - getStringWidth(s) / 2f), y, r, g, b, a);
     }
 
-    public float getStringWidth(String text) {
+    @Override
+    public double getStringWidth(String text) {
         char[] c = stripControlCodes(text).toCharArray();
         float currentLine = 0;
         float maxPreviousLines = 0;
@@ -321,12 +334,13 @@ public class FontRenderer implements Closeable {
                 continue;
             }
             Glyph glyph = locateGlyph1(c1);
-            currentLine +=  glyph == null ? 0 : (glyph.width() / (float) this.scaleMul);
+            currentLine += glyph == null ? 0 : (glyph.width() / (float) this.scaleMul);
         }
         return Math.max(currentLine, maxPreviousLines);
     }
 
-    public float getStringHeight(String text) {
+    @Override
+    public double getStringHeight(String text) {
         char[] c = stripControlCodes(text).toCharArray();
         if (c.length == 0) {
             c = new char[]{' '};
@@ -352,7 +366,6 @@ public class FontRenderer implements Closeable {
         return currentLine + previous;
     }
 
-
     @Override
     public void close() {
         try {
@@ -376,9 +389,36 @@ public class FontRenderer implements Closeable {
         return new ResourceLocation("minecraft", randomString());
     }
 
+    public static int nextInt(int origin, int bound) {
+        Random rng = new Random();
+        int r = new Random().nextInt();
+        if (origin < bound) {
+            // It's not case (1).
+            final int n = bound - origin;
+            final int m = n - 1;
+            if ((n & m) == 0) {
+                // It is case (2): length of range is a power of 2.
+                r = (r & m) + origin;
+            } else if (n > 0) {
+                // It is case (3): need to reject over-represented candidates.
+                for (int u = r >>> 1;
+                     u + m - (r = u % n) < 0;
+                     u = rng.nextInt() >>> 1)
+                    ;
+                r += origin;
+            } else {
+                // It is case (4): length of range not representable as long.
+                while (r < origin || r >= bound) {
+                    r = rng.nextInt();
+                }
+            }
+        }
+        return r;
+    }
+
     private static String randomString() {
         return IntStream.range(0, 32)
-                .mapToObj(operand -> String.valueOf((char) new Random().nextInt('a', 'z' + 1)))
+                .mapToObj(operand -> String.valueOf((char) nextInt('a', 'z' + 1)))
                 .collect(Collectors.joining());
     }
 
@@ -390,7 +430,7 @@ public class FontRenderer implements Closeable {
         return new int[]{red, green, blue};
     }
 
-    public float getFontHeight(String str) {
+    public double getFontHeight(String str) {
         return getStringHeight(str);
     }
 
@@ -399,8 +439,16 @@ public class FontRenderer implements Closeable {
     }
 
     public void drawGradientCenteredString(PoseStack matrices, String s, float x, float y, int i) {
-        drawGradientString(matrices, s, x - getStringWidth(s) / 2f, y, i);
+        drawGradientString(matrices, s, (float) (x - getStringWidth(s) / 2f), y, i);
     }
 
-    record DrawEntry(float atX, float atY, float r, float g, float b, Glyph toDraw) {}
+    @AllArgsConstructor
+    public static class DrawEntry {
+        float atX;
+        float atY;
+        float r;
+        float g;
+        float b;
+        Glyph toDraw;
+    }
 }
