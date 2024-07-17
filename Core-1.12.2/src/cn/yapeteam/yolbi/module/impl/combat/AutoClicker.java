@@ -32,7 +32,7 @@ public class AutoClicker extends Module {
     public void onEnable() {
         delay = generate(cps.getValue(), range.getValue());
         clickThread = new Thread(() -> {
-            while (true) {
+            while (isEnabled()) {
                 try {
                     delay = generate(cps.getValue(), range.getValue());
                     sendClick();
@@ -42,11 +42,6 @@ public class AutoClicker extends Module {
             }
         });
         clickThread.start();
-    }
-
-    @Override
-    protected void onDisable() {
-        clickThread.interrupt();
     }
 
     @Getter

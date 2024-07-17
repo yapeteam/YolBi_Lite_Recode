@@ -58,8 +58,9 @@ public class MainFrame extends JFrame {
                 cache += (value1 - cache) * speed;
                 progressBar1.setValue((int) cache);
                 try {
-                    Thread.sleep((long) (1000 / fps));
+                    Thread.sleep(1000 / fps);
                 } catch (InterruptedException ignored) {
+                    break;
                 }
             }
         });
@@ -71,6 +72,7 @@ public class MainFrame extends JFrame {
                 try {
                     Thread.sleep((long) (1000 / fps));
                 } catch (InterruptedException ignored) {
+                    break;
                 }
             }
         });
