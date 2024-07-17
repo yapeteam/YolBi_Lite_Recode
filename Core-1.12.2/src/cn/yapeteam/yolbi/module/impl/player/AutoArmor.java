@@ -9,13 +9,11 @@ import cn.yapeteam.yolbi.module.values.impl.NumberValue;
 import cn.yapeteam.yolbi.utils.misc.TimerUtil;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Enchantments;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPacketClientStatus;
 
 public class AutoArmor extends Module {
     private final TimerUtil timer = new TimerUtil();
@@ -36,8 +34,6 @@ public class AutoArmor extends Module {
     @Listener
     public void onTick(EventTick event) {
         String mode = this.mode.getValue();
-        //if (Client.getModuleManager().isEnabled(InventoryManager.class))
-        //    return;
         long delay = this.delay.getValue().longValue() * 50;
         if (mode.equalsIgnoreCase("OpenInv") && !(mc.currentScreen instanceof GuiInventory)) {
             return;
