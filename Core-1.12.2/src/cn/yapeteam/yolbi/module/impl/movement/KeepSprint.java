@@ -18,7 +18,7 @@ public class KeepSprint extends Module {
 
     @Listener
     private void onMotion(EventPacket event) {
-        EventPacket e = event;
+        EventPacket e = (EventPacket) event;
         try {
             if (e.isIncoming() && e.getPacket() instanceof CPacketEntityAction) {
                 CPacketEntityAction packet = (CPacketEntityAction) e.getPacket();
@@ -27,6 +27,7 @@ public class KeepSprint extends Module {
                 }
             }
         } catch (ClassCastException exception) {
+
         }
     }
 }
