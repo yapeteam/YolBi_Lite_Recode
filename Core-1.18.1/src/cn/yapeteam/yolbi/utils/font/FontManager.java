@@ -10,13 +10,15 @@ public class FontManager {
     public static FontRenderer tenacity;
     public static FontRenderer tenacity20;
     public static FontRenderer simkai;
-    public static void init(){
+
+    public static void init() {
 
     }
+
     public static Font getFont(int size, InputStream is) {
         Font font;
         try {
-            font = Font.createFont(Font.TRUETYPE_FONT,is).deriveFont(Font.PLAIN, (float) size);
+            font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.PLAIN, (float) size);
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println("Error loading font");
@@ -24,7 +26,6 @@ public class FontManager {
         }
         return font;
     }
-    public static FontRenderer createFontRenderer(InputStream font,int size) {
-        return new FontRenderer(getFont(size,font),size/2f);
-    }
+
+
 }
