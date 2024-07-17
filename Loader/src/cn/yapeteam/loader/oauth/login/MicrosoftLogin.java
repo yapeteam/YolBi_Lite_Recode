@@ -41,10 +41,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-//import org.json.*;
-
 public class MicrosoftLogin {
-    public static final MicrosoftLogin instance = new MicrosoftLogin();
     private final Logger LOGGER = LogManager.getLogger();
 
     private static final String msTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
@@ -65,7 +62,7 @@ public class MicrosoftLogin {
             .build();
     private final CloseableHttpClient client;
     private boolean isCancelled = false;
-    private Consumer<String> updateStatus = s -> {
+    private static Consumer<String> updateStatus = s -> {
     };
     private CountDownLatch serverLatch = null;
 
@@ -100,8 +97,8 @@ public class MicrosoftLogin {
         }
     }
 
-    public void setUpdateStatusConsumer(Consumer<String> updateStatus) {
-        this.updateStatus = updateStatus;
+    public static void setUpdateStatusConsumer(Consumer<String> updateStatus) {
+        MicrosoftLogin.updateStatus = updateStatus;
     }
 
     public MicrosoftProfile loginFromRefresh(String refreshToken) throws Exception {

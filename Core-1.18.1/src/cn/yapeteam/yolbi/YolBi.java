@@ -5,6 +5,7 @@ import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.server.WebServer;
+import cn.yapeteam.yolbi.utils.font.FontManager;
 import lombok.Getter;
 
 import java.io.File;
@@ -37,6 +38,7 @@ public class YolBi {
         instance.moduleManager = new ModuleManager();
         instance.eventManager.register(instance.moduleManager);
         instance.moduleManager.load();
+        FontManager.init();
         try {
             instance.getConfigManager().load();
             WebServer.start();

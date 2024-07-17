@@ -1,6 +1,7 @@
 package cn.yapeteam.yolbi.command;
 
 import cn.yapeteam.yolbi.command.impl.CommandBind;
+import cn.yapeteam.yolbi.command.impl.CommandLogin;
 import cn.yapeteam.yolbi.command.impl.CommandToggle;
 import cn.yapeteam.yolbi.command.impl.CommandValue;
 import cn.yapeteam.yolbi.event.Listener;
@@ -18,6 +19,7 @@ public class CommandManager {
         commands.add(new CommandToggle());
         commands.add(new CommandBind());
         commands.add(new CommandValue());
+        commands.add(new CommandLogin());
     }
 
     @Listener
@@ -27,7 +29,15 @@ public class CommandManager {
             e.setCancelled(true);
             message = message.substring(1);
             String[] args = parseMessage(message);
-            commands.forEach(c -> c.process(args));
+            String cmd = e.getMessage().split(" ")[0].substring(1);
+            AbstractCommand command = commands.stream()
+                    .filter(c -> c.getKey().equalsIgnoreCase(cmd))
+                    .findFirst().orElse(null);
+            if (command == null) {
+                AbstractCommand.printMessage("Command not found: " + cmd);
+                return;
+            }
+            command.process(args);
         }
         if (message.startsWith("@"))
             e.setMessage(message.substring(1));

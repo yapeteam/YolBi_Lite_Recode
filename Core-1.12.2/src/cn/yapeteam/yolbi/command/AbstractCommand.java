@@ -12,7 +12,7 @@ public abstract class AbstractCommand {
 
     public abstract void process(String[] args);
 
-    public static void sendMessage(String message) {
+    public static void printMessage(String message) {
         Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new TextComponentString(message));
     }
 }

@@ -15,8 +15,8 @@ public class CommandToggle extends AbstractCommand {
             Module module = YolBi.instance.getModuleManager().getModuleByName(args[0]);
             if (module != null) {
                 module.toggle();
-                sendMessage("Toggled " + module.getName());
-            } else sendMessage("Module not found " + args[0]);
+                printMessage("Toggled " + module.getName());
+            } else printMessage("Module not found " + args[0]);
         }
     }
 }
