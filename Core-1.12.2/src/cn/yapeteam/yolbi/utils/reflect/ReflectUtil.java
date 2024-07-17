@@ -12,6 +12,8 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -32,7 +34,7 @@ public class ReflectUtil {
             ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
             EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
             ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ,
-            SPacketEntityVelocity$motionX, SPacketEntityVelocity$motionY, SPacketEntityVelocity$motionZ;
+            SPacketEntityVelocity$motionX, SPacketEntityVelocity$motionY, SPacketEntityVelocity$motionZ, ItemStack$stackTagCompound;
 
 
     private static Method
@@ -41,6 +43,12 @@ public class ReflectUtil {
             Entity$getVectorForRotation;
 
     static {
+        try {
+            ItemStack$stackTagCompound = ItemStack.class.getDeclaredField(Mapper.map("net/minecraft/item/ItemStack", "stackTagCompound", null, Mapper.Type.Field));
+            ItemStack$stackTagCompound.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Logger.exception(e);
+        }
         try {
             Minecraft$clickMouse = Minecraft.class.getDeclaredMethod(Mapper.map("net/minecraft/client/Minecraft", "clickMouse", "()V", Mapper.Type.Method));
             Minecraft$clickMouse.setAccessible(true);
@@ -206,6 +214,15 @@ public class ReflectUtil {
         } catch (NoSuchFieldException e) {
             Logger.exception(e);
         }
+    }
+
+    public static NBTTagCompound ItemStack$getStackTagCompound(ItemStack obj) {
+        try {
+            return (NBTTagCompound) ItemStack$stackTagCompound.get(obj);
+        } catch (IllegalAccessException e) {
+            Logger.exception(e);
+        }
+        return null;
     }
 
     public static double SPacketEntityVelocity$getMotionX(SPacketEntityVelocity s12PacketEntityVelocity) {
