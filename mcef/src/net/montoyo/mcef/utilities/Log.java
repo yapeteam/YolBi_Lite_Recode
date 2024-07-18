@@ -1,27 +1,30 @@
 package net.montoyo.mcef.utilities;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
+import cn.yapeteam.loader.logger.Logger;
 
 /**
  * A set of functions to log messages into the MCEF log channel.
- * @author montoyo
  *
+ * @author montoyo
  */
 public class Log {
-    public static void info(String what, Object ... data) {
-        LogManager.getLogger("MCEF").log(Level.INFO, String.format(what, data));
-    }
-    
-    public static void warning(String what, Object ... data) {
-        LogManager.getLogger("MCEF").log(Level.WARN, String.format(what, data));
-    }
-    
-    public static void error(String what, Object ... data) {
-        LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data));
+    private static String convert(String str) {
+        return "[MCEF] " + str.replace("%s", "{}").replace("%d", "{}");
     }
 
-    public static void errorEx(String what, Throwable t, Object ... data) {
-        LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data), t);
+    public static void info(String what, Object... data) {
+        Logger.info(convert(what), data);
+    }
+
+    public static void warning(String what, Object... data) {
+        Logger.warn(convert(what), data);
+    }
+
+    public static void error(String what, Object... data) {
+        Logger.error(convert(what), data);
+    }
+
+    public static void exception(Throwable t) {
+        Logger.exception(t);
     }
 }

@@ -23,7 +23,7 @@ public class OS {
         return getOSType() == OSType.OSLinux;
     }
 
-    private static OSType getOSType() {
+    public static OSType getOSType() {
         if (osType == OSType.OSUndefined) {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.startsWith("windows")) {

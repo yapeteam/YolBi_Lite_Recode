@@ -1,5 +1,6 @@
 package net.montoyo.mcef.client;
 
+import cn.yapeteam.loader.Loader;
 import lombok.Getter;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
@@ -22,7 +23,6 @@ import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,6 +41,12 @@ public class ClientProxy extends BaseProxy {
 
     @Override
     public void onInit(String root) {
+        if (!OS.isWindows()) {
+            VIRTUAL = true;
+            Log.error("Unsupported Platform: %s", OS.getOSType());
+            return;
+        }
+
         appHandler.setArgs(MCEF.CEF_ARGS);
 
         ROOT = root;
@@ -50,53 +56,26 @@ public class ClientProxy extends BaseProxy {
         if (ROOT.endsWith("/"))
             ROOT = ROOT.substring(0, ROOT.length() - 1);
 
-        Log.info("Now adding \"%s\" to java.library.path", ROOT);
-
-        try {
-            Field pathsField = ClassLoader.class.getDeclaredField("usr_paths");
-            pathsField.setAccessible(true);
-
-            String[] paths = (String[]) pathsField.get(null);
-            String[] newList = new String[paths.length + 1];
-
-            System.arraycopy(paths, 0, newList, 1, paths.length);
-            newList[0] = ROOT.replace('/', File.separatorChar);
-            pathsField.set(null, newList);
-        } catch (Exception e) {
-            Log.error("Failed to do it! Entering virtual mode...");
-            e.printStackTrace();
-
-            VIRTUAL = true;
-            return;
-        }
-
-        Log.info("Done without errors.");
-        String exeSuffix;
-        if (OS.isWindows())
-            exeSuffix = ".exe";
-        else
-            exeSuffix = "";
+        String exeSuffix = ".exe";
 
         File subproc = new File(ROOT, "jcef_helper" + exeSuffix);
         CefSettings settings = new CefSettings();
         settings.windowless_rendering_enabled = true;
         settings.background_color = settings.new ColorType(0, 255, 255, 255);
         settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
-        settings.cache_path = (new File(ROOT, "MCEFCache")).getAbsolutePath();
+        settings.cache_path = (new File(Loader.YOLBI_DIR, "MCEFCache")).getAbsolutePath();
         settings.browser_subprocess_path = subproc.getAbsolutePath();
         settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_DEFAULT;
 
         try {
             ArrayList<String> libs = new ArrayList<>();
 
-            if (OS.isWindows()) {
-                libs.add("d3dcompiler_47.dll");
-                libs.add("libGLESv2.dll");
-                libs.add("libEGL.dll");
-                libs.add("chrome_elf.dll");
-                libs.add("libcef.dll");
-                libs.add("jcef.dll");
-            }
+            libs.add("d3dcompiler_47.dll");
+            libs.add("libGLESv2.dll");
+            libs.add("libEGL.dll");
+            libs.add("chrome_elf.dll");
+            libs.add("libcef.dll");
+            libs.add("jcef.dll");
 
             for (String lib : libs) {
                 File f = new File(ROOT, lib);
