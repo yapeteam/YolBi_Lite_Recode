@@ -34,16 +34,16 @@ public class Notification {
         this.type = type;
         switch (type) {
             case INIT:
-                color = new Color(0, 234, 255);
+                color = new Color(121, 114, 255);
                 break;
             case SUCCESS:
-                color = new Color(0, 255, 42);
+                color = new Color(121, 222, 134);
                 break;
             case FAILED:
-                color = new Color(255, 0, 30);
+                color = new Color(255, 0, 0);
                 break;
             case WARNING:
-                color = new Color(255, 251, 0);
+                color = new Color(255, 114, 0);
                 break;
             default:
                 color = new Color(-1);
