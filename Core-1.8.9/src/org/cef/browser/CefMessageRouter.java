@@ -3,7 +3,7 @@ package org.cef.browser;
 import org.cef.handler.CefMessageRouterHandler;
 
 public abstract class CefMessageRouter {
-    private CefMessageRouterConfig routerConfig_;
+    private final CefMessageRouterConfig routerConfig_;
 
     public abstract void dispose();
 
@@ -33,19 +33,19 @@ public abstract class CefMessageRouter {
         this.routerConfig_ = routerConfig;
     }
 
-    public static final CefMessageRouter create() {
+    public static CefMessageRouter create() {
         return create(null, null);
     }
 
-    public static final CefMessageRouter create(CefMessageRouterConfig config) {
+    public static CefMessageRouter create(CefMessageRouterConfig config) {
         return create(config, null);
     }
 
-    public static final CefMessageRouter create(CefMessageRouterHandler handler) {
+    public static CefMessageRouter create(CefMessageRouterHandler handler) {
         return create(null, handler);
     }
 
-    public static final CefMessageRouter create(CefMessageRouterConfig config, CefMessageRouterHandler handler) {
+    public static CefMessageRouter create(CefMessageRouterConfig config, CefMessageRouterHandler handler) {
         CefMessageRouter router = CefMessageRouter_N.createNative(config);
         if (router != null && handler != null) {
             router.addHandler(handler, true);
@@ -58,6 +58,6 @@ public abstract class CefMessageRouter {
     }
 
     public final void setMessageRouterConfig(CefMessageRouterConfig config) {
-        this.routerConfig_ = config;
+        //this.routerConfig_ = config;
     }
 }

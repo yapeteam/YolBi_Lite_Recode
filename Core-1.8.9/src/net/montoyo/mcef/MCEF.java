@@ -1,25 +1,15 @@
 package net.montoyo.mcef;
 
-import cn.yapeteam.loader.ResourceManager;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.Log;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 
 public class MCEF {
-
-    public static final String VERSION = "1.20";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
     public static boolean USE_FORGE_SPLASH;
-    public static String FORCE_MIRROR = null;
     public static String HOME_PAGE;
     public static String[] CEF_ARGS = new String[0];
     public static boolean CHECK_VRAM_LEAK;
@@ -27,7 +17,7 @@ public class MCEF {
     public static boolean SHUTDOWN_JCEF;
     public static boolean SECURE_MIRRORS_ONLY;
     public static MCEF INSTANCE = new MCEF();
-    public static BaseProxy PROXY;
+    public static final BaseProxy PROXY = new ClientProxy();
 
     public void onPreInit() {
         Log.info("Loading MCEF config...");
@@ -46,8 +36,6 @@ public class MCEF {
 
         //Config: debug
         CHECK_VRAM_LEAK = true;
-        importLetsEncryptCertificate();
-        PROXY = new ClientProxy();
         PROXY.onPreInit();
     }
 
@@ -59,25 +47,5 @@ public class MCEF {
     public static void onMinecraftShutdown() {
         Log.info("Minecraft shutdown hook called!");
         PROXY.onShutdown();
-    }
-
-    //This is needed, otherwise for some reason HTTPS doesn't work
-    private static void importLetsEncryptCertificate() {
-        try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate cert = cf.generateCertificate(ResourceManager.resources.getStream("cef/letsencryptauthorityx3.crt"));
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null, null);
-            ks.setCertificateEntry("letsencrypt", cert);
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-            tmf.init(ks);
-            SSLContext sslCtx = SSLContext.getInstance("TLS");
-            sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
-            SSL_SOCKET_FACTORY = sslCtx.getSocketFactory();
-            Log.info("Successfully loaded Let's Encrypt certificate", new Object[0]);
-        } catch (Throwable t) {
-            Log.error("Could not import Let's Encrypt certificate!! HTTPS downloads WILL fail...", new Object[0]);
-            t.printStackTrace();
-        }
     }
 }

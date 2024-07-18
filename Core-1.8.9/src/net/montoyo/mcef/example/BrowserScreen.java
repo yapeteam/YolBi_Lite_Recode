@@ -237,6 +237,7 @@ public class BrowserScreen extends GuiScreen {
             browser.goForward();
         else if (src.id == 2) {
             String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
+            System.out.println(fixedURL);
             browser.loadURL(fixedURL);
         } else if (src.id == 3) {
             ExampleMod.INSTANCE.setBackup(this);

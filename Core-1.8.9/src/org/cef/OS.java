@@ -11,19 +11,19 @@ public class OS {
         OSUnknown
     }
 
-    public static final boolean isWindows() {
+    public static boolean isWindows() {
         return getOSType() == OSType.OSWindows;
     }
 
-    public static final boolean isMacintosh() {
+    public static boolean isMacintosh() {
         return getOSType() == OSType.OSMacintosh;
     }
 
-    public static final boolean isLinux() {
+    public static boolean isLinux() {
         return getOSType() == OSType.OSLinux;
     }
 
-    private static final OSType getOSType() {
+    private static OSType getOSType() {
         if (osType == OSType.OSUndefined) {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.startsWith("windows")) {
