@@ -20,6 +20,7 @@ public class MCEFListener {
             mcefInited = true;
             CefBrowserFactory.Renderer = ImplCefRenderer.class;
             MCEF.INSTANCE.onInit(Minecraft.getMinecraft().mcDataDir.getAbsolutePath().replaceAll("\\\\", "/"));
+            new BrowserHandler().onInit();
         }
     }
 

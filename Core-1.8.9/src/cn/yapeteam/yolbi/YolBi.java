@@ -15,7 +15,6 @@ import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.render.ExternalFrame;
 import cn.yapeteam.yolbi.server.WebServer;
 import cn.yapeteam.yolbi.shader.Shader;
-import cn.yapeteam.yolbi.ui.browser.BrowserHandler;
 import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
@@ -76,7 +75,6 @@ public class YolBi {
         instance.eventManager.register(RotationManager.class);
         instance.eventManager.register(MCEFListener.class);
         instance.moduleManager.load();
-        new BrowserHandler().onInit();
         try {
             instance.getConfigManager().load();
             WebServer.start();
