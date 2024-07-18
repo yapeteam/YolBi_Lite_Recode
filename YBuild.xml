@@ -44,6 +44,9 @@
                     <file>deps/asm-all-9.2.jar</file>
                     <file>deps/flatlaf.jar</file>
                     <file>deps/flatlaf-intellij-themes.jar</file>
+                    <archive name="mcef.jar">
+                        <files>out/production/mcef</files>
+                    </archive>
                 </dir>
                 <file>build/definer.jar</file>
                 <file>build/loader.jar</file>

@@ -4,11 +4,10 @@ import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.command.CommandManager;
 import cn.yapeteam.yolbi.config.ConfigManager;
 import cn.yapeteam.yolbi.event.EventManager;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
+import cn.yapeteam.yolbi.mcef.MCEFListener;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
@@ -71,10 +70,10 @@ public class YolBi {
         instance.eventManager.register(instance.moduleManager);
         instance.eventManager.register(instance.botManager);
         instance.eventManager.register(instance.targetManager);
-        instance.eventManager.register(instance);
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(RotationManager.class);
+        instance.eventManager.register(MCEFListener.class);
         instance.moduleManager.load();
         try {
             instance.getConfigManager().load();
@@ -90,17 +89,6 @@ public class YolBi {
                         15000, NotificationType.INIT
                 )
         );
-    }
-
-    private boolean mcefInited = false;
-
-    @Listener
-    private void onTick(EventTick e) {
-        if (!mcefInited) {
-            mcefInited = true;
-            MCEF.INSTANCE.onPreInit();
-            MCEF.INSTANCE.onInit();
-        }
     }
 
     public void shutdown() {

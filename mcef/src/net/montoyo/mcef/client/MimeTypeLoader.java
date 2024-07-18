@@ -1,7 +1,6 @@
 package net.montoyo.mcef.client;
 
 import cn.yapeteam.loader.ResourceManager;
-import cn.yapeteam.ymixin.annotations.DontMap;
 import net.montoyo.mcef.utilities.Log;
 
 import java.io.BufferedReader;
@@ -11,7 +10,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@DontMap
 public class MimeTypeLoader {
     public static void loadMimeTypeMapping(HashMap<String, String> mimeTypeMap) {
         Pattern p = Pattern.compile("^(\\S+)\\s+(\\S+)\\s*(\\S*)\\s*(\\S*)$");

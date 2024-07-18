@@ -41,14 +41,6 @@ public interface API {
      * @return true if MCEF is in virtual mode.
      */
     boolean isVirtual();
-    
-    /**
-     * Opens the example browser UI.
-     * @param url The URL to load.
-     * @see net.montoyo.mcef.example.ExampleMod
-     */
-    void openExampleBrowser(String url);
-
     /**
      * Returns a mime type from a file extension,
      * or null, if there is no mapping for this extension.

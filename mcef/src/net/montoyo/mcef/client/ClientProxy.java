@@ -1,20 +1,12 @@
 package net.montoyo.mcef.client;
 
-import cn.yapeteam.yolbi.YolBi;
-import cn.yapeteam.yolbi.event.Listener;
-import cn.yapeteam.yolbi.event.impl.game.EventKey;
-import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
-import cn.yapeteam.yolbi.event.impl.game.EventLoop;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ChatComponentText;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
 import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.api.IScheme;
-import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.virtual.VirtualBrowser;
 import org.cef.CefApp;
@@ -27,7 +19,6 @@ import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
 import org.cef.browser.CefRenderer;
 import org.cef.handler.CefLifeSpanHandlerAdapter;
-import org.lwjgl.input.Keyboard;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,29 +35,15 @@ public class ClientProxy extends BaseProxy {
     private CefClient cefClient;
     private CefMessageRouter cefRouter;
     private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
-    private final String updateStr = "666";
-    private final Minecraft mc = Minecraft.getMinecraft();
     private final DisplayHandler displayHandler = new DisplayHandler();
     private final HashMap<String, String> mimeTypeMap = new HashMap<>();
     private final AppHandler appHandler = new AppHandler();
-    private final ExampleMod exampleMod = new ExampleMod();
 
     @Override
-    public void onPreInit() {
-        exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
-    }
-
-    @Listener
-    private void onKey(EventKey e) {
-        if (e.getKey() == Keyboard.KEY_L)
-            exampleMod.display();
-    }
-
-    @Override
-    public void onInit() {
+    public void onInit(String root) {
         appHandler.setArgs(MCEF.CEF_ARGS);
 
-        ROOT = mc.mcDataDir.getAbsolutePath().replaceAll("\\\\", "/");
+        ROOT = root;
         if (ROOT.endsWith("."))
             ROOT = ROOT.substring(0, ROOT.length() - 1);
 
@@ -159,10 +136,6 @@ public class ClientProxy extends BaseProxy {
             }
         });
 
-        YolBi.instance.getEventManager().register(this);
-        if (MCEF.ENABLE_EXAMPLE)
-            exampleMod.onInit();
-
         Log.info("MCEF loaded successfuly.");
     }
 
@@ -190,12 +163,6 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Override
-    public void openExampleBrowser(String url) {
-        if (MCEF.ENABLE_EXAMPLE)
-            exampleMod.showScreen(url);
-    }
-
-    @Override
     public void registerJSQueryHandler(IJSQueryHandler iqh) {
         if (!VIRTUAL) {
             cefRouter.addHandler(new MessageRouter(iqh), false);
@@ -212,10 +179,7 @@ public class ClientProxy extends BaseProxy {
         return appHandler.isSchemeRegistered(name);
     }
 
-    @Listener
-    public void onTick(EventLoop e) {
-        mc.mcProfiler.startSection("MCEF");
-
+    public void update() {
         if (cefApp != null)
             cefApp.N_DoMessageLoopWork();
 
@@ -223,15 +187,6 @@ public class ClientProxy extends BaseProxy {
             b.mcefUpdate();
 
         displayHandler.update();
-        mc.mcProfiler.endSection();
-    }
-
-    @Listener
-    public void onLogin(EventLoadWorld e) {
-        if (!MCEF.WARN_UPDATES)
-            return;
-
-        mc.ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(updateStr));
     }
 
     public void removeBrowser(CefBrowserOsr b) {

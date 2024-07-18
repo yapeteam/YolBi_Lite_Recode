@@ -1,4 +1,4 @@
-package net.montoyo.mcef.example;
+package cn.yapeteam.yolbi.ui.browser;
 
 import cn.yapeteam.ymixin.annotations.Super;
 import net.minecraft.client.gui.GuiScreen;
@@ -11,7 +11,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 public class ScreenCfg extends GuiScreen {
-    private IBrowser browser;
+    private final IBrowser browser;
     private int width = 320;
     private int height = 180;
     private int x = 10;
@@ -36,7 +36,7 @@ public class ScreenCfg extends GuiScreen {
         while (Keyboard.next()) {
             if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
                 drawSquare = false;
-                ExampleMod.INSTANCE.hudBrowser = this;
+                BrowserHandler.INSTANCE.hudBrowser = this;
                 browser.injectMouseMove(-10, -10, 0, true);
                 mc.displayGuiScreen(null);
                 return;

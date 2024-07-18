@@ -1,4 +1,4 @@
-package org.cef.browser;
+package cn.yapeteam.yolbi.mcef;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -6,44 +6,24 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
+import org.cef.browser.CefRenderer;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
-public class CefRenderer {
-    private static final ArrayList<Integer> GL_TEXTURES = new ArrayList<>();
-    private boolean transparent_;
-    public int[] texture_id_ = new int[1];
-    private int view_width_ = 0;
-    private int view_height_ = 0;
-    private Rectangle popup_rect_ = new Rectangle(0, 0, 0, 0);
-    private Rectangle original_popup_rect_ = new Rectangle(0, 0, 0, 0);
-
-    public static void dumpVRAMLeak() {
-        Log.info(">>>>> MCEF: Beginning VRAM leak report", new Object[0]);
-        GL_TEXTURES.forEach(tex -> {
-            Log.warning(">>>>> MCEF: This texture has not been freed: " + tex, new Object[0]);
-        });
-        Log.info(">>>>> MCEF: End of VRAM leak report", new Object[0]);
+@SuppressWarnings("unused")
+public class ImplCefRenderer extends CefRenderer {
+    public ImplCefRenderer(boolean transparent) {
+        super(transparent);
     }
 
-    public CefRenderer(boolean transparent) {
-        this.transparent_ = transparent;
-        initialize();
-    }
-
-    protected boolean isTransparent() {
-        return this.transparent_;
-    }
-
+    @Override
     protected void initialize() {
         GlStateManager.enableTexture2D();
         this.texture_id_[0] = GL11.glGenTextures();
-        if (MCEF.CHECK_VRAM_LEAK) {
-            GL_TEXTURES.add(Integer.valueOf(this.texture_id_[0]));
-        }
+        if (MCEF.CHECK_VRAM_LEAK)
+            GL_TEXTURES.add(this.texture_id_[0]);
         GlStateManager.bindTexture(this.texture_id_[0]);
         GL11.glTexParameteri(3553, 10241, 9729);
         GL11.glTexParameteri(3553, 10240, 9729);
@@ -51,15 +31,7 @@ public class CefRenderer {
         GlStateManager.bindTexture(0);
     }
 
-    public void cleanup() {
-        if (this.texture_id_[0] != 0) {
-            if (MCEF.CHECK_VRAM_LEAK) {
-                GL_TEXTURES.remove(Integer.valueOf(this.texture_id_[0]));
-            }
-            GL11.glDeleteTextures(this.texture_id_[0]);
-        }
-    }
-
+    @Override
     public void render(double x1, double y1, double x2, double y2) {
         if (this.view_width_ == 0 || this.view_height_ == 0) {
             return;
@@ -76,41 +48,7 @@ public class CefRenderer {
         GlStateManager.bindTexture(0);
     }
 
-    public void onPopupSize(Rectangle rect) {
-        if (rect.width <= 0 || rect.height <= 0) {
-            return;
-        }
-        this.original_popup_rect_ = rect;
-        this.popup_rect_ = getPopupRectInWebView(this.original_popup_rect_);
-    }
-
-    protected Rectangle getPopupRectInWebView(Rectangle rc) {
-        if (rc.x < 0) {
-            rc.x = 0;
-        }
-        if (rc.y < 0) {
-            rc.y = 0;
-        }
-        if (rc.x + rc.width > this.view_width_) {
-            rc.x = this.view_width_ - rc.width;
-        }
-        if (rc.y + rc.height > this.view_height_) {
-            rc.y = this.view_height_ - rc.height;
-        }
-        if (rc.x < 0) {
-            rc.x = 0;
-        }
-        if (rc.y < 0) {
-            rc.y = 0;
-        }
-        return rc;
-    }
-
-    public void clearPopupRects() {
-        this.popup_rect_.setBounds(0, 0, 0, 0);
-        this.original_popup_rect_.setBounds(0, 0, 0, 0);
-    }
-
+    @Override
     public void onPaint(boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height, boolean completeReRender) {
         if (this.transparent_) {
             GlStateManager.enableBlend();
@@ -175,13 +113,5 @@ public class CefRenderer {
         }
         GL11.glPixelStorei(3317, oldAlignement);
         GlStateManager.bindTexture(0);
-    }
-
-    public int getViewWidth() {
-        return this.view_width_;
-    }
-
-    public int getViewHeight() {
-        return this.view_height_;
     }
 }

@@ -1,4 +1,4 @@
-package net.montoyo.mcef.example;
+package cn.yapeteam.yolbi.ui.browser;
 
 import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
@@ -15,9 +15,8 @@ import net.montoyo.mcef.utilities.Log;
  *
  * @author montoyo
  */
-public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
-
-    public static ExampleMod INSTANCE;
+public class BrowserHandler implements IDisplayHandler, IJSQueryHandler {
+    public static BrowserHandler INSTANCE;
 
     public ScreenCfg hudBrowser = null;
     private final Minecraft mc = Minecraft.getMinecraft();
@@ -29,24 +28,19 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         return api;
     }
 
-    public void onPreInit() {
+    public void onInit() {
+        INSTANCE = this;
         //Grab the API and make sure it isn't null.
         api = MCEFApi.getAPI();
         if (api == null)
             return;
-
-        api.registerScheme("mod", ModScheme.class, true, false, false, true, true, false, false);
-        YolBi.instance.getEventManager().register(this);
-    }
-
-    public void onInit() {
-        INSTANCE = this;
-
+        api.registerScheme("mod", BrowserScheme.class, true, false, false, true, true, false, false);
         if (api != null) {
             //Register this class to handle onAddressChange and onQuery events
             api.registerDisplayHandler(this);
             api.registerJSQueryHandler(this);
         }
+        YolBi.instance.getEventManager().register(this);
     }
 
     public boolean hasBackup() {

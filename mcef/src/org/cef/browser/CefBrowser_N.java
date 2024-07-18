@@ -190,13 +190,10 @@ public abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowse
         if (this.closeAllowed_) {
             return false;
         }
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                Window root = (Window) SwingUtilities.getRoot(CefBrowser_N.this.getUIComponent());
-                if (root != null) {
-                    root.dispatchEvent(new WindowEvent(root, CefMenuModel.MenuId.MENU_ID_SPELLCHECK_SUGGESTION_1));
-                }
+        SwingUtilities.invokeLater(() -> {
+            Window root = (Window) SwingUtilities.getRoot(CefBrowser_N.this.getUIComponent());
+            if (root != null) {
+                root.dispatchEvent(new WindowEvent(root, CefMenuModel.MenuId.MENU_ID_SPELLCHECK_SUGGESTION_1));
             }
         });
         return true;

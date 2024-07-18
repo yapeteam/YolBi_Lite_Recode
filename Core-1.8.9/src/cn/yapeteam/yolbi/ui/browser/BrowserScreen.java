@@ -1,4 +1,4 @@
-package net.montoyo.mcef.example;
+package cn.yapeteam.yolbi.ui.browser;
 
 import cn.yapeteam.ymixin.annotations.Shadow;
 import cn.yapeteam.ymixin.annotations.Super;
@@ -49,7 +49,7 @@ public class BrowserScreen extends GuiScreen {
     @Super
     @Override
     public void initGui() {
-        ExampleMod.INSTANCE.hudBrowser = null;
+        BrowserHandler.INSTANCE.hudBrowser = null;
 
         if (browser == null) {
             //Grab the API and make sure it isn't null.
@@ -146,7 +146,7 @@ public class BrowserScreen extends GuiScreen {
     @Override
     public void onGuiClosed() {
         //Make sure to close the browser when you don't need it anymore.
-        if (!ExampleMod.INSTANCE.hasBackup() && browser != null)
+        if (!BrowserHandler.INSTANCE.hasBackup() && browser != null)
             browser.close();
 
         Keyboard.enableRepeatEvents(false);
@@ -178,7 +178,7 @@ public class BrowserScreen extends GuiScreen {
 
             //Forward event to text box.
             if (!pressed && focused && num == Keyboard.KEY_RETURN) {
-                String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
+                String fixedURL = BrowserHandler.INSTANCE.getAPI().punycode(url.getText());
                 System.out.println(fixedURL);
                 browser.loadURL(fixedURL);
             } else if (pressed)
@@ -236,11 +236,11 @@ public class BrowserScreen extends GuiScreen {
         else if (src.id == 1)
             browser.goForward();
         else if (src.id == 2) {
-            String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
+            String fixedURL = BrowserHandler.INSTANCE.getAPI().punycode(url.getText());
             System.out.println(fixedURL);
             browser.loadURL(fixedURL);
         } else if (src.id == 3) {
-            ExampleMod.INSTANCE.setBackup(this);
+            BrowserHandler.INSTANCE.setBackup(this);
             mc.displayGuiScreen(null);
         } else if (src.id == 4) {
             String loc = browser.getURL();
@@ -255,7 +255,7 @@ public class BrowserScreen extends GuiScreen {
                 redo = true;
 
             if (vId != null || redo) {
-                ExampleMod.INSTANCE.setBackup(this);
+                BrowserHandler.INSTANCE.setBackup(this);
                 mc.displayGuiScreen(new ScreenCfg(browser, vId));
             }
         }

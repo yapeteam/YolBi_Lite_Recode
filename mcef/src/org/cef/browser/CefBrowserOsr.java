@@ -20,6 +20,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.Vector;
 
@@ -265,7 +266,11 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         this.lastMouseEvent = new MouseEvent(this.dc_, 503, 0L, 0, 0, 0, 0, false);
         this.paintData = new PaintData();
         this.isTransparent_ = transparent;
-        this.renderer_ = new CefRenderer(transparent);
+        try {
+            this.renderer_ = (CefRenderer) CefBrowserFactory.Renderer.getConstructor(boolean.class).newInstance(transparent); // new CefRenderer(transparent);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -386,11 +391,10 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         if (getNativeRef("CefBrowser") == 0) {
             if (getParentBrowser() != null) {
                 createDevTools(getParentBrowser(), getClient(), 0L, true, this.isTransparent_, null, getInspectAt());
-                return;
             } else {
                 createBrowser(getClient(), 0L, getUrl(), true, this.isTransparent_, null, getRequestContext());
-                return;
             }
+            return;
         }
         setFocus(true);
     }

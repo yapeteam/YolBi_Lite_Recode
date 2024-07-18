@@ -16,6 +16,7 @@
       <module fileurl="file://$PROJECT_DIR$/Minecraft-1.8.9/Minecraft-1.8.9.iml" filepath="$PROJECT_DIR$/Minecraft-1.8.9/Minecraft-1.8.9.iml" />
       <module fileurl="file://$PROJECT_DIR$/YMixin/YMixin.iml" filepath="$PROJECT_DIR$/YMixin/YMixin.iml" />
       <module fileurl="file://$PROJECT_DIR$/YolBi_Lite_Recode.iml" filepath="$PROJECT_DIR$/YolBi_Lite_Recode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mcef/mcef.iml" filepath="$PROJECT_DIR$/mcef/mcef.iml" />
     </modules>
   </component>
 </project>
