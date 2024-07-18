@@ -1,5 +1,10 @@
 package org.cef;
 
+import org.cef.callback.CefSchemeHandlerFactory;
+import org.cef.handler.CefAppHandler;
+import org.cef.handler.CefAppHandlerAdapter;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -8,11 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import org.cef.callback.CefSchemeHandlerFactory;
-import org.cef.handler.CefAppHandler;
-import org.cef.handler.CefAppHandlerAdapter;
 
 public class CefApp extends CefAppHandlerAdapter {
     private static CefApp self = null;
@@ -31,7 +31,7 @@ public class CefApp extends CefAppHandlerAdapter {
         TERMINATED
     }
 
-    private static final native boolean N_Startup();
+    private static native boolean N_Startup();
 
     public final native boolean N_PreInitialize();
 
@@ -41,11 +41,11 @@ public class CefApp extends CefAppHandlerAdapter {
 
     public final native void N_DoMessageLoopWork();
 
-    private final native CefVersion N_GetVersion();
+    private native CefVersion N_GetVersion();
 
-    private final native boolean N_RegisterSchemeHandlerFactory(String str, String str2, CefSchemeHandlerFactory cefSchemeHandlerFactory);
+    private native boolean N_RegisterSchemeHandlerFactory(String str, String str2, CefSchemeHandlerFactory cefSchemeHandlerFactory);
 
-    private final native boolean N_ClearSchemeHandlerFactories();
+    private native boolean N_ClearSchemeHandlerFactories();
 
     public final class CefVersion {
         public final int JCEF_COMMIT_NUMBER;
@@ -252,7 +252,7 @@ public class CefApp extends CefAppHandlerAdapter {
         }
     }
 
-    private final void initialize() {
+    private void initialize() {
         try {
             Runnable r = new Runnable() {
                 @Override
@@ -299,7 +299,7 @@ public class CefApp extends CefAppHandlerAdapter {
         }
     }
 
-    private final void shutdown() {
+    private void shutdown() {
         System.out.println("shutdown on " + Thread.currentThread());
         setState(CefAppState.TERMINATED);
         self = null;

@@ -220,5 +220,4 @@ public class BaseProxy implements API {
         sb.append(url, hostEnd, url.length());
         return sb.toString();
     }
-
 }

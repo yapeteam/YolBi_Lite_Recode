@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
  *
  */
 public class Log {
-    
     public static void info(String what, Object ... data) {
         LogManager.getLogger("MCEF").log(Level.INFO, String.format(what, data));
     }
@@ -25,5 +24,4 @@ public class Log {
     public static void errorEx(String what, Throwable t, Object ... data) {
         LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data), t);
     }
-
 }

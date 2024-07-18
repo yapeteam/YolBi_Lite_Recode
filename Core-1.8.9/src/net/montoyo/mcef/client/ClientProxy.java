@@ -4,7 +4,7 @@ import cn.yapeteam.yolbi.YolBi;
 import cn.yapeteam.yolbi.event.Listener;
 import cn.yapeteam.yolbi.event.impl.game.EventKey;
 import cn.yapeteam.yolbi.event.impl.game.EventLoadWorld;
-import cn.yapeteam.yolbi.event.impl.game.EventTick;
+import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -162,7 +162,7 @@ public class ClientProxy extends BaseProxy {
         settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
         settings.cache_path = (new File(ROOT, "MCEFCache")).getAbsolutePath();
         settings.browser_subprocess_path = subproc.getAbsolutePath();
-        settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
+        settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_DEFAULT;
 
         try {
             ArrayList<String> libs = new ArrayList<>();
@@ -270,7 +270,7 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Listener
-    public void onTick(EventTick e) {
+    public void onTick(EventRender2D e) {
         mc.mcProfiler.startSection("MCEF");
 
         if (cefApp != null)
@@ -285,7 +285,7 @@ public class ClientProxy extends BaseProxy {
 
     @Listener
     public void onLogin(EventLoadWorld e) {
-        if (updateStr == null || !MCEF.WARN_UPDATES)
+        if (!MCEF.WARN_UPDATES)
             return;
 
         mc.ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(updateStr));

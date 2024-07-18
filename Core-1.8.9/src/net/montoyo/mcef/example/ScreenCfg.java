@@ -119,4 +119,9 @@ public class ScreenCfg extends GuiScreen {
         return ((double) y) / ((double) mc.displayHeight) * ((double) super.height);
     }
 
+    @Super
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
+    }
 }

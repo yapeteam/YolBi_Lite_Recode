@@ -179,6 +179,7 @@ public class BrowserScreen extends GuiScreen {
             //Forward event to text box.
             if (!pressed && focused && num == Keyboard.KEY_RETURN) {
                 String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
+                System.out.println(fixedURL);
                 browser.loadURL(fixedURL);
             } else if (pressed)
                 url.textboxKeyTyped(key, num);
@@ -229,11 +230,7 @@ public class BrowserScreen extends GuiScreen {
     @Super
     @Override
     protected void actionPerformed(GuiButton src) {
-        if (browser == null) {
-            System.out.println(1111111111);
-            return;
-        }
-
+        if (browser == null) return;
         if (src.id == 0)
             browser.goBack();
         else if (src.id == 1)
@@ -261,5 +258,11 @@ public class BrowserScreen extends GuiScreen {
                 mc.displayGuiScreen(new ScreenCfg(browser, vId));
             }
         }
+    }
+
+    @Super
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
     }
 }

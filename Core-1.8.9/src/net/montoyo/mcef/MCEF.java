@@ -1,5 +1,6 @@
 package net.montoyo.mcef;
 
+import cn.yapeteam.loader.ResourceManager;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.Log;
 
@@ -33,7 +34,7 @@ public class MCEF {
 
         //Config: main
         SKIP_UPDATES = true;// cfg.getBoolean("skipUpdates"      , "main", false          , "Do not update binaries.");
-        WARN_UPDATES = false;// cfg.getBoolean("warnUpdates"      , "main", true           , "Tells in the chat if a new version of MCEF is available.");
+        WARN_UPDATES = true;// cfg.getBoolean("warnUpdates"      , "main", true           , "Tells in the chat if a new version of MCEF is available.");
         USE_FORGE_SPLASH = false;// cfg.getBoolean("useForgeSplash"   , "main", true           , "Use Forge's splash screen to display resource download progress (may be unstable).");
         CEF_ARGS = new String[]{};        //= cfg.getString ("cefArgs"          , "main", "--disable-gpu", "Command line arguments passed to CEF. For advanced users.").split("\\s+");
         SHUTDOWN_JCEF = false;// cfg.getBoolean("shutdownJcef"     , "main", false          , "Set this to true if your Java process hangs after closing Minecraft. This is disabled by default because it makes the launcher think Minecraft crashed...");
@@ -41,11 +42,11 @@ public class MCEF {
 
         //Config: exampleBrowser
         ENABLE_EXAMPLE = true;
-        HOME_PAGE = "bilibili.com";// cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
+        HOME_PAGE = "https://www.bilibili.com";// cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
 
         //Config: debug
-        CHECK_VRAM_LEAK = false;
-
+        CHECK_VRAM_LEAK = true;
+        importLetsEncryptCertificate();
         PROXY = new ClientProxy();
         PROXY.onPreInit();
     }
@@ -64,22 +65,18 @@ public class MCEF {
     private static void importLetsEncryptCertificate() {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate cert = cf.generateCertificate(MCEF.class.getResourceAsStream("/assets/mcef/r3.crt"));
-
+            Certificate cert = cf.generateCertificate(ResourceManager.resources.getStream("cef/letsencryptauthorityx3.crt"));
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null, null);
-            ks.setCertificateEntry("r3", cert);
-
+            ks.setCertificateEntry("letsencrypt", cert);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
             tmf.init(ks);
-
             SSLContext sslCtx = SSLContext.getInstance("TLS");
             sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
-
             SSL_SOCKET_FACTORY = sslCtx.getSocketFactory();
-            Log.info("Successfully loaded Let's Encrypt certificate");
+            Log.info("Successfully loaded Let's Encrypt certificate", new Object[0]);
         } catch (Throwable t) {
-            Log.error("Could not import Let's Encrypt certificate!! HTTPS downloads WILL fail...");
+            Log.error("Could not import Let's Encrypt certificate!! HTTPS downloads WILL fail...", new Object[0]);
             t.printStackTrace();
         }
     }

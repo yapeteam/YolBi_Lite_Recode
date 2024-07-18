@@ -97,7 +97,5 @@ public class AppHandler extends CefAppHandlerAdapter {
                 return null;
             }
         }
-        
     }
-
 }

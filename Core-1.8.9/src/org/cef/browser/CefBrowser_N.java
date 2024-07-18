@@ -30,115 +30,115 @@ public abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowse
 
     protected abstract CefBrowser_N createDevToolsBrowser(CefClient cefClient, String str, CefRequestContext cefRequestContext, CefBrowser_N cefBrowser_N, Point point);
 
-    private final native boolean N_CreateBrowser(CefClientHandler cefClientHandler, long j, String str, boolean z, boolean z2, Component component, CefRequestContext cefRequestContext);
+    private native boolean N_CreateBrowser(CefClientHandler cefClientHandler, long j, String str, boolean z, boolean z2, Component component, CefRequestContext cefRequestContext);
 
-    private final native boolean N_CreateDevTools(CefBrowser cefBrowser, CefClientHandler cefClientHandler, long j, boolean z, boolean z2, Component component, Point point);
+    private native boolean N_CreateDevTools(CefBrowser cefBrowser, CefClientHandler cefClientHandler, long j, boolean z, boolean z2, Component component, Point point);
 
-    private final native long N_GetWindowHandle(long j);
+    private native long N_GetWindowHandle(long j);
 
-    private final native boolean N_CanGoBack();
+    private native boolean N_CanGoBack();
 
-    private final native void N_GoBack();
+    private native void N_GoBack();
 
-    private final native boolean N_CanGoForward();
+    private native boolean N_CanGoForward();
 
-    private final native void N_GoForward();
+    private native void N_GoForward();
 
-    private final native boolean N_IsLoading();
+    private native boolean N_IsLoading();
 
-    private final native void N_Reload();
+    private native void N_Reload();
 
-    private final native void N_ReloadIgnoreCache();
+    private native void N_ReloadIgnoreCache();
 
-    private final native void N_StopLoad();
+    private native void N_StopLoad();
 
-    private final native int N_GetIdentifier();
+    private native int N_GetIdentifier();
 
-    private final native CefFrame N_GetMainFrame();
+    private native CefFrame N_GetMainFrame();
 
-    private final native CefFrame N_GetFocusedFrame();
+    private native CefFrame N_GetFocusedFrame();
 
-    private final native CefFrame N_GetFrame(long j);
+    private native CefFrame N_GetFrame(long j);
 
-    private final native CefFrame N_GetFrame2(String str);
+    private native CefFrame N_GetFrame2(String str);
 
-    private final native Vector<Long> N_GetFrameIdentifiers();
+    private native Vector<Long> N_GetFrameIdentifiers();
 
-    private final native Vector<String> N_GetFrameNames();
+    private native Vector<String> N_GetFrameNames();
 
-    private final native int N_GetFrameCount();
+    private native int N_GetFrameCount();
 
-    private final native boolean N_IsPopup();
+    private native boolean N_IsPopup();
 
-    private final native boolean N_HasDocument();
+    private native boolean N_HasDocument();
 
-    private final native void N_ViewSource();
+    private native void N_ViewSource();
 
-    private final native void N_GetSource(CefStringVisitor cefStringVisitor);
+    private native void N_GetSource(CefStringVisitor cefStringVisitor);
 
-    private final native void N_GetText(CefStringVisitor cefStringVisitor);
+    private native void N_GetText(CefStringVisitor cefStringVisitor);
 
-    private final native void N_LoadRequest(CefRequest cefRequest);
+    private native void N_LoadRequest(CefRequest cefRequest);
 
-    private final native void N_LoadURL(String str);
+    private native void N_LoadURL(String str);
 
-    private final native void N_ExecuteJavaScript(String str, String str2, int i);
+    private native void N_ExecuteJavaScript(String str, String str2, int i);
 
-    private final native String N_GetURL();
+    private native String N_GetURL();
 
-    private final native void N_Close(boolean z);
+    private native void N_Close(boolean z);
 
-    private final native void N_SetFocus(boolean z);
+    private native void N_SetFocus(boolean z);
 
-    private final native void N_SetWindowVisibility(boolean z);
+    private native void N_SetWindowVisibility(boolean z);
 
-    private final native double N_GetZoomLevel();
+    private native double N_GetZoomLevel();
 
-    private final native void N_SetZoomLevel(double d);
+    private native void N_SetZoomLevel(double d);
 
-    private final native void N_RunFileDialog(CefDialogHandler.FileDialogMode fileDialogMode, String str, String str2, Vector<String> vector, int i, CefRunFileDialogCallback cefRunFileDialogCallback);
+    private native void N_RunFileDialog(CefDialogHandler.FileDialogMode fileDialogMode, String str, String str2, Vector<String> vector, int i, CefRunFileDialogCallback cefRunFileDialogCallback);
 
-    private final native void N_StartDownload(String str);
+    private native void N_StartDownload(String str);
 
-    private final native void N_Print();
+    private native void N_Print();
 
-    private final native void N_PrintToPDF(String str, CefPdfPrintSettings cefPdfPrintSettings, CefPdfPrintCallback cefPdfPrintCallback);
+    private native void N_PrintToPDF(String str, CefPdfPrintSettings cefPdfPrintSettings, CefPdfPrintCallback cefPdfPrintCallback);
 
-    private final native void N_Find(int i, String str, boolean z, boolean z2, boolean z3);
+    private native void N_Find(int i, String str, boolean z, boolean z2, boolean z3);
 
-    private final native void N_StopFinding(boolean z);
+    private native void N_StopFinding(boolean z);
 
-    private final native void N_CloseDevTools();
+    private native void N_CloseDevTools();
 
-    private final native void N_ReplaceMisspelling(String str);
+    private native void N_ReplaceMisspelling(String str);
 
-    private final native void N_WasResized(int i, int i2);
+    private native void N_WasResized(int i, int i2);
 
-    private final native void N_Invalidate();
+    private native void N_Invalidate();
 
-    private final native void N_SendKeyEvent(KeyEvent keyEvent);
+    private native void N_SendKeyEvent(KeyEvent keyEvent);
 
-    private final native void N_SendMouseEvent(MouseEvent mouseEvent);
+    private native void N_SendMouseEvent(MouseEvent mouseEvent);
 
-    private final native void N_SendMouseWheelEvent(MouseWheelEvent mouseWheelEvent);
+    private native void N_SendMouseWheelEvent(MouseWheelEvent mouseWheelEvent);
 
-    private final native void N_DragTargetDragEnter(CefDragData cefDragData, Point point, int i, int i2);
+    private native void N_DragTargetDragEnter(CefDragData cefDragData, Point point, int i, int i2);
 
-    private final native void N_DragTargetDragOver(Point point, int i, int i2);
+    private native void N_DragTargetDragOver(Point point, int i, int i2);
 
-    private final native void N_DragTargetDragLeave();
+    private native void N_DragTargetDragLeave();
 
-    private final native void N_DragTargetDrop(Point point, int i);
+    private native void N_DragTargetDrop(Point point, int i);
 
-    private final native void N_DragSourceEndedAt(Point point, int i);
+    private native void N_DragSourceEndedAt(Point point, int i);
 
-    private final native void N_DragSourceSystemDragEnded();
+    private native void N_DragSourceSystemDragEnded();
 
-    private final native void N_UpdateUI(Rectangle rectangle, Rectangle rectangle2);
+    private native void N_UpdateUI(Rectangle rectangle, Rectangle rectangle2);
 
-    private final native void N_SetParent(long j, Component component);
+    private native void N_SetParent(long j, Component component);
 
-    private final native void N_NotifyMoveOrResizeStarted();
+    private native void N_NotifyMoveOrResizeStarted();
 
     public CefBrowser_N(CefClient client, String url, CefRequestContext context, CefBrowser_N parent, Point inspectAt) {
         this.parent_ = null;
