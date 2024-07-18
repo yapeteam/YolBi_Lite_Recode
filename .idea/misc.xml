@@ -15,6 +15,7 @@
     </list>
     <writeAnnotations>
       <writeAnnotation name="cn.yapeteam.ymixin.annotations.Shadow" />
+      <writeAnnotation name="cn.yapeteam.ymixin.annotations.Super" />
     </writeAnnotations>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">

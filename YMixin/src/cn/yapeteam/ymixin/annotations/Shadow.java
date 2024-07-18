@@ -1,8 +1,7 @@
 package cn.yapeteam.ymixin.annotations;
 
 import cn.yapeteam.ymixin.utils.ASMUtils;
-import cn.yapeteam.ymixin.utils.Mapper;
-import cn.yapeteam.ymixin.utils.Name_Desc;
+import cn.yapeteam.ymixin.utils.StringPair;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm_9_2.Type;
 import org.objectweb.asm_9_2.tree.*;
@@ -28,10 +27,11 @@ public @interface Shadow {
         public static boolean hasAnnotation(@NotNull FieldNode node) {
             return node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(Shadow.Helper::isAnnotation);
         }
+
         public static void processShadow(ClassNode node) {
             // Process @Shadow
-            ArrayList<Name_Desc> methodShadows = new ArrayList<>();
-            ArrayList<Name_Desc> fieldShadows = new ArrayList<>();
+            ArrayList<StringPair> methodShadows = new ArrayList<>();
+            ArrayList<StringPair> fieldShadows = new ArrayList<>();
             String targetName = null;
             if (node.visibleAnnotations != null) {
                 Type type = ASMUtils.getAnnotationValue(
@@ -43,11 +43,11 @@ public @interface Shadow {
                 if (targetName != null) {
                     for (MethodNode method : node.methods) {
                         if (Shadow.Helper.hasAnnotation(method))
-                            methodShadows.add(new Name_Desc(method.name, method.desc));
+                            methodShadows.add(new StringPair(method.name, method.desc));
                     }
                     for (FieldNode field : node.fields) {
                         if (Shadow.Helper.hasAnnotation(field))
-                            fieldShadows.add(new Name_Desc(field.name, field.desc));
+                            fieldShadows.add(new StringPair(node.name, field.name));
                     }
                     targetName = targetName.replace('.', '/');
                 }
@@ -56,12 +56,41 @@ public @interface Shadow {
                 for (AbstractInsnNode instruction : method.instructions) {
                     if (instruction instanceof MethodInsnNode) {
                         MethodInsnNode methodInsnNode = (MethodInsnNode) instruction;
-                        if (methodShadows.stream().anyMatch(m -> m.name.equals(methodInsnNode.name) && m.desc.equals(methodInsnNode.desc)))
-                            methodInsnNode.owner = Mapper.getFriendlyClass(targetName);
+                        if (methodShadows.stream().anyMatch(m -> m.a.equals(methodInsnNode.name) && m.b.equals(methodInsnNode.desc)))
+                            methodInsnNode.owner = targetName;
                     } else if (instruction instanceof FieldInsnNode) {
                         FieldInsnNode fieldInsnNode = (FieldInsnNode) instruction;
-                        if (fieldShadows.stream().anyMatch(m -> m.name.equals(fieldInsnNode.name) && m.desc.equals(fieldInsnNode.desc)))
-                            fieldInsnNode.owner = Mapper.getFriendlyClass(targetName);
+                        if (fieldShadows.stream().anyMatch(f -> f.a.equals(fieldInsnNode.owner) && f.b.equals(fieldInsnNode.name)))
+                            fieldInsnNode.owner = targetName;
+                    }
+                }
+            }
+        }
+
+        public static void processShadowBySuper(ClassNode node, String superClz) {
+            // Process @Shadow
+            ArrayList<StringPair> methodShadows = new ArrayList<>();
+            ArrayList<StringPair> fieldShadows = new ArrayList<>();
+            String targetName = superClz;
+            targetName = targetName.replace('.', '/');
+            for (MethodNode method : node.methods) {
+                if (Shadow.Helper.hasAnnotation(method))
+                    methodShadows.add(new StringPair(method.name, method.desc));
+            }
+            for (FieldNode field : node.fields) {
+                if (Shadow.Helper.hasAnnotation(field))
+                    fieldShadows.add(new StringPair(node.name, field.name));
+            }
+            for (MethodNode method : node.methods) {
+                for (AbstractInsnNode instruction : method.instructions) {
+                    if (instruction instanceof MethodInsnNode) {
+                        MethodInsnNode methodInsnNode = (MethodInsnNode) instruction;
+                        if (methodShadows.stream().anyMatch(m -> m.a.equals(methodInsnNode.name) && m.b.equals(methodInsnNode.desc)))
+                            methodInsnNode.owner = targetName;
+                    } else if (instruction instanceof FieldInsnNode) {
+                        FieldInsnNode fieldInsnNode = (FieldInsnNode) instruction;
+                        if (fieldShadows.stream().anyMatch(f -> f.a.equals(fieldInsnNode.owner) && f.b.equals(fieldInsnNode.name)))
+                            fieldInsnNode.owner = targetName;
                     }
                 }
             }

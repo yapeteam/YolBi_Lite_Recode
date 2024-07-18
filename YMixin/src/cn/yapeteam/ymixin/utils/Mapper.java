@@ -169,14 +169,8 @@ public class Mapper {
         while (superClz != Object.class) {
             if (superClz != null) {
                 classes.add(superClz);
+                classes.addAll(Arrays.asList(superClz.getInterfaces()));
                 superClz = superClz.getSuperclass();
-            } else break;
-        }
-        Class<?> interfaceClz = theClass;
-        while (interfaceClz != Object.class) {
-            if (interfaceClz != null) {
-                classes.addAll(Arrays.asList(interfaceClz.getInterfaces()));
-                interfaceClz = interfaceClz.getSuperclass();
             } else break;
         }
         for (Class<?> clz : classes) {

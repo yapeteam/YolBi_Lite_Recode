@@ -18,6 +18,7 @@ import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
 import lombok.Getter;
+import net.montoyo.mcef.MCEF;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,8 @@ public class YolBi {
         instance.moduleManager.load();
         try {
             instance.getConfigManager().load();
+            MCEF.INSTANCE.onPreInit();
+            MCEF.INSTANCE.onInit();
             WebServer.start();
         } catch (Throwable e) {
             Logger.exception(e);
@@ -93,6 +96,7 @@ public class YolBi {
             instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
+            MCEF.onMinecraftShutdown();
             instance = new YolBi();
             System.gc();
         } catch (IOException e) {
