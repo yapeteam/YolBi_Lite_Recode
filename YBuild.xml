@@ -51,7 +51,6 @@
                 <file>build/ymixin.jar</file>
                 <file>Loader/dll/build/libinjection.dll</file>
                 <file>Loader/dll/build/libapi.dll</file>
-                <file>natives.zip</file>
             </archive>
         </artifact>
     </build>

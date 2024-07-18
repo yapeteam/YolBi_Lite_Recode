@@ -117,7 +117,7 @@ public class Builder {
                 System.out.println("file " + node.getTextContent());
                 File file = new File(node.getTextContent());
                 String path = file.toString();
-                String entry_name = root_dir + (root_dir.isEmpty() ? "" : "/") + path.substring(file.getParent().length()).replace("\\", "/").substring(1);
+                String entry_name = root_dir + (root_dir.isEmpty() ? "" : "/") + path.substring(file.getParent() != null ? file.getParent().length() : 0).replace("\\", "/").substring(1);
                 ZipEntry entry = new ZipEntry(entry_name);
                 try {
                     output.putNextEntry(entry);
