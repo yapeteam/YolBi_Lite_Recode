@@ -12,8 +12,7 @@ import net.minecraft.client.gui.ScaledResolution;
 import java.awt.*;
 
 /**
- * @author yuxiangll
- * @since 2024/1/8 04:58
+ * @author yuxiangll & wzhy233
  * IntelliJ IDEA
  */
 @Getter
