@@ -1,7 +1,11 @@
 package net.montoyo.mcef;
 
+import cn.yapeteam.loader.Loader;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.Log;
+import net.montoyo.mcef.utilities.Util;
+
+import java.io.File;
 
 public class MCEF {
     public static boolean SKIP_UPDATES;
@@ -15,7 +19,16 @@ public class MCEF {
     public static MCEF INSTANCE = new MCEF();
     public static final BaseProxy PROXY = new ClientProxy();
 
-    public void onInit(String root) {
+    public void onInit(String mcRoot) {
+        Log.info("Extracting natives...");
+        try {
+            Util.unzip(new File(Loader.YOLBI_DIR, "resources/cef/natives.zip").getAbsolutePath(), mcRoot);
+        } catch (Exception e) {
+            Log.error("Failed to extract natives");
+            Log.exception(e);
+            ClientProxy.VIRTUAL = true;
+            return;
+        }
         Log.info("Loading MCEF config...");
 
         //Config: main
@@ -28,7 +41,7 @@ public class MCEF {
 
         //Config: debug
         CHECK_VRAM_LEAK = true;
-        PROXY.onInit(root);
+        PROXY.onInit(mcRoot);
     }
 
     public static void onMinecraftShutdown() {
