@@ -125,7 +125,7 @@ public class KillAura extends Module {
 
     private void startBlock() {
         if (autoBlock.getValue() && !blocking) {
-            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+            if (mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
                 Natives.SendRight(true);
                 blocking = true;
             }
@@ -134,7 +134,7 @@ public class KillAura extends Module {
 
     private void stopBlock() {
         if (autoBlock.getValue() && blocking) {
-            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+            if (mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
                 Natives.SendRight(false);
                 blocking = false;
             }

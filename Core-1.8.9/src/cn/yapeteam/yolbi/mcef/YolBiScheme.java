@@ -18,8 +18,8 @@ public class YolBiScheme implements IScheme {
 
     @Override
     public SchemePreResponse processRequest(String url) {
+        // yolbi://clickui/#
         String head = "yolbi://";
-        String index = "index.html";
         if (url.isEmpty())
             return SchemePreResponse.NOT_HANDLED;
         if (url.length() < head.length())
@@ -30,9 +30,11 @@ public class YolBiScheme implements IScheme {
                 url = url.substring(0, pos);
         }
         url = url.substring(head.length());
-        if (url.contains(index + "/"))
-            url = url.replace(index + "/", "");
-        is = ResourceManager.resources.getStream("web/" + url);
+        String loc = "web/" + url;
+        if (!ResourceManager.resources.isFile(loc))
+            loc += "/index.html";
+        System.out.println(loc);
+        is = ResourceManager.resources.getStream(loc);
         if (is == null) {
             Log.warning("Resource " + url + " NOT found!");
             return SchemePreResponse.NOT_HANDLED;

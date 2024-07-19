@@ -14,8 +14,7 @@ public class HtmlHttpHandler implements HttpHandler {
         String requestedPath = httpExchange.getRequestURI().getPath();
         System.out.println("Requested Path: " + requestedPath); // Debugging log
 
-        // Assuming "/assets/hermes/ui" is at the root of your classpath
-        String basePath = "web";
+        String basePath = "web/webui";
         String resourcePath = basePath + (requestedPath.equals("/") ? "/index.html" : requestedPath);
 
         // Determine content type based on the file extension

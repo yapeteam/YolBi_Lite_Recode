@@ -267,7 +267,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         this.paintData = new PaintData();
         this.isTransparent_ = transparent;
         try {
-            this.renderer_ = (CefRenderer) CefBrowserFactory.Renderer.getConstructor(boolean.class).newInstance(transparent); // new CefRenderer(transparent);
+            this.renderer_ = CefBrowserFactory.Renderer.getConstructor(boolean.class).newInstance(transparent); // new CefRenderer(transparent);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }

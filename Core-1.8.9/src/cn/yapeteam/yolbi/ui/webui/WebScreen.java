@@ -17,10 +17,10 @@ import org.lwjgl.input.Mouse;
 public abstract class WebScreen extends GuiScreen
         implements IDisplayHandler, IJSQueryHandler {
     private IBrowser browser = null;
-    private final String index;
+    private final String root;
 
-    public WebScreen(String index) {
-        this.index = index;
+    public WebScreen(String root) {
+        this.root = root;
         MCEF.PROXY.registerDisplayHandler(this);
         MCEF.PROXY.registerJSQueryHandler(this);
     }
@@ -34,7 +34,7 @@ public abstract class WebScreen extends GuiScreen
     public void initGui() {
         if (browser == null) {
             //Create a browser and resize it to fit the screen
-            browser = MCEF.PROXY.createBrowser("yolbi://" + index, false);
+            browser = MCEF.PROXY.createBrowser("yolbi://" + root + "/index.html", true);
         }
         //Resize the browser if window size changed
         if (browser != null)
@@ -104,8 +104,9 @@ public abstract class WebScreen extends GuiScreen
     @Override
     public void onGuiClosed() {
         //Make sure to close the browser when you don't need it anymore.
-        if (browser != null)
-            browser.close();
+        if (browser != null) {
+            //browser.close();
+        }
 
         Keyboard.enableRepeatEvents(false);
     }

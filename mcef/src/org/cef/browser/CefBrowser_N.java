@@ -141,8 +141,6 @@ public abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowse
     private native void N_NotifyMoveOrResizeStarted();
 
     public CefBrowser_N(CefClient client, String url, CefRequestContext context, CefBrowser_N parent, Point inspectAt) {
-        this.parent_ = null;
-        this.inspectAt_ = null;
         this.client_ = client;
         this.url_ = url;
         this.request_context_ = context;

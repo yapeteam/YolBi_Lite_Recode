@@ -4,11 +4,11 @@ import cn.yapeteam.yolbi.ui.webui.WebScreen;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IJSQueryCallback;
 
-public class WebClickUI extends WebScreen {
-    public static WebClickUI instance = new WebClickUI();
+public class ClickUI extends WebScreen {
+    public static ClickUI instance = new ClickUI();
 
-    public WebClickUI() {
-        super("index.html");
+    public ClickUI() {
+        super("clickui");
     }
 
     @Override

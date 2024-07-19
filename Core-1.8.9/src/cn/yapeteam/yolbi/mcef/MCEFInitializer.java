@@ -5,7 +5,7 @@ import cn.yapeteam.yolbi.event.impl.game.EventKey;
 import cn.yapeteam.yolbi.event.impl.game.EventLoop;
 import cn.yapeteam.yolbi.event.impl.game.EventTick;
 import cn.yapeteam.yolbi.ui.browser.BrowserHandler;
-import cn.yapeteam.yolbi.ui.webui.impl.WebClickUI;
+import cn.yapeteam.yolbi.ui.webui.impl.ClickUI;
 import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
@@ -35,7 +35,9 @@ public class MCEFInitializer {
 
     @Listener
     private static void onKey(EventKey e) {
-        if (e.getKey() == Keyboard.KEY_F10)
-            Minecraft.getMinecraft().displayGuiScreen(WebClickUI.instance);//BrowserHandler.INSTANCE.display();
+        if (e.getKey() == Keyboard.KEY_F10) {
+            Minecraft.getMinecraft().displayGuiScreen(ClickUI.instance);
+            // BrowserHandler.INSTANCE.display();
+        }
     }
 }
