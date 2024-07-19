@@ -11,7 +11,7 @@ import org.lwjgl.input.Keyboard;
 
 @Getter
 public class ClickUI extends Module {
-   // private final BooleanValue notification = new BooleanValue("Notification" , false);
+
     private final BooleanValue pauseGame = new BooleanValue("PauseGame", true);
     private final BooleanValue blur = new BooleanValue("Blur background", () -> !mc.gameSettings.ofFastRender, true);
     private final BooleanValue rainbow = new BooleanValue("RainBow", false);
@@ -24,8 +24,8 @@ public class ClickUI extends Module {
         else blur.setVisibility(() -> true);
         //public final BooleanValue notif = notification.getValue();
         //notification.setValue(false);
-        addValues(blur,rainbow,blurRadius);
-        //addValues(notification, blur, rainbow, blurRadius);
+        //addValues(blur,rainbow,blurRadius);
+        addValues(blur, rainbow, blurRadius);
     }
 
     @Getter
