@@ -16,12 +16,10 @@ public class DisplayHandler implements CefDisplayHandler {
     private final ArrayList<EventData> queue = new ArrayList<>();
 
     private enum EventType {
-
         ADDRESS_CHANGE,
         TITLE_CHANGE,
         TOOLTIP,
         STATUS_MESSAGE;
-
     }
 
     private static final class EventData {
@@ -107,5 +105,4 @@ public class DisplayHandler implements CefDisplayHandler {
             }
         }
     }
-
 }

@@ -33,9 +33,8 @@ public class ImplCefRenderer extends CefRenderer {
 
     @Override
     public void render(double x1, double y1, double x2, double y2) {
-        if (this.view_width_ == 0 || this.view_height_ == 0) {
+        if (this.view_width_ == 0 || this.view_height_ == 0)
             return;
-        }
         Tessellator t = Tessellator.getInstance();
         WorldRenderer vb = t.getWorldRenderer();
         GlStateManager.bindTexture(this.texture_id_[0]);
@@ -50,12 +49,11 @@ public class ImplCefRenderer extends CefRenderer {
 
     @Override
     public void onPaint(boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height, boolean completeReRender) {
-        if (this.transparent_) {
+        if (this.transparent_)
             GlStateManager.enableBlend();
-        }
         int size = (width * height) << 2;
         if (size > buffer.limit()) {
-            Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (1)", new Object[0]);
+            Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (1)");
             return;
         }
         GlStateManager.enableTexture2D();
@@ -71,7 +69,7 @@ public class ImplCefRenderer extends CefRenderer {
                 GL11.glPixelStorei(3314, this.view_width_);
                 for (Rectangle rect : dirtyRects) {
                     if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > this.view_width_ || rect.y + rect.height > this.view_height_) {
-                        Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (2)", new Object[0]);
+                        Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (2)");
                     } else {
                         GL11.glPixelStorei(3316, rect.x);
                         GL11.glPixelStorei(3315, rect.y);

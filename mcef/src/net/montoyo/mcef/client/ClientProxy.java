@@ -61,7 +61,7 @@ public class ClientProxy extends BaseProxy {
         File subproc = new File(ROOT, "jcef_helper" + exeSuffix);
         CefSettings settings = new CefSettings();
         settings.windowless_rendering_enabled = true;
-        settings.background_color = settings.new ColorType(0, 255, 255, 255);
+        settings.background_color = new CefSettings.ColorType(0, 0, 0, 0);
         settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
         settings.cache_path = (new File(Loader.YOLBI_DIR, "MCEFCache")).getAbsolutePath();
         settings.browser_subprocess_path = subproc.getAbsolutePath();
@@ -88,21 +88,19 @@ public class ClientProxy extends BaseProxy {
                 System.load(f.getPath());
             }
 
-            CefApp.startup();
-            cefApp = CefApp.getInstance(settings);
-            //cefApp.myLoc = ROOT.replace('/', File.separatorChar);
-
-            MimeTypeLoader.loadMimeTypeMapping(mimeTypeMap);
-            CefApp.addAppHandler(appHandler);
-            cefClient = cefApp.createClient();
         } catch (Throwable t) {
             Log.error("Going in virtual mode; couldn't initialize CEF.");
-            t.printStackTrace();
+            Log.exception(t);
 
             VIRTUAL = true;
             return;
         }
 
+        CefApp.startup();
+        cefApp = CefApp.getInstance(settings);
+        MimeTypeLoader.loadMimeTypeMapping(mimeTypeMap);
+        CefApp.addAppHandler(appHandler);
+        cefClient = cefApp.createClient();
         Log.info(cefApp.getVersion().toString());
         cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
         cefClient.addMessageRouter(cefRouter);
@@ -114,7 +112,6 @@ public class ClientProxy extends BaseProxy {
                 return false;
             }
         });
-
         Log.info("MCEF loaded successfuly.");
     }
 

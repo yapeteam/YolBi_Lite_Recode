@@ -162,7 +162,7 @@ public class CefApp extends CefAppHandlerAdapter {
         }
     }
 
-    public static final CefAppState getState() {
+    public static CefAppState getState() {
         CefAppState cefAppState;
         synchronized (state_) {
             cefAppState = state_;
@@ -170,7 +170,7 @@ public class CefApp extends CefAppHandlerAdapter {
         return cefAppState;
     }
 
-    public static final void setState(CefAppState state) {
+    public static void setState(CefAppState state) {
         synchronized (state_) {
             state_ = state;
         }
@@ -179,7 +179,7 @@ public class CefApp extends CefAppHandlerAdapter {
         }
     }
 
-    public static final void forceShutdownState() {
+    public static void forceShutdownState() {
         synchronized (state_) {
             state_ = CefAppState.SHUTTING_DOWN;
         }
@@ -338,7 +338,7 @@ public class CefApp extends CefAppHandlerAdapter {
         });
     }
 
-    public static final boolean startup() {
+    public static boolean startup() {
         if (OS.isLinux() || OS.isMacintosh()) {
             return N_Startup();
         }

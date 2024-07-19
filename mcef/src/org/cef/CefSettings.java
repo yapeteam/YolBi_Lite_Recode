@@ -30,7 +30,7 @@ public class CefSettings {
         LOGSEVERITY_DISABLE
     }
 
-    public class ColorType {
+    public static class ColorType {
         private long color_value;
 
         private ColorType() {
@@ -38,8 +38,7 @@ public class CefSettings {
         }
 
         public ColorType(int alpha, int red, int green, int blue) {
-            this.color_value = 0L;
-            this.color_value = (alpha << 24) | (red << 16) | (green << 8) | (blue << 0);
+            this.color_value = ((long) alpha << 24) | ((long) red << 16) | ((long) green << 8) | (blue);
         }
 
         public long getColor() {

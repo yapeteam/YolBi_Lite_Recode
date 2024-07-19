@@ -32,14 +32,9 @@ public class BrowserHandler implements IDisplayHandler, IJSQueryHandler {
         INSTANCE = this;
         //Grab the API and make sure it isn't null.
         api = MCEFApi.getAPI();
-        if (api == null)
-            return;
-        api.registerScheme("mod", BrowserScheme.class, true, false, false, true, true, false, false);
-        if (api != null) {
-            //Register this class to handle onAddressChange and onQuery events
-            api.registerDisplayHandler(this);
-            api.registerJSQueryHandler(this);
-        }
+        //Register this class to handle onAddressChange and onQuery events
+        api.registerDisplayHandler(this);
+        api.registerJSQueryHandler(this);
         YolBi.instance.getEventManager().register(this);
     }
 

@@ -179,7 +179,6 @@ public class BrowserScreen extends GuiScreen {
             //Forward event to text box.
             if (!pressed && focused && num == Keyboard.KEY_RETURN) {
                 String fixedURL = BrowserHandler.INSTANCE.getAPI().punycode(url.getText());
-                System.out.println(fixedURL);
                 browser.loadURL(fixedURL);
             } else if (pressed)
                 url.textboxKeyTyped(key, num);
@@ -237,7 +236,6 @@ public class BrowserScreen extends GuiScreen {
             browser.goForward();
         else if (src.id == 2) {
             String fixedURL = BrowserHandler.INSTANCE.getAPI().punycode(url.getText());
-            System.out.println(fixedURL);
             browser.loadURL(fixedURL);
         } else if (src.id == 3) {
             BrowserHandler.INSTANCE.setBackup(this);

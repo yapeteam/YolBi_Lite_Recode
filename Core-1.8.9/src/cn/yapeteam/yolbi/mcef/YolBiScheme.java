@@ -1,5 +1,7 @@
-package cn.yapeteam.yolbi.ui.browser;
+package cn.yapeteam.yolbi.mcef;
 
+import cn.yapeteam.loader.ResourceManager;
+import cn.yapeteam.loader.logger.Logger;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.api.ISchemeResponseData;
@@ -10,72 +12,60 @@ import net.montoyo.mcef.utilities.Log;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BrowserScheme implements IScheme {
-
+public class YolBiScheme implements IScheme {
     private String contentType = null;
     private InputStream is = null;
-    
+
     @Override
     public SchemePreResponse processRequest(String url) {
-        url = url.substring("mod://".length());
-        
-        int pos = url.indexOf('/');
-        if(pos < 0)
+        String head = "yolbi://";
+        String index = "index.html";
+        if (url.isEmpty())
             return SchemePreResponse.NOT_HANDLED;
-        
-        String mod = removeSlashes(url.substring(0, pos));
-        String loc = removeSlashes(url.substring(pos + 1));
-
-        if(mod.length() <= 0 || loc.length() <= 0 || mod.charAt(0) == '.' || loc.charAt(0) == '.') {
-            Log.warning("Invalid URL " + url);
+        if (url.length() < head.length())
             return SchemePreResponse.NOT_HANDLED;
+        if (!Character.isLetter(url.charAt(url.length() - 1))) {
+            int pos = url.lastIndexOf('/');
+            if (pos != -1)
+                url = url.substring(0, pos);
         }
-        
-        is = BrowserScheme.class.getResourceAsStream("/assets/" + mod.toLowerCase() + "/html/" + loc.toLowerCase());
-        if(is == null) {
+        url = url.substring(head.length());
+        if (url.contains(index + "/"))
+            url = url.replace(index + "/", "");
+        is = ResourceManager.resources.getStream("web/" + url);
+        if (is == null) {
             Log.warning("Resource " + url + " NOT found!");
-            return SchemePreResponse.NOT_HANDLED; //Mhhhhh... 404?
+            return SchemePreResponse.NOT_HANDLED;
         }
-
         contentType = null;
-        pos = loc.lastIndexOf('.');
-        if(pos >= 0 && pos < loc.length() - 2)
-            contentType = MCEF.PROXY.mimeTypeFromExtension(loc.substring(pos + 1));
-
+        int pos = url.lastIndexOf('.');
+        if (pos != -1)
+            contentType = MCEF.PROXY.mimeTypeFromExtension(url.substring(pos + 1));
         return SchemePreResponse.HANDLED_CONTINUE;
     }
-    
-    private String removeSlashes(String loc) {
-        int i = 0;
-        while(i < loc.length() && loc.charAt(i) == '/')
-            i++;
-        
-        return loc.substring(i);
-    }
-    
+
     @Override
     public void getResponseHeaders(ISchemeResponseHeaders rep) {
-        if(contentType != null)
+        if (contentType != null)
             rep.setMimeType(contentType);
 
         rep.setStatus(200);
         rep.setStatusText("OK");
         rep.setResponseLength(-1);
     }
-    
+
     @Override
     public boolean readResponse(ISchemeResponseData data) {
         try {
             int ret = is.read(data.getDataArray(), 0, data.getBytesToRead());
-            if(ret <= 0)
+            if (ret <= 0)
                 is.close();
-            
+
             data.setAmountRead(Math.max(ret, 0));
             return ret > 0;
-        } catch(IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            Logger.exception(e);
             return false;
         }
     }
-
 }
