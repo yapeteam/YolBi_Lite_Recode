@@ -23,7 +23,7 @@ public class Loader {
             MixinManager.init();
             Logger.warn("Start transforming!");
             MixinManager.transform();
-            Logger.success("Welcome {} ver {}", YolBi.name, YolBi.version);
+            Logger.success("Welcome {} v{}", YolBi.name, YolBi.version);
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();

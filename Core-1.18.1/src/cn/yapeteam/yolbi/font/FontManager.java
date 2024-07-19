@@ -21,6 +21,7 @@ public class FontManager {
         PingFang18 = createFontRenderer("PingFang_Normal.ttf", 18);
         PingFangBold18 = createFontRenderer("PingFang_Bold.ttf", 18);
         FLUXICON14 = createFontRenderer("fluxicon.ttf", 18);
+        RobotoLight = createFontRenderer("RobotoLight.ttf",16);
         default18 = createFontRenderer(new Font(null, Font.PLAIN, 18), 18);
     }
 
@@ -28,6 +29,7 @@ public class FontManager {
     private final AbstractFontRenderer JelloLight18;
     private final AbstractFontRenderer JelloMedium18;
     private final AbstractFontRenderer PingFang12;
+    private final AbstractFontRenderer RobotoLight;
     private final AbstractFontRenderer PingFang14;
     private final AbstractFontRenderer PingFang18;
     private final AbstractFontRenderer PingFangBold18;

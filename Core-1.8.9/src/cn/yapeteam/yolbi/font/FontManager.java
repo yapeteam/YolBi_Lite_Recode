@@ -16,6 +16,7 @@ public class FontManager {
         PingFang18 = new CFontRenderer("PingFang_Normal.ttf", 18, Font.PLAIN, true, true);
         PingFangBold18 = new CFontRenderer("PingFang_Bold.ttf", 18, Font.PLAIN, true, true);
         FLUXICON14 = new CFontRenderer("fluxicon.ttf", 18, Font.PLAIN, true, true);
+        RobotoLight = new CFontRenderer("RobotoLight.ttf" , 16 , Font.PLAIN,true,true);
         default18 = new CFontRenderer(new Font(null, Font.PLAIN, 18), true, true);
     }
 
@@ -28,4 +29,5 @@ public class FontManager {
     private final AbstractFontRenderer PingFangBold18;
     private final AbstractFontRenderer FLUXICON14;
     private final AbstractFontRenderer default18;
+    private final AbstractFontRenderer RobotoLight;
 }

@@ -83,7 +83,7 @@ public class YolBi {
         }
         instance.getNotificationManager().post(
                 new Notification(
-                        "Injected successfully",
+                        "Injected Yolbi successfully",
                         Easing.EASE_IN_OUT_QUAD,
                         Easing.EASE_IN_OUT_QUAD,
                         15000, NotificationType.INIT
@@ -93,6 +93,7 @@ public class YolBi {
 
     public void shutdown() {
         try {
+            Logger.info("Shutting down Yolbi Lite");
             instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();

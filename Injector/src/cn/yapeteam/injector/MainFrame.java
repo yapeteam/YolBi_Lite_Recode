@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import cn.yapeteam.injector.Main;
 
 public class MainFrame extends JFrame {
     private JPanel panel;
@@ -25,7 +26,7 @@ public class MainFrame extends JFrame {
     private final Thread updateThread;
 
     public MainFrame() {
-        super("Inject Your YolBi Lite");
+        super("YolBi Lite v" + Main.version + " - Development Build");
         float width = 500, height = width * 0.618f;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();

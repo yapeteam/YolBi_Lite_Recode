@@ -11,17 +11,21 @@ import org.lwjgl.input.Keyboard;
 
 @Getter
 public class ClickUI extends Module {
+
     private final BooleanValue pauseGame = new BooleanValue("PauseGame", true);
     private final BooleanValue blur = new BooleanValue("Blur background", () -> !mc.gameSettings.ofFastRender, true);
     private final BooleanValue rainbow = new BooleanValue("RainBow", false);
     private final NumberValue<Integer> blurRadius = new NumberValue<>("blurRadius", blur::getValue, 3, 0, 50, 1);
-
+    //public  final BooleanValue notiff = notification;
     public ClickUI() {
-        super("ClickUI", ModuleCategory.VISUAL, Keyboard.KEY_RCONTROL);
+        super("ClickGUI", ModuleCategory.VISUAL, Keyboard.KEY_RCONTROL);
         if (ReflectUtil.hasOptifine)
             blur.setCallback((oldV, newV) -> !mc.gameSettings.ofFastRender && newV);
         else blur.setVisibility(() -> true);
-        addValues(pauseGame, blur, rainbow, blurRadius);
+        //public final BooleanValue notif = notification.getValue();
+        //notification.setValue(false);
+        //addValues(blur,rainbow,blurRadius);
+        addValues(blur, rainbow, blurRadius);
     }
 
     @Getter
