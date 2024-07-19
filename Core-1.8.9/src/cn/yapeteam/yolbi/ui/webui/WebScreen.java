@@ -105,9 +105,16 @@ public abstract class WebScreen extends GuiScreen
     public void onGuiClosed() {
         //Make sure to close the browser when you don't need it anymore.
         if (browser != null) {
-            //browser.close();
+            browser.close();
+            browser = null;
         }
 
         Keyboard.enableRepeatEvents(false);
+    }
+
+    @Super
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
     }
 }
