@@ -31,6 +31,7 @@ public class BrowserScreen extends GuiScreen {
     private static final String YT_REGEX2 = "^https?://(?:www\\.)?youtu\\.be/([a-zA-Z0-9_\\-]+)$";
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 
+
     public BrowserScreen() {
         urlToLoad = MCEF.HOME_PAGE;
     }
