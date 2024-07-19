@@ -25,7 +25,7 @@ public class MainFrame extends JFrame {
     private final Thread updateThread;
 
     public MainFrame() {
-        super("Inject Your YolBi Lite");
+        super("YolBi Lite - Development");
         float width = 500, height = width * 0.618f;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
