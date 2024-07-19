@@ -4,6 +4,7 @@ import cn.yapeteam.yolbi.font.cfont.CFontRenderer;
 import lombok.Getter;
 
 import java.awt.*;
+import java.security.PrivateKey;
 
 @Getter
 public class FontManager {
@@ -17,6 +18,7 @@ public class FontManager {
         PingFangBold18 = new CFontRenderer("PingFang_Bold.ttf", 18, Font.PLAIN, true, true);
         FLUXICON14 = new CFontRenderer("fluxicon.ttf", 18, Font.PLAIN, true, true);
         default18 = new CFontRenderer(new Font(null, Font.PLAIN, 18), true, true);
+        RobotoLight = new CFontRenderer("RobotoLight.ttf",16,Font.PLAIN,true,true);
     }
 
     private final AbstractFontRenderer JelloRegular18;
@@ -28,4 +30,5 @@ public class FontManager {
     private final AbstractFontRenderer PingFangBold18;
     private final AbstractFontRenderer FLUXICON14;
     private final AbstractFontRenderer default18;
+    private final AbstractFontRenderer RobotoLight;
 }
