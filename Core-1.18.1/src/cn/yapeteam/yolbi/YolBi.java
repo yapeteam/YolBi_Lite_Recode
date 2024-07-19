@@ -41,6 +41,7 @@ public class YolBi {
         FontManager.init();
         try {
             instance.getConfigManager().load();
+
             WebServer.start();
         } catch (Throwable e) {
             Logger.exception(e);
@@ -49,9 +50,11 @@ public class YolBi {
 
     public void shutdown() {
         try {
+            Logger.info("Shutting down Yolbi Lite");
             configManager.save();
             WebServer.stop();
             instance = new YolBi();
+            //Logger.info("Shutting down Yolbi Lite");
             System.gc();
         } catch (IOException e) {
             Logger.exception(e);
