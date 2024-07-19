@@ -8,7 +8,7 @@ let altsData = {}; // Object to store fetched alts data for easy access
 let isHovered = false;
 let hoverTimeout;
 
-const port = 1342;
+const port = 23333;
 
 async function createAlt(Username, Accounttype) {
     const altcontainer = document.querySelector('.alt-display');
