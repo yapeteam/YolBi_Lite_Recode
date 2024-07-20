@@ -24,10 +24,12 @@ import java.util.stream.Collectors;
 public class ModuleManager {
     private final List<Module> modules = new CopyOnWriteArrayList<>();
    // private final BooleanValue notif = ClickUI.notification.getValue();
+    private final Boolean notiffff = ClientTheme.notiff;
     public void load() {
         modules.add(new AimAssist());
         modules.add(new AntiBot());
         modules.add(new AutoClicker());
+        modules.add(new KeepSprint());
         // modules.add(new Backtrack());
         // modules.add(new BlatantVelocity());
         // modules.add(new Criticals());
@@ -64,15 +66,16 @@ public class ModuleManager {
     private void onKey(EventKey e) {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
+            if(notiffff){
+                    YolBi.instance.getNotificationManager().post(new Notification(
+                        module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
 
-            YolBi.instance.getNotificationManager().post(new Notification(
-                    module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
+                        Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
+                        1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
+                        ));
+            }
 
-                    Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
-                    1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
-                    )
 
-            );
         });
     }
 
