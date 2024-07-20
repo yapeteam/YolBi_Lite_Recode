@@ -11,6 +11,8 @@ import net.montoyo.mcef.utilities.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class YolBiScheme implements IScheme {
     private String contentType = null;
@@ -18,6 +20,12 @@ public class YolBiScheme implements IScheme {
 
     @Override
     public SchemePreResponse processRequest(String url) {
+        try {
+            url = URLDecoder.decode(url, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            Logger.exception(e);
+            return SchemePreResponse.NOT_HANDLED;
+        }
         // yolbi://clickui/#
         String head = "yolbi://";
         if (url.isEmpty())

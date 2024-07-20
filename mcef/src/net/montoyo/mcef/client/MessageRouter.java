@@ -10,7 +10,7 @@ import org.cef.handler.CefMessageRouterHandlerAdapter;
 
 public class MessageRouter extends CefMessageRouterHandlerAdapter {
     
-    private IJSQueryHandler handler;
+    private final IJSQueryHandler handler;
     
     public MessageRouter(IJSQueryHandler h) {
         handler = h;

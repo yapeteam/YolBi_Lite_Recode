@@ -18,7 +18,7 @@ public class ClickUI extends WebScreen {
 
     @Override
     public void onTitleChange(IBrowser browser, String title) {
-
+        System.out.println("Title: " + title);
     }
 
     @Override
@@ -33,6 +33,12 @@ public class ClickUI extends WebScreen {
 
     @Override
     public boolean handleQuery(IBrowser b, long queryId, String query, boolean persistent, IJSQueryCallback cb) {
+        System.out.println(query);
+        if (query.equals("run")) {
+            //b.runJS("alert('Hello, World!');", "");
+            cb.success("666");
+            return true;
+        }
         return false;
     }
 

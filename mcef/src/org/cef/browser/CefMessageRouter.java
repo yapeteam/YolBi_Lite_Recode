@@ -3,7 +3,7 @@ package org.cef.browser;
 import org.cef.handler.CefMessageRouterHandler;
 
 public abstract class CefMessageRouter {
-    private final CefMessageRouterConfig routerConfig_;
+    private CefMessageRouterConfig routerConfig_;
 
     public abstract void dispose();
 
@@ -58,6 +58,6 @@ public abstract class CefMessageRouter {
     }
 
     public final void setMessageRouterConfig(CefMessageRouterConfig config) {
-        //this.routerConfig_ = config;
+        this.routerConfig_ = config;
     }
 }

@@ -1,17 +1,58 @@
 <!DOCTYPE html>
+<meta charset="UTF-8">
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>ClickUI</title>
+    <script type="text/javascript" src="jquery.js"></script>
 </head>
+
 <body>
-<a>🤣👉</a>
+    <p id="content">ClickUI🤡</p>
+    <button onclick="request()">Run</button>
+    <script type="text/javascript">
+        function request() {
+            window.cefQuery({
+                "request": "run",
+                "persistent": false,
+                "onSuccess": function (msg) {
+                    $("#content").html(msg);
+                },
+
+                "onFailure": function (err, msg) {
+                }
+            });
+        }
+    </script>
 </body>
 <style>
+    @font-face {
+        font-family: 'Noto Color Emoji';
+        src: url('fonts/NotoColorEmoji.ttf') format('truetype');
+    }
+
+    @font-face {
+        font-family: 'Open Sans Emoji';
+        src: url('fonts/OpenSansEmoji.ttf') format('truetype');
+    }
+
     body {
         background-color: transparent;
+        font-size: 120px;
+    }
+
+    p {
+        background: none repeat scroll 0 0 #00000000;
+        cursor: pointer;
+        color: #FFFFFF;
+        font-family: "Great Vibes", "Open Sans Emoji";
+        margin: auto;
+        padding: 26px 10px;
+        text-align: center;
+        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px#fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+        transition: text-shadow 0.5s ease 0s;
     }
 </style>
-<script>
-</script>
+
 </html>

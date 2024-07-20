@@ -6,7 +6,6 @@ import cn.yapeteam.yolbi.event.impl.render.EventRender2D;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.api.*;
-import net.montoyo.mcef.utilities.Log;
 
 /**
  * An example mod that shows you how to use MCEF.
@@ -93,28 +92,6 @@ public class BrowserHandler implements IDisplayHandler, IJSQueryHandler {
 
     @Override
     public boolean handleQuery(IBrowser b, long queryId, String query, boolean persistent, IJSQueryCallback cb) {
-        if (b != null && query.equalsIgnoreCase("username")) {
-            if (b.getURL().startsWith("mod://")) {
-                //Only allow MCEF URLs to get the player's username to keep his identity secret
-
-                mc.addScheduledTask(() -> {
-                    //Add this to a scheduled task because this is NOT called from the main Minecraft thread...
-
-                    try {
-                        String name = mc.getSession().getUsername();
-                        cb.success(name);
-                    } catch (Throwable t) {
-                        cb.failure(500, "Internal error.");
-                        Log.warning("Could not get username from JavaScript:");
-                        t.printStackTrace();
-                    }
-                });
-            } else
-                cb.failure(403, "Can't access username from external page");
-
-            return true;
-        }
-
         return false;
     }
 

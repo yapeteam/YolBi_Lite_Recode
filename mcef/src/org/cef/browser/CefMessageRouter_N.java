@@ -6,15 +6,15 @@ import org.cef.handler.CefMessageRouterHandler;
 public class CefMessageRouter_N extends CefMessageRouter implements CefNative {
     private long N_CefHandle;
 
-    private static final native CefMessageRouter_N N_Create(CefMessageRouter.CefMessageRouterConfig cefMessageRouterConfig);
+    private static native CefMessageRouter_N N_Create(CefMessageRouter.CefMessageRouterConfig cefMessageRouterConfig);
 
-    private final native void N_Dispose(long j);
+    private native void N_Dispose(long j);
 
-    private final native boolean N_AddHandler(long j, CefMessageRouterHandler cefMessageRouterHandler, boolean z);
+    private native boolean N_AddHandler(long j, CefMessageRouterHandler cefMessageRouterHandler, boolean z);
 
-    private final native boolean N_RemoveHandler(long j, CefMessageRouterHandler cefMessageRouterHandler);
+    private native boolean N_RemoveHandler(long j, CefMessageRouterHandler cefMessageRouterHandler);
 
-    private final native void N_CancelPending(long j, CefBrowser cefBrowser, CefMessageRouterHandler cefMessageRouterHandler);
+    private native void N_CancelPending(long j, CefBrowser cefBrowser, CefMessageRouterHandler cefMessageRouterHandler);
 
     @Override
     public void setNativeRef(String identifer, long nativeRef) {
