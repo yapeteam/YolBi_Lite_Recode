@@ -67,7 +67,7 @@ public abstract class CefDragData {
         super.finalize();
     }
 
-    public static final CefDragData create() {
+    public static CefDragData create() {
         return CefDragData_N.createNative();
     }
 

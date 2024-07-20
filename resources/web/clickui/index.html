@@ -5,7 +5,21 @@
 <head>
     <meta charset="UTF-8">
     <title>ClickUI</title>
-    <script type="text/javascript" src="jquery.js"></script>
+    <script src="jquery.js"></script>
+    <script>
+        function request() {
+            window.mcefQuery({
+                "request": "run",
+                "persistent": false,
+                "onSuccess": function (msg) {
+                    $("#content").html(msg);
+                },
+
+                "onFailure": function (err, msg) {
+                }
+            });
+        }
+    </script>
 </head>
 
 <body>
@@ -51,18 +65,4 @@
         text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
     }
 </style>
-<script type="text/javascript">
-    function request() {
-        window.mcefQuery({
-            "request": "run",
-            "persistent": false,
-            "onSuccess": function (msg) {
-                $("#content").html(msg);
-            },
-
-            "onFailure": function (err, msg) {
-            }
-        });
-    }
-</script>
 </html>

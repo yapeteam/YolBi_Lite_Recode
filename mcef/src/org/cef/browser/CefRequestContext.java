@@ -9,11 +9,11 @@ public abstract class CefRequestContext {
 
     public abstract CefRequestContextHandler getHandler();
 
-    public static final CefRequestContext getGlobalContext() {
+    public static CefRequestContext getGlobalContext() {
         return CefRequestContext_N.getGlobalContextNative();
     }
 
-    public static final CefRequestContext createContext(CefRequestContextHandler handler) {
+    public static CefRequestContext createContext(CefRequestContextHandler handler) {
         return CefRequestContext_N.createNative(handler);
     }
 }

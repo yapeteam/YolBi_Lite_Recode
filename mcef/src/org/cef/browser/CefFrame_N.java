@@ -3,23 +3,23 @@ package org.cef.browser;
 import org.cef.callback.CefNativeAdapter;
 
 class CefFrame_N extends CefNativeAdapter implements CefFrame {
-    private final native void N_Dispose(long j);
+    private native void N_Dispose(long j);
 
-    private final native long N_GetIdentifier(long j);
+    private native long N_GetIdentifier(long j);
 
-    private final native String N_GetURL(long j);
+    private native String N_GetURL(long j);
 
-    private final native String N_GetName(long j);
+    private native String N_GetName(long j);
 
-    private final native boolean N_IsMain(long j);
+    private native boolean N_IsMain(long j);
 
-    private final native boolean N_IsValid(long j);
+    private native boolean N_IsValid(long j);
 
-    private final native boolean N_IsFocused(long j);
+    private native boolean N_IsFocused(long j);
 
-    private final native CefFrame N_GetParent(long j);
+    private native CefFrame N_GetParent(long j);
 
-    private final native void N_ExecuteJavaScript(long j, String str, String str2, int i);
+    private native void N_ExecuteJavaScript(long j, String str, String str2, int i);
 
     CefFrame_N() {
     }

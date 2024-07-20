@@ -92,10 +92,12 @@ public abstract class WebScreen extends GuiScreen
 
                 if (wheel != 0)
                     browser.injectMouseWheel(sx, y, 0, 1, wheel);
-                else if (btn == -1)
+                else if (btn == -1) {
                     browser.injectMouseMove(sx, y, 0, y < 0);
-                else
+                } else {
+                    System.out.println(btn + ":" + pressed);
                     browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
+                }
             }
         }
     }

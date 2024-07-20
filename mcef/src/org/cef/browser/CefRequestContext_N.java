@@ -8,13 +8,13 @@ class CefRequestContext_N extends CefRequestContext implements CefNative {
     private long N_CefHandle = 0;
     private CefRequestContextHandler handler = null;
 
-    private static final native CefRequestContext_N N_GetGlobalContext();
+    private static native CefRequestContext_N N_GetGlobalContext();
 
-    private static final native CefRequestContext_N N_CreateContext(CefRequestContextHandler cefRequestContextHandler);
+    private static native CefRequestContext_N N_CreateContext(CefRequestContextHandler cefRequestContextHandler);
 
-    private final native boolean N_IsGlobal();
+    private native boolean N_IsGlobal();
 
-    private final native void N_CefRequestContext_DTOR();
+    private native void N_CefRequestContext_DTOR();
 
     @Override
     public void setNativeRef(String identifer, long nativeRef) {
@@ -29,7 +29,7 @@ class CefRequestContext_N extends CefRequestContext implements CefNative {
     CefRequestContext_N() {
     }
 
-    public static final CefRequestContext_N getGlobalContextNative() {
+    public static CefRequestContext_N getGlobalContextNative() {
         CefRequestContext_N result = null;
         try {
             result = N_GetGlobalContext();
@@ -44,7 +44,7 @@ class CefRequestContext_N extends CefRequestContext implements CefNative {
         return globalInstance;
     }
 
-    public static final CefRequestContext_N createNative(CefRequestContextHandler handler) {
+    public static CefRequestContext_N createNative(CefRequestContextHandler handler) {
         CefRequestContext_N result = null;
         try {
             result = N_CreateContext(handler);

@@ -31,7 +31,7 @@ public class CefMessageRouter_N extends CefMessageRouter implements CefNative {
         this.N_CefHandle = 0L;
     }
 
-    public static final CefMessageRouter createNative(CefMessageRouter.CefMessageRouterConfig config) {
+    public static CefMessageRouter createNative(CefMessageRouter.CefMessageRouterConfig config) {
         try {
             return N_Create(config);
         } catch (UnsatisfiedLinkError ule) {
