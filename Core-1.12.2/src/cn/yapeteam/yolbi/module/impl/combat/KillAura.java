@@ -34,7 +34,7 @@ import static net.minecraft.util.EnumHand.OFF_HAND;
 
 public class KillAura extends Module {
     public KillAura() {
-        super("KillAura", ModuleCategory.COMBAT, Keyboard.KEY_R);
+        super("KillAura", ModuleCategory.COMBAT);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
         addValues(cps, cpsRange, searchRange, autoBlock, mode, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, invisibility, death);

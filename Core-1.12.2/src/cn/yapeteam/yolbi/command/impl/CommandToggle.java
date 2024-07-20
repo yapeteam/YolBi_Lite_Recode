@@ -16,6 +16,7 @@ public class CommandToggle extends AbstractCommand {
             if (module != null) {
                 module.toggle();
                 printMessage("Toggled " + module.getName());
+
             } else printMessage("Module not found " + args[0]);
         }
     }
