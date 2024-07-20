@@ -9,9 +9,48 @@
 </head>
 
 <body>
-<p id="content">
-    😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙🥲😚☺️🙂🤗🤩🤔🫡🤨😐😑😶🫥😶‍🌫️🙄😏😣😥😮🤐😯😪😫🥱😴😌😛😜😝🤤😒😓😔😕🫤🙃🫠🤑😲☹️🙁😖😞😟😤😢😭😦😧😨😩🤯😬😮‍💨😰😱🥵🥶😳🤪😵😵‍💫🥴😠😡🤬😷🤒🤕🤢🤮🤧😇🥳🥸🥺🥹🤠🤡🤥🫨🤫🤭🫢🫣🧐🤓😈👿👹👺💀☠️👻💩🙍‍♀️🙍‍♂️🙍🙎‍♀️🙎‍♂️🙎🙅‍♀️🙅‍♂️🙅🙆‍♀️🙆‍♂️🙆🧏‍♀️🧏‍♂️🧏💁‍♀️💁‍♂️💁🙋‍♀️🙋‍♂️🤏👈👉☝️🫵👆👇✌️🤞🫰🖖🫱🫲🫳🫴🫷🫸🤘🤙🖐️✋👌🤌👍👎✊👊🤛🤜🤚👋🤟✍️👏👐🙌🫶🤲🙏💅🕶️♥️💊♀️♂️⚧️🚬💰💴💵💶💷📦🧀🌈❤️💔🈚🈶🈲㊙️💯❎✅0️⃣1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟🐱</p>
-<button onclick="request()">Run</button>
+<div class="r1" id="ele1">
+    <a id="content">😡😡😡</a>
+</div>
+<script src="panel.js"></script>
+<div class="r2" id="ele2"></div>
+<script src="panel.js"></script>
+</body>
+<style>
+    @font-face {
+        font-family: 'Apple Color Emoji';
+        src: url('fonts/AppleColorEmoji.ttf');
+    }
+
+    body {
+        background-color: transparent;
+        font-family: system-ui, "Apple Color Emoji";
+    }
+
+    .r1 {
+        width: 200px;
+        height: 100px;
+        background-color: rgba(0, 0, 0, 0.5);
+        font-size: 40px;
+        text-align: center;
+        line-height: 100px;
+        border: 10px solid transparent;
+        border-radius: 20px;
+        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+    }
+
+    .r2 {
+        width: 200px;
+        height: 100px;
+        background-color: rgba(0, 0, 0, 0.5);
+        font-size: 40px;
+        text-align: center;
+        line-height: 100px;
+        border: 10px solid transparent;
+        border-radius: 20px;
+        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+    }
+</style>
 <script type="text/javascript">
     function request() {
         window.mcefQuery({
@@ -26,28 +65,4 @@
         });
     }
 </script>
-</body>
-<style>
-    @font-face {
-        font-family: 'Apple Color Emoji';
-        src: url('fonts/AppleColorEmoji.ttf');
-    }
-
-    body {
-        background-color: transparent;
-        font-size: 120px;
-    }
-
-    p {
-        background: none repeat scroll 0 0 #00000000;
-        cursor: pointer;
-        color: #FFFFFF;
-        font-family: -apple-system, system-ui, "Apple Color Emoji";
-        margin: auto;
-        padding: 26px 10px;
-        text-align: center;
-        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
-        transition: text-shadow 0.5s ease 0s;
-    }
-</style>
 </html>
