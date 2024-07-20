@@ -31,7 +31,7 @@ public class IRC extends Module {
 
     @Listener
     private void onTick(EventTick event) {
-        // Periodically send the IRC identification packet
+
         sendIRCIdentificationPacket();
     }
 
@@ -156,12 +156,12 @@ public class IRC extends Module {
 //    }
 //
 //    private void sendIRCIdentityPacket() {
-//        String message = "/IRCIDENTITY"; // 自定义消息以标识IRC用户
+//        String message = "/IRCIDENTITY1";
 //        mc.getNetHandler().getNetworkManager().sendPacket(new C01PacketChatMessage(message));
 //    }
 //
 //    @Override
 //    protected void onDisable() {
-//        // 可选：禁用时移除或更新IRC用户信息
+//
 //    }
 //}
