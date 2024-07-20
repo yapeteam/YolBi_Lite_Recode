@@ -23,6 +23,9 @@ import net.montoyo.mcef.MCEF;
 
 import java.io.File;
 import java.io.IOException;
+import cn.yapeteam.yolbi.module.impl.misc.IRC;
+//import cn.yapeteam.yolbi.event.impl.player.IRCListener;
+import cn.yapeteam.yolbi.YolBi;
 
 @Getter
 public class YolBi {
@@ -81,6 +84,20 @@ public class YolBi {
         } catch (Throwable e) {
             Logger.exception(e);
         }
+
+
+//        YolBi instance = YolBi.getInstance();
+//
+//        // 初始化IRC模块
+//        IRCModule ircModule = new IRCModule();
+//        instance.getModuleManager().addModule(ircModule);
+//
+//        // 注册IRC事件监听器
+//        IRCListener ircListener = new IRCListener();
+//        instance.getEventBus().register(ircListener);
+
+
+
         instance.getNotificationManager().post(
                 new Notification(
                         "Injected Yolbi successfully",
