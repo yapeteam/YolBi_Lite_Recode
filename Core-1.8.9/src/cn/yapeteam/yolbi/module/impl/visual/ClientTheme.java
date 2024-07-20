@@ -12,8 +12,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class ClientTheme extends Module {
-    public static Boolean notiff = new Boolean(false);
-    private final BooleanValue notifi = new BooleanValue("Notification" , false);
+   // public static BooleanValue notiff = new Boolean(false);
+    public static BooleanValue notifi = new BooleanValue("Notification" , false);
     //private final ModeValue<Boolean> notif = new ModeValue<>()
     public final ModeValue<String> color = new ModeValue<>("Color", "Custom fade", "White", "Red", "Blue", "Vape", "Custom static", "Custom fade", "Custom 3 colors", "Rainbow");
     private final ColorValue color1 = new ColorValue("Color1", () -> color.getValue().startsWith("Custom"), new Color(210, 80, 105).getRGB());
@@ -25,7 +25,7 @@ public class ClientTheme extends Module {
     public ClientTheme() {
         super("ClientTheme", ModuleCategory.VISUAL);
         this.addValues(notifi, color, color1, color2, color3, saturation, brightness);
-        notiff = notifi.getValue();
+        //notiff = notifi.getValue();
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class ModuleManager {
     private final List<Module> modules = new CopyOnWriteArrayList<>();
    // private final BooleanValue notif = ClickUI.notification.getValue();
-    private final Boolean notiffff = ClientTheme.notiff;
+    private final BooleanValue notiffff = ClientTheme.notifi;
     public void load() {
         modules.add(new AimAssist());
         modules.add(new AntiBot());
@@ -66,7 +66,7 @@ public class ModuleManager {
     private void onKey(EventKey e) {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
-            if(notiffff){
+            if(notiffff.getValue()){
                     YolBi.instance.getNotificationManager().post(new Notification(
                         module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
 
