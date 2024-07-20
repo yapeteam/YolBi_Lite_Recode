@@ -9,32 +9,28 @@
 </head>
 
 <body>
-    <p id="content">ClickUI🤡</p>
-    <button onclick="request()">Run</button>
-    <script type="text/javascript">
-        function request() {
-            window.cefQuery({
-                "request": "run",
-                "persistent": false,
-                "onSuccess": function (msg) {
-                    $("#content").html(msg);
-                },
+<p id="content">
+    😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙🥲😚☺️🙂🤗🤩🤔🫡🤨😐😑😶🫥😶‍🌫️🙄😏😣😥😮🤐😯😪😫🥱😴😌😛😜😝🤤😒😓😔😕🫤🙃🫠🤑😲☹️🙁😖😞😟😤😢😭😦😧😨😩🤯😬😮‍💨😰😱🥵🥶😳🤪😵😵‍💫🥴😠😡🤬😷🤒🤕🤢🤮🤧😇🥳🥸🥺🥹🤠🤡🤥🫨🤫🤭🫢🫣🧐🤓😈👿👹👺💀☠️👻💩🙍‍♀️🙍‍♂️🙍🙎‍♀️🙎‍♂️🙎🙅‍♀️🙅‍♂️🙅🙆‍♀️🙆‍♂️🙆🧏‍♀️🧏‍♂️🧏💁‍♀️💁‍♂️💁🙋‍♀️🙋‍♂️🤏👈👉☝️🫵👆👇✌️🤞🫰🖖🫱🫲🫳🫴🫷🫸🤘🤙🖐️✋👌🤌👍👎✊👊🤛🤜🤚👋🤟✍️👏👐🙌🫶🤲🙏💅🕶️♥️💊♀️♂️⚧️🚬💰💴💵💶💷📦🧀🌈❤️💔🈚🈶🈲㊙️💯❎✅0️⃣1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟🐱</p>
+<button onclick="request()">Run</button>
+<script type="text/javascript">
+    function request() {
+        window.mcefQuery({
+            "request": "run",
+            "persistent": false,
+            "onSuccess": function (msg) {
+                $("#content").html(msg);
+            },
 
-                "onFailure": function (err, msg) {
-                }
-            });
-        }
-    </script>
+            "onFailure": function (err, msg) {
+            }
+        });
+    }
+</script>
 </body>
 <style>
     @font-face {
-        font-family: 'Noto Color Emoji';
-        src: url('fonts/NotoColorEmoji.ttf') format('truetype');
-    }
-
-    @font-face {
-        font-family: 'Open Sans Emoji';
-        src: url('fonts/OpenSansEmoji.ttf') format('truetype');
+        font-family: 'Apple Color Emoji';
+        src: url('fonts/AppleColorEmoji.ttf');
     }
 
     body {
@@ -46,13 +42,12 @@
         background: none repeat scroll 0 0 #00000000;
         cursor: pointer;
         color: #FFFFFF;
-        font-family: "Great Vibes", "Open Sans Emoji";
+        font-family: -apple-system, system-ui, "Apple Color Emoji";
         margin: auto;
         padding: 26px 10px;
         text-align: center;
-        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px#fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
         transition: text-shadow 0.5s ease 0s;
     }
 </style>
-
 </html>
