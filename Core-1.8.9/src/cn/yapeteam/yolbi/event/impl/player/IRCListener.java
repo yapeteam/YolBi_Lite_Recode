@@ -18,7 +18,7 @@
 //            if (packet.getAction() == Action.ADD_PLAYER) {
 //                for (AddPlayerData data : packet.getEntries()) {
 //                    if (isIRCUser(data.getProfile().getName())) {
-//                        // 修改玩家名称前缀为"[IRC]"，并设置绿色
+//                        // 修改玩家名称前缀为[IRC]
 //                        GameProfile newProfile = new GameProfile(data.getProfile().getId(), "[IRC] " + data.getProfile().getName());
 //                        data.setProfile(newProfile);
 //                        // 设置名称为绿色

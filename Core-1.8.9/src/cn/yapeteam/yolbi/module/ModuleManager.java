@@ -31,6 +31,7 @@ public class ModuleManager {
         modules.add(new AutoClicker());
         modules.add(new KeepSprint());
         // modules.add(new Backtrack());
+        modules.add(new IRC()); // To be tested
         // modules.add(new BlatantVelocity());
         // modules.add(new Criticals());
         // modules.add(new FakeLag());
@@ -66,7 +67,7 @@ public class ModuleManager {
     private void onKey(EventKey e) {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
-            if(notiffff.getValue()){
+            if(notiffff.getValue()){ // Notification -> ClientTheme
                     YolBi.instance.getNotificationManager().post(new Notification(
                         module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
 
