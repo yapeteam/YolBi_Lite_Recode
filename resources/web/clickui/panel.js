@@ -46,6 +46,5 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         new DraggablePanel('ele1');
-        new DraggablePanel('ele2');
     });
 })();

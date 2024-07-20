@@ -23,12 +23,10 @@
 </head>
 
 <body>
-<div class="r1" id="ele1">
-    <a id="content">😡😡😡</a>
-</div>
-<script src="panel.js"></script>
-<div class="r2" id="ele2"></div>
-<script src="panel.js"></script>
+    <div class="rect" id="ele1">
+        <a id="content">🤣👉🤡</a>
+    </div>
+    <script src="panel.js"></script>
 </body>
 <style>
     @font-face {
@@ -41,28 +39,24 @@
         font-family: system-ui, "Apple Color Emoji";
     }
 
-    .r1 {
+    .rect {
         width: 200px;
-        height: 100px;
-        background-color: rgba(0, 0, 0, 0.5);
-        font-size: 40px;
+        height: 60px;
+        background-color: rgb(26, 25, 26);
         text-align: center;
-        line-height: 100px;
-        border: 10px solid transparent;
-        border-radius: 20px;
-        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+        font-size: 40px;
+        border-radius: 5px;
+        text-shadow: #FC0 1px 0 10px;
+        box-shadow: rgb(0, 0, 0) 1px 0 10px;
+        filter: blur(5px);
+        will-change: filter, height;
+        transition: 0.10s;
     }
 
-    .r2 {
-        width: 200px;
-        height: 100px;
-        background-color: rgba(0, 0, 0, 0.5);
-        font-size: 40px;
-        text-align: center;
-        line-height: 100px;
-        border: 10px solid transparent;
-        border-radius: 20px;
-        text-shadow: 0 0 10px #FFFFFF, 0 0 20px #FFFFFF, 0 0 30px #FFFFFF, 0 0 40px #fbff00, 0 0 50px #fbff00, 0 0 60px #fbff00, 0 0 700px #fbff00;
+    .rect:hover {
+        filter: blur(0px);
+        height: 500px;
     }
 </style>
+
 </html>
