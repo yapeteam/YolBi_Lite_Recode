@@ -1,0 +1,45 @@
+@font-face {
+    font-family: 'Apple Color Emoji';
+    src: url('fonts/AppleColorEmoji.ttf');
+}
+
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+body {
+    background-color: transparent;
+    font-family: system-ui, "Apple Color Emoji";
+}
+
+.glow-animation {
+    background: linear-gradient(45deg, rgb(0, 247, 255) 0%, rgb(231, 69, 255) 50%, rgb(0, 255, 42) 100%);
+    padding: 10px;
+}
+
+.panel {
+    width: 200px;
+    height: 500px;
+    background-color: rgb(26, 25, 26);
+    color: white;
+    text-align: center;
+    font-size: 30px;
+    border-radius: 5px;
+    text-shadow: #FC0 1px 0 10px;
+    box-shadow: rgb(0, 0, 0) 1px 0 10px;
+    will-change: filter, height;
+    transition: 0.10s;
+}
+
+.panel:hover {
+}

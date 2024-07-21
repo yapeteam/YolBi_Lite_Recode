@@ -6,57 +6,11 @@
     <meta charset="UTF-8">
     <title>ClickUI</title>
     <script src="jquery.js"></script>
-    <script>
-        function request() {
-            window.mcefQuery({
-                "request": "run",
-                "persistent": false,
-                "onSuccess": function (msg) {
-                    $("#content").html(msg);
-                },
-
-                "onFailure": function (err, msg) {
-                }
-            });
-        }
-    </script>
+    <script src="utils.js"></script>
+    <script src="panel.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
-    <div class="rect" id="ele1">
-        <a id="content">🤣👉🤡</a>
-    </div>
-    <script src="panel.js"></script>
 </body>
-<style>
-    @font-face {
-        font-family: 'Apple Color Emoji';
-        src: url('fonts/AppleColorEmoji.ttf');
-    }
-
-    body {
-        background-color: transparent;
-        font-family: system-ui, "Apple Color Emoji";
-    }
-
-    .rect {
-        width: 200px;
-        height: 60px;
-        background-color: rgb(26, 25, 26);
-        text-align: center;
-        font-size: 40px;
-        border-radius: 5px;
-        text-shadow: #FC0 1px 0 10px;
-        box-shadow: rgb(0, 0, 0) 1px 0 10px;
-        filter: blur(5px);
-        will-change: filter, height;
-        transition: 0.10s;
-    }
-
-    .rect:hover {
-        filter: blur(0px);
-        height: 500px;
-    }
-</style>
-
 </html>
