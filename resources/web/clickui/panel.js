@@ -46,31 +46,25 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        for (let val of ['Combat', 'Player']) {
-            const newDiv = document.createElement("div");
-            newDiv.id = val;
-            newDiv.classList.add("panel");
-            newDiv.classList.add("glow-animation");
-            newDiv.innerHTML = `${val}🤡`;
-            document.body.appendChild(newDiv);
-            new DraggablePanel(val);
-        }
-        // window.mcefQuery({
-        //     "request": "run",
-        //     "persistent": false,
-        //     "onSuccess": function (msg) {
-        //         const parse = JSON.parse(msg);
-        //         for (let val of parse.vals) {
-        //             const newDiv = document.createElement("div");
-        //             newDiv.id = val;
-        //             newDiv.classList.add("rect");
-        //             newDiv.innerHTML = "🤡";
-        //             document.body.appendChild(newDiv);
-        //             new DraggablePanel(val);
-        //         }
-        //     },
-        //     "onFailure": function (err, msg) {
-        //     }
-        // });
+        window.mcefQuery({
+            "request": "clickui/cats",
+            "persistent": false,
+            "onSuccess": function (msg) {
+                const array = JSON.parse(msg);
+                for (let i = 0; i < array.length; i++) {
+                    const val = array[i];
+                    const newDiv = document.createElement("div");
+                    newDiv.id = val;
+                    newDiv.classList.add("panel");
+                    newDiv.classList.add("glow-animation");
+                    newDiv.innerHTML = `${val}🤡`;
+                    document.body.appendChild(newDiv);
+                    new DraggablePanel(val);
+                }
+            },
+            "onFailure": function (err, msg) {
+                console.log(msg);
+            }
+        });
     });
 })();

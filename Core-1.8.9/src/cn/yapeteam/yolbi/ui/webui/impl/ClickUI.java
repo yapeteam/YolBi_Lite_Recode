@@ -1,6 +1,9 @@
 package cn.yapeteam.yolbi.ui.webui.impl;
 
+import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.ui.webui.WebScreen;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IJSQueryCallback;
 
@@ -33,10 +36,18 @@ public class ClickUI extends WebScreen {
 
     @Override
     public boolean handleQuery(IBrowser b, long queryId, String query, boolean persistent, IJSQueryCallback cb) {
-        System.out.println(query);
-        if (query.equals("run")) {
-            //b.runJS("alert('Hello, World!');", "");
-            cb.success("666");
+        String[] parts = query.split("/");
+        if (parts.length == 2 && parts[0].equals("clickui")) {
+            switch (parts[1]) {
+                case "cats":
+                    JsonArray array = new JsonArray();
+                    for (ModuleCategory value : ModuleCategory.values())
+                        array.add(new JsonPrimitive(value.name()));
+                    cb.success(array.toString());
+                    break;
+                default:
+                    cb.failure(404, "invalid request");
+            }
             return true;
         }
         return false;
