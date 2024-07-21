@@ -16,7 +16,7 @@ public class NumberValue<T extends Number> extends Value<T> {
     private final Class<? extends Number> type;
 
     public NumberValue(String name, T value, T min, T max, T inc) {
-        super(name);
+        super("number", name);
         this.name = name;
         this.value = value;
         this.min = min;
@@ -26,7 +26,7 @@ public class NumberValue<T extends Number> extends Value<T> {
     }
 
     public NumberValue(String name, Visibility visibility, T value, T min, T max, T inc) {
-        super(name);
+        super("number", name);
         this.name = name;
         setVisibility(visibility);
         this.value = value;
@@ -68,8 +68,48 @@ public class NumberValue<T extends Number> extends Value<T> {
         this.value = (T) convertValue(type, getCallback() != null ? getCallback().run(this.value, (T) convertValue(type, value)) : value);
     }
 
+    public void setValue(String value) {
+        Number val = convertStringToNumber(value);
+        this.value = (T) convertValue(type, getCallback() != null ? getCallback().run(this.value, (T) convertValue(type, val)) : val);
+    }
+
+
     public void setValue(Number value, boolean callback) {
         this.value = (T) convertValue(type, (getCallback() != null && callback) ? getCallback().run(this.value, (T) convertValue(type, value)) : value);
+    }
+
+    public static Number convertStringToNumber(String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            // Not an Integer, try next
+        }
+
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            // Not a Long, try next
+        }
+
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            // Not a Double, try next
+        }
+
+        try {
+            return Float.parseFloat(str);
+        } catch (NumberFormatException e) {
+            // Not a Float, try next
+        }
+        try {
+            return Short.parseShort(str);
+        } catch (NumberFormatException e) {
+            // Not a Short, try next
+        }
+
+        // If all conversions fail, return null or throw an exception
+        return null;
     }
 
     private Object convertValue(Class<? extends Number> type, Number value) {
@@ -87,5 +127,10 @@ public class NumberValue<T extends Number> extends Value<T> {
     public static void setBound(NumberValue<? extends Number> min, NumberValue<? extends Number> max) {
         min.setCallback((oldV, newV) -> newV.doubleValue() > max.getValue().doubleValue() ? oldV : newV);
         max.setCallback((oldV, newV) -> newV.doubleValue() < min.getValue().doubleValue() ? oldV : newV);
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

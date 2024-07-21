@@ -7,7 +7,7 @@ import cn.yapeteam.yolbi.module.values.Visibility;
 @DontMap
 public class BooleanValue extends Value<Boolean> {
     public BooleanValue(String name, boolean value) {
-        super(name);
+        super("bool", name);
         this.value = value;
     }
 
@@ -24,5 +24,10 @@ public class BooleanValue extends Value<Boolean> {
     public BooleanValue(String name, String desc, Visibility visibility, boolean value) {
         this(name, desc, value);
         setVisibility(visibility);
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

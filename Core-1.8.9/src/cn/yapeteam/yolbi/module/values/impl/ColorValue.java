@@ -23,7 +23,7 @@ public class ColorValue extends Value<Color> {
     private int color;
 
     public ColorValue(String name, int color) {
-        super(name);
+        super("color", name);
         this.name = name;
         this.color = color;
         this.value = intToColor(color);
@@ -35,7 +35,7 @@ public class ColorValue extends Value<Color> {
     }
 
     public ColorValue(String name, Visibility visibility, int color) {
-        super(name);
+        super("color", name);
         this.name = name;
         setVisibility(visibility);
         this.color = color;
@@ -48,7 +48,7 @@ public class ColorValue extends Value<Color> {
     }
 
     public ColorValue(String name, String desc, Visibility visibility, int color) {
-        super(name);
+        super("color", name);
         this.name = name;
         this.desc = desc;
         setVisibility(visibility);
@@ -262,5 +262,10 @@ public class ColorValue extends Value<Color> {
         float g = 0.003921569f * (float) c.getGreen();
         float b = 0.003921569f * (float) c.getBlue();
         return new Color(r, g, b, alpha).getRGB();
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value.getRGB());
     }
 }
