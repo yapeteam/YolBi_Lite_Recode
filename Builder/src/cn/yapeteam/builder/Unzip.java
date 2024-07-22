@@ -23,7 +23,7 @@ public class Unzip {
             File file = new File(unzipFilePath);
             if (zipEntry.isDirectory())
                 mkdir(new File(unzipFilePath));
-            else if (!file.exists()) {
+            else {
                 mkdir(file.getParentFile());
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(unzipFilePath)));
                 byte[] bytes = new byte[1024];
