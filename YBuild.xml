@@ -27,7 +27,7 @@
         <native-obfuscate artifact="definer.jar"/>
         <native-obfuscate artifact="hooker.jar"/>
         <native-obfuscate artifact="loader.jar" black="cn.yapeteam.loader.ClassMapper"/>
-        <artifact name="injector.jar">
+        <artifact name="injector.jar" launch4j-config="launch4j.xml">
             <files>out/production/Injector</files>
             <dir>Injector/META-INF</dir>
             <extract>deps/jna.jar</extract>
@@ -44,6 +44,9 @@
                     <file>deps/asm-all-9.2.jar</file>
                     <file>deps/flatlaf.jar</file>
                     <file>deps/flatlaf-intellij-themes.jar</file>
+                    <archive name="mcef.jar">
+                        <files>out/production/mcef</files>
+                    </archive>
                 </dir>
                 <file>build/definer.jar</file>
                 <file>build/loader.jar</file>
@@ -51,7 +54,6 @@
                 <file>build/ymixin.jar</file>
                 <file>Loader/dll/build/libinjection.dll</file>
                 <file>Loader/dll/build/libapi.dll</file>
-                <file>Builder/g++.zip</file>
             </archive>
         </artifact>
     </build>

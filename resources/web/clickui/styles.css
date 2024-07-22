@@ -1,0 +1,129 @@
+@font-face {
+    font-family: 'Apple Color Emoji';
+    src: url('fonts/AppleColorEmoji.ttf');
+}
+
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background: transparent;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+input,
+textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+body {
+    font-family: system-ui, "Apple Color Emoji";
+    background: transparent;
+    opacity: 0;
+    animation: opacity-fadeIn 0.5s forwards;
+}
+
+@keyframes opacity-fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.content {
+    position: relative;
+    overflow: auto;
+}
+
+.panel {
+    position: absolute;
+    width: 180px;
+    color: white;
+    padding-top: 5px;
+    text-align: center;
+    font-size: 25px;
+    border-radius: 5px;
+    text-shadow: rgb(0, 0, 0) 1px 0 10px;
+    box-shadow: rgb(0, 0, 0) 1px 0 10px;
+    transition: 0.10s;
+    background: transparent;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+
+.panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to top right, #fda1f5 0%, #76d4ff 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    filter: blur(2px);
+    background-clip: padding-box;
+    transition: 0.10s;
+    z-index: -1;
+    overflow: visible;
+}
+
+.module {
+    width: 90%;
+    border-radius: 5px;
+    background-image: linear-gradient(120deg, #a6c0fe 0%, #f68084 100%);
+    opacity: 0.7;
+    box-shadow: rgb(0, 0, 0) 1px 0 10px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.moduleName {
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 15px;
+}
+
+.value {
+    
+    width: 100%;
+    height: 20px;
+    font-size: 10px;
+}
+
+@keyframes background-fadeIn {
+    from {
+        background: rgba(0, 0, 0, 0);
+    }
+
+    to {
+        background: rgba(0, 0, 0, 0.5);
+    }
+}
+
+.mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0);
+    animation: background-fadeIn 2s forwards;
+}

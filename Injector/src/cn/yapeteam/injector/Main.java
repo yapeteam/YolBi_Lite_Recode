@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.File;
 
 public class Main {
+    public static final String version = "0.3.6";
     public static final File YolBi_Dir = new File(System.getProperty("user.home"), ".yolbi");
     public static final String dllName = "libinjection.dll";
     public static final int port = 20181;

@@ -13,6 +13,7 @@ import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.math.MathUtils;
 import cn.yapeteam.yolbi.utils.misc.VirtualKeyBoard;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
+import net.minecraft.util.text.TextComponentString;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -61,14 +62,19 @@ public class Velocity extends Module {
     public void onPacket(EventPacket event) {
         if (mc.currentScreen != null) return;
         if (event.getPacket() instanceof SPacketEntityVelocity && ((SPacketEntityVelocity) event.getPacket()).getEntityID() == mc.player.getEntityId()) {
-            YolBi.instance.getNotificationManager().post(
-                    new Notification(
-                            "Velocity",
-                            Easing.EASE_IN_OUT_QUAD,
-                            Easing.EASE_IN_OUT_QUAD,
-                            2500, NotificationType.WARNING
-                    )
-            );
+
+            mc.player.addChatMessage(new TextComponentString(
+                    String.format("[Yolbi] You are using a blatant module and it will not get bypassed")
+            ));
+//            YolBi.instance.getNotificationManager().post(
+//                    new Notification(
+//                            "Velocity",
+//                            Easing.EASE_IN_OUT_QUAD,
+//                            Easing.EASE_IN_OUT_QUAD,
+//                            2500, NotificationType.WARNING
+//                    )
+//            );
+
 
             if (Math.random() * 100 < probability.getValue()) {
                 jumpreset();

@@ -117,7 +117,7 @@ public class Builder {
                 System.out.println("file " + node.getTextContent());
                 File file = new File(node.getTextContent());
                 String path = file.toString();
-                String entry_name = root_dir + (root_dir.isEmpty() ? "" : "/") + path.substring(file.getParent().length()).replace("\\", "/").substring(1);
+                String entry_name = root_dir + (root_dir.isEmpty() ? "" : "/") + path.substring(file.getParent() != null ? file.getParent().length() : 0).replace("\\", "/").substring(1);
                 ZipEntry entry = new ZipEntry(entry_name);
                 try {
                     output.putNextEntry(entry);
@@ -304,6 +304,7 @@ public class Builder {
                         boolean ignored = output_file.getParentFile().mkdirs();
                         Node proguard_cfg = element.getAttributes().getNamedItem("proguard-config");
                         Node mosey_cfg = element.getAttributes().getNamedItem("mosey-config");
+                        Node launch4j_cfg = element.getAttributes().getNamedItem("launch4j-config");
                         System.out.printf("building artifact %s...%n", artifact_name);
                         ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(output_file.toPath()));
                         List<Node> includes_list = new ArrayList<>();
@@ -335,7 +336,11 @@ public class Builder {
                             }
                         }
                         if (mosey_cfg != null)
-                            rip.hippo.mosey.Main$.MODULE$.main(new String[]{String.format("-config%s", mosey_cfg.getNodeValue())});
+                            rip.hippo.mosey.Main.main(new String[]{String.format("-config%s", mosey_cfg.getNodeValue())});
+                        if (launch4j_cfg != null) {
+                            Terminal terminal = new Terminal(new File("."), null);
+                            terminal.execute(new String[]{"launch4jc", launch4j_cfg.getNodeValue()});
+                        }
                         break;
                     }
                     case "native-obfuscate": {

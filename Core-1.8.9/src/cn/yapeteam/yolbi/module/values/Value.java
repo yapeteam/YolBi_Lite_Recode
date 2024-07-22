@@ -9,6 +9,7 @@ import lombok.Setter;
 public class Value<T> {
     protected T value;
     public String name;
+    private final String type;
     protected String desc;
     @Setter
     private ChangedCallback<T> callback = null;
@@ -16,11 +17,13 @@ public class Value<T> {
     @Setter
     private Visibility visibility = () -> true;
 
-    public Value(String name) {
+    public Value(String type, String name) {
+        this.type = type;
         this.name = name;
     }
 
-    public Value(String name, String desc) {
+    public Value(String type, String name, String desc) {
+        this.type = type;
         this.name = name;
         this.desc = desc;
     }

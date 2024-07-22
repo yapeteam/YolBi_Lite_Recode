@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ClickGui</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./modules.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css"/>
+    <!-- 'monolith' theme -->
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="wrap">
+    <div class="nav">
+        <!--按钮-->
+        <div class="btn">
+            <div class="btn-item"></div>
+            <div class="btn-item"></div>
+            <div class="btn-item"></div>
+        </div>
+        <!--头像-->
+        <div class="client_icon">
+            <div class="icon-img"><img src="imgs/icon.jpg" alt=""/></div>
+            <div class="icon-con">
+                <p>New injection Client</p>
+                <h2>Yolbi Lite</h2>
+            </div>
+        </div>
+        <div class="line"></div>
+        <div class="title">
+            <p>Catagory</p>
+        </div>
+        <div class="menu">
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon"><img src="imgs/combat.png"></div>
+                <div class="catagory_name">COMBAT</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon"><img src="imgs/movement.png"></div>
+                <div class="catagory_name">MOVEMENT</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon">
+                    <img src="imgs/render.png">
+                </div>
+                <div class="catagory_name">VISUAL</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon">
+                    <img src="imgs/player.png">
+                </div>
+                <div class="catagory_name">PLAYER</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon">
+                    <img src="imgs/world.png">
+                </div>
+                <div class="catagory_name">WORLD</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon">
+                    <img src="imgs/world.png">
+                </div>
+                <div class="catagory_name">EXPLOIT</div>
+                <div class="ricon"></div>
+            </div>
+            <div class="catagory">
+                <div class="light"></div>
+                <div class="catagory_icon">
+                    <img src="imgs/misc.png">
+                </div>
+                <div class="catagory_name">MISC</div>
+                <div class="ricon"></div>
+            </div>
+        </div>
+        <!-- <div class="line"></div>
+         <div class="title">
+             <p>Sever 6</p>
+         </div>
+         <div class="serve">
+             <div class="catagory">
+                 <div class="catagory_icon">
+                     <img class="gui_img" src="imgs/alt.png">
+                 </div>
+                 <div class="catagory_name">Alt Manager</div>
+                 <div class="ricon"></div>
+             </div>
+             <div class="catagory">
+                 <div class="catagory_icon"><span class="iconfont icon-renqun"></span></div>
+                 <div class="catagory_name">Chat</div>
+                 <div class="ricon"></div>
+             </div>
+             <div class="catagory">
+                 <div class="catagory_icon"><span class="iconfont icon-sousuo"></span></div>
+                 <div class="catagory_name">Intercom</div>
+                 <div class="ricon"><span class="iconfont icon-caidan1"></span></div>
+             </div>
+             <div class="catagory">
+                 <div class="catagory_icon">
+                     <span class="iconfont icon-gengduo-a"></span>
+                 </div>
+                 <div class="catagory_name">Setting</div>
+                 <div class="ricon"></div>
+             </div>
+         </div>-->
+    </div>
+</div>
+
+<div class="module_container">
+    <div class="module">
+        <span></span>
+        <div class="module_content">
+            <h2>ExampleModule</h2>
+            <p>this is an example module </p>
+            <a href="#">Settings</a>
+            <!-- Settings Page, initially hidden -->
+            <div id="settingsPage" class="settings-container" style="display: none;">
+                <button id="backButton">Back</button>
+                <h2 id="settingsTitle">Settings Page</h2>
+                <!-- Additional settings content can be added here -->
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

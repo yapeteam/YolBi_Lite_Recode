@@ -1,7 +1,6 @@
 package cn.yapeteam.yolbi.module.impl.combat;
 
 import cn.yapeteam.loader.Natives;
-import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.yolbi.module.Module;
 import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
@@ -31,21 +30,12 @@ public class AutoClicker extends Module {
     public void onEnable() {
         delay = generate(cps.getValue(), range.getValue());
         clickThread = new Thread(() -> {
-            while (true) {
-                try {
-                    delay = generate(cps.getValue(), range.getValue());
-                    sendClick();
-                } catch (Exception ex) {
-                    Logger.exception(ex);
-                }
+            while (isEnabled()) {
+                delay = generate(cps.getValue(), range.getValue());
+                sendClick();
             }
         });
         clickThread.start();
-    }
-
-    @Override
-    protected void onDisable() {
-        clickThread.interrupt();
     }
 
     @Getter

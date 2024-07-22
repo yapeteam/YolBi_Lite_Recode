@@ -1,0 +1,1081 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+
+    background-color: #222;
+
+    /*background: linear-gradient(125deg, rgba(52, 152, 219, 0.65), rgba(46, 204, 113, 0.65), rgba(52, 152, 219, 0.65), rgba(46, 204, 113, 0.5), #3498db, #2ecc71, #3498db, #8e44ad);*/
+    /*background-size: 500%;*/
+    /*animation: bgAnimation 45s linear infinite;*/
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+.nav {
+    margin-left: 15px;
+    margin-top: 50px;
+    color: #dff1ff;
+    font-family: 'Poppins', sans-serif;
+    width: 110px;
+    margin-right: 15px;
+    height: 820px;
+    background: rgba(14, 12, 12, 0.92);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: 0.5s;
+}
+
+.nav:hover {
+    width: 280px;
+}
+
+.btn {
+    width: 60px;
+    height: 10px;
+    display: flex;
+    justify-content: space-around;
+    margin-left: 25px;
+    margin-top: 25px;
+}
+
+.btn-item {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.btn-item:nth-child {
+    background: #eb5a56;
+}
+
+
+.client_icon {
+    width: 250px;
+    height: 60px;
+    margin-left: 25px;
+    margin-top: 20px;
+    display: flex;
+}
+
+.icon-img {
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+}
+
+.icon-img img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.icon-con {
+    height: 60px;
+    margin-left: 25px;
+}
+
+.icon-con p {
+    padding-top: 5px;
+}
+
+.icon-con h2 {
+    font-weight: 400;
+}
+
+.line {
+    width: 60px;
+    height: 1px;
+    background: rgba(245, 253, 255, 0.5);
+    margin: 20px 25px;
+    transition: 0.5s;
+}
+
+.nav:hover .line {
+    width: 230px;
+}
+
+.title {
+    width: 60px;
+    margin-left: 25px;
+    margin-bottom: 20px;
+}
+
+.title p {
+    font-size: 14px;
+}
+
+.menu {
+    width: 230px;
+    margin-left: 25px;
+}
+
+.catagory {
+    display: flex;
+    position: relative;
+    transition: 0.5s;
+    border-radius: 6px;
+}
+
+.catagory:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.catagory_icon {
+    width: 60px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gui_img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+.catagory_name {
+    width: 0px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.5s;
+    overflow: hidden;
+    position: relative;
+    left: -20px;
+    opacity: 0;
+}
+
+.nav:hover .catagory_name {
+    width: 160px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    opacity: 1;
+    margin-left: 25px;
+}
+
+.ricon {
+    width: 0px;
+    height: 50px;
+    transition: 0.5s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.nav:hover .ricon {
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+}
+
+.iconfont {
+    font-size: 26px;
+}
+
+.ricon .iconfont {
+    font-size: 20px;
+    color: #62cb44;
+}
+
+.light {
+    width: 6px;
+    height: 50px;
+    background: #63aefd;
+    box-shadow: rgba(93, 166, 255, 0.83) 0px 0px 5px 5px;
+    position: absolute;
+    left: -25px;
+    transition: 0.5s;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    opacity: 0;
+
+}
+
+.catagory:hover .light {
+    opacity: 1;
+}
+
+.serve {
+    width: 60px;
+    /*    background: rgba(98, 203, 68, 0.5);*/
+    background: rgba(0, 0, 0, 0.7);
+    margin-left: 25px;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: 0.5s;
+}
+
+.nav:hover .serve {
+    width: 230px;
+}
+
+
+.module_container {
+    display: flex;
+    align-content: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: fit-content;
+    padding: 20px; /* Padding around the container */
+    box-sizing: border-box; /* Include padding in the calculation */
+
+}
+
+/*module*/
+
+.module {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.5s;
+    flex: 1 1 auto; /* This allows the module to grow and shrink based on content */
+    box-sizing: border-box; /* Include padding and borders in the calculation */
+    margin: 40px 30px 20px;
+}
+
+
+.module_content {
+    width: auto;
+    left: 0;
+    padding: 20px 40px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 1;
+    transition: 0.5s;
+}
+
+.module_content h2 {
+    font-size: 2em;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.module_content p {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    line-height: 1.4em;
+}
+
+.module_content a {
+    display: inline-block;
+    font-size: 1.1em;
+    color: #111;
+    background: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 5px;
+    transition: 0.6s;
+}
+
+.module:hover .module_content {
+    left: -25px;
+    padding: 60px 40px;
+}
+
+.module_content a:hover {
+    background: #222;
+    color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 15px #222;
+}
+
+
+.module::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 30%;
+    bottom: -15px;
+    width: 200px;
+    background: linear-gradient(315deg, #ffbc00, #ff0058);
+    border-radius: 8px;
+    z-index: -1; /* Place it behind the content */
+    transform: skewX(15deg);
+    transition: 0.5s;
+}
+
+.module:hover::before,
+.module:hover::after {
+    transform: skewX(0deg);
+}
+
+
+.module span {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/*.module span::before{*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    background: rgba(255, 255, 255, 0.1);*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    width: 0;*/
+/*    height: 0;*/
+/*    opacity: 0;*/
+/*    transition: 0.3s;*/
+/*    backdrop-filter: blur(10px);*/
+/*    border-radius: 8px;*/
+/*    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);*/
+/*    animation: animate 2s ease-in-out infinite;*/
+/*}*/
+
+/*.module span::after{*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    bottom: 0;*/
+/*    right: 0;*/
+/*    width: 100%;*/
+/*    height: 100%;*/
+/*    background: rgba(255, 255, 255, 0.1);*/
+/*    opacity: 0;*/
+/*    transition: 0.5s;*/
+/*    backdrop-filter: blur(10px);*/
+/*    border-radius: 8px;*/
+/*    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);*/
+/*    animation: animate 2s ease-in-out infinite;*/
+/*    animation-delay: -1s;*/
+/*}*/
+
+
+.module:hover span::before {
+    opacity: 1;
+    top: -50px;
+    left: 50px;
+    width: 100px;
+    height: 100px;
+}
+
+
+.module:hover span::after {
+    bottom: -50px;
+    right: 50px;
+    width: 100px;
+    height: 100px;
+    opacity: 1;
+}
+
+@keyframes animate {
+    0%,
+    100% {
+        transform: translateY(10px);
+    }
+    50% {
+        transform: translate(-10px);
+    }
+}
+
+.se
+    /* settings */
+.settings-container {
+    display: none; /* Initially hidden */
+    position: absolute; /* Position over the module container */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    color: white;
+    padding: 20px;
+    z-index: 10; /* Ensure it's above other content */
+    /* ... other styles ... */
+}
+
+.settings-container h2 {
+    margin-bottom: 20px;
+    align-self: flex-start; /* Align module name to the top-left */
+}
+
+#pageIndicator {
+    display: inline-block;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#pageIndicator, #leftArrow, #rightArrow, #indecator {
+    display: flex;
+}
+
+#backButton {
+    align-self: flex-end; /* Position the back button at the bottom */
+    cursor: pointer;
+    padding: 10px 20px; /* Adjust padding as needed */
+    margin-top: 20px; /* Space above the back button */
+    background-color: #ffbc00; /* Example button color */
+    border: none;
+    border-radius: 5px;
+    color: black;
+    font-size: 1em;
+}
+
+.settings_content {
+    margin-bottom: 20px;
+}
+
+.setting {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+
+/* boolean toggle box*/
+/* Boolean toggle box */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px; /* Width of the switch */
+    height: 25px; /* Height of the switch */
+    cursor: pointer;
+}
+
+.toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-switch-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 2px #ccc;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.toggle-switch-handle {
+    position: absolute;
+    top: 50%;
+    left: 3.1px; /* Initial position to the left */
+    transform: translateY(-52%); /* Center vertically */
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.85); /* Red border added */
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background .toggle-switch-handle {
+    transform: translateX(24px) translateY(-52%); /* Move to the right and keep centered */
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch-background {
+    background-color: rgba(255, 255, 255, 0.55); /* Optional: Change background color when checked */
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-switch::before {
+    content: "On";
+    position: absolute;
+    right: -30px;
+    top: -20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px #fff;
+    transition: color 0.3s ease-in-out;
+}
+
+/* range sliders */
+
+/* Additional styles for range slider settings */
+.setting.range-slider-setting {
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align items to the left */
+}
+
+.setting.range-slider-setting .setting-name {
+    font-size: 1em;
+    color: #fff; /* White color for the name */
+    margin-bottom: 10px; /* Space below the name */
+}
+
+.rangevalue_wrapper {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+}
+
+.container {
+    position: relative; /* instead of position: static */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height: auto;
+}
+
+.container input[type="number"] {
+    width: 25px; /* Reduced width */
+    height: 30px; /* Unchanged height */
+    font-size: 15px; /* Unchanged font size */
+    font-weight: 700;
+    text-align: center;
+    border-radius: 5px;
+    color: #fff; /* White text color */
+    background: transparent; /* Transparent background */
+    border: none; /* Remove border */
+}
+
+.container input[type="number"]::-webkit-outer-spin-button,
+.container input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.container .range-slider {
+    position: relative;
+    min-width: 250px; /* Reduced width */
+    height: 5px; /* Unchanged height */
+    background: #ddd;
+    outline: none;
+    top: 1px;
+    margin: 10px; /* Unchanged margin */
+}
+
+.container .range-slider .progress {
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    height: 100%;
+    background: #4c8bf5;
+    box-shadow: rgba(93, 166, 255, 0.01) 0px 0px 5px 5px;
+    border-radius: 50px; /* Unchanged border-radius */
+}
+
+.container .range-slider input[type="range"] {
+    position: absolute;
+    top: -6px; /* Unchanged top position */
+    width: 101%;
+    -webkit-appearance: none;
+    pointer-events: none;
+    background: none;
+    outline: none;
+}
+
+.container .range-slider input::-webkit-slider-thumb {
+    pointer-events: auto;
+    -webkit-appearance: none;
+    width: 17px; /* Unchanged width */
+    height: 17px; /* Unchanged height */
+    background: #4c8bf5;
+    box-shadow: rgba(93, 166, 255, 0.1) 0px 0px 5px 5px;
+    border-radius: 50px; /* Unchanged border-radius */
+}
+
+/* Input Settings Styles */
+/* Style for the input box and its focus indicator */
+.form-control {
+    position: relative;
+    --width-of-input: 300px; /* Adjust the width as needed */
+    margin-bottom: 10px; /* Space below each setting */
+}
+
+.input {
+    color: #fff;
+    font-size: 0.9rem;
+    background-color: transparent;
+    width: 100%;
+    padding-inline: 0.5em;
+    padding-block: 0.7em;
+    border: none;
+    border-bottom: 2px solid white; /* Initial white border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input:focus {
+    outline: none;
+    border-bottom: 2px solid transparent; /* Make border transparent on focus */
+}
+
+/* The focus indicator div */
+.input-focus-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0%; /* Start with 0 width initially */
+    background-image: linear-gradient(90deg, #FF6464 0%, #FFBF59 50%, #47C9FF 100%);
+    transition: width 0.4s ease-in-out; /* Transition for expanding the rainbow line */
+}
+
+/* Style changes when input is focused */
+.input:focus + .input-focus-indicator {
+    width: 100%; /* Expand rainbow line to full width on focus */
+}
+
+/* radio button */
+.radio-button {
+    position: relative;
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    cursor: pointer;
+    margin: 15px;
+}
+
+.radio-button__input {
+
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-button__label {
+    display: flex;
+    align-items: center; /* Align label text vertically */
+    padding-left: 30px; /* Space for the custom radio button */
+    font-size: 15px;
+    color: #f2f2f2;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.radio-button__custom {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    transition: all 0.3s ease;
+    margin-right: 10px; /* Space between the custom radio button and the label text */
+}
+
+/* Rest of the styles remain the same */
+
+
+.radio-button__input:checked + .radio-button__label .radio-button__custom {
+    background-color: #4c8bf5;
+    border-color: transparent;
+    box-shadow: 0 0 20px #4c8bf580;
+}
+
+.radio-button__input:checked + .radio-button__label {
+    color: #4c8bf5;
+}
+
+.radio-button__label:hover .radio-button__custom {
+    transform: scale(1.05) translateY(-10%);
+    border-color: #4c8bf5;
+    box-shadow: 0 0 20px #4c8bf580;
+}
+
+/* Slider Wrapper Styles */
+.slider-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Adjust width as needed */
+    padding: 10px;
+}
+
+/* Slider Specific Styles */
+/* ... existing styles ... */
+
+.setting {
+    margin-bottom: 20px;
+}
+
+
+.setting .field {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+
+.setting .field .sliderValue {
+    position: absolute;
+    top: -55px; /* Adjust as needed */
+    width: 45px; /* Width of the indicator */
+    height: 45px; /* Height of the indicator */
+    line-height: 45px; /* Aligns text vertically */
+    color: #fff; /* Text color */
+    background: #4c8bf5; /* Background color */
+    border: 3px solid #fff; /* Border properties */
+    display: flex; /* Enables Flexbox */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
+    transform: scale(0); /* Initial transform */
+    transition: transform 0.3s ease-in-out; /* Transition for scaling */
+    z-index: 2; /* Ensures it's above other elements */
+    padding: 0 10px; /* Adjust as needed */
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    box-shadow: 0 0 20px rgba(76, 139, 245, 0.8);
+
+}
+
+.setting .field .sliderValue.show {
+    transform: scale(1); /* Scales up when active */
+}
+
+.setting .field input[type="range"] {
+    -webkit-appearance: none;
+}
+
+.setting .field input {
+    position: relative;
+    width: 100%; /* Take up all available width */
+    box-sizing: border-box; /* Include padding and border in element's total width */
+    background: #cccccc;
+    height: 3px;
+}
+
+.setting .field input[type="range"]::-webkit-slider-thumb {
+    background-color: #4c8bf5;
+    box-shadow: 0 0 20px rgba(76, 139, 245, 0.8);
+    border: 20px transparent;
+    box-sizing: content-box;
+}
+
+.setting .field .value {
+    position: absolute;
+    font-size: 18px;
+    color: #4c8bf5;
+    font-weight: 600;
+}
+
+.setting .field .progress-bar {
+    position: absolute;
+    background-color: #4c8bf5;
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(76, 139, 245, 0.8);
+    height: 3px;
+    z-index: 2;
+}
+
+.setting .field .value.left {
+    position: relative;
+    left: 0px; /* Adjust position to the left */
+    margin-right: 10px;
+}
+
+.setting .field .value.right {
+    position: relative;
+    margin-left: 10px;
+}
+
+/*mode setting */
+
+.setting.mode-setting {
+    display: flex;
+    align-items: center; /* Aligns items vertically in the center */
+    position: relative;
+    margin-bottom: 10px; /* Space between each setting */
+}
+
+.setting.mode-setting .mode-name {
+    margin-right: 10px; /* Space between the name and the value */
+}
+
+.setting.mode-setting .mode-control {
+    display: flex;
+    align-items: center;
+}
+
+.setting.mode-setting .arrow {
+    cursor: pointer;
+    padding: 5px;
+    user-select: none;
+}
+
+.setting.mode-setting .mode-value {
+    margin: 0 10px;
+}
+
+
+/* for altmanager */
+.AltManager_Title {
+    display: block;
+    width: 600px;
+    height: auto;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    border: none;
+    border-bottom: #dff1ff 2px solid;
+    border-radius: 2px;
+    font-size: 2em;
+    color: #fff;
+    margin-top: 10px;
+    margin-bottom: 15px;
+
+    font-weight: bolder;
+}
+
+.buttons-panel {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.buttons-panel a {
+    display: inline-block;
+    font-size: 1.1em;
+    color: #111;
+    background: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 5px;
+    transition: 0.6s;
+}
+
+.alt-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+
+}
+
+.alt {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px;
+    min-width: 345px;
+    height: 144px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.player-head {
+    width: 108px;
+    height: 108px;
+    overflow: hidden;
+    border-radius: 5px;
+    display: flex;
+}
+
+.player-information {
+    display: block;
+    margin-left: 10px;
+    min-width: 150px;
+    height: auto;
+}
+
+.player-name {
+    color: white;
+    font-size: 1.5em;
+    font-weight: bolder;
+    font-family: 'Poppins', sans-serif;
+    border-bottom: 15px;
+    border-style: none;
+    border-bottom: white 1.5px solid;
+
+}
+
+.account-type {
+    color: white;
+    font-size: 1.3em;
+    font-weight: bolder;
+    font-family: 'Poppins', sans-serif;
+    border-bottom: 15px;
+}
+
+.player-information a {
+    font-size: 1.1em;
+    color: #111;
+    background: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 5px;
+    transition: 0.6s;
+}
+
+.alt-buttons {
+    display: flex;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: rgba(232, 232, 232, 0.79);
+    border-radius: 5px;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    z-index: 1;
+    left: 160px; /* Align with the left edge of the "Add Account" button */
+    margin-top: 8px;
+    margin-left: 0;
+    transform: scale(0);
+    transition: transform 0.5s ease-in-out;
+
+}
+
+.dropdown-menu a {
+    display: block;
+    font-size: 1.1em;
+    color: #111;
+    background: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 5px;
+    transition: 0.6s;
+}
+
+.dropdown-menu a:first-child {
+    margin-top: 0;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+}
+
+.add-account:hover .dropdown-menu {
+    display: block;
+    transform: scale(1);
+}
+
+.card {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    width: 260px; /* Adjust the width as needed */
+    height: 160px; /* Adjust the height as needed */
+}
+
+.card button {
+    display: inline-block;
+    font-size: 1.1em;
+    color: #111;
+    background: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 10px;
+    transition: 0.6s;
+    margin-right: 7px;
+}
+
+.card button:hover {
+    background-color: #f1f1f1;
+}
+
+.input-container {
+    margin-top: 20px;
+    position: relative;
+    width: 200px;
+}
+
+.input-container input[type="text"] {
+    font-size: 20px;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 5px 0;
+    background-color: transparent;
+    outline: none;
+}
+
+.input-container .label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ccc;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.input-container input[type="text"]:focus ~ .label,
+.input-container input[type="text"]:valid ~ .label {
+    top: -20px;
+    font-size: 16px;
+    color: #333;
+
+    .card {
+        width: +20px;
+    }
+}
+
+
+.input-container .underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #333;
+    transform: scaleX(0);
+    transition: all 0.3s ease;
+}
+
+.input-container input[type="text"]:focus ~ .underline,
+.input-container input[type="text"]:valid ~ .underline {
+    transform: scaleX(1);
+}
+
+/*color picker css*/
+
+.color-picker {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+/* bg animation */
+@keyframes bgAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+

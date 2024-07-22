@@ -13,6 +13,7 @@ import cn.yapeteam.yolbi.module.impl.player.AutoArmor;
 import cn.yapeteam.yolbi.module.impl.player.ChestStealer;
 import cn.yapeteam.yolbi.module.impl.player.InvCleaner;
 import cn.yapeteam.yolbi.module.impl.visual.*;
+import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
 import cn.yapeteam.yolbi.utils.animation.Easing;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unchecked", "unused"})
 public class ModuleManager {
     private final List<Module> modules = new CopyOnWriteArrayList<>();
-
+    private final BooleanValue notiffff = ClientTheme.notif;
     public void load() {
         modules.add(new AimAssist());
         modules.add(new AntiBot());
@@ -69,13 +70,15 @@ public class ModuleManager {
     private void onKey(EventKey e) {
         modules.stream().filter(m -> m.getKey() == e.getKey()).collect(Collectors.toList()).forEach(module -> {
             module.toggle();
-            YolBi.instance.getNotificationManager().post(new Notification(
-                            module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
-                            //"[Wagon]: " + module.getName() + (module.isEnabled() ? " enabled" : " disabled"),
-                            Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
-                            1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
-                    )
-            );
+            if(notiffff.getValue()) {
+                YolBi.instance.getNotificationManager().post(new Notification(
+                        module.getName() + (module.isEnabled() ? " Enabled" : " Disabled"),
+                        //"[Wagon]: " + module.getName() + (module.isEnabled() ? " enabled" : " disabled"),
+                        Easing.EASE_OUT_BACK, Easing.EASE_IN_OUT_CUBIC,
+                        1500, module.isEnabled() ? NotificationType.SUCCESS : NotificationType.FAILED
+                ));
+            };
+
         });
     }
 

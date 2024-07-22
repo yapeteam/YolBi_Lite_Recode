@@ -32,6 +32,10 @@ public class ResourceManager {
             return null;
         }
 
+        public static boolean isFile(String path) {
+            return new File(Loader.YOLBI_DIR, "resources/" + path).isFile();
+        }
+
         public static byte[] get(String name) {
             InputStream stream = getStream(name);
             if (stream != null) {

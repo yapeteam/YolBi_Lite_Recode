@@ -24,11 +24,11 @@ public class Loader {
             MixinManager.init();
             Logger.warn("Start transforming!");
             MixinManager.transform();
-            Logger.success("Welcome {} ver {}", YolBi.name, YolBi.version);
+            Logger.success("Welcome {} v{}", YolBi.name, YolBi.version);
             SocketSender.send("CLOSE");
             SocketSender.close();
             YolBi.initialize();
-            Minecraft.getInstance().getWindow().setTitle(YolBi.name + " ver " + YolBi.version);
+            Minecraft.getInstance().getWindow().setTitle(YolBi.name + " v" + YolBi.version);
         } catch (InvocationTargetException e) {
             Logger.exception(e);
             Logger.error("Cause:");

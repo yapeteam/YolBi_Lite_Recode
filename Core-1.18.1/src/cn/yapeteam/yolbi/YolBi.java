@@ -15,7 +15,7 @@ import java.io.IOException;
 public class YolBi {
     public static YolBi instance = new YolBi();
     public static final String name = "YolBi Lite";
-    public static final String version = "0.3.5";
+    public static final String version = "0.3.6";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
     public static boolean initialized = false;
     private EventManager eventManager;
@@ -41,6 +41,7 @@ public class YolBi {
         FontManager.init();
         try {
             instance.getConfigManager().load();
+
             WebServer.start();
         } catch (Throwable e) {
             Logger.exception(e);
@@ -49,9 +50,11 @@ public class YolBi {
 
     public void shutdown() {
         try {
+            Logger.info("Shutting down Yolbi Lite");
             configManager.save();
             WebServer.stop();
             instance = new YolBi();
+            //Logger.info("Shutting down Yolbi Lite");
             System.gc();
         } catch (IOException e) {
             Logger.exception(e);

@@ -7,6 +7,7 @@ import cn.yapeteam.yolbi.event.EventManager;
 import cn.yapeteam.yolbi.font.FontManager;
 import cn.yapeteam.yolbi.managers.BotManager;
 import cn.yapeteam.yolbi.managers.TargetManager;
+import cn.yapeteam.yolbi.mcef.MCEFInitializer;
 import cn.yapeteam.yolbi.module.ModuleManager;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationManager;
@@ -18,15 +19,19 @@ import cn.yapeteam.yolbi.utils.animation.Easing;
 import cn.yapeteam.yolbi.utils.player.RotationManager;
 import cn.yapeteam.yolbi.utils.render.ESPUtil;
 import lombok.Getter;
+import net.montoyo.mcef.MCEF;
 
 import java.io.File;
 import java.io.IOException;
+import cn.yapeteam.yolbi.module.impl.misc.IRC;
+//import cn.yapeteam.yolbi.event.impl.player.IRCListener;
+import cn.yapeteam.yolbi.YolBi;
 
 @Getter
 public class YolBi {
     public static YolBi instance = new YolBi();
     public static final String name = "YolBi Lite";
-    public static final String version = "0.3.5";
+    public static final String version = "0.3.6";
     public static final File YOLBI_DIR = new File(System.getProperty("user.home"), ".yolbi");
     public static boolean initialized = false;
     private EventManager eventManager;
@@ -71,6 +76,7 @@ public class YolBi {
         instance.eventManager.register(Shader.class);
         instance.eventManager.register(ESPUtil.class);
         instance.eventManager.register(RotationManager.class);
+        instance.eventManager.register(MCEFInitializer.class);
         instance.moduleManager.load();
         try {
             instance.getConfigManager().load();
@@ -78,21 +84,37 @@ public class YolBi {
         } catch (Throwable e) {
             Logger.exception(e);
         }
+
+
+//        YolBi instance = YolBi.getInstance();
+//
+//        // 初始化IRC模块
+//        IRCModule ircModule = new IRCModule();
+//        instance.getModuleManager().addModule(ircModule);
+//
+//        // 注册IRC事件监听器
+//        IRCListener ircListener = new IRCListener();
+//        instance.getEventBus().register(ircListener);
+
+
+
         instance.getNotificationManager().post(
                 new Notification(
-                        "Injected successfully",
+                        "Injected Yolbi successfully",
                         Easing.EASE_IN_OUT_QUAD,
                         Easing.EASE_IN_OUT_QUAD,
-                        2500, NotificationType.INIT
+                        15000, NotificationType.INIT
                 )
         );
     }
 
     public void shutdown() {
         try {
+            Logger.info("Shutting down Yolbi Lite");
             instance.jFrameRenderer.close();
             configManager.save();
             WebServer.stop();
+            MCEF.onMinecraftShutdown();
             instance = new YolBi();
             System.gc();
         } catch (IOException e) {

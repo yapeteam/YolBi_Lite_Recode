@@ -6,7 +6,9 @@ import cn.yapeteam.yolbi.module.values.Visibility;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @DontMap
 @Setter
@@ -16,14 +18,14 @@ public class ModeValue<T> extends Value<T> {
 
     @SafeVarargs
     public ModeValue(String name, T current, T... modes) {
-        super(name);
+        super("mode", name);
         this.value = current;
         this.modes = modes;
     }
 
     @SafeVarargs
     public ModeValue(String name, Visibility visibility, T current, T... modes) {
-        super(name);
+        super("mode", name);
         this.value = current;
         this.modes = modes;
         setVisibility(visibility);
@@ -51,5 +53,16 @@ public class ModeValue<T> extends Value<T> {
         setValue(modes[index > 0 ? index - 1 : modes.length - 1]);
     }
 
+    public String[] getModesAsString() {
+        List<String> modeList = new ArrayList<>();
+        for (T mode : modes)
+            modeList.add(mode.toString());
+        return modeList.toArray(new String[0]);
+    }
 
+    @Override
+    public String toString() {
+        if (value == null) return "null";
+        return value.toString();
+    }
 }

@@ -32,13 +32,8 @@ public class Hooker {
                 name.startsWith("org.objectweb.") ||
                 name.startsWith("com.formdev.") ||
                 name.split("\\.")[0].endsWith("_yolbi") ||
-                name.startsWith("javafx.") ||
-                name.startsWith("com.sun.glass.") ||
-                name.startsWith("com.sun.javafx.") ||
-                name.startsWith("com.sun.media.") ||
-                name.startsWith("com.sun.prism.") ||
-                name.startsWith("com.sun.scenario.") ||
-                name.startsWith("com.sun.webkit.");
+                name.startsWith("org.cef") ||
+                name.startsWith("net.montoyo.mcef");
     }
 
     private static byte[] readStream(InputStream inStream) throws Exception {

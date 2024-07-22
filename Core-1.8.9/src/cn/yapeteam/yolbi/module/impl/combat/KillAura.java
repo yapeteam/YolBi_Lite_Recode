@@ -21,11 +21,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.util.ChatComponentText;
 import org.lwjgl.input.Keyboard;
 
 public class KillAura extends Module {
     public KillAura() {
-        super("KillAura", ModuleCategory.COMBAT, Keyboard.KEY_R);
+        super("KillAura", ModuleCategory.COMBAT);
         minRotationSpeed.setCallback((oldV, newV) -> newV > maxRotationSpeed.getValue() ? oldV : newV);
         maxRotationSpeed.setCallback((oldV, newV) -> newV < minRotationSpeed.getValue() ? oldV : newV);
         addValues(cps, cpsRange, searchRange, autoBlock, blockDelay, maxRotationSpeed, minRotationSpeed, autoRod, invisibility, death);
@@ -125,7 +126,7 @@ public class KillAura extends Module {
 
     private void startBlock() {
         if (autoBlock.getValue() && !blocking) {
-            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+            if (mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
                 Natives.SendRight(true);
                 blocking = true;
             }
@@ -134,7 +135,7 @@ public class KillAura extends Module {
 
     private void stopBlock() {
         if (autoBlock.getValue() && blocking) {
-            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
+            if (mc.thePlayer.getHeldItem() != null && mc.thePlayer.getHeldItem().getItem() instanceof ItemSword) {
                 Natives.SendRight(false);
                 blocking = false;
             }
@@ -146,6 +147,9 @@ public class KillAura extends Module {
         if (mc.theWorld == null || mc.thePlayer == null) {
             setEnabled(false);
         }
+        mc.thePlayer.addChatMessage(new ChatComponentText(
+                String.format("&6[Yolbi] &3You are using a blatant module and it will not get bypassed")
+        ));
     }
 
     @Override

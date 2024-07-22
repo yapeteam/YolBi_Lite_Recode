@@ -3,7 +3,9 @@ package cn.yapeteam.yolbi.utils.render;
 import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.yolbi.shader.GaussianFilter;
 import cn.yapeteam.yolbi.shader.impl.ShaderScissor;
+import cn.yapeteam.yolbi.utils.reflect.ReflectUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -40,7 +42,50 @@ public class RenderUtil {
         GL11.glHint(3154, 4354);
         GL11.glHint(3155, 4354);
     }
-
+    public static void drawBorderedRect(int x, int y, int x2, int y2, float lineWidth, int color1, final int color2) {
+        Gui.drawRect(x, y, x2, y2, color2);
+        final float f = (color1 >> 24 & 0xFF) / 255.0f;
+        final float f2 = (color1 >> 16 & 0xFF) / 255.0f;
+        final float f3 = (color1 >> 8 & 0xFF) / 255.0f;
+        final float f4 = (color1 & 0xFF) / 255.0f;
+        GL11.glEnable(3042);
+        GL11.glDisable(3553);
+        GL11.glBlendFunc(770, 771);
+        GL11.glEnable(2848);
+        GL11.glPushMatrix();
+        GL11.glColor4f(f2, f3, f4, f);
+        GL11.glLineWidth(lineWidth);
+        GL11.glBegin(1);
+        GL11.glVertex2d(x, y);
+        GL11.glVertex2d(x, y2);
+        GL11.glVertex2d(x2, y2);
+        GL11.glVertex2d(x2, y);
+        GL11.glVertex2d(x, y);
+        GL11.glVertex2d(x2, y);
+        GL11.glVertex2d(x, y2);
+        GL11.glVertex2d(x2, y2);
+        GL11.glEnd();
+        GL11.glPopMatrix();
+        GL11.glEnable(3553);
+        GL11.glDisable(3042);
+        GL11.glDisable(2848);
+    }
+    public static void startDrawing() {
+        GL11.glEnable(3042);
+        GL11.glEnable(3042);
+        GL11.glBlendFunc(770, 771);
+        GL11.glEnable(2848);
+        GL11.glDisable(3553);
+        GL11.glDisable(2929);
+        mc.entityRenderer.setupCameraTransform(ReflectUtil.Minecraft$getTimer(mc).renderPartialTicks, 0);
+    }
+    public static void stopDrawing() {
+        GL11.glDisable(3042);
+        GL11.glEnable(3553);
+        GL11.glDisable(2848);
+        GL11.glDisable(3042);
+        GL11.glEnable(2929);
+    }
     public static void disableGL2D() {
         GL11.glEnable(3553);
         GL11.glDisable(3042);

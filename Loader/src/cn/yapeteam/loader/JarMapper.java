@@ -81,20 +81,21 @@ public class JarMapper {
                 int finalAll = all;
                 new Thread(() -> SocketSender.send("P1" + " " + (float) finalCount / finalAll * 100f)).start();
                 var bytes = StreamUtils.readStream(zis);
-                if (!se.isDirectory() && se.getName().endsWith(".class") && se.getName().startsWith("cn/yapeteam/")) {
+                if (!se.isDirectory() && se.getName().endsWith(".class")) {
                     var node = ASMUtils.node(bytes);
                     if (DontMap.Helper.hasAnnotation(node)) {
                         write(se.getName(), bytes, zos);
                         Logger.info("Skipping class: {}", se.getName());
                         continue;
                     }
-                    if (node.visibleAnnotations != null && node.visibleAnnotations.stream().anyMatch(a -> a.desc.contains(ASMUtils.slash(Mixin.class.getName())))) {
+                    if (Mixin.Helper.hasAnnotation(node)) {
                         Logger.info("Mapping mixin class: {}", se.getName());
                         Shadow.Helper.processShadow(node);
                         ClassMapper.map(node, mode);
                         bytes = rewriteClass(node);
                         ResourceManager.resources.res.put(se.getName().substring(0, se.getName().length() - 6).replace('/', '.'), bytes);
                     } else {
+                        Shadow.Helper.processShadowBySuper(node, node.superName);
                         ClassMapper.map(node, mode);
                         bytes = rewriteClass(node);
                     }

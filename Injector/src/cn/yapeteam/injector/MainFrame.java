@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import cn.yapeteam.injector.Main;
 
 public class MainFrame extends JFrame {
     private JPanel panel;
@@ -25,12 +26,12 @@ public class MainFrame extends JFrame {
     private final Thread updateThread;
 
     public MainFrame() {
-        super("Inject Your YolBi Lite");
+        super("YolBi Lite v" + Main.version + " - Development Build");
         float width = 500, height = width * 0.618f;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenWidth = (int) screenSize.getWidth();
         int screenHeight = (int) screenSize.getHeight();
-        int[] size = {(int) (width / 1920 * screenWidth), (int) (height / 1080 * screenHeight)};
+        int[] size = {(int) (width / 1920 * screenWidth + 225 ), (int) (height / 1080 * screenHeight + 100)};
         setSize(size[0], size[1]);
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -58,8 +59,9 @@ public class MainFrame extends JFrame {
                 cache += (value1 - cache) * speed;
                 progressBar1.setValue((int) cache);
                 try {
-                    Thread.sleep((long) (1000 / fps));
+                    Thread.sleep(1000 / fps);
                 } catch (InterruptedException ignored) {
+                    break;
                 }
             }
         });
@@ -71,6 +73,7 @@ public class MainFrame extends JFrame {
                 try {
                     Thread.sleep((long) (1000 / fps));
                 } catch (InterruptedException ignored) {
+                    break;
                 }
             }
         });
