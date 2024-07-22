@@ -1,4 +1,4 @@
-package cn.yapeteam.yolbi.module.impl.misc;
+package cn.yapeteam.yolbi.module.impl.player;
 
 import cn.yapeteam.loader.logger.Logger;
 import cn.yapeteam.ymixin.utils.Mapper;
