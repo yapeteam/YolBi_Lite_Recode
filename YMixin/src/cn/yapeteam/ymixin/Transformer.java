@@ -3,7 +3,6 @@ package cn.yapeteam.ymixin;
 import cn.yapeteam.ymixin.operation.Operation;
 import cn.yapeteam.ymixin.operation.impl.InjectOperation;
 import cn.yapeteam.ymixin.operation.impl.OverwriteOperation;
-import cn.yapeteam.ymixin.operation.impl.RedirectOperation;
 import cn.yapeteam.ymixin.utils.ASMUtils;
 import lombok.Getter;
 import org.objectweb.asm_9_2.tree.ClassNode;
@@ -28,7 +27,6 @@ public class Transformer {
         operations.add(new InjectOperation());
         operations.add(new OverwriteOperation());
         // operations.add(new ModifyOperation());
-        operations.add(new RedirectOperation());
     }
 
     public void addMixin(ClassNode node) throws Throwable {

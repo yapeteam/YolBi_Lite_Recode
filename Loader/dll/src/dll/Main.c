@@ -589,14 +589,9 @@ void Inject_fla_bcf_(JNIEnv *jniEnv)
     jobject classObject = (*jniEnv)->CallObjectMethod(jniEnv, classLoader, getClass);
     jobject classLoaderLoader = (*jniEnv)->CallObjectMethod(jniEnv, classObject, getClassLoader);
 
-    // jmethodID forName = (*jniEnv)->GetStaticMethodID(jniEnv, Class, ("forName"), ("(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"));
-    // jstring className = (*jniEnv)->NewStringUTF(jniEnv, ("net.minecraft.launchwrapper.LaunchClassLoader"));
-    //(*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
     jclass loaderClz = findClass(jniEnv, "net.minecraft.launchwrapper.LaunchClassLoader", classLoaderLoader);
     hasLaunchClassLoader = loaderClz != NULL;
-    // className = (*jniEnv)->NewStringUTF(jniEnv, "cpw.mods.cl.ModuleClassLoader");
-    //(*jniEnv)->CallStaticObjectMethod(jniEnv, Class, forName, className, JNI_TRUE, classLoader);
-    loaderClz = findClass(jniEnv, "net.minecraft.launchwrapper.LaunchClassLoader", classLoaderLoader);
+    loaderClz = findClass(jniEnv, "cpw.mods.cl.ModuleClassLoader", classLoaderLoader);
     defineMode = !hasLaunchClassLoader && loaderClz != NULL;
     if (hasLaunchClassLoader)
         printf("LaunchClassLoader found\n");

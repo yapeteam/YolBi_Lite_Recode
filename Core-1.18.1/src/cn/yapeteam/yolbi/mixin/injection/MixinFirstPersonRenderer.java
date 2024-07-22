@@ -21,7 +21,7 @@ public class MixinFirstPersonRenderer {
 
     @Inject(
             method = "renderArmWithItem",
-            desc = "(Lnet/minecraft/client/entity/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+            desc = "(Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             target = @Target(
                     value = "INVOKESTATIC",
                     target = "net/minecraft/util/Mth.sin(F)F",
