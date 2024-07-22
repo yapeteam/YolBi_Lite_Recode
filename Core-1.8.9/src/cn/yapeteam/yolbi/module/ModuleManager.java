@@ -6,6 +6,7 @@ import cn.yapeteam.yolbi.event.impl.game.EventKey;
 import cn.yapeteam.yolbi.module.impl.combat.*;
 import cn.yapeteam.yolbi.module.impl.misc.*;
 import cn.yapeteam.yolbi.module.impl.movement.*;
+import cn.yapeteam.yolbi.module.impl.player.MurdererFinder;
 import cn.yapeteam.yolbi.module.impl.visual.ClickUI;
 import cn.yapeteam.yolbi.module.impl.player.AutoArmor;
 import cn.yapeteam.yolbi.module.impl.visual.*;
@@ -59,6 +60,9 @@ public class ModuleManager {
         modules.add(new JFrameRenderer());
         modules.add(new PacketDebug());
         modules.add(new TargetHud());
+        modules.add(new MurdererFinder());
+        modules.add(new NameTags());
+
 
         modules.sort((m1, m2) -> -Integer.compare(m2.getName().charAt(0), m1.getName().charAt(0)));
     }
