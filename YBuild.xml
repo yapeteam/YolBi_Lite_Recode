@@ -27,7 +27,7 @@
         <native-obfuscate artifact="definer.jar"/>
         <native-obfuscate artifact="hooker.jar"/>
         <native-obfuscate artifact="loader.jar" black="cn.yapeteam.loader.ClassMapper"/>
-        <artifact name="injector.jar">
+        <artifact name="injector.jar" launch4j-config="launch4j.xml">
             <files>out/production/Injector</files>
             <dir>Injector/META-INF</dir>
             <extract>deps/jna.jar</extract>

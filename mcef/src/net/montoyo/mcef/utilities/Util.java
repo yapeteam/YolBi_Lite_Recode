@@ -53,7 +53,6 @@ public class Util {
 
     /**
      * 解压zip文件到指定目录
-     * used by native code
      */
     public static void unzip(String zipFile, String desDir) throws Exception {
         ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(Paths.get(zipFile)));
@@ -64,6 +63,7 @@ public class Util {
                 mkdir(new File(unzipFilePath));
             else {
                 File file = new File(unzipFilePath);
+                if (file.exists()) continue;
                 mkdir(file.getParentFile());
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(unzipFilePath)));
                 byte[] bytes = new byte[1024];
