@@ -266,6 +266,7 @@ public class ColorValue extends Value<Color> {
 
     @Override
     public String toString() {
+        if (value == null) return "null";
         return String.valueOf(value.getRGB());
     }
 }

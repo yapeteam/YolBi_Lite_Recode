@@ -36,6 +36,7 @@ public class TextValue extends Value<String> {
 
     @Override
     public String toString() {
+        if (value == null) return "null";
         return value;
     }
 }

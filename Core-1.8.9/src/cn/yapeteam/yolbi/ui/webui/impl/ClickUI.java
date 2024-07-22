@@ -72,7 +72,12 @@ public class ClickUI extends WebScreen {
                 case "values":
                     if (args.length == 1) {
                         array = new JsonArray();
-                        for (Value<?> value : manager.getModuleByName(args[0]).getValues()) {
+                        JsonObject base = new JsonObject();
+                        Module module = manager.getModuleByName(args[0]);
+                        base.addProperty("bool:enabled", module.isEnabled());
+                        base.addProperty("number:key", module.getKey());
+                        array.add(base);
+                        for (Value<?> value : module.getValues()) {
                             object = new JsonObject();
                             object.addProperty(value.getType() + ":" + value.getName(), value.toString());
                             switch (value.getType()) {
@@ -83,11 +88,11 @@ public class ClickUI extends WebScreen {
                                     object.addProperty("inc", numberValue.getInc());
                                     break;
                                 case "mode":
-                                    array = new JsonArray();
+                                    JsonArray mode_array = new JsonArray();
                                     ModeValue<?> modeValue = (ModeValue<?>) value;
                                     for (String mode : modeValue.getModesAsString())
-                                        array.add(new JsonPrimitive(mode));
-                                    object.add("modes", array);
+                                        mode_array.add(new JsonPrimitive(mode));
+                                    object.add("modes", mode_array);
                                     break;
                                 default:
                                     break;

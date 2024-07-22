@@ -62,6 +62,7 @@ public class ModeValue<T> extends Value<T> {
 
     @Override
     public String toString() {
+        if (value == null) return "null";
         return value.toString();
     }
 }
