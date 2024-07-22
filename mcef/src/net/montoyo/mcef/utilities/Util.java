@@ -59,10 +59,10 @@ public class Util {
         ZipEntry zipEntry = zipInputStream.getNextEntry();
         while (zipEntry != null) {
             String unzipFilePath = desDir + File.separator + zipEntry.getName();
+            File file = new File(unzipFilePath);
             if (zipEntry.isDirectory())
                 mkdir(new File(unzipFilePath));
-            else {
-                File file = new File(unzipFilePath);
+            else if (!file.exists()) {
                 if (file.exists()) continue;
                 mkdir(file.getParentFile());
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(unzipFilePath)));
