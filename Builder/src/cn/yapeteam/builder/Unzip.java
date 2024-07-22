@@ -2,7 +2,6 @@ package cn.yapeteam.builder;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
@@ -14,16 +13,15 @@ public class Unzip {
      * 解压zip文件到指定目录
      * used by native code
      */
-    public static void unzip(InputStream zipFile, File desDir) throws Exception {
-        boolean ignored = desDir.mkdir();
-        ZipInputStream zipInputStream = new ZipInputStream(zipFile);
+    public static void unzip(String zipFile, String desDir) throws Exception {
+        ZipInputStream zipInputStream = new ZipInputStream(Files.newInputStream(Paths.get(zipFile)));
         ZipEntry zipEntry = zipInputStream.getNextEntry();
         while (zipEntry != null) {
-            String unzipFilePath = desDir.getAbsolutePath() + File.separator + zipEntry.getName();
-            File file = new File(unzipFilePath);
+            String unzipFilePath = desDir + File.separator + zipEntry.getName();
             if (zipEntry.isDirectory())
                 mkdir(new File(unzipFilePath));
             else {
+                File file = new File(unzipFilePath);
                 mkdir(file.getParentFile());
                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(unzipFilePath)));
                 byte[] bytes = new byte[1024];
