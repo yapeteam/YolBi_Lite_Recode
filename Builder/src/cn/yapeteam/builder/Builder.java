@@ -321,10 +321,6 @@ public class Builder {
                             System.out.printf("artifact %s: included %s, %s of %s%n", artifact_name, include.getNodeName(), j + 1, includes_list.size());
                         }
                         output.close();
-                        if (launch4j_cfg != null) {
-                            Terminal terminal = new Terminal(new File("."), null);
-                            terminal.execute(new String[]{"launch4jc", launch4j_cfg.getNodeValue()});
-                        }
                         if (!advanced_mode) break;
                         if (proguard_cfg != null) {
                             File build_dir = new File(output_dir, artifact_id);
@@ -341,6 +337,10 @@ public class Builder {
                         }
                         if (mosey_cfg != null)
                             rip.hippo.mosey.Main.main(new String[]{String.format("-config%s", mosey_cfg.getNodeValue())});
+                        if (launch4j_cfg != null) {
+                            Terminal terminal = new Terminal(new File("."), null);
+                            terminal.execute(new String[]{"launch4jc", launch4j_cfg.getNodeValue()});
+                        }
                         break;
                     }
                     case "native-obfuscate": {
