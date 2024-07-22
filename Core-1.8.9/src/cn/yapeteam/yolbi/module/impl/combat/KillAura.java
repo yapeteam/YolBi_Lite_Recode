@@ -33,7 +33,7 @@ public class KillAura extends Module {
 
     private final NumberValue<Double> searchRange = new NumberValue<>("Range", 3.0, 0.0, 8.0, 0.1);
     private final NumberValue<Double> cps = new NumberValue<>("CPS", 8.0, 1.0, 20.0, 1.0);
-    private final NumberValue<Double> cpsRange = new NumberValue<>("CPS Range", 1.5, 0.1, 5.0, 0.1);
+    private final NumberValue<Double> cpsRange = new NumberValue<>("Random Tick", 1.5, 0.1, 5.0, 0.1);
     private final NumberValue<Double> maxRotationSpeed = new NumberValue<>("MaxRotationSpeed", 60.0, 1.0, 180.0, 5.0);
     private final NumberValue<Double> minRotationSpeed = new NumberValue<>("MinRotationSpeed", 40.0, 1.0, 180.0, 5.0);
     private final BooleanValue autoBlock = new BooleanValue("AutoBlock", false);
