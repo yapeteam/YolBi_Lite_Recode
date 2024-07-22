@@ -21,7 +21,7 @@ public class IRC extends Module {
     private Set<String> ircUsers = new HashSet<>();  // 存储 IRC 用户的昵称集合
 
     public IRC() {
-        super("IRC", ModuleCategory.MISC);
+        super("IRC(To be fixed)", ModuleCategory.MISC);
     }
 
     @Override

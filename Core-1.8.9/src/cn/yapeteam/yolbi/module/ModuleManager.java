@@ -32,7 +32,7 @@ public class ModuleManager {
         modules.add(new AutoClicker());
         modules.add(new KeepSprint());
         // modules.add(new Backtrack());
-        modules.add(new IRC()); // To be tested
+        //modules.add(new IRC()); // To be tested
         // modules.add(new BlatantVelocity());
         // modules.add(new Criticals());
         // modules.add(new FakeLag());
