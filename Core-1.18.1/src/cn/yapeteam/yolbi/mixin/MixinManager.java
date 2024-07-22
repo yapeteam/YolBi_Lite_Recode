@@ -22,25 +22,9 @@ public class MixinManager {
     public static Transformer transformer;
     public static final String MIXIN_PACKAGE = "cn.yapeteam.yolbi.mixin.injection";
 
-    public static void init() {
+    public static void init() throws Throwable {
         transformer = new Transformer(JVMTIWrapper.instance::getClassBytes);
-        //add("MixinBlock");
-        //add("MixinEntity");
-        //add("MixinBlockNote");
-        //add("MixinMinecraft");
-        //add("MixinGuiIngame");
-        //add("MixinModelBiped");
-        //add("MixinEntityPlayer");
-        //add("MixinNetworkManager");
-        //add("MixinEntityPlayerSP");
-        //add("MixinEntityRenderer");
-        //add("MixinEntityLivingBase");
-        //add("MixinPlayerControllerMP");
-        //add("MixinRendererLivingEntity");
-        //add("MixinMovementInputFromOptions");
-        //add("MixinEntityPlayerSPForEventLook");
-        //add("MixinEntityLivingBaseForEventLook");
-        //add("MixinAbstractClientPlayerForEventLook");
+        add("MixinFirstPersonRenderer");
     }
 
     public static void destroyClient() throws IOException {
