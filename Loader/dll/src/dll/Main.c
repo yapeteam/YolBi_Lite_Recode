@@ -14,8 +14,6 @@
 #include "../jvm/jni.h"
 #include "../jvm/jvmti.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "UnusedParameter"
 JavaVM *jvm;
 jvmtiEnv *jvmti;
 
@@ -736,7 +734,6 @@ void Inject_fla_bcf_(JNIEnv *jniEnv)
 }
 
 #include <windows.h>
-
 PVOID UnLoad(PVOID arg)
 {
     HMODULE hModule = NULL;
@@ -843,5 +840,3 @@ void entry()
 {
     CreateThread(NULL, 4096, (LPTHREAD_START_ROUTINE)(&remote), NULL, 0, NULL);
 }
-
-#pragma clang diagnostic pop

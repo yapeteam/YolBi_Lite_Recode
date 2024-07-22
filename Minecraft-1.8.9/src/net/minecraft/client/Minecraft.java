@@ -1146,7 +1146,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
 	public void runTick() throws IOException {
 		if (this.rightClickDelayTimer > 0) --this.rightClickDelayTimer;
 		this.mcProfiler.startSection("gui");
-		if (!this.isGamePaused) this.ingameGUI.updateTick();
+		if (!this.isGamePaused)
+			this.ingameGUI.updateTick();
 		this.mcProfiler.endSection();
 		this.entityRenderer.getMouseOver(1.0F);
 		this.mcProfiler.startSection("gameMode");
