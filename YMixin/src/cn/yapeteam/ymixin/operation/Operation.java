@@ -5,6 +5,7 @@ import cn.yapeteam.ymixin.utils.Mapper;
 import cn.yapeteam.ymixin.Mixin;
 import cn.yapeteam.ymixin.utils.DescParser;
 import org.objectweb.asm_9_2.Opcodes;
+import org.objectweb.asm_9_2.tree.LabelNode;
 import org.objectweb.asm_9_2.tree.MethodNode;
 
 import java.lang.reflect.Field;
@@ -34,6 +35,8 @@ public interface Operation {
                         return true;
                 } catch (Throwable ignored) {
                 }
+        LabelNode node = new LabelNode();
+
         return false;
     }
 
