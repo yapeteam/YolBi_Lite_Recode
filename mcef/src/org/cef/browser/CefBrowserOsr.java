@@ -14,7 +14,6 @@ import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
-import org.lwjgl.BufferUtils;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -22,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Vector;
 
 public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBrowser {
@@ -268,7 +268,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         this.isTransparent_ = transparent;
         try {
             this.renderer_ = CefBrowserFactory.Renderer.getConstructor(boolean.class).newInstance(transparent); // new CefRenderer(transparent);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -346,7 +347,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                     this.paintData.fullReRender = true;
                 }
                 if (this.paintData.buffer == null || size != this.paintData.buffer.capacity()) {
-                    this.paintData.buffer = BufferUtils.createByteBuffer(size);
+                    this.paintData.buffer = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
                 }
                 this.paintData.buffer.position(0);
                 this.paintData.buffer.limit(buffer.limit());

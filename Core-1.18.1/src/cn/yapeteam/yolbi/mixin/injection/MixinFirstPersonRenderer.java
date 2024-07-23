@@ -1,9 +1,9 @@
 package cn.yapeteam.yolbi.mixin.injection;
 
 import cn.yapeteam.ymixin.annotations.*;
-import cn.yapeteam.yolbi.utils.misc.ObjectStore;
 import cn.yapeteam.yolbi.utils.render.PoseUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -38,10 +38,7 @@ public class MixinFirstPersonRenderer {
             @Local(source = "pBuffer", index = 9) MultiBufferSource pBuffer,
             @Local(source = "pCombinedLight", index = 10) int pCombinedLight
     ) {
-        // ObjectStore.objects.put("isBlocking", null);
-        if (pPlayer.getOffhandItem().getItem() instanceof ShieldItem && ObjectStore.objects.get("isBlocking") != null &&
-                ((boolean) ObjectStore.objects.get("isBlocking"))
-        ) {
+        if (pPlayer.getOffhandItem().getItem() instanceof ShieldItem && Minecraft.getInstance().options.keyRight.isDown()) {
             int side = 1;
             pPoseStack.translate(side * 0.56, -0.52, -0.72);
             pPoseStack.translate(side * -0.1414214, 0.08, 0.1414214);

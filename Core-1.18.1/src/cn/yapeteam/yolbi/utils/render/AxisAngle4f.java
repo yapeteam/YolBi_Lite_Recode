@@ -23,7 +23,7 @@
  */
 package cn.yapeteam.yolbi.utils.render;
 
-import org.lwjgl.util.vector.Vector3f;
+import com.mojang.math.Vector3f;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.io.ObjectOutput;
  *
  * @author Kai Burjack
  */
-public class AxisAngle4f implements Externalizable, Cloneable {
+public class AxisAngle4f implements Externalizable {
 
     private static final long serialVersionUID = 1L;
 
@@ -100,7 +100,7 @@ public class AxisAngle4f implements Externalizable, Cloneable {
      * @param angle the angle in radians
      * @param v     the rotation axis as a {@link Vector3f}
      */
-    public AxisAngle4f(float angle, com.mojang.math.Vector3f v) {
+    public AxisAngle4f(float angle, Vector3f v) {
         this(angle, v.x(), v.y(), v.z());
     }
 
@@ -113,7 +113,7 @@ public class AxisAngle4f implements Externalizable, Cloneable {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(ObjectInput in) throws IOException {
         angle = in.readFloat();
         x = in.readFloat();
         y = in.readFloat();

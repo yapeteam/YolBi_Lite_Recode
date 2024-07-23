@@ -26,5 +26,6 @@
     <orderEntry type="module" module-name="YMixin" />
     <orderEntry type="module" module-name="Loader" />
     <orderEntry type="module" module-name="mcef" />
+    <orderEntry type="library" name="libs-low" level="project" />
   </component>
 </module>

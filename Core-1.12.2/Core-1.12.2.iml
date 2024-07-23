@@ -25,5 +25,6 @@
     <orderEntry type="library" name="minecraft-1.12.2" level="project" />
     <orderEntry type="module" module-name="YMixin" />
     <orderEntry type="module" module-name="Loader" />
+    <orderEntry type="library" name="libs-low" level="project" />
   </component>
 </module>

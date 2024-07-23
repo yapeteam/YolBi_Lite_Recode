@@ -1,8 +1,6 @@
 package org.cef.browser;
 
-import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
@@ -36,14 +34,7 @@ public abstract class CefRenderer {
 
     protected abstract void initialize();
 
-    public void cleanup() {
-        if (this.texture_id_[0] != 0) {
-            if (MCEF.CHECK_VRAM_LEAK) {
-                GL_TEXTURES.remove(Integer.valueOf(this.texture_id_[0]));
-            }
-            GL11.glDeleteTextures(this.texture_id_[0]);
-        }
-    }
+    public abstract void cleanup();
 
     public abstract void render(double x1, double y1, double x2, double y2);
 

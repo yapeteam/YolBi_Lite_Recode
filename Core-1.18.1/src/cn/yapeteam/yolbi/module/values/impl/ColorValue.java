@@ -4,7 +4,6 @@ import cn.yapeteam.ymixin.annotations.DontMap;
 import cn.yapeteam.yolbi.module.values.Value;
 import cn.yapeteam.yolbi.module.values.Visibility;
 import lombok.Getter;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -192,7 +191,7 @@ public class ColorValue extends Value<Color> {
         }
     }
 
-    public void draw(float x, float y, float width, float height, float mouseX, float mouseY) {
+    public void draw(float x, float y, float width, float height, float mouseX, float mouseY, boolean mouseDown) {
         if (hue == -1) {
             float[] vals = Color.RGBtoHSB(color >> 16 & 255, color >> 8 & 255, color & 255, null);
             hue = vals[0];
@@ -228,7 +227,7 @@ public class ColorValue extends Value<Color> {
         double alphaY = getAlpha() * height;
         //drawRect(x + 50, y + alphaY, x + 56, y + alphaY + 1, -1);
 
-        if (Mouse.isButtonDown(0)) {
+        if (mouseDown) {
             if (isHovered(x + 42, y, x + 48, y + height, ((int) mouseX), ((int) mouseY))) {
                 hue = (mouseY - y) / height;
             }

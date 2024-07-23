@@ -32,6 +32,16 @@ public class ImplCefRenderer extends CefRenderer {
     }
 
     @Override
+    public void cleanup() {
+        if (this.texture_id_[0] != 0) {
+            if (MCEF.CHECK_VRAM_LEAK) {
+                GL_TEXTURES.remove(Integer.valueOf(this.texture_id_[0]));
+            }
+            GL11.glDeleteTextures(this.texture_id_[0]);
+        }
+    }
+
+    @Override
     public void render(double x1, double y1, double x2, double y2) {
         if (this.view_width_ == 0 || this.view_height_ == 0)
             return;

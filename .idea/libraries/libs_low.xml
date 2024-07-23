@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="libs-low">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/libs-low" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/libs-low" recursive="false" />
+  </library>
+</component>
