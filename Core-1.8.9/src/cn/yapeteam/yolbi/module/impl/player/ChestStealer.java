@@ -45,7 +45,7 @@ public class ChestStealer extends Module {
     private final BooleanValue ignore = new BooleanValue("Ignore Trash Items", true);
 
     public ChestStealer() {
-        super("ChestStealer", ModuleCategory.MISC);
+        super("ChestStealer", ModuleCategory.PLAYER);
         addValues(mode, delayNext, delayFirst, drop, close, chestAura, ignore);
     }
 

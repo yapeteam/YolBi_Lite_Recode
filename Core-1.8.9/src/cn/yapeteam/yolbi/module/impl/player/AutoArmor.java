@@ -22,7 +22,7 @@ public class AutoArmor extends Module {
     private final NumberValue<Integer> delay = new NumberValue<>("delay", 1, 0, 10, 1);
 
     public AutoArmor() {
-        super("AutoArmor", ModuleCategory.MISC);
+        super("AutoArmor", ModuleCategory.PLAYER);
         addValues(mode, delay);
     }
 

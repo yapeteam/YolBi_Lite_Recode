@@ -8,6 +8,7 @@ import cn.yapeteam.yolbi.module.ModuleCategory;
 import cn.yapeteam.yolbi.module.values.impl.ModeValue;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class AntiBot extends Module {
@@ -33,7 +34,7 @@ public class AntiBot extends Module {
         }
     }
 
-    public static boolean isBot(EntityPlayer entity) {
+    public static boolean isBot(EntityLivingBase entity) {
         // must have a player info
         final NetworkPlayerInfo info = mc.getNetHandler().getPlayerInfo(entity.getUniqueID());
         return info == null;

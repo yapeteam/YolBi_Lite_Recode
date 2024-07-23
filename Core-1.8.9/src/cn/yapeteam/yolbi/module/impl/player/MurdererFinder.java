@@ -10,14 +10,17 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemSword;
 import org.lwjgl.input.Keyboard;
 
-import java.awt.*;
 import java.util.HashSet;
 
 public class MurdererFinder extends Module {
+    public static MurdererFinder instance;
     public HashSet<String> names = new HashSet<>();
+
     public MurdererFinder() {
         super("MurdererFinder", ModuleCategory.PLAYER, Keyboard.KEY_NONE);
+        instance = this;
     }
+
     @Listener
     public void onTick(EventTick event) {
         if (mc.thePlayer == null || mc.theWorld == null) return;
@@ -28,11 +31,12 @@ public class MurdererFinder extends Module {
             }
         }
     }
+
     public int findSword(EntityPlayer target) {
 
         for (int i = 36; i < 45; i++) {
             Item item = target.inventoryContainer.getSlot(i).getStack().getItem();
-            if (target.inventoryContainer.getSlot(i).getStack() != null && item instanceof ItemSword){
+            if (target.inventoryContainer.getSlot(i).getStack() != null && item instanceof ItemSword) {
                 return i;
             }
         }
