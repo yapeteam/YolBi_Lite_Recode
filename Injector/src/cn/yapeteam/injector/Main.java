@@ -39,6 +39,7 @@ public class Main {
 
     private static boolean checkConnection() {
         try {
+
             URL url = new URL("http://yapeteam.github.io");
             URL url2 = new URL("http://skidonion.tech");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

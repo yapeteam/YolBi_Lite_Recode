@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exe4j version="6.0.2" transformSequenceNumber="2">
+  <directoryPresets config="F:/Yolbi_Lite_Recode/build" />
+  <application name="Yolbi Lite" distributionSourceDir="D:/YapeTeam/Yolbi-Lite/Output">
+    <languages>
+      <principalLanguage id="en" customLocalizationFile="" />
+    </languages>
+  </application>
+  <executable name="Yolbi Lite" type="2" iconSet="true" iconFile="D:/YapeTeam/yapeteam.ico" executableDir="." redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="true" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="requireAdministrator" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="true" amd64="true">
+    <messageSet />
+    <versionInfo include="true" fileVersion="0.3.6" fileDescription="Yolbi Lite" legalCopyright="Copyright © 2023 - 2024 Yapeteam. All Rights Reserved" internalName="yapeteam.github.io" productName="" companyName="YapeTeam LLC." productVersion="0.3.6" />
+  </executable>
+  <splashScreen show="false" width="200" height="200" bitmapFile="D:/YapeTeam/yolbi-shield.png" textOverlay="true">
+    <text>
+      <statusLine x="108" y="185" text="Yolbi Shield" fontSize="28" fontColor="102,255,102" bold="false" />
+      <versionLine x="59" y="105" text="" fontSize="8" fontColor="51,255,255" bold="false" />
+    </text>
+  </splashScreen>
+  <java mainClass="cn.yapeteam.injector.Main" mainMode="1" vmParameters="-Dfile.encoding=utf-8" arguments="" allowVMPassthroughParameters="true" preferredVM="client" bundleRuntime="true" minVersion="1.8" maxVersion="22" allowBetaVM="false" jdkOnly="true">
+    <searchSequence>
+      <registry />
+      <envVar name="JAVA_HOME" />
+      <envVar name="JDK_HOME" />
+    </searchSequence>
+    <classPath>
+      <archive location="F:/Yolbi_Lite_Recode/build/injector.jar" failOnError="false" />
+    </classPath>
+    <modulePath />
+    <nativeLibraryDirectories />
+    <vmOptions />
+  </java>
+  <includedFiles />
+  <unextractableFiles />
+</exe4j>
