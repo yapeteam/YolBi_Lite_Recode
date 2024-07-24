@@ -2,7 +2,6 @@ package cn.yapeteam.injector;
 
 import javax.swing.*;
 import java.awt.*;
-import cn.yapeteam.injector.Main;
 import java.io.File;
 
 public class StartFrame extends JFrame {
@@ -11,11 +10,14 @@ public class StartFrame extends JFrame {
     public StartFrame() {
         setTitle("YolBi Shield");
         setSize(300, 300);
+        setUndecorated(true); // Remove window decorations
+        setBackground(new Color(0, 0, 0, 0)); // Set frame background to transparent
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
+        panel.setOpaque(false); // Make panel background transparent
 
         File shieldImageFile = new File(Main.YolBi_Dir, "resources/shield.png");
         if (shieldImageFile.exists()) {
@@ -23,7 +25,7 @@ public class StartFrame extends JFrame {
             JLabel shieldLabel = new JLabel(shieldIcon);
             panel.add(shieldLabel, BorderLayout.CENTER);
         } else {
-            JLabel errorLabel = new JLabel("Sorry , but we are still working.");
+            JLabel errorLabel = new JLabel("Sorry ,but we are still working");
             panel.add(errorLabel, BorderLayout.CENTER);
         }
 
