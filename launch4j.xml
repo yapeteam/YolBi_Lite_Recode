@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
-    <dontWrapJar>false</dontWrapJar>
-    <headerType>console</headerType>
-    <jar>build\injector.jar</jar>
-    <outfile>build\Yolbi-Lite.exe</outfile>
-    <errTitle/>
-    <cmdLine/>
-    <chdir>.</chdir>
-    <priority>high</priority>
-    <downloadUrl/>
-    <supportUrl>yapeteam.github.io</supportUrl>
-    <stayAlive>true</stayAlive>
-    <restartOnCrash>false</restartOnCrash>
-    <manifest>UAC.manifest</manifest>
-    <icon/>
-    <jre>
-        <path>%JAVA_HOME%;%PATH%</path>
-        <requiresJdk>true</requiresJdk>
-        <requires64Bit>true</requires64Bit>
-        <minVersion>1.8</minVersion>
-        <maxVersion>22</maxVersion>
-    </jre>
-    <versionInfo>
-        <fileVersion>0.3.6</fileVersion>
-        <txtFileVersion>0.3.6</txtFileVersion>
-        <fileDescription>YolBi Lite Development Build</fileDescription>
-        <copyright>Copyright (c) 2023 - 2024 Yapeteam. All Rights Reserved.</copyright>
-        <productVersion>0.3.6</productVersion>
-        <txtProductVersion>0.3.6</txtProductVersion>
-        <productName>YolBi Lite</productName>
-        <companyName>YapeTeam</companyName>
-        <internalName>injector</internalName>
-        <originalFilename>Yolbi Lite.exe</originalFilename>
-        <trademarks/>
-        <language>SIMPLIFIED_CHINESE</language>
-    </versionInfo>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>console</headerType>
+  <jar>build\injector.jar</jar>
+  <outfile>build\injector.exe</outfile>
+  <errTitle/>
+  <cmdLine/>
+  <chdir>.</chdir>
+  <priority>high</priority>
+  <downloadUrl/>
+  <supportUrl>yapeteam.github.io</supportUrl>
+  <stayAlive>true</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest>UAC.manifest</manifest>
+  <icon/>
+  <jre>
+    <path>./jre</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>true</requires64Bit>
+    <minVersion>1.8</minVersion>
+    <maxVersion/>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.3.3.7</fileVersion>
+    <txtFileVersion>1.3.3.7</txtFileVersion>
+    <fileDescription>YolBi Lite Development Build</fileDescription>
+    <copyright>Copyright (c) 2023 - 2024 Yapeteam. All Rights Reserved.</copyright>
+    <productVersion>1.3.3.7</productVersion>
+    <txtProductVersion>1.3.3.7</txtProductVersion>
+    <productName>YolBi Lite</productName>
+    <companyName>YapeTeam</companyName>
+    <internalName>injector</internalName>
+    <originalFilename>Yolbi Lite.exe</originalFilename>
+    <trademarks/>
+    <language>SIMPLIFIED_CHINESE</language>
+  </versionInfo>
 </launch4jConfig>
