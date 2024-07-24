@@ -28,11 +28,33 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class ReflectUtil {
     private static Field
-            EntityRenderer$theShaderGroup, KeyBinding$pressed,
-            ShaderGroup$listShaders, Minecraft$timer, Minecraft$leftClickCounter, Minecraft$rightClickDelayTimer,
-            EntityPlayerSP$lastReportedYaw, EntityPlayerSP$lastReportedPitch, Entity$motionX, Entity$motionY, Entity$motionZ,
-            ActiveRenderInfo$MODELVIEW, ActiveRenderInfo$PROJECTION, ActiveRenderInfo$VIEWPORT, ActiveRenderInfo$OBJECTCOORDS, RenderManager$renderPosX, RenderManager$renderPosY, RenderManager$renderPosZ, Entity$PosX, Entity$PosY, Entity$PosZ,
-            S12PacketEntityVelocity$motionX, S12PacketEntityVelocity$motionY, S12PacketEntityVelocity$motionZ, C07PacketPlayerDigging$position, C07PacketPlayerDigging$facing, C03PacketPlayer$pitch;
+            EntityRenderer$theShaderGroup;
+    private static Field KeyBinding$pressed;
+    private static Field ShaderGroup$listShaders;
+    private static Field Minecraft$timer;
+    private static Field Minecraft$leftClickCounter;
+    public static Field Minecraft$rightClickDelayTimer;
+    private static Field EntityPlayerSP$lastReportedYaw;
+    private static Field EntityPlayerSP$lastReportedPitch;
+    private static Field Entity$motionX;
+    private static Field Entity$motionY;
+    private static Field Entity$motionZ;
+    private static Field ActiveRenderInfo$MODELVIEW;
+    private static Field ActiveRenderInfo$PROJECTION;
+    private static Field ActiveRenderInfo$VIEWPORT;
+    private static Field ActiveRenderInfo$OBJECTCOORDS;
+    private static Field RenderManager$renderPosX;
+    private static Field RenderManager$renderPosY;
+    private static Field RenderManager$renderPosZ;
+    private static Field Entity$PosX;
+    private static Field Entity$PosY;
+    private static Field Entity$PosZ;
+    private static Field S12PacketEntityVelocity$motionX;
+    private static Field S12PacketEntityVelocity$motionY;
+    private static Field S12PacketEntityVelocity$motionZ;
+    private static Field C07PacketPlayerDigging$position;
+    private static Field C07PacketPlayerDigging$facing;
+    private static Field C03PacketPlayer$pitch;
 
 
     private static Method

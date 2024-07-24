@@ -11,6 +11,7 @@ import cn.yapeteam.yolbi.module.impl.player.MurdererFinder;
 import cn.yapeteam.yolbi.module.impl.visual.ClickUI;
 import cn.yapeteam.yolbi.module.impl.player.AutoArmor;
 import cn.yapeteam.yolbi.module.impl.visual.*;
+import cn.yapeteam.yolbi.module.impl.world.FastPlace;
 import cn.yapeteam.yolbi.module.values.impl.BooleanValue;
 import cn.yapeteam.yolbi.notification.Notification;
 import cn.yapeteam.yolbi.notification.NotificationType;
@@ -31,7 +32,6 @@ public class ModuleManager {
         modules.add(new AimAssist());
         modules.add(new AntiBot());
         modules.add(new AutoClicker());
-        modules.add(new KeepSprint());
         // modules.add(new Backtrack());
         //modules.add(new IRC()); // To be tested
         // modules.add(new BlatantVelocity());
@@ -64,6 +64,7 @@ public class ModuleManager {
         modules.add(new TargetHud());
         modules.add(new MurdererFinder());
         modules.add(new NameTags());
+        modules.add(new FastPlace());
 
 
         modules.sort((m1, m2) -> -Integer.compare(m2.getName().charAt(0), m1.getName().charAt(0)));
