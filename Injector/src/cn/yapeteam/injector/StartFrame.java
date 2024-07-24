@@ -9,7 +9,8 @@ public class StartFrame extends JFrame {
 
     public StartFrame() {
         setTitle("YolBi Shield");
-        setSize(300, 300);
+        setSize(600, 600);
+        setAlwaysOnTop(true);
         setUndecorated(true); // Remove window decorations
         setBackground(new Color(0, 0, 0, 0)); // Set frame background to transparent
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
