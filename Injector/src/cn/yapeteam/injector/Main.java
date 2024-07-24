@@ -65,10 +65,10 @@ public class Main {
         try {
             URL url = new URL("http://yapeteam.github.io");
             URL url2 = new URL("http://www.bilibili.com");
-            URL url3 = new URL("http://www.google.com");
+          //  URL url3 = new URL("http://www.google.com");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             HttpURLConnection connection2 = (HttpURLConnection) url2.openConnection();
-            HttpURLConnection connection3 = (HttpURLConnection) url3.openConnection();
+           // HttpURLConnection connection3 = (HttpURLConnection) url3.openConnection();
             connection.setRequestMethod("HEAD");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
@@ -77,12 +77,12 @@ public class Main {
             connection2.setConnectTimeout(5000);
             connection2.setReadTimeout(5000);
 
-            connection3.setRequestMethod("HEAD");
-            connection3.setConnectTimeout(5000);
-            connection3.setReadTimeout(5000);
+//            connection3.setRequestMethod("HEAD");
+//            connection3.setConnectTimeout(5000);
+//            connection3.setReadTimeout(5000);
             int responseCode = connection.getResponseCode();
             int responseCode2 = connection2.getResponseCode();
-            int responseCode3 = connection3.getResponseCode();
+           // int responseCode3 = connection3.getResponseCode();
             return (200 <= responseCode && responseCode <= 399 && responseCode2 <= 399 && responseCode2 >=200);
         } catch (IOException e) {
             e.printStackTrace();
