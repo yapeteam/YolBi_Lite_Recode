@@ -39,9 +39,9 @@ public class Main {
 
     private static boolean checkConnection() {
         try {
-            URL url = new URL("http://yapeteam.github.io");
-            URL url2 = new URL("http://www.bilibili.com");
-            URL url3 = new URL("http://www.gitee.com");
+            URL url = new URL("https://yapeteam.github.io");
+            URL url2 = new URL("https://www.bilibili.com");
+            URL url3 = new URL("https://www.gitee.com");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             HttpURLConnection connection2 = (HttpURLConnection) url2.openConnection();
             HttpURLConnection connection3 = (HttpURLConnection) url3.openConnection();
