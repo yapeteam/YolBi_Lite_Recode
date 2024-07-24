@@ -3,13 +3,13 @@
     <dontWrapJar>false</dontWrapJar>
     <headerType>console</headerType>
     <jar>build\injector.jar</jar>
-    <outfile>build\Yolbi Lite.exe</outfile>
+    <outfile>build\Yolbi-Lite.exe</outfile>
     <errTitle/>
     <cmdLine/>
     <chdir>.</chdir>
     <priority>high</priority>
     <downloadUrl/>
-    <supportUrl/>
+    <supportUrl>yapeteam.github.io</supportUrl>
     <stayAlive>true</stayAlive>
     <restartOnCrash>false</restartOnCrash>
     <manifest>UAC.manifest</manifest>

@@ -75,7 +75,7 @@ public class AntiLeak {
         hwidUrl = GenFakeIP.generateRandomIP(4);
         latestVersionUrl = GenFakeIP.generateRandomIP(4);
         // 设置加密密钥
-        ENCODE_KEY = "FuckYouCrackerLL";
+        ENCODE_KEY = "FuckYouCracker";
         // 执行垃圾回收
         Runtime.getRuntime().gc();
         try {
