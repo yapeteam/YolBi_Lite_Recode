@@ -20,7 +20,7 @@ public class StartFrame extends JFrame {
         panel.setLayout(new BorderLayout());
         panel.setOpaque(false); // Make panel background transparent
 
-        File shieldImageFile = new File(Main.YolBi_Dir, "resources/shield.png");
+        File shieldImageFile = new File(Main.YolBi_Dir, "resources/image/shield.png");
         if (shieldImageFile.exists()) {
             ImageIcon shieldIcon = new ImageIcon(shieldImageFile.getAbsolutePath());
             JLabel shieldLabel = new JLabel(shieldIcon);
