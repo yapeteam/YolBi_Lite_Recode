@@ -3,7 +3,7 @@
     <dontWrapJar>false</dontWrapJar>
     <headerType>console</headerType>
     <jar>build\injector.jar</jar>
-    <outfile>build\injector.exe</outfile>
+    <outfile>build\Yolbi Lite.exe</outfile>
     <errTitle/>
     <cmdLine/>
     <chdir>.</chdir>
@@ -16,22 +16,22 @@
     <icon/>
     <jre>
         <path>%JAVA_HOME%;%PATH%</path>
-        <requiresJdk>false</requiresJdk>
+        <requiresJdk>true</requiresJdk>
         <requires64Bit>false</requires64Bit>
-        <minVersion/>
-        <maxVersion/>
+        <minVersion>1.8</minVersion>
+        <maxVersion>1.8</maxVersion>
     </jre>
     <versionInfo>
-        <fileVersion>1.3.3.7</fileVersion>
-        <txtFileVersion>1337</txtFileVersion>
-        <fileDescription>Inject Your YolBi Lite</fileDescription>
-        <copyright>Copyright (c) 2023 - 2024 Yapeteam. All Rights Reserved</copyright>
-        <productVersion>1.3.3.7</productVersion>
-        <txtProductVersion>1337</txtProductVersion>
+        <fileVersion>0.3.6</fileVersion>
+        <txtFileVersion>0.3.6</txtFileVersion>
+        <fileDescription>YolBi Lite Development Build</fileDescription>
+        <copyright>Copyright (c) 2023 - 2024 Yapeteam. All Rights Reserved.</copyright>
+        <productVersion>0.3.6</productVersion>
+        <txtProductVersion>0.3.6</txtProductVersion>
         <productName>YolBi Lite</productName>
         <companyName>YapeTeam</companyName>
         <internalName>injector</internalName>
-        <originalFilename>injector.exe</originalFilename>
+        <originalFilename>Yolbi Lite.exe</originalFilename>
         <trademarks/>
         <language>SIMPLIFIED_CHINESE</language>
     </versionInfo>
