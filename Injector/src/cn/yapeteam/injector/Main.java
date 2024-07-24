@@ -31,6 +31,7 @@ public class Main {
                 frame.inject_ui();
             }
         } else {
+            startFrame.dispose();
             JOptionPane.showMessageDialog(null, "Failed to connect to the Yolbi Server", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
