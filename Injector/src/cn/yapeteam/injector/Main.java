@@ -42,7 +42,7 @@ public class Main {
 
             if (!isHWIDValid()) {
                 startFrame.dispose();
-                copyHWIDToClipboard(HWID); // ����HWID��������
+                copyHWIDToClipboard(HWID);
                 JOptionPane.showMessageDialog(null, "You do not have permission to access the Yolbi Lite, please add this code administrator: " + HWID, "Validation failed , Your HWID has benn copied to The Clipboard", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
@@ -63,8 +63,8 @@ public class Main {
 
     private static boolean checkConnection() {
         try {
-            URL url = new URL("http://yapeteam.github.io");//单纯检查连接,无验证意义
-            URL url2 = new URL("http://skidonion.tech");
+            URL url = new URL("https://yapeteam.github.io");//单纯检查连接,无验证意义
+            URL url2 = new URL("https://skidonion.tech");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             HttpURLConnection connection2 = (HttpURLConnection) url2.openConnection();
             connection.setRequestMethod("HEAD");
