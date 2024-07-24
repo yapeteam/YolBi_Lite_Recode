@@ -19,7 +19,7 @@
         <requiresJdk>true</requiresJdk>
         <requires64Bit>true</requires64Bit>
         <minVersion>1.8</minVersion>
-        <maxVersion>1.8</maxVersion>
+        <maxVersion>22</maxVersion>
     </jre>
     <versionInfo>
         <fileVersion>0.3.6</fileVersion>
