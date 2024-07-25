@@ -43,7 +43,7 @@ public class Main {
             if (!isHWIDValid()) {
                 startFrame.dispose();
                 copyHWIDToClipboard(HWID);
-                JOptionPane.showMessageDialog(null, "You do not have permission to access the Yolbi Lite, please add this code administrator: " + HWID, "Validation failed , Your HWID has benn copied to The Clipboard", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Validation failed, please send this code to administrator: " + HWID, "Validation failed", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
 
