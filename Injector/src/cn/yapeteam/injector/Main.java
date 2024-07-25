@@ -60,6 +60,12 @@ public class Main {
             System.exit(0);
         }
     }
+//    private static boolean handshake(){
+//        if(checkConnection()) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     private static boolean checkConnection() {
         try {
