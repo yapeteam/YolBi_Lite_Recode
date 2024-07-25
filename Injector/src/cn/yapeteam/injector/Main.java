@@ -36,7 +36,7 @@ public class Main {
         if (checkConnection()) {
             if (!downloadHWIDList()) {
                 startFrame.dispose();
-                JOptionPane.showMessageDialog(null, "Failed to connect to the Yolbi Server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Error while handshaking phase B", "Connection Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
 
@@ -56,13 +56,14 @@ public class Main {
             }
         } else {
             startFrame.dispose();
-            JOptionPane.showMessageDialog(null, "Failed to connect to the Yolbi Server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error while handshaking phase A", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
     }
 
     private static boolean checkConnection() {
         try {
+            //handshaking phase a
             URL url = new URL("https://yapeteam.github.io");//单纯检查连接,无验证意义
             URL url2 = new URL("https://skidonion.tech");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
