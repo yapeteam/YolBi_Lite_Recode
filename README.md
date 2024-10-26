@@ -3,6 +3,10 @@
   <img src="https://avatars.githubusercontent.com/u/159465859?s=64&v=4" alt="YolBi Inject" img>
 </p>
 
+>[!NOTE]
+>这是yolbi lite的旧仓库，包含yolbi lite早期的全部推送
+>但是你依然需要遵守GPL以及[YolBi Licence](https://github.com/yapeteam/OpenYolBi/blob/master/YOLBI_LICENSE.md)
+
 # YolBi Inject - Recode
 
 - ***Powered by Yape Development Team***
