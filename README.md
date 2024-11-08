@@ -7,6 +7,11 @@
 >这是yolbi lite的旧仓库，包含yolbi lite早期的全部推送
 >但是你依然需要遵守GPL以及[YolBi Licence](https://github.com/yapeteam/OpenYolBi/blob/master/YOLBI_LICENSE.md)
 
+## 感谢所有参与开发YolBi Lite的贡献者们
+<a href="https://github.com/yapeteam/YolBi_Lite_Recode/graphs/contributors" target="_blank">
+  <img src="https://contrib.rocks/image?repo=yapeteam/YolBi_Lite_Recode"/>
+</a>
+
 # YolBi Inject - Recode
 
 - ***Powered by Yape Development Team***
